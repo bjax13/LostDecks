@@ -3,80 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lost Tales Marketplace Wireframe</title>
-  <link rel="stylesheet" href="styles.css">
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js"></script>
-  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>Lost Tales Marketplace</title>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel">
-    const { BrowserRouter, Routes, Route, Link } = ReactRouterDOM;
-
-    function Home() {
-      return (
-        <div>
-          <h1>Lost Tales Marketplace</h1>
-          <p>Welcome to the trading card marketplace.</p>
-        </div>
-      );
-    }
-
-    function Cards() {
-      return (
-        <div>
-          <h2>Cards</h2>
-          <p>View available cards and current offers.</p>
-        </div>
-      );
-    }
-
-    function MarketMaker() {
-      return (
-        <div>
-          <h2>Market Maker</h2>
-          <p>Create an offer to sell or request a card.</p>
-        </div>
-      );
-    }
-
-    function MarketTaker() {
-      return (
-        <div>
-          <h2>Market Taker</h2>
-          <p>Accept an existing offer.</p>
-        </div>
-      );
-    }
-
-    function NotFound() {
-      return <h2>Page not found</h2>;
-    }
-
-    function App() {
-      return (
-        <BrowserRouter>
-          <nav>
-            <Link to="/">Home</Link> |{' '}
-            <Link to="/cards">Cards</Link> |{' '}
-            <Link to="/maker">Market Maker</Link> |{' '}
-            <Link to="/taker">Market Taker</Link>
-          </nav>
-          <hr />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/cards" element={<Cards />} />
-            <Route path="/maker" element={<MarketMaker />} />
-            <Route path="/taker" element={<MarketTaker />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
