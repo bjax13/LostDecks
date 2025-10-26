@@ -175,11 +175,66 @@
   flex: 1;
 }
 
+/* Nonsense stamp styles */
+.card-stamp {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #DC143C;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  opacity: 0.9;
+  z-index: 10;
+  box-shadow: 
+    0 0 0 3px rgba(255, 255, 255, 0.3),
+    0 0 0 6px rgba(220, 20, 60, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+  
+  /* Frilly border effect using multiple box-shadows */
+  box-shadow: 
+    0 0 0 2px rgba(255, 255, 255, 0.4),
+    0 0 0 4px rgba(220, 20, 60, 0.3),
+    0 0 0 6px rgba(255, 255, 255, 0.2),
+    0 0 0 8px rgba(220, 20, 60, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Add scalloped edge effect using pseudo-elements */
+.card-stamp::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, 
+    transparent 40%, 
+    rgba(255, 255, 255, 0.1) 42%, 
+    rgba(255, 255, 255, 0.1) 44%, 
+    transparent 46%);
+  pointer-events: none;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .card {
     width: 280px;
     height: 380px;
+  }
+  
+  .card-stamp {
+    width: 80px;
+    height: 80px;
+    font-size: 11px;
   }
 }
 
@@ -191,5 +246,11 @@
   
   .card-title {
     font-size: 1.2rem;
+  }
+  
+  .card-stamp {
+    width: 70px;
+    height: 70px;
+    font-size: 10px;
   }
 }

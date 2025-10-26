@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import './Card.css';
 import { getTheme } from '../../themes/cardThemes';
 
@@ -9,7 +9,9 @@ export default function Card({
   onClick,
   isFlipped: controlledIsFlipped,
   onFlip,
-  theme = 'default'
+  theme = 'default',
+  isNonsense = false,
+  nonsensePosition
 }) {
   const [internalIsFlipped, setInternalIsFlipped] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -17,6 +19,41 @@ export default function Card({
   
   // Get theme configuration
   const themeConfig = getTheme(theme);
+  
+  // Generate random stamp position if not provided and card is nonsense
+  const stampPosition = useMemo(() => {
+    if (!isNonsense) return null;
+    
+    if (nonsensePosition) {
+      return nonsensePosition;
+    }
+    
+    // Generate random position 1-8 (excluding center position 5)
+    const positions = [1, 2, 3, 4, 6, 7, 8, 9];
+    return positions[Math.floor(Math.random() * positions.length)];
+  }, [isNonsense, nonsensePosition]);
+  
+  // Map position to CSS positioning
+  const getStampStyle = (position) => {
+    const positionMap = {
+      1: { top: '15%', left: '15%' },
+      2: { top: '15%', left: '50%', transform: 'translateX(-50%)' },
+      3: { top: '15%', right: '15%' },
+      4: { top: '50%', left: '15%', transform: 'translateY(-50%)' },
+      6: { top: '50%', right: '15%', transform: 'translateY(-50%)' },
+      7: { bottom: '15%', left: '15%' },
+      8: { bottom: '15%', left: '50%', transform: 'translateX(-50%)' },
+      9: { bottom: '15%', right: '15%' }
+    };
+    
+    const baseStyle = positionMap[position] || {};
+    const rotation = Math.random() * 20 - 10; // Random rotation between -10 and 10 degrees
+    
+    return {
+      ...baseStyle,
+      transform: `${baseStyle.transform || ''} rotate(${rotation}deg)`.trim()
+    };
+  };
   
   // Create CSS variables object for inline styles
   const cssVariables = {
@@ -98,6 +135,14 @@ export default function Card({
           <div className="card-back-content">
             {backContent}
           </div>
+          {isNonsense && stampPosition && (
+            <div 
+              className="card-stamp"
+              style={getStampStyle(stampPosition)}
+            >
+              NONSENSE
+            </div>
+          )}
         </div>
       </div>
     </div>

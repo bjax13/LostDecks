@@ -19,6 +19,7 @@ export default function Home() {
             backContent={<h2>{number}/54</h2>}
             className="card-main"
             theme={themes[index % themes.length]}
+            isNonsense={index % 4 === 0} // Every 4th card is nonsense
           />
         ))}
       </div>
