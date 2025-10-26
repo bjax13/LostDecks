@@ -4,17 +4,17 @@
   height: 400px;
   border-radius: 12px;
   position: relative;
-  border: 1px solid rgba(138, 43, 226, 0.3);
-  background: linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid var(--card-border-hover, rgba(138, 43, 226, 0.3));
+  background: var(--card-front-gradient, linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%));
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
-  border-color: rgba(138, 43, 226, 0.5);
+  border-color: var(--card-border, rgba(138, 43, 226, 0.5));
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(138, 43, 226, 0.1),
+    0 0 20px var(--card-glow, rgba(138, 43, 226, 0.1)),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   perspective: 1000px;
 }
@@ -25,10 +25,10 @@
 
 /* Locked state styling */
 .card.locked {
-  border-color: rgba(255, 215, 0, 0.6);
+  border-color: var(--card-border-locked, rgba(255, 215, 0, 0.6));
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 215, 0, 0.2),
+    0 0 20px var(--card-glow-locked, rgba(255, 215, 0, 0.2)),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(138, 43, 226, 0.5);
+  border: 1px solid var(--card-border, rgba(138, 43, 226, 0.5));
   box-shadow: none;
 }
 
@@ -66,25 +66,25 @@
       45deg,
       transparent,
       transparent 8px,
-      rgba(138, 43, 226, 0.1) 8px,
-      rgba(138, 43, 226, 0.1) 16px
+      var(--card-pattern-overlay, rgba(138, 43, 226, 0.1)) 8px,
+      var(--card-pattern-overlay, rgba(138, 43, 226, 0.1)) 16px
     ),
     repeating-linear-gradient(
       -45deg,
       transparent,
       transparent 8px,
-      rgba(138, 43, 226, 0.05) 8px,
-      rgba(138, 43, 226, 0.05) 16px
+      var(--card-pattern-overlay-secondary, rgba(138, 43, 226, 0.05)) 8px,
+      var(--card-pattern-overlay-secondary, rgba(138, 43, 226, 0.05)) 16px
     ),
-    radial-gradient(circle at 20% 20%, rgba(138, 43, 226, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-    linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%);
+    radial-gradient(circle at 20% 20%, var(--card-radial-overlay-1, rgba(138, 43, 226, 0.3)) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, var(--card-radial-overlay-2, rgba(138, 43, 226, 0.2)) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, var(--card-radial-overlay-3, rgba(138, 43, 226, 0.15)) 0%, transparent 50%),
+    var(--card-front-gradient, linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%));
 }
 
 .card-back {
   transform: rotateY(180deg);
-  background: linear-gradient(145deg, #2a1a3a 0%, #1a0f2e 100%);
+  background: var(--card-back-gradient, linear-gradient(145deg, #2a1a3a 0%, #1a0f2e 100%));
 }
 
 /* Make the card container transparent during flip so table shows through */
@@ -105,12 +105,12 @@
 }
 
 .card-back-content h2 {
-  color: #ffffff;
+  color: var(--card-text, #ffffff);
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  background: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+  background: linear-gradient(135deg, var(--card-text, #ffffff) 0%, var(--card-text-secondary, #b0b0b0) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -126,13 +126,13 @@
 }
 
 .card-icon {
-  color: #ffd700;
+  color: var(--card-accent, #ffd700);
   font-size: 1.2rem;
   margin-right: 0.5rem;
 }
 
 .card-label {
-  color: #b0b0b0;
+  color: var(--card-text-secondary, #b0b0b0);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -141,7 +141,7 @@
 
 .card-tag {
   background: rgba(60, 60, 60, 0.8);
-  color: #ffffff;
+  color: var(--card-text, #ffffff);
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   font-size: 0.7rem;
@@ -159,7 +159,7 @@
 }
 
 .card-title {
-  color: #e0e0e0;
+  color: var(--card-text, #e0e0e0);
   font-size: 1.4rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
@@ -168,7 +168,7 @@
 }
 
 .card-description {
-  color: #b0b0b0;
+  color: var(--card-text-secondary, #b0b0b0);
   font-size: 0.95rem;
   line-height: 1.4;
   margin: 0;
