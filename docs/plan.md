@@ -17,8 +17,6 @@ users to trade Brandon Sanderson "Lost Tales" collectible story cards.
 |------------------|--------------------------------------------------------------|
 | **Home**         | Landing page with brief introduction and navigation links.   |
 | **Cards**        | Browse all cards and see current bids/asks.                  |
-| **Market Maker** | Form to create an offer to sell a card or request a bounty.  |
-| **Market Taker** | View existing offers and accept one.                         |
 | **Not Found**    | Fallback page for unknown routes.                            |
 
 ### Future Ideas
