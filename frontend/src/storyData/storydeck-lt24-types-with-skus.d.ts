@@ -28,8 +28,9 @@ export type NonsenseCardForStory<StoryType extends StoryCode> = NonsenseCard<Sto
 export type AllNonsenseNumbers = NonsenseCardNumbers[StoryCode];
 
 // Utility types for common ranges
-export type Digit1To9 = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-export type Digit1To3 = 1 | 2 | 3;
+export type Digit1To54 = Exclude<Range<55>, 0>; // 1 | 2 | 3 |...| 52 | 53 | 54
+export type Digit1To9 = Exclude<Range<10>, 0>; // 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+export type Digit1To3 = Exclude<Range<4>, 0>;  // 1 | 2 | 3
 
 // Template literal types for ID generation
 export type StoryCardId = `${SetId}-${StoryCode}-${string}`;
@@ -61,7 +62,7 @@ export interface StoryCard {
   category: 'story';
   story: StoryCode;
   storyTitle: string;
-  number: number;           // 1..54
+  number: Digit1To54;           // 1..54
   rarityTier: RarityTier;
   mosaic: BinderMosaic;
 }
@@ -85,7 +86,7 @@ export interface NonsenseCard<StoryType extends StoryCode = StoryCode> {
 }
 
 export interface SKU {
-  skuId: SkuId;             // e.g., LT24-ELS-01#STD or LT24-NS-ELS-24-DANCE#FOIL
+  skuId: SkuId;             // e.g., LT24-ELS-01#DUN or LT24-NS-ELS-24-DANCE#FOIL
   cardId: CardId;           // references any card id (StoryCard | HeraldCard | NonsenseCard)
   finish: Finish;
 }
