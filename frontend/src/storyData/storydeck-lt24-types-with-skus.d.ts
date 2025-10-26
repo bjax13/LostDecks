@@ -27,6 +27,11 @@ export type NonsenseNumbersForStory<StoryType extends StoryCode> = NonsenseCardN
 export type NonsenseCardForStory<StoryType extends StoryCode> = NonsenseCard<StoryType>;
 export type AllNonsenseNumbers = NonsenseCardNumbers[StoryCode];
 
+// Add this before the utility types
+type Range<N extends number, Acc extends number[] = []> = Acc['length'] extends N
+  ? Acc[number]
+  : Range<N, [...Acc, Acc['length']]>;
+
 // Utility types for common ranges
 export type Digit1To54 = Exclude<Range<55>, 0>; // 1 | 2 | 3 |...| 52 | 53 | 54
 export type Digit1To9 = Exclude<Range<10>, 0>; // 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
