@@ -32,6 +32,128 @@
   gap: 1.5rem;
 }
 
+.collection-bulk {
+  background: rgba(24, 18, 45, 0.85);
+  border-radius: 20px;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.collection-bulk__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.collection-bulk__header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+}
+
+.collection-bulk__header p {
+  margin: 0;
+  color: rgba(224, 224, 224, 0.8);
+  line-height: 1.5;
+}
+
+.collection-bulk__hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(224, 224, 224, 0.7);
+}
+
+.collection-bulk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.collection-bulk__button,
+.collection-bulk__upload span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.collection-bulk__button:disabled,
+.collection-bulk__upload input:disabled + span {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.collection-bulk__button:not(:disabled):hover,
+.collection-bulk__upload input:not(:disabled) + span:hover {
+  transform: translateY(-1px);
+}
+
+.collection-bulk__upload {
+  position: relative;
+  overflow: hidden;
+}
+
+.collection-bulk__upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.collection-bulk__filename {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(224, 224, 224, 0.65);
+}
+
+.collection-bulk__report {
+  background: rgba(138, 43, 226, 0.2);
+  border: 1px solid rgba(138, 43, 226, 0.35);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.collection-bulk__issues {
+  background: rgba(255, 193, 71, 0.18);
+  border: 1px solid rgba(255, 193, 71, 0.4);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: #ffd479;
+  font-size: 0.9rem;
+}
+
+.collection-bulk__issues ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.collection-bulk__error {
+  background: rgba(255, 77, 109, 0.18);
+  border: 1px solid rgba(255, 99, 132, 0.45);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: #ff6f91;
+  font-size: 0.95rem;
+}
+
 .collection-page__error {
   background: rgba(255, 77, 109, 0.15);
   border: 1px solid rgba(255, 99, 132, 0.45);
@@ -142,6 +264,67 @@
 .collection-summary__progress-label {
   font-size: 0.9rem;
   color: rgba(224, 224, 224, 0.8);
+}
+
+.collection-summary__subset-progress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.collection-summary__subset-card {
+  background: rgba(13, 10, 26, 0.9);
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.collection-summary__subset-heading {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+.collection-summary__subset-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.collection-summary__subset-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.collection-summary__subset-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: rgba(224, 224, 224, 0.85);
+}
+
+.collection-summary__subset-track {
+  position: relative;
+  height: 6px;
+  background: rgba(138, 43, 226, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.collection-summary__subset-bar {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  border-radius: inherit;
+  transition: width 0.4s ease;
 }
 
 .collection-summary__breakdowns {

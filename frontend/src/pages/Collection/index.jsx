@@ -2,7 +2,13 @@ import { useMemo } from 'react';
 import AuthGuard from '../../components/Auth/AuthGuard';
 import { useAuth } from '../../contexts/AuthContext';
 import { categoryLabels } from '../Cards/constants';
-import { datasetMeta, getCardRecord, getSkuRecord } from '../../data/cards';
+import {
+  collectionProgressTargets,
+  datasetMeta,
+  getCardRecord,
+  getSkuRecord
+} from '../../data/cards';
+import BulkCollectionTools from './components/BulkCollectionTools';
 import { useUserCollection } from './hooks/useUserCollection';
 import './Collection.css';
 
@@ -69,6 +75,8 @@ function CollectionSummary({ summary }) {
   const categoryEntries = Object.entries(summary.categoryCounts).sort(([a], [b]) =>
     a.localeCompare(b),
   );
+  const storyProgress = summary.progressBreakdowns?.stories ?? [];
+  const heraldProgress = summary.progressBreakdowns?.heralds ?? [];
 
   return (
     <section className="collection-summary" aria-label="Collection summary">
@@ -101,6 +109,66 @@ function CollectionSummary({ summary }) {
           {completionPercent}% of the Stormlight Lost Tales set catalogued
         </span>
       </div>
+
+      {(storyProgress.length > 0 || heraldProgress.length > 0) && (
+        <div className="collection-summary__subset-progress">
+          {storyProgress.map((story) => (
+            <div key={story.code} className="collection-summary__subset-card">
+              <h3 className="collection-summary__subset-heading">{story.title}</h3>
+              <ul className="collection-summary__subset-list">
+                {story.items.map((item) => (
+                  <li key={item.key} className="collection-summary__subset-item">
+                    <div className="collection-summary__subset-meta">
+                      <span>{item.label}</span>
+                      <span>{item.owned} / {item.total}</span>
+                    </div>
+                    <div
+                      className="collection-summary__subset-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={item.percent}
+                    >
+                      <div
+                        className="collection-summary__subset-bar"
+                        style={{ width: `${item.percent}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {heraldProgress.length > 0 ? (
+            <div className="collection-summary__subset-card">
+              <h3 className="collection-summary__subset-heading">Heralds</h3>
+              <ul className="collection-summary__subset-list">
+                {heraldProgress.map((item) => (
+                  <li key={item.key} className="collection-summary__subset-item">
+                    <div className="collection-summary__subset-meta">
+                      <span>{item.label}</span>
+                      <span>{item.owned} / {item.total}</span>
+                    </div>
+                    <div
+                      className="collection-summary__subset-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={item.percent}
+                    >
+                      <div
+                        className="collection-summary__subset-bar"
+                        style={{ width: `${item.percent}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {(finishEntries.length > 0 || categoryEntries.length > 0) && (
         <div className="collection-summary__breakdowns">
@@ -237,6 +305,7 @@ function CollectionContent() {
           ? categoryLabels[cardInfo.category] ?? cardInfo.category
           : '—',
         storyTitle: cardInfo?.storyTitle ?? null,
+        storyCode: cardInfo?.story ?? null,
         binderLabel,
         updatedAtLabel,
         notes
@@ -263,8 +332,29 @@ function CollectionContent() {
     const categoryCounts = {};
     let totalQuantity = 0;
 
+    const storyProgress = collectionProgressTargets.stories.reduce((acc, story) => {
+      acc[story.code] = {
+        storyCards: new Set(),
+        storyDunSkus: new Set(),
+        storyFoilSkus: new Set(),
+        nonsenseDunSkus: new Set(),
+        nonsenseFoilSkus: new Set()
+      };
+      return acc;
+    }, {});
+
+    const heraldProgress = {
+      dunSkus: new Set(),
+      foilSkus: new Set()
+    };
+
     decoratedEntries.forEach((entry) => {
+      if (entry.quantity <= 0) {
+        return;
+      }
+
       totalQuantity += entry.quantity;
+
       if (entry.cardId) {
         uniqueCardIds.add(entry.cardId);
       }
@@ -277,11 +367,110 @@ function CollectionContent() {
       if (entry.category) {
         categoryCounts[entry.category] = (categoryCounts[entry.category] ?? 0) + entry.quantity;
       }
+
+      const normalizedFinish = entry.finish ? entry.finish.toUpperCase() : null;
+      const storySet = entry.storyCode ? storyProgress[entry.storyCode] : null;
+      const finishIdentifier = entry.skuId
+        ?? (entry.cardId && normalizedFinish ? `${entry.cardId}#${normalizedFinish}` : null);
+
+      if (entry.category === 'story' && storySet) {
+        if (entry.cardId) {
+          storySet.storyCards.add(entry.cardId);
+        }
+        if (normalizedFinish === 'DUN' && finishIdentifier) {
+          storySet.storyDunSkus.add(finishIdentifier);
+        } else if (normalizedFinish === 'FOIL' && finishIdentifier) {
+          storySet.storyFoilSkus.add(finishIdentifier);
+        }
+      } else if (entry.category === 'nonsense' && storySet) {
+        if (normalizedFinish === 'DUN' && finishIdentifier) {
+          storySet.nonsenseDunSkus.add(finishIdentifier);
+        } else if (normalizedFinish === 'FOIL' && finishIdentifier) {
+          storySet.nonsenseFoilSkus.add(finishIdentifier);
+        }
+      } else if (entry.category === 'herald' && normalizedFinish && finishIdentifier) {
+        if (normalizedFinish === 'DUN') {
+          heraldProgress.dunSkus.add(finishIdentifier);
+        } else if (normalizedFinish === 'FOIL') {
+          heraldProgress.foilSkus.add(finishIdentifier);
+        }
+      }
     });
 
     const completionRate = datasetMeta?.totalUniqueCards
       ? Math.min(1, uniqueCardIds.size / datasetMeta.totalUniqueCards)
       : 0;
+
+    const storyBreakdowns = collectionProgressTargets.stories.map((story) => {
+      const owned = storyProgress[story.code] ?? {
+        storyCards: new Set(),
+        storyDunSkus: new Set(),
+        storyFoilSkus: new Set(),
+        nonsenseDunSkus: new Set(),
+        nonsenseFoilSkus: new Set()
+      };
+      const totals = story.totals;
+      const items = [
+        {
+          key: 'storyCards',
+          label: 'Story cards',
+          owned: owned.storyCards.size,
+          total: totals.storyCards
+        },
+        {
+          key: 'storyDunSkus',
+          label: 'Dun finish',
+          owned: owned.storyDunSkus.size,
+          total: totals.storyDunSkus
+        },
+        {
+          key: 'storyFoilSkus',
+          label: 'Foil finish',
+          owned: owned.storyFoilSkus.size,
+          total: totals.storyFoilSkus
+        },
+        {
+          key: 'nonsenseDunSkus',
+          label: 'Nonsense',
+          owned: owned.nonsenseDunSkus.size,
+          total: totals.nonsenseDunSkus
+        },
+        {
+          key: 'nonsenseFoilSkus',
+          label: 'Nonsense foil',
+          owned: owned.nonsenseFoilSkus.size,
+          total: totals.nonsenseFoilSkus
+        }
+      ].map((item) => ({
+        ...item,
+        percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0
+      }));
+
+      return {
+        code: story.code,
+        title: story.title,
+        items
+      };
+    });
+
+    const heraldTotals = collectionProgressTargets.heralds.totals ?? { dunSkus: 0, foilSkus: 0 };
+    const heraldBreakdown = [
+      {
+        key: 'dunSkus',
+        label: 'Herald dun',
+        owned: heraldProgress.dunSkus.size,
+        total: heraldTotals.dunSkus
+      },
+      {
+        key: 'foilSkus',
+        label: 'Herald foil',
+        owned: heraldProgress.foilSkus.size,
+        total: heraldTotals.foilSkus
+      }
+    ].map((item) => ({
+      ...item,
+      percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0
+    }));
 
     return {
       uniqueCardCount: uniqueCardIds.size,
@@ -289,7 +478,11 @@ function CollectionContent() {
       totalQuantity,
       finishCounts,
       categoryCounts,
-      completionRate
+      completionRate,
+      progressBreakdowns: {
+        stories: storyBreakdowns,
+        heralds: heraldBreakdown
+      }
     };
   }, [decoratedEntries]);
 
@@ -310,6 +503,7 @@ function CollectionContent() {
       ) : null}
 
       <div className="collection-page__body">
+        <BulkCollectionTools ownerUid={ownerUid} entries={entries} disabled={loading} />
         {loading ? (
           <div className="collection-page__loading">
             <div className="collection-page__loading-spinner" aria-hidden="true" />
