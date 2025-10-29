@@ -1,0 +1,229 @@
+.account-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem clamp(1.5rem, 4vw, 3rem) 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  color: #f4f1ff;
+}
+
+.account-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.account-hint {
+  margin: 0;
+  max-width: 46rem;
+  color: #b8aaff;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.account-section {
+  background: rgba(24, 18, 45, 0.88);
+  border: 1px solid rgba(132, 105, 221, 0.45);
+  border-radius: 20px;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem);
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.account-section h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #e8dcff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.account-summary li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(45, 31, 82, 0.65);
+  border: 1px solid rgba(132, 105, 221, 0.35);
+  border-radius: 16px;
+  color: #dcd2ff;
+}
+
+.account-summary-label {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b2a4ff;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #dcd2ff;
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b8aaff;
+}
+
+.form-field input,
+.form-field textarea {
+  font: inherit;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(176, 148, 255, 0.35);
+  background: rgba(16, 11, 33, 0.9);
+  color: #f8f6ff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: rgba(200, 185, 255, 0.5);
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: rgba(208, 187, 255, 0.8);
+  box-shadow: 0 0 0 2px rgba(168, 139, 255, 0.35);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+}
+
+.form-actions button:focus-visible {
+  outline: 2px solid rgba(208, 187, 255, 0.9);
+  outline-offset: 3px;
+}
+
+.form-feedback {
+  color: #8ff4c9;
+  font-size: 0.9rem;
+}
+
+.notification-preview {
+  margin: 0;
+  padding: 1.25rem;
+  border: 1px dashed rgba(168, 139, 255, 0.6);
+  border-radius: 18px;
+  background: rgba(16, 11, 33, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.notification-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #dcd2ff;
+  opacity: 0.75;
+}
+
+.notification-option input {
+  accent-color: #cfa8ff;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+@media (max-width: 600px) {
+  .account-page {
+    padding: 2.5rem 1.25rem 3rem;
+  }
+
+  .account-section {
+    padding: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
