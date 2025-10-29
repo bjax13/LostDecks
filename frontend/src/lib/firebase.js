@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, GithubAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -19,6 +20,7 @@ if (Object.values(firebaseConfig).some((value) => typeof value === 'undefined'))
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 setPersistence(auth, browserLocalPersistence).catch((error) => {
   console.error('Failed to set Firebase auth persistence', error);
@@ -30,4 +32,4 @@ const githubProvider = new GithubAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 githubProvider.setCustomParameters({ allow_signup: 'false' });
 
-export { app, auth, googleProvider, githubProvider };
+export { app, auth, db, googleProvider, githubProvider };
