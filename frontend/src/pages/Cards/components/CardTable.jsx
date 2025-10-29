@@ -1,6 +1,7 @@
 import CategoryPill from './CategoryPill';
 import FinishPills from './FinishPills';
 import BinderInfo from './BinderInfo';
+import AddToCollectionButton from './AddToCollectionButton';
 import { categoryLabels } from '../constants';
 
 export default function CardTable({ cards }) {
@@ -17,6 +18,7 @@ export default function CardTable({ cards }) {
             <th>Rarity</th>
             <th>Finishes</th>
             <th>Binder</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -38,6 +40,9 @@ export default function CardTable({ cards }) {
               </td>
               <td>
                 <BinderInfo binder={card.binder} layout="table" />
+              </td>
+              <td>
+                <AddToCollectionButton card={card} variant="table" />
               </td>
             </tr>
           ))}

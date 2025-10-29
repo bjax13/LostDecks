@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import Cards from './pages/Cards';
@@ -10,14 +9,12 @@ import CollectionPage from './pages/Collection';
 import OffersPage from './pages/Offers';
 import AccountPage from './pages/Account';
 import { useAuth } from './contexts/AuthContext';
-import AuthModal from './components/Auth/AuthModal';
+import { useAuthModal } from './contexts/AuthModalContext.jsx';
 
 function App() {
   const { user, logout, loading } = useAuth();
-  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  const { openAuthModal } = useAuthModal();
 
-  const openAuthModal = () => setAuthModalOpen(true);
-  const closeAuthModal = () => setAuthModalOpen(false);
   const handleSignOut = async () => {
     try {
       await logout();
@@ -49,7 +46,7 @@ function App() {
           ) : (
             <>
               <Link to="/auth/login">Sign in</Link>
-              <button type="button" onClick={openAuthModal}>
+              <button type="button" onClick={() => openAuthModal()}>
                 Quick sign in
               </button>
             </>
@@ -68,10 +65,8 @@ function App() {
         <Route path="/auth/forgot" element={<ForgotPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
     </BrowserRouter>
   );
 }
 
 export default App;
-

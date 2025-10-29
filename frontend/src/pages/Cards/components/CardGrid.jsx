@@ -1,6 +1,7 @@
 import CategoryPill from './CategoryPill';
 import FinishPills from './FinishPills';
 import BinderInfo from './BinderInfo';
+import AddToCollectionButton from './AddToCollectionButton';
 
 export default function CardGrid({ cards }) {
   return (
@@ -37,6 +38,9 @@ export default function CardGrid({ cards }) {
           <div className="binder">
             <h3>Binder location</h3>
             <BinderInfo binder={card.binder} layout="grid" />
+          </div>
+          <div className="card-actions">
+            <AddToCollectionButton card={card} variant="card" />
           </div>
         </article>
       ))}
