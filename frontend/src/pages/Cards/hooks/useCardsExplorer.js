@@ -1,91 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
-import dataset from '../../../storyData/storydeck-lt24-with-skus.json';
+import { cardsIndex, datasetMeta, datasetStories } from '../../../data/cards';
 import { categoryLabels } from '../constants';
-
-function buildCardRecords() {
-  const storyTitleByCode = dataset.stories.reduce((acc, story) => {
-    acc[story.code] = story.title;
-    return acc;
-  }, {});
-
-  const finishesByCardId = dataset.skus.reduce((acc, sku) => {
-    const finish = sku.finish.toUpperCase();
-    if (!acc[sku.cardId]) {
-      acc[sku.cardId] = new Set();
-    }
-    acc[sku.cardId].add(finish);
-    return acc;
-  }, {});
-
-  const toFinishList = (cardId) => {
-    const finishSet = finishesByCardId[cardId];
-    if (!finishSet) {
-      return [];
-    }
-    return Array.from(finishSet).sort();
-  };
-
-  const storyCards = dataset.storyCards.map((card) => {
-    const storyTitle = storyTitleByCode[card.story] ?? card.story;
-    const displayName = `${storyTitle} #${card.number.toString().padStart(2, '0')}`;
-    return {
-      id: card.id,
-      category: card.category,
-      story: card.story,
-      storyTitle,
-      number: card.number,
-      rarity: card.rarityTier,
-      binder: card.mosaic,
-      displayName,
-      detail: 'Story card',
-      finishes: toFinishList(card.id),
-      searchTokens: [card.id, card.story, storyTitle, displayName].join(' ').toLowerCase()
-    };
-  });
-
-  const heraldCards = dataset.heralds.map((card) => {
-    const displayName = card.heraldName;
-    const storyTitle = 'Heraldic Order';
-    return {
-      id: card.id,
-      category: card.category,
-      story: null,
-      storyTitle,
-      number: card.number,
-      rarity: card.rarityTier,
-      binder: null,
-      displayName,
-      detail: 'Herald of the Almighty',
-      finishes: toFinishList(card.id),
-      searchTokens: [card.id, displayName, 'Herald', card.rarityTier ?? ''].join(' ').toLowerCase()
-    };
-  });
-
-  const nonsenseCards = dataset.nonsense.knownCards.map((card) => {
-    const storyTitle = storyTitleByCode[card.story] ?? card.story;
-    const variantLabel = card.variantName ? `Variant: ${card.variantName}` : 'Standard Variant';
-    const displayName = `${storyTitle} Nonsense #${card.baseNumber.toString().padStart(2, '0')}`;
-    return {
-      id: card.id,
-      category: card.category,
-      story: card.story,
-      storyTitle,
-      number: card.baseNumber,
-      rarity: null,
-      binder: null,
-      displayName,
-      detail: variantLabel,
-      finishes: toFinishList(card.id),
-      searchTokens: [card.id, card.story, storyTitle, variantLabel, displayName]
-        .join(' ')
-        .toLowerCase()
-    };
-  });
-
-  return [...storyCards, ...heraldCards, ...nonsenseCards];
-}
-
-const allCards = buildCardRecords();
+const allCards = cardsIndex;
 
 const defaultSortState = {
   field: 'number',
@@ -110,7 +26,7 @@ export function useCardsExplorer() {
     return Array.from(rarities).sort();
   }, []);
 
-  const stories = useMemo(() => dataset.stories, []);
+  const stories = useMemo(() => datasetStories, []);
 
   const filteredCards = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -211,7 +127,7 @@ export function useCardsExplorer() {
   return {
     cards: filteredCards,
     totalCards: allCards.length,
-    datasetMeta: dataset.meta,
+    datasetMeta,
     rarityOptions,
     stories,
     searchTerm,
