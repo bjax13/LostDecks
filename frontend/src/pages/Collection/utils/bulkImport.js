@@ -20,7 +20,22 @@ function escapeCsvValue(value) {
 }
 
 export function createCollectionTemplateCsv() {
-  const rows = datasetSkus.map((sku) => {
+  const sortedSkus = [...datasetSkus].sort((a, b) => {
+    const finishA = a.finish.toUpperCase();
+    const finishB = b.finish.toUpperCase();
+    
+    // Sort by finish: DUN comes before FOIL
+    if (finishA !== finishB) {
+      if (finishA === 'DUN') return -1;
+      if (finishB === 'DUN') return 1;
+      return finishA.localeCompare(finishB);
+    }
+    
+    // Secondary sort by cardId within each finish group
+    return a.cardId.localeCompare(b.cardId);
+  });
+
+  const rows = sortedSkus.map((sku) => {
     const card = getCardRecord(sku.cardId);
     return [
       sku.skuId,

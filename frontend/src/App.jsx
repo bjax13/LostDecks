@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import Cards from './pages/Cards';
+import CardDetail from './pages/CardDetail';
 import NotFound from './pages/NotFound';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -57,6 +58,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/cards" element={<Cards />} />
+        <Route path="/cards/:cardId" element={<CardDetail />} />
+        <Route path="/cards/:cardId/:skuId" element={<CardDetail />} />
         <Route path="/collections" element={<CollectionPage />} />
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/account" element={<AccountPage />} />

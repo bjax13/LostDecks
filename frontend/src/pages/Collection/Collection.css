@@ -402,6 +402,10 @@
   background: rgba(138, 43, 226, 0.15);
 }
 
+.collection-table__row--clickable {
+  cursor: pointer;
+}
+
 .collection-table__card {
   display: flex;
   flex-direction: column;

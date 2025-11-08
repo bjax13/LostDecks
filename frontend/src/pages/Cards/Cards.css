@@ -203,6 +203,10 @@
   background: rgba(70, 46, 140, 0.45);
 }
 
+.cards-table__row--clickable {
+  cursor: pointer;
+}
+
 .mono {
   font-family: 'Fira Code', 'Roboto Mono', Menlo, Monaco, monospace;
   letter-spacing: 0.04em;
@@ -294,6 +298,17 @@
   flex-direction: column;
   gap: 1rem;
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+}
+
+.card-tile--clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-tile--clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.4);
+  border-color: rgba(157, 129, 255, 0.6);
 }
 
 .card-tile header {

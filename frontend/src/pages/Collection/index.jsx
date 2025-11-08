@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AuthGuard from '../../components/Auth/AuthGuard';
 import { useAuth } from '../../contexts/AuthContext';
 import { categoryLabels } from '../Cards/constants';
@@ -201,6 +202,23 @@ function CollectionSummary({ summary }) {
 }
 
 function CollectionTable({ entries }) {
+  const navigate = useNavigate();
+
+  const handleRowClick = (entry, event) => {
+    // Don't navigate if clicking on interactive elements
+    if (event.target.closest('button, a, input, select, textarea')) {
+      return;
+    }
+
+    // Prefer skuId route if available, otherwise use cardId route
+    if (entry.skuId && entry.cardId) {
+      navigate(`/cards/${entry.cardId}/${entry.skuId}`);
+    } else if (entry.cardId) {
+      navigate(`/cards/${entry.cardId}`);
+    }
+    // If neither exists, don't navigate
+  };
+
   return (
     <div className="collection-table__wrapper">
       <table className="collection-table">
@@ -215,7 +233,11 @@ function CollectionTable({ entries }) {
         </thead>
         <tbody>
           {entries.map((entry) => (
-            <tr key={entry.id}>
+            <tr
+              key={entry.id}
+              className={entry.cardId || entry.skuId ? 'collection-table__row--clickable' : ''}
+              onClick={(e) => handleRowClick(entry, e)}
+            >
               <td>
                 <div className="collection-table__card">
                   <span className="collection-table__card-name">{entry.displayName}</span>

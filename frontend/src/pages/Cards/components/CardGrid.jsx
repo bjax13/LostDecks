@@ -1,13 +1,28 @@
+import { useNavigate } from 'react-router-dom';
 import CategoryPill from './CategoryPill';
 import FinishPills from './FinishPills';
 import BinderInfo from './BinderInfo';
 import AddToCollectionButton from './AddToCollectionButton';
 
 export default function CardGrid({ cards }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = (cardId, event) => {
+    // Don't navigate if clicking on the action button area
+    if (event.target.closest('.card-actions')) {
+      return;
+    }
+    navigate(`/cards/${cardId}`);
+  };
+
   return (
     <div className="cards-grid">
       {cards.map((card) => (
-        <article key={card.id} className="card-tile">
+        <article
+          key={card.id}
+          className="card-tile card-tile--clickable"
+          onClick={(e) => handleCardClick(card.id, e)}
+        >
           <header>
             <CategoryPill category={card.category} />
             <span className="card-id mono">{card.id}</span>
