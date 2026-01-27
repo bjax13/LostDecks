@@ -30,11 +30,13 @@ export function useAddToCollection() {
           ownerUid: user.uid,
           cardId: card.id,
           quantity,
-          finish: finish ?? null,
-          createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          source: 'cards-page',
         };
+
+        // Only include finish if it has a value (matching bulkImport.js pattern)
+        if (finish) {
+          payload.finish = String(finish).toUpperCase();
+        }
 
         if (card.displayName) {
           payload.displayName = card.displayName;
