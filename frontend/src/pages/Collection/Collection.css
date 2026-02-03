@@ -145,6 +145,21 @@
   gap: 0.35rem;
 }
 
+.collection-bulk__post-status {
+  background: rgba(76, 217, 100, 0.18);
+  border: 1px solid rgba(76, 217, 100, 0.4);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  color: rgba(220, 255, 230, 0.95);
+  font-size: 0.95rem;
+}
+
+.collection-bulk__post-status.is-error {
+  background: rgba(255, 77, 109, 0.18);
+  border-color: rgba(255, 99, 132, 0.45);
+  color: #ff6f91;
+}
+
 .collection-bulk__error {
   background: rgba(255, 77, 109, 0.18);
   border: 1px solid rgba(255, 99, 132, 0.45);

@@ -4,6 +4,7 @@ import {
   createCollectionTemplateCsv,
   parseBulkCollectionCsv
 } from '../utils/bulkImport';
+import { datasetSkus, datasetStories, getCardRecord, getSkuRecord } from '../../../data/cards';
 
 function formatSummaryCount(count, singular, plural) {
   if (count === 0) {
@@ -31,12 +32,225 @@ function combineSummary(report) {
   return `${segments.slice(0, -1).join(', ')} and ${segments.at(-1)}`;
 }
 
+function normalizeQuantity(entry) {
+  const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+      return candidate;
+    }
+  }
+  return 1;
+}
+
+function normalizeSkuId(skuId) {
+  if (!skuId || typeof skuId !== 'string') {
+    return null;
+  }
+  const [cardId, finish] = skuId.split('#');
+  if (!finish) {
+    return skuId.trim();
+  }
+  return `${cardId}#${finish.toUpperCase()}`;
+}
+
+function getVariantLabel(detail) {
+  if (!detail) {
+    return null;
+  }
+  const trimmed = detail.trim();
+  if (trimmed.toLowerCase() === 'standard variant') {
+    return null;
+  }
+  if (trimmed.toLowerCase().startsWith('variant:')) {
+    return trimmed.slice('variant:'.length).trim();
+  }
+  return trimmed;
+}
+
+function formatTradeItem(card) {
+  if (!card) {
+    return null;
+  }
+  if (card.category === 'story') {
+    return { text: `${card.number}`, sortKey: [card.number, ''] };
+  }
+  if (card.category === 'herald') {
+    const label = card.displayName ?? 'Unknown Herald';
+    const number = Number.isFinite(card.number) ? card.number : 0;
+    return { text: `${number} ${label}`, sortKey: [number, label] };
+  }
+  if (card.category === 'nonsense') {
+    const variant = getVariantLabel(card.detail);
+    return {
+      text: variant ? `${card.number} ${variant}` : `${card.number}`,
+      sortKey: [card.number, variant ?? '']
+    };
+  }
+  return { text: card.displayName ?? card.id ?? 'Unknown', sortKey: [card.displayName ?? '', ''] };
+}
+
+function buildIsoUftPost(entries) {
+  const ownedSkuCounts = new Map();
+  let skippedEntries = 0;
+
+  entries.forEach((entry) => {
+    const quantity = Math.max(0, normalizeQuantity(entry));
+    if (!quantity) {
+      return;
+    }
+
+    const normalizedSkuId = normalizeSkuId(entry.skuId);
+    const skuInfo = normalizedSkuId ? getSkuRecord(normalizedSkuId) : null;
+    const cardId = entry.cardId ?? skuInfo?.cardId ?? null;
+    const finish = typeof entry.finish === 'string' && entry.finish.trim().length > 0
+      ? entry.finish.trim().toUpperCase()
+      : skuInfo?.finish ?? null;
+    const skuKey = normalizedSkuId ?? (cardId && finish ? `${cardId}#${finish}` : null);
+
+    if (!skuKey) {
+      skippedEntries += 1;
+      return;
+    }
+
+    ownedSkuCounts.set(skuKey, (ownedSkuCounts.get(skuKey) ?? 0) + quantity);
+  });
+
+  const storyOrder = datasetStories.map((story) => story.title);
+  const storyRank = (title) => {
+    const index = storyOrder.indexOf(title);
+    return index === -1 ? Number.POSITIVE_INFINITY : index;
+  };
+
+  const buildSectionLines = ({ predicate, groupSuffix }, mode) => {
+    const groups = new Map();
+
+    datasetSkus.forEach((sku) => {
+      const skuKey = normalizeSkuId(sku.skuId);
+      const ownedCount = skuKey ? ownedSkuCounts.get(skuKey) ?? 0 : 0;
+      if (mode === 'iso' ? ownedCount > 0 : ownedCount <= 1) {
+        return;
+      }
+
+      const finish = sku.finish ? sku.finish.toUpperCase() : null;
+      const card = getCardRecord(sku.cardId);
+      if (!card || !predicate({ card, finish })) {
+        return;
+      }
+
+      const item = formatTradeItem(card);
+      if (!item) {
+        return;
+      }
+
+      const storyTitle = card.storyTitle ?? 'Other';
+      if (!groups.has(storyTitle)) {
+        groups.set(storyTitle, []);
+      }
+      groups.get(storyTitle).push(item);
+    });
+
+    const orderedGroups = Array.from(groups.entries()).sort(([titleA], [titleB]) => {
+      const rankA = storyRank(titleA);
+      const rankB = storyRank(titleB);
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+      return titleA.localeCompare(titleB);
+    });
+
+    const lines = [];
+    orderedGroups.forEach(([storyTitle, items]) => {
+      items.sort((a, b) => {
+        if (a.sortKey[0] !== b.sortKey[0]) {
+          return a.sortKey[0] - b.sortKey[0];
+        }
+        return String(a.sortKey[1]).localeCompare(String(b.sortKey[1]));
+      });
+      lines.push(`${storyTitle} ${groupSuffix}: ${items.map((item) => item.text).join(', ')}`);
+    });
+
+    return lines;
+  };
+
+  const sections = [
+    {
+      title: 'Story Foils',
+      groupSuffix: 'Foils',
+      predicate: ({ card, finish }) => card.category === 'story' && finish === 'FOIL'
+    },
+    {
+      title: 'Story Dun',
+      groupSuffix: 'Dun',
+      predicate: ({ card, finish }) => card.category === 'story' && finish === 'DUN'
+    },
+    {
+      title: 'Heralds (Foil)',
+      groupSuffix: 'Heralds',
+      predicate: ({ card, finish }) => card.category === 'herald' && finish === 'FOIL'
+    },
+    {
+      title: 'Heralds (Dun)',
+      groupSuffix: 'Heralds',
+      predicate: ({ card, finish }) => card.category === 'herald' && finish === 'DUN'
+    },
+    {
+      title: 'Nonsense (Dun)',
+      groupSuffix: 'Nonsense',
+      predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'DUN'
+    },
+    {
+      title: 'Nonsense (Foil)',
+      groupSuffix: 'Nonsense',
+      predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'FOIL'
+    }
+  ];
+
+  const buildBlock = (label, mode) => {
+    const lines = [label, ''];
+    let hasContent = false;
+
+    sections.forEach((section) => {
+      const sectionLines = buildSectionLines(section, mode);
+      if (sectionLines.length === 0) {
+        return;
+      }
+      hasContent = true;
+      lines.push(`${section.title}:`);
+      lines.push(...sectionLines);
+      lines.push('');
+    });
+
+    if (!hasContent) {
+      lines.push(mode === 'iso' ? 'None needed yet.' : 'None available yet.');
+      lines.push('');
+    }
+
+    return lines;
+  };
+
+  const lines = [
+    ...buildBlock('ISO:', 'iso'),
+    ...buildBlock('UFT:', 'uft')
+  ];
+
+  while (lines.length > 0 && lines.at(-1) === '') {
+    lines.pop();
+  }
+
+  return {
+    text: lines.join('\n'),
+    skippedEntries
+  };
+}
+
 export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [processing, setProcessing] = useState(false);
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
   const [lastFileName, setLastFileName] = useState('');
+  const [postStatus, setPostStatus] = useState(null);
+  const [postError, setPostError] = useState(null);
 
   const existingEntries = useMemo(() => entries ?? [], [entries]);
 
@@ -98,6 +312,40 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
     }
   };
 
+  const handleCopyPost = async () => {
+    if (!ownerUid || processing || disabled) {
+      return;
+    }
+
+    setPostStatus(null);
+    setPostError(null);
+
+    const { text, skippedEntries } = buildIsoUftPost(existingEntries);
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setPostStatus(
+        skippedEntries > 0
+          ? `Copied ISO/UFT post. ${skippedEntries} entries without a finish were skipped.`
+          : 'Copied ISO/UFT post to your clipboard.'
+      );
+    } catch (err) {
+      console.error('Failed to copy ISO/UFT post', err);
+      setPostError('Unable to copy the post. Please try again.');
+    }
+  };
+
   const summaryText = report ? combineSummary(report) : null;
 
   return (
@@ -123,6 +371,14 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         >
           Download template
         </button>
+        <button
+          type="button"
+          className="collection-bulk__button"
+          onClick={handleCopyPost}
+          disabled={!ownerUid || disabled || processing}
+        >
+          Copy ISO/UFT post
+        </button>
         <label className={`collection-bulk__upload ${processing ? 'is-uploading' : ''}`}>
           <input
             type="file"
@@ -136,6 +392,18 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
       {lastFileName ? (
         <p className="collection-bulk__filename">Last uploaded file: {lastFileName}</p>
+      ) : null}
+
+      {postStatus ? (
+        <div className="collection-bulk__post-status" role="status">
+          {postStatus}
+        </div>
+      ) : null}
+
+      {postError ? (
+        <div className="collection-bulk__post-status is-error" role="alert">
+          {postError}
+        </div>
       ) : null}
 
       {summaryText ? (
