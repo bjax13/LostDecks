@@ -13,25 +13,31 @@ users to trade Brandon Sanderson "Lost Tales" collectible story cards.
 
 ## Page Overview
 
-| Page             | Description                                                  |
-|------------------|--------------------------------------------------------------|
-| **Home**         | Landing page with brief introduction and navigation links.   |
-| **Cards**        | Browse all cards and see current bids/asks.                  |
-| **Not Found**    | Fallback page for unknown routes.                            |
+The UI is evolving, but at a high level the experience includes:
+
+| Page / Area       | Description                                                  |
+|-------------------|--------------------------------------------------------------|
+| **Home**          | Landing page with brief introduction and navigation links.   |
+| **Cards**         | Browse cards and (eventually) see current bids/asks.         |
+| **Auth**          | Login / registration / password reset flows.                 |
+| **Collections**   | Authenticated area for managing a user collection.           |
+| **Offers**        | Authenticated area for viewing/creating offers.              |
+| **Account**       | Authenticated account settings/profile area.                 |
+| **Not Found**     | Fallback page for unknown routes.                            |
+
+> Note: Some authenticated areas may currently be placeholders/shells.
 
 ### Future Ideas
 
-- User accounts with login and portfolio tracking
-- Search and filtering of cards
-- Transaction history
+- Flesh out cards browsing (search/filtering, bids/asks display)
+- Trading workflow (offers + bounties + accept/fulfill)
+- User portfolios and transaction history
 - Admin features for curating cards and offers
 
-## Wireframe Prototype
+## Frontend Prototype
 
-The `frontend` directory contains a very simple wireframe built with
-React (via CDN). It demonstrates basic navigation between the pages
-listed above using React Router. The wireframe is purely for planning
-purposes and does not persist any data.
+The `frontend` directory contains a Vite + React application that demonstrates
+navigation and scaffolding (including Firebase Authentication helpers and route
+guards).
 
-To preview the prototype, open `frontend/index.html` in a browser with
-internet access.
+For local development instructions, see the root `README.md` and `frontend/README.md`.
