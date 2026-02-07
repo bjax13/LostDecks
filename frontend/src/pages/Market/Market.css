@@ -1,0 +1,59 @@
+.market-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.market-listing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  background: rgba(24, 18, 45, 0.75);
+}
+
+.market-listing__main {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.market-listing__type {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: rgba(206, 193, 255, 0.9);
+}
+
+.market-listing__price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.market-listing__meta {
+  color: rgba(206, 193, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.market-listing__actions button {
+  border: 1px solid rgba(201, 182, 255, 0.7);
+  background: rgba(96, 66, 178, 0.45);
+  color: #ffffff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.market-listing__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
