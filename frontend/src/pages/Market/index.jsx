@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import useOpenListings from './hooks/useOpenListings';
 import ListingRow from './components/ListingRow';
+import { acceptListing, cancelListing } from '../../lib/marketplace/listings';
 import { getCardRecord } from '../../data/cards';
 import './Market.css';
 
@@ -27,32 +28,38 @@ function MarketPage() {
   const searchedCard = useMemo(() => {
     const q = queryText.trim();
     if (!q) return null;
-
-    // If the user types an exact cardId, try to resolve it.
     const exact = getCardRecord(q);
-    if (exact) return exact;
-
-    return null;
+    return exact || null;
   }, [queryText]);
 
   const emptyMessage = listings.length === 0 ? 'No open listings yet.' : 'No open listings found.';
 
-  const handleCancel = (listing) => {
+  const handleCancel = async (listing) => {
     if (!user) {
       navigate('/auth/login', { state: { from: { pathname: '/market' } } });
       return;
     }
 
-    alert('Cancel flow coming soon.');
+    try {
+      await cancelListing({ listingId: listing.id, cancelledByUid: user.uid });
+    } catch (err) {
+      console.error('Failed to cancel listing', err);
+      alert(err?.message || 'Failed to cancel listing');
+    }
   };
 
-  const handleAccept = (listing) => {
+  const handleAccept = async (listing) => {
     if (!user) {
       navigate('/auth/login', { state: { from: { pathname: '/market' } } });
       return;
     }
 
-    alert('Accept flow coming soon.');
+    try {
+      await acceptListing({ listingId: listing.id });
+    } catch (err) {
+      console.error('Failed to accept listing', err);
+      alert(err?.message || 'Failed to accept listing');
+    }
   };
 
   return (

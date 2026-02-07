@@ -7,18 +7,11 @@ service cloud.firestore {
 
     // Collections collection - user's card collection entries
     match /collections/{entryId} {
-      // Users can read their own collection entries
       allow read: if signedIn() && request.auth.uid == resource.data.ownerUid;
-
-      // Users can create entries if authenticated and setting their own UID
       allow create: if signedIn() && request.auth.uid == request.resource.data.ownerUid;
-
-      // Users can update their own entries (and can't change ownerUid)
       allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
         && request.auth.uid == request.resource.data.ownerUid;
-
-      // Users can delete their own entries
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
@@ -38,7 +31,7 @@ service cloud.firestore {
         && request.resource.data.cardId is string
         && request.resource.data.cardId.size() > 0;
 
-      // Allow the creator to cancel their own OPEN listing.
+      // Cancel: creator can cancel their own OPEN listing.
       allow update: if signedIn()
         && resource.data.createdByUid == request.auth.uid
         && resource.data.status == 'OPEN'
@@ -50,17 +43,18 @@ service cloud.firestore {
         && request.resource.data.currency == resource.data.currency
         && request.resource.data.quantity == resource.data.quantity;
 
-      // Allow delete only for creator (optional; not used yet)
+      // Note: accepting listings is handled via a callable Cloud Function (admin privileges)
+      // so that listing ACCEPT + trade creation happen atomically.
+
       allow delete: if signedIn() && resource.data.createdByUid == request.auth.uid;
     }
 
-    // Trades (not enabled yet; accept flow ships next)
+    // Trades are created by a callable Cloud Function so clients cannot spoof them.
     match /trades/{tradeId} {
       allow read: if signedIn() && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
       allow create, update, delete: if false;
     }
 
-    // Deny all other collections by default
     match /{document=**} {
       allow read, write: if false;
     }
