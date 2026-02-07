@@ -24,6 +24,17 @@ function MarketPage() {
     });
   }, [listings, typeFilter, queryText]);
 
+  const searchedCard = useMemo(() => {
+    const q = queryText.trim();
+    if (!q) return null;
+
+    // If the user types an exact cardId, try to resolve it.
+    const exact = getCardRecord(q);
+    if (exact) return exact;
+
+    return null;
+  }, [queryText]);
+
   const emptyMessage = listings.length === 0 ? 'No open listings yet.' : 'No open listings found.';
 
   const handleCancel = (listing) => {
@@ -66,10 +77,22 @@ function MarketPage() {
           <input
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="Search cards…"
+            placeholder="Search cards… (or paste a card id)"
           />
         </label>
       </div>
+
+      {searchedCard ? (
+        <div className="market-cta">
+          <div>
+            <strong>{searchedCard.displayName}</strong>
+            <div className="muted">Matched card id: {searchedCard.id}</div>
+          </div>
+          <button type="button" onClick={() => navigate(`/cards/${searchedCard.id}`)}>
+            Create listing for this card
+          </button>
+        </div>
+      ) : null}
 
       {loading ? (
         <p>Loading listings…</p>
