@@ -35,7 +35,10 @@ export default function TradesPanel({ user }) {
                   <div>
                     <strong>{role}</strong> · {formatMoney(t.priceCents, t.currency)} · {t.type}
                   </div>
-                  <div className="muted">Card: {t.cardId} · With: {counterpartyName || 'Anonymous'} · Status: {t.status}</div>
+                  <div className="muted">
+                    Card: {t.cardDisplayName ? `${t.cardDisplayName} (${t.cardId})` : t.cardId} · With:{' '}
+                    {counterpartyName || 'Anonymous'} · Status: {t.status}
+                  </div>
                 </div>
               </li>
             );
