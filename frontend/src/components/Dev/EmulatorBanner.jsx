@@ -14,6 +14,7 @@ export default function EmulatorBanner() {
   const fsPort = import.meta.env.VITE_FIRESTORE_EMULATOR_PORT || '8080';
   const fnHost = import.meta.env.VITE_FUNCTIONS_EMULATOR_HOST || '127.0.0.1';
   const fnPort = import.meta.env.VITE_FUNCTIONS_EMULATOR_PORT || '5001';
+  const uiUrl = import.meta.env.VITE_EMULATOR_UI_URL || 'http://127.0.0.1:4000';
 
   return (
     <aside className="emulator-banner" role="status">
@@ -27,6 +28,20 @@ export default function EmulatorBanner() {
         <span className="emulator-banner__sep">·</span>
         Functions: {fnHost}:{fnPort}
       </div>
+      <nav className="emulator-banner__links" aria-label="Emulator UI links">
+        <a href={uiUrl} target="_blank" rel="noreferrer">
+          UI
+        </a>
+        <a href={`${uiUrl}/auth`} target="_blank" rel="noreferrer">
+          Auth
+        </a>
+        <a href={`${uiUrl}/firestore`} target="_blank" rel="noreferrer">
+          Firestore
+        </a>
+        <a href={`${uiUrl}/functions`} target="_blank" rel="noreferrer">
+          Functions
+        </a>
+      </nav>
     </aside>
   );
 }

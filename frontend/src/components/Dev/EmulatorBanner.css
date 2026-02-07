@@ -34,3 +34,29 @@
   margin: 0 0.5rem;
   opacity: 0.55;
 }
+
+.emulator-banner__links {
+  display: flex;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.emulator-banner__links a {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 196, 0, 0.45);
+  color: rgba(255, 241, 200, 0.95);
+  text-decoration: none;
+  background: rgba(255, 196, 0, 0.08);
+}
+
+.emulator-banner__links a:hover {
+  background: rgba(255, 196, 0, 0.16);
+}
+
+@media (max-width: 760px) {
+  .emulator-banner__links {
+    display: none;
+  }
+}
