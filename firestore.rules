@@ -87,7 +87,10 @@ service cloud.firestore {
         && request.resource.data.currency == 'USD'
         && request.resource.data.quantity == 1
         && request.resource.data.priceCents is int
-        && request.resource.data.priceCents > 0;
+        && request.resource.data.priceCents > 0
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.participants.hasAll([request.resource.data.buyerUid, request.resource.data.sellerUid]);
 
       allow update, delete: if false;
     }

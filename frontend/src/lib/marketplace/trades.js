@@ -29,6 +29,7 @@ export async function createTrade({
     buyerDisplayName: buyerDisplayName || 'Anonymous',
     sellerUid,
     sellerDisplayName: sellerDisplayName || 'Anonymous',
+    participants: [buyerUid, sellerUid],
     status: 'PENDING',
     createdAt: serverTimestamp(),
   };
