@@ -9,6 +9,8 @@ import BinderInfo from '../Cards/components/BinderInfo';
 import AddToCollectionButton from '../Cards/components/AddToCollectionButton';
 import { categoryLabels } from '../Cards/constants';
 import CreateListingForm from './components/CreateListingForm';
+import CardListingsPanel from './components/CardListingsPanel';
+import '../Market/Market.css';
 import './CardDetail.css';
 
 function normalizeQuantity(entry) {
@@ -236,6 +238,9 @@ export default function CardDetail() {
             Create a buy (bid) or sell (ask) listing for this card.
           </p>
           <CreateListingForm cardId={cardId} />
+
+          <h3 style={{ marginTop: '1.5rem' }}>Open listings</h3>
+          <CardListingsPanel cardId={cardId} />
         </section>
       </div>
     </div>

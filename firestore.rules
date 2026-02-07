@@ -83,6 +83,7 @@ service cloud.firestore {
         && request.resource.data.status == 'PENDING'
         && request.resource.data.listingId is string
         && request.resource.data.cardId is string
+        && (!('cardDisplayName' in request.resource.data) || request.resource.data.cardDisplayName is string || request.resource.data.cardDisplayName == null)
         && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
         && request.resource.data.currency == 'USD'
         && request.resource.data.quantity == 1
