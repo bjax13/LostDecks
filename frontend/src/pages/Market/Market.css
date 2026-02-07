@@ -37,6 +37,18 @@
   }
 }
 
+.market-cta {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  background: rgba(24, 18, 45, 0.65);
+}
+
 .market-list {
   list-style: none;
   padding: 0;
