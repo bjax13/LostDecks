@@ -7,7 +7,7 @@ function formatMoney(priceCents, currency = 'USD') {
   }
 }
 
-function ListingRow({ listing, onAccept, canAccept, canCancel, onCancel }) {
+function ListingRow({ listing, onAccept, canAccept, canCancel, onCancel, cardLabel }) {
   const label = listing.type === 'BID' ? 'Bid' : 'Ask';
 
   return (
@@ -16,7 +16,7 @@ function ListingRow({ listing, onAccept, canAccept, canCancel, onCancel }) {
         <div className="market-listing__type">{label}</div>
         <div className="market-listing__price">{formatMoney(listing.priceCents, listing.currency)}</div>
         <div className="market-listing__meta">
-          <span className="muted">Card:</span> {listing.cardId}
+          <span className="muted">Card:</span> {cardLabel || listing.cardId}
           {' · '}
           <span className="muted">By:</span> {listing.createdByDisplayName || 'Anonymous'}
         </div>
