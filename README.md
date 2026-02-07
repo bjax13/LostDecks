@@ -28,7 +28,9 @@ For local multi-user testing (recommended), run the emulators and point the fron
 ```bash
 # terminal 1
 cd ..
-firebase emulators:start --only auth,firestore
+# If you see "port taken" errors, stop the previous emulator process or run:
+#   ./scripts/kill-firebase-emulators.sh
+./scripts/start-emulators.sh botcards-9a7d9
 
 # terminal 2
 cd frontend

@@ -26,6 +26,8 @@ yarn-error.log*
 *-debug.log
 firebase-debug.log
 firestore-debug.log
+functions-debug.log
+ui-debug.log
 
 # Local emulator env (Vite mode=emulator)
 frontend/.env.emulator.local
