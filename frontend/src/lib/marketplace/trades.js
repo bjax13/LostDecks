@@ -6,6 +6,7 @@ export const TRADES_PATH = 'trades';
 export async function createTrade({
   listingId,
   cardId,
+  cardDisplayName,
   type,
   priceCents,
   currency = 'USD',
@@ -21,6 +22,7 @@ export async function createTrade({
   const payload = {
     listingId,
     cardId,
+    cardDisplayName: cardDisplayName || null,
     type,
     priceCents,
     currency,
