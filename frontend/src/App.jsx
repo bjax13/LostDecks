@@ -11,6 +11,7 @@ import OffersPage from './pages/Offers';
 import AccountPage from './pages/Account';
 import { useAuth } from './contexts/AuthContext';
 import { useAuthModal } from './contexts/AuthModalContext.jsx';
+import EmulatorBanner from './components/Dev/EmulatorBanner';
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -26,6 +27,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <EmulatorBanner />
       <nav className="main-nav">
         <div className="main-nav__links">
           <Link to="/">Home</Link>
