@@ -35,7 +35,6 @@ This project supports running against local Firebase emulators (Auth + Firestore
 1. Start emulators from the repo root:
 
    ```bash
-   cd ..
    firebase emulators:start --only auth,firestore
    ```
 

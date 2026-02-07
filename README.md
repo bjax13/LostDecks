@@ -27,7 +27,6 @@ For local multi-user testing (recommended), run the emulators and point the fron
 
 ```bash
 # terminal 1
-cd ..
 firebase emulators:start --only auth,firestore
 
 # terminal 2
