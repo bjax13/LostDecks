@@ -38,17 +38,35 @@ service cloud.firestore {
         && request.resource.data.cardId is string
         && request.resource.data.cardId.size() > 0;
 
-      // Allow the creator to cancel their own OPEN listing.
-      allow update: if signedIn()
-        && resource.data.createdByUid == request.auth.uid
-        && resource.data.status == 'OPEN'
-        && request.resource.data.status == 'CANCELLED'
-        && request.resource.data.createdByUid == resource.data.createdByUid
-        && request.resource.data.type == resource.data.type
-        && request.resource.data.cardId == resource.data.cardId
-        && request.resource.data.priceCents == resource.data.priceCents
-        && request.resource.data.currency == resource.data.currency
-        && request.resource.data.quantity == resource.data.quantity;
+      // Allow updates for: cancel (creator) or accept (someone else)
+      allow update: if signedIn() && (
+        // Cancel: creator can cancel their own OPEN listing.
+        (
+          resource.data.createdByUid == request.auth.uid
+          && resource.data.status == 'OPEN'
+          && request.resource.data.status == 'CANCELLED'
+          && request.resource.data.createdByUid == resource.data.createdByUid
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.cardId == resource.data.cardId
+          && request.resource.data.priceCents == resource.data.priceCents
+          && request.resource.data.currency == resource.data.currency
+          && request.resource.data.quantity == resource.data.quantity
+        )
+        ||
+        // Accept: a non-creator can accept an OPEN listing.
+        (
+          resource.data.createdByUid != request.auth.uid
+          && resource.data.status == 'OPEN'
+          && request.resource.data.status == 'ACCEPTED'
+          && request.resource.data.createdByUid == resource.data.createdByUid
+          && request.resource.data.type == resource.data.type
+          && request.resource.data.cardId == resource.data.cardId
+          && request.resource.data.priceCents == resource.data.priceCents
+          && request.resource.data.currency == resource.data.currency
+          && request.resource.data.quantity == resource.data.quantity
+          && request.resource.data.acceptedByUid == request.auth.uid
+        )
+      );
 
       // Allow delete only for creator (optional; not used yet)
       allow delete: if signedIn() && resource.data.createdByUid == request.auth.uid;

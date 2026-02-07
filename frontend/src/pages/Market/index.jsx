@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import useOpenListings from './hooks/useOpenListings';
 import ListingRow from './components/ListingRow';
+import { acceptListing } from '../../lib/marketplace/listings';
 import './Market.css';
 
 function MarketPage() {
@@ -9,14 +10,22 @@ function MarketPage() {
   const { user } = useAuth();
   const { listings, loading, error } = useOpenListings();
 
-  const handleAccept = (listing) => {
+  const handleAccept = async (listing) => {
     if (!user) {
       navigate('/auth/login', { state: { from: { pathname: '/market' } } });
       return;
     }
 
-    // Accept flow (trades + atomic update) comes in the next PR.
-    alert('Accept flow coming next. For now you can create and view listings.');
+    try {
+      await acceptListing({
+        listingId: listing.id,
+        acceptedByUid: user.uid,
+        acceptedByDisplayName: user.displayName || user.email,
+      });
+    } catch (err) {
+      console.error('Failed to accept listing', err);
+      alert(err?.message || 'Failed to accept listing');
+    }
   };
 
   return (
@@ -38,6 +47,11 @@ function MarketPage() {
               listing={listing}
               onAccept={handleAccept}
               canAccept={Boolean(user) && listing.createdByUid !== user.uid}
+              canCancel={Boolean(user) && listing.createdByUid === user.uid}
+              onCancel={async (l) => {
+                // Cancel flow will be added next; for now keep UI minimal.
+                alert('Cancel coming next.');
+              }}
             />
           ))}
         </ul>

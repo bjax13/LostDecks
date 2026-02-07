@@ -1,11 +1,13 @@
 import {
   collection,
   addDoc,
+  doc,
   query,
   where,
   orderBy,
   serverTimestamp,
   onSnapshot,
+  runTransaction,
 } from 'firebase/firestore';
 
 import { db } from '../../firebaseClient';
@@ -20,6 +22,38 @@ export function subscribeOpenListings({ cardId } = {}, onNext, onError) {
   }
   const q = query(base, ...constraints);
   return onSnapshot(q, onNext, onError);
+}
+
+export async function acceptListing({ listingId, acceptedByUid, acceptedByDisplayName }) {
+  if (!listingId || !acceptedByUid) {
+    throw new Error('Missing required accept fields');
+  }
+
+  const listingRef = doc(db, LISTINGS_PATH, listingId);
+
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(listingRef);
+    if (!snap.exists()) {
+      throw new Error('Listing not found');
+    }
+    const listing = snap.data();
+    if (listing.status !== 'OPEN') {
+      throw new Error('Listing is not open');
+    }
+    if (listing.createdByUid === acceptedByUid) {
+      throw new Error('Cannot accept your own listing');
+    }
+
+    tx.update(listingRef, {
+      status: 'ACCEPTED',
+      acceptedByUid,
+      acceptedByDisplayName: acceptedByDisplayName || 'Anonymous',
+      acceptedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    return { id: snap.id, ...listing };
+  });
 }
 
 export async function createListing({

@@ -7,7 +7,7 @@ function formatMoney(priceCents, currency = 'USD') {
   }
 }
 
-function ListingRow({ listing, onAccept, canAccept }) {
+function ListingRow({ listing, onAccept, canAccept, canCancel, onCancel }) {
   const label = listing.type === 'BID' ? 'Bid' : 'Ask';
 
   return (
@@ -22,9 +22,15 @@ function ListingRow({ listing, onAccept, canAccept }) {
         </div>
       </div>
       <div className="market-listing__actions">
-        <button type="button" onClick={() => onAccept?.(listing)} disabled={!canAccept}>
-          Accept
-        </button>
+        {canCancel ? (
+          <button type="button" onClick={() => onCancel?.(listing)}>
+            Cancel
+          </button>
+        ) : (
+          <button type="button" onClick={() => onAccept?.(listing)} disabled={!canAccept}>
+            Accept
+          </button>
+        )}
       </div>
     </li>
   );
