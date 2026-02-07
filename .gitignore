@@ -23,5 +23,11 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*-debug.log
+firebase-debug.log
+firestore-debug.log
+
+# Local emulator env (Vite mode=emulator)
+frontend/.env.emulator.local
 
 .vs/slnx.sqlite

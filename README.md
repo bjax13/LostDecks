@@ -9,29 +9,35 @@ wireframe has been created to outline navigation and page structure.
 
 ### Frontend (Vite + React)
 
-The `frontend` directory contains a Vite-powered React application.
+The app lives in `frontend/`.
 
 ```bash
 cd frontend
 npm install
-npm run dev
+cp .env.example .env.local
+# fill in VITE_FIREBASE_* values
+npm run dev -- --host 127.0.0.1 --port 5174
 ```
 
-#### Firebase configuration
+### Firebase (Auth + Firestore)
 
-The frontend expects Firebase configuration via Vite environment variables.
-Copy `frontend/.env.example` to `frontend/.env` and fill in your Firebase
-project credentials:
+This repo includes Firestore security rules in `firestore.rules` and Firebase Emulator Suite configuration in `firebase.json`.
+
+For local multi-user testing (recommended), run the emulators and point the frontend at them:
 
 ```bash
+# terminal 1
+cd ..
+firebase emulators:start --only auth,firestore
+
+# terminal 2
 cd frontend
-cp .env.example .env
+npm run dev -- --mode emulator --host 127.0.0.1 --port 5174
 ```
 
-> Note: The app can still render without Firebase configured, but auth-related
-> features will be unavailable.
+Emulator UI:
+- http://127.0.0.1:4000/
 
-### Planning docs
+See `frontend/README.md` for details.
 
-See `docs/plan.md` for a high-level plan of the pages and features considered
-for the minimum viable product.
+See `docs/plan.md` for a high-level plan of the pages and features considered for the minimum viable product.
