@@ -72,10 +72,24 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.createdByUid == request.auth.uid;
     }
 
-    // Trades (not enabled yet; accept flow ships next)
+    // Trades (created when a listing is accepted)
     match /trades/{tradeId} {
       allow read: if signedIn() && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
-      allow create, update, delete: if false;
+
+      // MVP: allow buyer or seller to create a trade record.
+      // NOTE: This does not strictly enforce atomic coupling with the listing acceptance.
+      allow create: if signedIn()
+        && (request.auth.uid == request.resource.data.buyerUid || request.auth.uid == request.resource.data.sellerUid)
+        && request.resource.data.status == 'PENDING'
+        && request.resource.data.listingId is string
+        && request.resource.data.cardId is string
+        && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
+        && request.resource.data.currency == 'USD'
+        && request.resource.data.quantity == 1
+        && request.resource.data.priceCents is int
+        && request.resource.data.priceCents > 0;
+
+      allow update, delete: if false;
     }
 
     // Deny all other collections by default
