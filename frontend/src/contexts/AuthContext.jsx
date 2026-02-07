@@ -8,7 +8,7 @@ import {
   updateProfile,
   signInWithPopup,
 } from 'firebase/auth';
-import { auth, googleProvider, githubProvider } from '../lib/firebase';
+import { auth, googleProvider, githubProvider, hasFirebaseConfig } from '../lib/firebase';
 
 const AuthContext = createContext(null);
 
@@ -18,6 +18,12 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!auth) {
+      setUser(null);
+      setLoading(false);
+      return undefined;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
@@ -35,6 +41,14 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(
     async (email, password) => {
+      if (!auth) {
+        const err = new Error(
+          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-in.',
+        );
+        handleError(err);
+        throw err;
+      }
+
       clearError();
       try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -48,6 +62,14 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(
     async (email, password, profile = {}) => {
+      if (!auth) {
+        const err = new Error(
+          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable registration.',
+        );
+        handleError(err);
+        throw err;
+      }
+
       clearError();
       try {
         const credentials = await createUserWithEmailAndPassword(auth, email, password);
@@ -74,6 +96,14 @@ export function AuthProvider({ children }) {
 
   const resetPassword = useCallback(
     async (email) => {
+      if (!auth) {
+        const err = new Error(
+          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable password reset.',
+        );
+        handleError(err);
+        throw err;
+      }
+
       clearError();
       try {
         await sendPasswordResetEmail(auth, email);
@@ -87,6 +117,14 @@ export function AuthProvider({ children }) {
 
   const signInWithProvider = useCallback(
     async (provider) => {
+      if (!auth || !provider) {
+        const err = new Error(
+          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable social sign-in.',
+        );
+        handleError(err);
+        throw err;
+      }
+
       clearError();
       try {
         await signInWithPopup(auth, provider);
@@ -113,6 +151,7 @@ export function AuthProvider({ children }) {
       resetPassword,
       loginWithGoogle,
       loginWithGithub,
+      hasFirebaseConfig,
     }),
     [user, loading, error, clearError, login, register, logout, resetPassword, loginWithGoogle, loginWithGithub],
   );
