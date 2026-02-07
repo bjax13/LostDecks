@@ -101,8 +101,17 @@ function MarketPage() {
         </p>
       )}
 
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+        <button type="button" onClick={() => navigate('/cards')}>
+          Create listing
+        </button>
+        <button type="button" onClick={() => navigate('/cards')} style={{ opacity: 0.8 }}>
+          Browse cards
+        </button>
+      </div>
+
       <p className="muted" style={{ marginTop: '0.75rem' }}>
-        Tip: create listings from a specific card’s page (Cards → select a card).
+        Listings are created from a specific card’s page (Cards → select a card).
       </p>
     </section>
   );
