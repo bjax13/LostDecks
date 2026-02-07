@@ -32,6 +32,9 @@ cd ..
 #   ./scripts/kill-firebase-emulators.sh
 ./scripts/start-emulators.sh botcards-9a7d9
 
+# Optional: reset emulator state (clears Auth users + Firestore docs)
+# ./scripts/reset-emulators.sh botcards-9a7d9
+
 # terminal 2
 cd frontend
 npm run dev -- --mode emulator --host 127.0.0.1 --port 5174

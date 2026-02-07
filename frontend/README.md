@@ -49,6 +49,9 @@ This project supports running against local Firebase emulators (Auth + Firestore
    # If you see "port taken" errors, stop the previous emulator process or run:
    #   ./scripts/kill-firebase-emulators.sh
    ./scripts/start-emulators.sh botcards-9a7d9
+
+   # Optional: reset emulator state (clears Auth users + Firestore docs)
+   # ./scripts/reset-emulators.sh botcards-9a7d9
    ```
 
 2. Start the frontend in emulator mode:
