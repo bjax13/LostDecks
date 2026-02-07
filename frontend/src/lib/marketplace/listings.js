@@ -9,8 +9,9 @@ import {
   onSnapshot,
   runTransaction,
 } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
-import { db } from '../../firebaseClient';
+import { db, functions } from '../../firebaseClient';
 
 export const LISTINGS_PATH = 'listings';
 
@@ -53,36 +54,14 @@ export async function cancelListing({ listingId, cancelledByUid }) {
   });
 }
 
-export async function acceptListing({ listingId, acceptedByUid, acceptedByDisplayName }) {
-  if (!listingId || !acceptedByUid) {
-    throw new Error('Missing required accept fields');
+export async function acceptListing({ listingId }) {
+  if (!listingId) {
+    throw new Error('listingId is required');
   }
 
-  const listingRef = doc(db, LISTINGS_PATH, listingId);
-
-  return runTransaction(db, async (tx) => {
-    const snap = await tx.get(listingRef);
-    if (!snap.exists()) {
-      throw new Error('Listing not found');
-    }
-    const listing = snap.data();
-    if (listing.status !== 'OPEN') {
-      throw new Error('Listing is not open');
-    }
-    if (listing.createdByUid === acceptedByUid) {
-      throw new Error('Cannot accept your own listing');
-    }
-
-    tx.update(listingRef, {
-      status: 'ACCEPTED',
-      acceptedByUid,
-      acceptedByDisplayName: acceptedByDisplayName || 'Anonymous',
-      acceptedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    return { id: snap.id, ...listing };
-  });
+  const call = httpsCallable(functions, 'acceptListing');
+  const res = await call({ listingId });
+  return res.data;
 }
 
 export async function createListing({

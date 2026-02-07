@@ -38,35 +38,20 @@ service cloud.firestore {
         && request.resource.data.cardId is string
         && request.resource.data.cardId.size() > 0;
 
-      // Allow updates for: cancel (creator) or accept (someone else)
-      allow update: if signedIn() && (
-        // Cancel: creator can cancel their own OPEN listing.
-        (
-          resource.data.createdByUid == request.auth.uid
-          && resource.data.status == 'OPEN'
-          && request.resource.data.status == 'CANCELLED'
-          && request.resource.data.createdByUid == resource.data.createdByUid
-          && request.resource.data.type == resource.data.type
-          && request.resource.data.cardId == resource.data.cardId
-          && request.resource.data.priceCents == resource.data.priceCents
-          && request.resource.data.currency == resource.data.currency
-          && request.resource.data.quantity == resource.data.quantity
-        )
-        ||
-        // Accept: a non-creator can accept an OPEN listing.
-        (
-          resource.data.createdByUid != request.auth.uid
-          && resource.data.status == 'OPEN'
-          && request.resource.data.status == 'ACCEPTED'
-          && request.resource.data.createdByUid == resource.data.createdByUid
-          && request.resource.data.type == resource.data.type
-          && request.resource.data.cardId == resource.data.cardId
-          && request.resource.data.priceCents == resource.data.priceCents
-          && request.resource.data.currency == resource.data.currency
-          && request.resource.data.quantity == resource.data.quantity
-          && request.resource.data.acceptedByUid == request.auth.uid
-        )
-      );
+      // Allow updates for: cancel (creator)
+      allow update: if signedIn()
+        && resource.data.createdByUid == request.auth.uid
+        && resource.data.status == 'OPEN'
+        && request.resource.data.status == 'CANCELLED'
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && request.resource.data.type == resource.data.type
+        && request.resource.data.cardId == resource.data.cardId
+        && request.resource.data.priceCents == resource.data.priceCents
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.quantity == resource.data.quantity;
+
+      // Note: accepting listings is handled via a callable Cloud Function (admin privileges)
+      // so that listing ACCEPT + trade creation happen atomically.
 
       // Allow delete only for creator (optional; not used yet)
       allow delete: if signedIn() && resource.data.createdByUid == request.auth.uid;
@@ -76,22 +61,8 @@ service cloud.firestore {
     match /trades/{tradeId} {
       allow read: if signedIn() && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
 
-      // MVP: allow buyer or seller to create a trade record.
-      // NOTE: This does not strictly enforce atomic coupling with the listing acceptance.
-      allow create: if signedIn()
-        && (request.auth.uid == request.resource.data.buyerUid || request.auth.uid == request.resource.data.sellerUid)
-        && request.resource.data.status == 'PENDING'
-        && request.resource.data.listingId is string
-        && request.resource.data.cardId is string
-        && (!('cardDisplayName' in request.resource.data) || request.resource.data.cardDisplayName is string || request.resource.data.cardDisplayName == null)
-        && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
-        && request.resource.data.currency == 'USD'
-        && request.resource.data.quantity == 1
-        && request.resource.data.priceCents is int
-        && request.resource.data.priceCents > 0
-        && request.resource.data.participants is list
-        && request.resource.data.participants.size() == 2
-        && request.resource.data.participants.hasAll([request.resource.data.buyerUid, request.resource.data.sellerUid]);
+      // Trades are created by a callable Cloud Function so clients cannot spoof them.
+      allow create: if false;
 
       allow update, delete: if false;
     }

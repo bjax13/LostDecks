@@ -3,7 +3,6 @@ import { useAuth } from '../../../contexts/AuthContext';
 import useOpenListings from '../../Market/hooks/useOpenListings';
 import ListingRow from '../../Market/components/ListingRow';
 import { acceptListing, cancelListing } from '../../../lib/marketplace/listings';
-import { createTrade } from '../../../lib/marketplace/trades';
 import { getCardRecord } from '../../../data/cards';
 
 export default function CardListingsPanel({ cardId }) {
@@ -32,38 +31,7 @@ export default function CardListingsPanel({ cardId }) {
     }
 
     try {
-      await acceptListing({
-        listingId: listing.id,
-        acceptedByUid: user.uid,
-        acceptedByDisplayName: user.displayName || user.email,
-      });
-
-      const listingType = listing.type;
-      const creatorUid = listing.createdByUid;
-      const creatorName = listing.createdByDisplayName || 'Anonymous';
-      const acceptorUid = user.uid;
-      const acceptorName = user.displayName || user.email;
-
-      const buyerUid = listingType === 'ASK' ? acceptorUid : creatorUid;
-      const buyerDisplayName = listingType === 'ASK' ? acceptorName : creatorName;
-      const sellerUid = listingType === 'ASK' ? creatorUid : acceptorUid;
-      const sellerDisplayName = listingType === 'ASK' ? creatorName : acceptorName;
-
-      const card = getCardRecord(listing.cardId);
-
-      await createTrade({
-        listingId: listing.id,
-        cardId: listing.cardId,
-        cardDisplayName: card?.displayName,
-        type: listingType,
-        priceCents: listing.priceCents,
-        currency: listing.currency,
-        quantity: listing.quantity || 1,
-        buyerUid,
-        buyerDisplayName,
-        sellerUid,
-        sellerDisplayName,
-      });
+      await acceptListing({ listingId: listing.id });
     } catch (err) {
       console.error('Failed to accept listing', err);
       alert(err?.message || 'Failed to accept listing');

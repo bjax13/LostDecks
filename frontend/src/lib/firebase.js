@@ -8,6 +8,7 @@ import {
   connectAuthEmulator,
 } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,6 +29,7 @@ if (Object.values(firebaseConfig).some((value) => typeof value === 'undefined'))
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
 // --- Local Emulator support (Auth + Firestore) ---
 // Enable via VITE_USE_EMULATORS=true in .env.local (or a dedicated .env.emulator).
@@ -51,6 +53,14 @@ if (useEmulators) {
   } catch (err) {
     console.debug('Firestore emulator connection skipped', err);
   }
+
+  const fnHost = import.meta.env.VITE_FUNCTIONS_EMULATOR_HOST || '127.0.0.1';
+  const fnPort = Number(import.meta.env.VITE_FUNCTIONS_EMULATOR_PORT || 5001);
+  try {
+    connectFunctionsEmulator(functions, fnHost, fnPort);
+  } catch (err) {
+    console.debug('Functions emulator connection skipped', err);
+  }
 }
 
 setPersistence(auth, browserLocalPersistence).catch((error) => {
@@ -63,4 +73,4 @@ const githubProvider = new GithubAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 githubProvider.setCustomParameters({ allow_signup: 'false' });
 
-export { app, auth, db, googleProvider, githubProvider };
+export { app, auth, db, functions, googleProvider, githubProvider };
