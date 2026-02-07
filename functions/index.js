@@ -91,10 +91,55 @@ exports.acceptListing = onCall(async (request) => {
       participants: [buyerUid, sellerUid],
       status: 'PENDING',
       createdAt: now,
+      updatedAt: now,
     });
 
     return { tradeId: tradeRef.id };
   });
 
   return { ok: true, ...result };
+});
+
+exports.updateTradeStatus = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Must be signed in');
+  }
+
+  const { tradeId, status } = request.data || {};
+  if (typeof tradeId !== 'string' || tradeId.trim().length === 0) {
+    throw new HttpsError('invalid-argument', 'tradeId is required');
+  }
+
+  const allowed = new Set(['COMPLETED', 'CANCELLED']);
+  if (typeof status !== 'string' || !allowed.has(status)) {
+    throw new HttpsError('invalid-argument', 'status must be COMPLETED or CANCELLED');
+  }
+
+  const tradeRef = db.collection('trades').doc(tradeId);
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(tradeRef);
+    if (!snap.exists) {
+      throw new HttpsError('not-found', 'Trade not found');
+    }
+
+    const trade = snap.data();
+
+    const participants = Array.isArray(trade.participants) ? trade.participants : [];
+    if (!participants.includes(auth.uid)) {
+      throw new HttpsError('permission-denied', 'Only trade participants can update status');
+    }
+
+    if (trade.status !== 'PENDING') {
+      throw new HttpsError('failed-precondition', 'Trade is not pending');
+    }
+
+    tx.update(tradeRef, {
+      status,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+
+  return { ok: true };
 });
