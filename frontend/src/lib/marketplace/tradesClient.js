@@ -1,5 +1,5 @@
 import { httpsCallable } from 'firebase/functions';
-import { functions } from '../../firebaseClient';
+import { functions } from '../firebase';
 
 export async function updateTradeStatus({ tradeId, status }) {
   if (!tradeId) throw new Error('tradeId is required');

@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 
-import { db, functions } from '../../firebaseClient';
+import { db, functions } from '../firebase';
 
 export const LISTINGS_PATH = 'listings';
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
-import { db } from '../../../firebaseClient';
+import { db } from '../../../lib/firebase';
 
 export default function useMyTrades(uid) {
   const [trades, setTrades] = useState([]);
