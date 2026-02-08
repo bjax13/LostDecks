@@ -8,6 +8,9 @@ import FinishPills from '../Cards/components/FinishPills';
 import BinderInfo from '../Cards/components/BinderInfo';
 import AddToCollectionButton from '../Cards/components/AddToCollectionButton';
 import { categoryLabels } from '../Cards/constants';
+import CreateListingForm from './components/CreateListingForm';
+import CardListingsPanel from './components/CardListingsPanel';
+import '../Market/Market.css';
 import './CardDetail.css';
 
 function normalizeQuantity(entry) {
@@ -230,13 +233,14 @@ export default function CardDetail() {
         )}
 
         <section className="card-detail__offers">
-          <h2 className="card-detail__section-title">Make Offer</h2>
-          <div className="card-detail__offers-placeholder">
-            <p>Offer functionality coming soon</p>
-            <button type="button" className="card-detail__offers-button" disabled>
-              Make Offer
-            </button>
-          </div>
+          <h2 className="card-detail__section-title">Market</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Create a buy (bid) or sell (ask) listing for this card.
+          </p>
+          <CreateListingForm cardId={cardId} />
+
+          <h3 style={{ marginTop: '1.5rem' }}>Open listings</h3>
+          <CardListingsPanel cardId={cardId} />
         </section>
       </div>
     </div>

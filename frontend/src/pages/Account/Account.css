@@ -142,14 +142,15 @@
   gap: 0.75rem;
 }
 
-.form-actions button {
+/* Base button styling for the account page (used by Trades + forms) */
+.account-page button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.75rem;
+  padding: 0.65rem 1.25rem;
   border-radius: 999px;
-  border: none;
-  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  border: 1px solid rgba(201, 182, 255, 0.7);
+  background: rgba(96, 66, 178, 0.45);
   color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -158,14 +159,26 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.form-actions button:hover {
+.account-page button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.4);
+  box-shadow: 0 15px 30px rgba(138, 43, 226, 0.25);
 }
 
-.form-actions button:focus-visible {
+.account-page button:focus-visible {
   outline: 2px solid rgba(208, 187, 255, 0.9);
   outline-offset: 3px;
+}
+
+.account-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Keep the "Save contact info" button gradient */
+.form-actions button {
+  border: none;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  padding: 0.75rem 1.75rem;
 }
 
 .form-feedback {
