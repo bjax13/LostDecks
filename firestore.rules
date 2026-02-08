@@ -46,7 +46,9 @@ service cloud.firestore {
       // Note: accepting listings is handled via a callable Cloud Function (admin privileges)
       // so that listing ACCEPT + trade creation happen atomically.
 
-      allow delete: if signedIn() && resource.data.createdByUid == request.auth.uid;
+      allow delete: if signedIn()
+        && resource.data.createdByUid == request.auth.uid
+        && resource.data.status == 'OPEN';
     }
 
     // Trades are created by a callable Cloud Function so clients cannot spoof them.
