@@ -7,7 +7,7 @@ import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import CollectionPage from './pages/Collection';
-import OffersPage from './pages/Offers';
+import MarketPage from './pages/Market';
 import AccountPage from './pages/Account';
 import { useAuth } from './contexts/AuthContext';
 import { useAuthModal } from './contexts/AuthModalContext.jsx';
@@ -33,7 +33,7 @@ function App() {
           <Link to="/">Home</Link>
           <Link to="/cards">Cards</Link>
           <Link to="/collections">Collection</Link>
-          <Link to="/offers">Offers</Link>
+          <Link to="/market">Market</Link>
           <Link to="/account">Account</Link>
         </div>
         <div className="main-nav__auth">
@@ -63,7 +63,7 @@ function App() {
         <Route path="/cards/:cardId" element={<CardDetail />} />
         <Route path="/cards/:cardId/:skuId" element={<CardDetail />} />
         <Route path="/collections" element={<CollectionPage />} />
-        <Route path="/offers" element={<OffersPage />} />
+        <Route path="/market" element={<MarketPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />

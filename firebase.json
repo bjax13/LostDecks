@@ -1,6 +1,10 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "source": "functions"
   },
   "emulators": {
     "firestore": {
@@ -8,6 +12,9 @@
     },
     "auth": {
       "port": 9099
+    },
+    "functions": {
+      "port": 5001
     },
     "ui": {
       "enabled": true,
