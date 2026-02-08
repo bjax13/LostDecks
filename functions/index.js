@@ -26,8 +26,7 @@ exports.acceptListing = onCall(async (request) => {
   }
 
   const acceptedByUid = auth.uid;
-  const acceptedByDisplayName =
-    (auth.token && (auth.token.name || auth.token.email)) || request.data?.acceptedByDisplayName || 'Anonymous';
+  const acceptedByDisplayName = (auth.token && (auth.token.name || auth.token.email)) || auth.uid;
 
   const listingRef = db.collection('listings').doc(listingId);
   const tradeRef = db.collection('trades').doc();
