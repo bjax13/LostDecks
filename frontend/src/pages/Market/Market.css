@@ -143,6 +143,20 @@
   font-size: 0.9rem;
 }
 
+.market-listing__hint {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.1rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 182, 255, 0.4);
+  background: rgba(96, 66, 178, 0.25);
+  color: rgba(233, 226, 255, 0.95);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
 .market-listing__actions {
   display: flex;
 }

@@ -64,6 +64,25 @@ export async function acceptListing({ listingId }) {
   return res.data;
 }
 
+export async function updateListing({ listingId, type, cardId, priceCents }) {
+  if (!listingId) {
+    throw new Error('listingId is required');
+  }
+  if (type !== 'BID' && type !== 'ASK') {
+    throw new Error('type must be BID or ASK');
+  }
+  if (!cardId) {
+    throw new Error('cardId is required');
+  }
+  if (typeof priceCents !== 'number' || !Number.isFinite(priceCents) || priceCents <= 0) {
+    throw new Error('priceCents must be a positive number');
+  }
+
+  const call = httpsCallable(functions, 'updateListing');
+  const res = await call({ listingId, type, cardId, priceCents });
+  return res.data;
+}
+
 export async function createListing({
   type,
   cardId,

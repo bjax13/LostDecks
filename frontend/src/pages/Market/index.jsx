@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import useOpenListings from './hooks/useOpenListings';
 import ListingRow from './components/ListingRow';
-import { acceptListing, cancelListing, createListing } from '../../lib/marketplace/listings';
+import { acceptListing, createListing, updateListing } from '../../lib/marketplace/listings';
 import { cardsIndex, getCardRecord } from '../../data/cards';
+import { useUserCollection } from '../Collection/hooks/useUserCollection';
 import './Market.css';
 
 function dollarsToCents(value) {
@@ -28,13 +29,26 @@ function resolveCardIdFromInput(value) {
   return caseInsensitive?.id || '';
 }
 
+function normalizeCollectionQuantity(entry) {
+  const quantityFields = [entry?.quantity, entry?.count, entry?.copies, entry?.total];
+  for (const candidate of quantityFields) {
+    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+      return Math.max(0, Math.floor(candidate));
+    }
+  }
+  // Unknown quantity should not be interpreted as ownership count.
+  return 0;
+}
+
 function MarketPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { listings, loading, error } = useOpenListings();
+  const { entries: collectionEntries, loading: collectionLoading } = useUserCollection(user?.uid);
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [queryText, setQueryText] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingListing, setEditingListing] = useState(null);
   const [createSearchText, setCreateSearchText] = useState('');
   const [selectedCreateCardId, setSelectedCreateCardId] = useState('');
   const [createType, setCreateType] = useState('BID');
@@ -66,6 +80,18 @@ function MarketPage() {
   }, [queryText]);
 
   const emptyMessage = listings.length === 0 ? 'No open listings yet.' : 'No open listings found.';
+  const collectionCountsByCardId = useMemo(() => {
+    const counts = new Map();
+    collectionEntries.forEach((entry) => {
+      const cardId = String(entry?.cardId || '').trim().toUpperCase();
+      if (!cardId) return;
+      const quantity = normalizeCollectionQuantity(entry);
+      if (quantity <= 0) return;
+      const nextCount = (counts.get(cardId) || 0) + quantity;
+      counts.set(cardId, nextCount);
+    });
+    return counts;
+  }, [collectionEntries]);
   const selectableCards = useMemo(
     () =>
       [...cardsIndex].sort((a, b) => {
@@ -102,6 +128,7 @@ function MarketPage() {
     const handleEsc = (event) => {
       if (event.key === 'Escape') {
         setIsCreateModalOpen(false);
+        setEditingListing(null);
       }
     };
 
@@ -135,20 +162,6 @@ function MarketPage() {
     });
   }, [shouldShowCardResults, createResults]);
 
-  const handleCancel = async (listing) => {
-    if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: '/market' } } });
-      return;
-    }
-
-    try {
-      await cancelListing({ listingId: listing.id, cancelledByUid: user.uid });
-    } catch (err) {
-      console.error('Failed to cancel listing', err);
-      alert(err?.message || 'Failed to cancel listing');
-    }
-  };
-
   const handleAccept = async (listing) => {
     if (!user) {
       navigate('/auth/login', { state: { from: { pathname: '/market' } } });
@@ -163,18 +176,33 @@ function MarketPage() {
     }
   };
 
-  const openCreateModal = () => {
-    const initialCard = searchedCard?.id || '';
-    setSelectedCreateCardId(initialCard);
-    setCreateSearchText(initialCard);
-    setCreateType('BID');
-    setCreatePrice('');
+  const openCreateModal = ({ cardId = '', type = 'BID', price = '', listingToEdit = null } = {}) => {
+    setSelectedCreateCardId(cardId);
+    setCreateSearchText(cardId);
+    setCreateType(type);
+    setCreatePrice(price);
+    setEditingListing(listingToEdit);
     setCreateError(null);
     setCreateSuccess('');
     setIsCardPickerOpen(false);
     setActiveResultIndex(-1);
     setSuppressNextCardFocusOpen(true);
     setIsCreateModalOpen(true);
+  };
+
+  const handleEdit = (listing) => {
+    if (!user) {
+      navigate('/auth/login', { state: { from: { pathname: '/market' } } });
+      return;
+    }
+
+    const price = Number.isFinite(listing.priceCents) ? (listing.priceCents / 100).toFixed(2) : '';
+    openCreateModal({
+      cardId: listing.cardId,
+      type: listing.type,
+      price,
+      listingToEdit: listing,
+    });
   };
 
   const selectCreateCard = (card) => {
@@ -243,20 +271,38 @@ function MarketPage() {
 
     setCreateSubmitting(true);
     try {
-      await createListing({
-        type: createType,
-        cardId: cardIdToCreate,
-        priceCents,
-        currency: 'USD',
-        quantity: 1,
-        createdByUid: user.uid,
-        createdByDisplayName: user.displayName || user.email,
-      });
-      setCreatePrice('');
-      setCreateSuccess('Listing created.');
+      if (editingListing) {
+        await updateListing({
+          listingId: editingListing.id,
+          type: createType,
+          cardId: cardIdToCreate,
+          priceCents,
+        });
+      } else {
+        await createListing({
+          type: createType,
+          cardId: cardIdToCreate,
+          priceCents,
+          currency: 'USD',
+          quantity: 1,
+          createdByUid: user.uid,
+          createdByDisplayName: user.displayName || user.email,
+        });
+      }
+      setCreateSuccess(editingListing ? 'Listing updated.' : 'Listing created.');
+      if (editingListing) {
+        setIsCreateModalOpen(false);
+        setEditingListing(null);
+      } else {
+        setCreatePrice('');
+      }
     } catch (err) {
-      console.error('Failed to create listing', err);
-      setCreateError('Failed to create listing.');
+      if (editingListing) {
+        console.error('Failed to update listing', err);
+      } else {
+        console.error('Failed to create listing', err);
+      }
+      setCreateError(editingListing ? 'Failed to update listing.' : 'Failed to create listing.');
     } finally {
       setCreateSubmitting(false);
     }
@@ -270,7 +316,11 @@ function MarketPage() {
           <p>Browse active buy (bid) and sell (ask) listings for Lost Tales cards.</p>
         </div>
         <div className="market-header__actions">
-          <button type="button" className="market-pill-button" onClick={openCreateModal}>
+          <button
+            type="button"
+            className="market-pill-button"
+            onClick={() => openCreateModal({ cardId: searchedCard?.id || '' })}
+          >
             Create listing
           </button>
           <button type="button" className="market-pill-button" onClick={() => navigate('/cards')}>
@@ -307,7 +357,11 @@ function MarketPage() {
             <strong>{searchedCard.displayName}</strong>
             <div className="muted">Matched card id: {searchedCard.id}</div>
           </div>
-          <button type="button" className="market-pill-button" onClick={openCreateModal}>
+          <button
+            type="button"
+            className="market-pill-button"
+            onClick={() => openCreateModal({ cardId: searchedCard.id })}
+          >
             Create listing for this card
           </button>
         </div>
@@ -324,19 +378,44 @@ function MarketPage() {
             const cardLabel = card?.displayName || undefined;
             const isOwnListing = Boolean(user) && listing.createdByUid === user.uid;
             const canAccept = !isOwnListing;
-            const acceptLabel = !user ? 'Sign in to accept' : isOwnListing ? 'Your listing' : 'Accept';
-            const acceptDisabledReason = isOwnListing ? 'You cannot accept your own listing.' : undefined;
+            const normalizedListingCardId = String(listing.cardId || '').trim().toUpperCase();
+            const ownedCount = user ? collectionCountsByCardId.get(normalizedListingCardId) || 0 : 0;
+            const creatorLabel = isOwnListing ? 'You' : listing.createdByDisplayName || 'Anonymous';
+            const acceptLabel = !user ? 'Sign in to accept' : 'Accept';
+            const acceptDisabledReason = undefined;
+            let collectionHint = '';
+
+            if (isOwnListing) {
+              collectionHint = 'Submitted by you';
+            } else if (user) {
+              if (collectionLoading) {
+                collectionHint = 'Checking your collection…';
+              } else if (listing.type === 'BID') {
+                collectionHint =
+                  ownedCount > 0
+                    ? `You own ${ownedCount}. You can likely fulfill this bid.`
+                    : 'You do not own this card yet.';
+              } else {
+                collectionHint =
+                  ownedCount > 0
+                    ? `You already own ${ownedCount}.`
+                    : 'Not in your collection yet.';
+              }
+            }
+
             return (
               <ListingRow
                 key={listing.id}
                 listing={listing}
                 cardLabel={cardLabel}
+                creatorLabel={creatorLabel}
+                collectionHint={collectionHint}
                 onAccept={handleAccept}
                 canAccept={canAccept}
                 acceptLabel={acceptLabel}
                 acceptDisabledReason={acceptDisabledReason}
-                canCancel={isOwnListing}
-                onCancel={handleCancel}
+                isOwnListing={isOwnListing}
+                onEdit={handleEdit}
               />
             );
           })}
@@ -350,25 +429,38 @@ function MarketPage() {
       )}
 
       {isCreateModalOpen ? (
-        <div className="market-create-modal__backdrop" onClick={() => setIsCreateModalOpen(false)}>
+        <div
+          className="market-create-modal__backdrop"
+          onClick={() => {
+            setIsCreateModalOpen(false);
+            setEditingListing(null);
+          }}
+        >
           <div
             className="market-create-modal"
             role="dialog"
             aria-modal="true"
-            aria-label="Create listing for a card"
+            aria-label={editingListing ? 'Edit listing' : 'Create listing for a card'}
             onClick={(event) => event.stopPropagation()}
           >
             <div className="market-create-modal__header">
-              <h2>Create listing</h2>
+              <h2>{editingListing ? 'Edit listing' : 'Create listing'}</h2>
               <button
                 type="button"
                 className="market-create-modal__close"
-                onClick={() => setIsCreateModalOpen(false)}
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setEditingListing(null);
+                }}
               >
                 ×
               </button>
             </div>
-            <p className="muted">Pick a card, set type and price, then create your listing here.</p>
+            <p className="muted">
+              {editingListing
+                ? 'Adjust card, type, or price to replace your existing listing.'
+                : 'Pick a card, set type and price, then create your listing here.'}
+            </p>
 
             <form className="market-create-form" onSubmit={handleCreateListingSubmit}>
               <div className="market-card-picker" ref={cardPickerRef}>
@@ -469,13 +561,24 @@ function MarketPage() {
                 <button
                   type="button"
                   className="market-pill-button"
-                  onClick={() => setIsCreateModalOpen(false)}
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setEditingListing(null);
+                  }}
                   disabled={createSubmitting}
                 >
                   Cancel
                 </button>
                 <button type="submit" className="market-pill-button" disabled={createSubmitting}>
-                  {user ? (createSubmitting ? 'Creating…' : 'Create listing') : 'Sign in to create listing'}
+                  {user
+                    ? createSubmitting
+                      ? editingListing
+                        ? 'Saving…'
+                        : 'Creating…'
+                      : editingListing
+                        ? 'Save listing'
+                        : 'Create listing'
+                    : 'Sign in to create listing'}
                 </button>
               </div>
             </form>

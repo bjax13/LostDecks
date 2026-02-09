@@ -11,9 +11,11 @@ function ListingRow({
   listing,
   onAccept,
   canAccept,
-  canCancel,
-  onCancel,
+  isOwnListing,
+  onEdit,
   cardLabel,
+  creatorLabel,
+  collectionHint,
   acceptLabel = 'Accept',
   acceptDisabledReason,
 }) {
@@ -29,13 +31,14 @@ function ListingRow({
           <div className="market-listing__card">{cardLabel || listing.cardId}</div>
         </div>
         <div className="market-listing__meta">
-          <span className="muted">By:</span> {listing.createdByDisplayName || 'Anonymous'}
+          <span className="muted">By:</span> {creatorLabel || listing.createdByDisplayName || 'Anonymous'}
         </div>
+        {collectionHint ? <div className="market-listing__hint">{collectionHint}</div> : null}
       </div>
       <div className="market-listing__actions">
-        {canCancel ? (
-          <button type="button" onClick={() => onCancel?.(listing)}>
-            Cancel
+        {isOwnListing ? (
+          <button type="button" onClick={() => onEdit?.(listing)}>
+            Edit
           </button>
         ) : (
           <button

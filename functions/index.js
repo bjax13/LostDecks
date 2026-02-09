@@ -99,6 +99,55 @@ exports.acceptListing = onCall(async (request) => {
   return { ok: true, ...result };
 });
 
+exports.updateListing = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Must be signed in to update a listing');
+  }
+
+  const { listingId, type, cardId, priceCents } = request.data || {};
+  if (typeof listingId !== 'string' || listingId.trim().length === 0) {
+    throw new HttpsError('invalid-argument', 'listingId is required');
+  }
+  if (type !== 'BID' && type !== 'ASK') {
+    throw new HttpsError('invalid-argument', 'type must be BID or ASK');
+  }
+  if (typeof cardId !== 'string' || cardId.trim().length === 0) {
+    throw new HttpsError('invalid-argument', 'cardId is required');
+  }
+  asInt(priceCents, 'priceCents');
+  if (priceCents <= 0) {
+    throw new HttpsError('invalid-argument', 'priceCents must be greater than zero');
+  }
+
+  const listingRef = db.collection('listings').doc(listingId);
+  const updated = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(listingRef);
+    if (!snap.exists) {
+      throw new HttpsError('not-found', 'Listing not found');
+    }
+
+    const listing = snap.data();
+    if (listing.status !== 'OPEN') {
+      throw new HttpsError('failed-precondition', 'Listing is not open');
+    }
+    if (listing.createdByUid !== auth.uid) {
+      throw new HttpsError('permission-denied', 'Only the creator can update this listing');
+    }
+
+    tx.update(listingRef, {
+      type,
+      cardId: cardId.trim(),
+      priceCents,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return true;
+  });
+
+  return { ok: updated };
+});
+
 exports.updateTradeStatus = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) {
