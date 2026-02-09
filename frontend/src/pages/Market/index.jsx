@@ -321,15 +321,21 @@ function MarketPage() {
         <ul className="market-list">
           {filteredListings.map((listing) => {
             const card = getCardRecord(listing.cardId);
-            const cardLabel = card?.displayName ? `${card.displayName} (${listing.cardId})` : undefined;
+            const cardLabel = card?.displayName || undefined;
+            const isOwnListing = Boolean(user) && listing.createdByUid === user.uid;
+            const canAccept = !isOwnListing;
+            const acceptLabel = !user ? 'Sign in to accept' : isOwnListing ? 'Your listing' : 'Accept';
+            const acceptDisabledReason = isOwnListing ? 'You cannot accept your own listing.' : undefined;
             return (
               <ListingRow
                 key={listing.id}
                 listing={listing}
                 cardLabel={cardLabel}
                 onAccept={handleAccept}
-                canAccept={Boolean(user) && listing.createdByUid !== user.uid}
-                canCancel={Boolean(user) && listing.createdByUid === user.uid}
+                canAccept={canAccept}
+                acceptLabel={acceptLabel}
+                acceptDisabledReason={acceptDisabledReason}
+                canCancel={isOwnListing}
                 onCancel={handleCancel}
               />
             );

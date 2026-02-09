@@ -28,7 +28,8 @@
 .market-pill-button:disabled,
 .market-listing__actions button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
+  filter: grayscale(0.35);
 }
 
 .market-controls {
@@ -87,6 +88,16 @@
   background: rgba(24, 18, 45, 0.75);
 }
 
+.market-listing--bid {
+  border-left: 5px solid rgba(52, 211, 153, 0.85);
+  background: linear-gradient(90deg, rgba(8, 48, 39, 0.45), rgba(24, 18, 45, 0.78));
+}
+
+.market-listing--ask {
+  border-left: 5px solid rgba(96, 165, 250, 0.9);
+  background: linear-gradient(90deg, rgba(20, 38, 74, 0.45), rgba(24, 18, 45, 0.78));
+}
+
 .market-listing__main {
   display: grid;
   gap: 0.25rem;
@@ -100,7 +111,28 @@
   color: rgba(206, 193, 255, 0.9);
 }
 
+.market-listing--bid .market-listing__type {
+  color: rgba(110, 231, 183, 0.95);
+}
+
+.market-listing--ask .market-listing__type {
+  color: rgba(147, 197, 253, 0.98);
+}
+
+.market-listing__headline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .market-listing__price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.market-listing__card {
   font-size: 1.1rem;
   font-weight: 700;
   color: #ffffff;
@@ -113,6 +145,11 @@
 
 .market-listing__actions {
   display: flex;
+}
+
+.market-listing__actions button:not(:disabled):hover {
+  border-color: rgba(201, 182, 255, 0.95);
+  background: rgba(96, 66, 178, 0.7);
 }
 
 .market-create-modal__backdrop {
