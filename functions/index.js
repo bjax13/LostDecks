@@ -1,6 +1,12 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 
+const {
+  assertListingType,
+  assertPriceCents,
+  assertUsdCurrency,
+} = require('./lib/marketplaceValidation');
+
 if (!admin.apps.length) {
   admin.initializeApp();
 }
@@ -45,17 +51,11 @@ exports.acceptListing = onCall(async (request) => {
       throw new HttpsError('failed-precondition', 'Cannot accept your own listing');
     }
 
-    if (listing.currency !== 'USD') {
-      throw new HttpsError('failed-precondition', 'Unsupported currency');
-    }
-
-    // MVP constraints (keep things simple + consistent)
-    asInt(listing.priceCents, 'priceCents');
+    assertUsdCurrency(listing.currency);
+    assertPriceCents(listing.priceCents);
 
     const listingType = listing.type;
-    if (listingType !== 'BID' && listingType !== 'ASK') {
-      throw new HttpsError('failed-precondition', 'Invalid listing type');
-    }
+    assertListingType(listingType);
 
     const creatorUid = listing.createdByUid;
     const creatorName = listing.createdByDisplayName || 'Anonymous';
