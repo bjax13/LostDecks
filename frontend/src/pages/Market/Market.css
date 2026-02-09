@@ -1,3 +1,36 @@
+.market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.market-header__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.market-pill-button,
+.market-listing__actions button {
+  border: 1px solid rgba(201, 182, 255, 0.7);
+  background: rgba(96, 66, 178, 0.45);
+  color: #ffffff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.market-pill-button:disabled,
+.market-listing__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .market-controls {
   margin-top: 1rem;
   display: grid;
@@ -20,21 +53,6 @@
   color: #ffffff;
   padding: 0.6rem 0.75rem;
   border-radius: 12px;
-}
-
-@media (max-width: 520px) {
-  .market-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .market-listing {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .market-listing__actions {
-    width: 100%;
-  }
 }
 
 .market-cta {
@@ -97,18 +115,141 @@
   display: flex;
 }
 
-.market-listing__actions button {
-  border: 1px solid rgba(201, 182, 255, 0.7);
-  background: rgba(96, 66, 178, 0.45);
-  color: #ffffff;
-  padding: 0.6rem 1.25rem;
-  border-radius: 999px;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
+.market-create-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 2, 6, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
 }
 
-.market-listing__actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.market-create-modal {
+  width: min(640px, 100%);
+  max-height: min(80vh, 680px);
+  overflow: auto;
+  background: rgba(24, 18, 45, 0.98);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+  padding: 1.25rem;
+}
+
+.market-create-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.market-create-modal__close {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.market-create-modal__results {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  max-height: 320px;
+  overflow-y: auto;
+  background: rgba(24, 18, 45, 0.98);
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  border-radius: 14px;
+  padding: 0.5rem;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+}
+
+.market-create-modal__result {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 182, 255, 0.35);
+  background: rgba(96, 66, 178, 0.2);
+  color: #ffffff;
+}
+
+.market-create-modal__result.is-selected {
+  border-color: rgba(201, 182, 255, 0.85);
+  background: rgba(96, 66, 178, 0.45);
+}
+
+.market-create-modal__result.is-active {
+  border-color: rgba(201, 182, 255, 0.75);
+  background: rgba(96, 66, 178, 0.35);
+}
+
+.market-create-modal__actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.market-create-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.market-card-picker {
+  position: relative;
+}
+
+.market-create-form__row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 520px) {
+  .market-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .market-header__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .market-pill-button {
+    flex: 1 1 auto;
+  }
+
+  .market-listing {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .market-listing__actions {
+    width: 100%;
+  }
+
+  .market-create-modal__result {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .market-create-modal__actions {
+    justify-content: stretch;
+  }
+
+  .market-create-form__row {
+    grid-template-columns: 1fr;
+  }
 }
