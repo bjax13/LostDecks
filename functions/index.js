@@ -7,12 +7,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-function asInt(value, field) {
-  if (typeof value !== 'number' || !Number.isFinite(value) || Math.floor(value) !== value) {
-    throw new HttpsError('invalid-argument', `${field} must be an integer`);
-  }
-  return value;
-}
+const { asInt } = require('./lib/validation');
 
 exports.acceptListing = onCall(async (request) => {
   const auth = request.auth;
