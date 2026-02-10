@@ -61,7 +61,7 @@ export default function CardListingsPanel({ cardId }) {
           listing={listing}
           cardLabel={cardLabel}
           onAccept={handleAccept}
-          canAccept={Boolean(user) && listing.createdByUid !== user.uid}
+          canAccept={!user || listing.createdByUid !== user.uid}
           canCancel={Boolean(user) && listing.createdByUid === user.uid}
           onCancel={handleCancel}
         />
