@@ -1,18 +1,92 @@
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
 
+const {
+  assertListingType,
+  assertPriceCents,
+  assertUsdCurrency,
+  assertQuantity,
+  assertCardId,
+} = require('./lib/marketplaceValidation');
+
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
 const db = admin.firestore();
 
-function asInt(value, field) {
-  if (typeof value !== 'number' || !Number.isFinite(value) || Math.floor(value) !== value) {
-    throw new HttpsError('invalid-argument', `${field} must be an integer`);
-  }
-  return value;
+function getDisplayNameFromAuth(auth) {
+  return (auth.token && (auth.token.name || auth.token.email)) || auth.uid;
 }
+
+exports.createListing = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Must be signed in to create a listing');
+  }
+
+  const { type, cardId, priceCents, currency = 'USD', quantity = 1 } = request.data || {};
+
+  assertListingType(type);
+  assertCardId(cardId);
+  assertUsdCurrency(currency);
+  assertPriceCents(priceCents);
+  assertQuantity(quantity);
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  const docRef = await db.collection('listings').add({
+    type,
+    status: 'OPEN',
+    cardId,
+    priceCents,
+    currency: 'USD',
+    quantity: 1,
+    createdByUid: auth.uid,
+    createdByDisplayName: getDisplayNameFromAuth(auth),
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return { ok: true, listingId: docRef.id };
+});
+
+exports.cancelListing = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError('unauthenticated', 'Must be signed in to cancel a listing');
+  }
+
+  const { listingId } = request.data || {};
+  if (typeof listingId !== 'string' || listingId.trim().length === 0) {
+    throw new HttpsError('invalid-argument', 'listingId is required');
+  }
+
+  const listingRef = db.collection('listings').doc(listingId);
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(listingRef);
+    if (!snap.exists) {
+      throw new HttpsError('not-found', 'Listing not found');
+    }
+
+    const listing = snap.data();
+    if (listing.status !== 'OPEN') {
+      throw new HttpsError('failed-precondition', 'Listing is not open');
+    }
+
+    if (listing.createdByUid !== auth.uid) {
+      throw new HttpsError('permission-denied', 'Only the creator can cancel this listing');
+    }
+
+    tx.update(listingRef, {
+      status: 'CANCELLED',
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+
+  return { ok: true };
+});
 
 exports.acceptListing = onCall(async (request) => {
   const auth = request.auth;
@@ -26,7 +100,7 @@ exports.acceptListing = onCall(async (request) => {
   }
 
   const acceptedByUid = auth.uid;
-  const acceptedByDisplayName = (auth.token && (auth.token.name || auth.token.email)) || auth.uid;
+  const acceptedByDisplayName = getDisplayNameFromAuth(auth);
 
   const listingRef = db.collection('listings').doc(listingId);
   const tradeRef = db.collection('trades').doc();
@@ -45,25 +119,17 @@ exports.acceptListing = onCall(async (request) => {
       throw new HttpsError('failed-precondition', 'Cannot accept your own listing');
     }
 
-    if (listing.currency !== 'USD') {
-      throw new HttpsError('failed-precondition', 'Unsupported currency');
-    }
-
-    // MVP constraints (keep things simple + consistent)
-    asInt(listing.priceCents, 'priceCents');
-
-    const listingType = listing.type;
-    if (listingType !== 'BID' && listingType !== 'ASK') {
-      throw new HttpsError('failed-precondition', 'Invalid listing type');
-    }
+    assertUsdCurrency(listing.currency);
+    assertPriceCents(listing.priceCents);
+    assertListingType(listing.type);
 
     const creatorUid = listing.createdByUid;
     const creatorName = listing.createdByDisplayName || 'Anonymous';
 
-    const buyerUid = listingType === 'ASK' ? acceptedByUid : creatorUid;
-    const buyerDisplayName = listingType === 'ASK' ? acceptedByDisplayName : creatorName;
-    const sellerUid = listingType === 'ASK' ? creatorUid : acceptedByUid;
-    const sellerDisplayName = listingType === 'ASK' ? creatorName : acceptedByDisplayName;
+    const buyerUid = listing.type === 'ASK' ? acceptedByUid : creatorUid;
+    const buyerDisplayName = listing.type === 'ASK' ? acceptedByDisplayName : creatorName;
+    const sellerUid = listing.type === 'ASK' ? creatorUid : acceptedByUid;
+    const sellerDisplayName = listing.type === 'ASK' ? creatorName : acceptedByDisplayName;
 
     const now = admin.firestore.FieldValue.serverTimestamp();
 
@@ -79,7 +145,7 @@ exports.acceptListing = onCall(async (request) => {
       listingId,
       cardId: listing.cardId,
       cardDisplayName: listing.cardDisplayName || null,
-      type: listingType,
+      type: listing.type,
       priceCents: listing.priceCents,
       currency: 'USD',
       quantity: 1,
