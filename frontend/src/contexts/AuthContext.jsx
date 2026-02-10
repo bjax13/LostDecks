@@ -85,6 +85,14 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(async () => {
+    if (!auth) {
+      const err = new Error(
+        'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-out.',
+      );
+      handleError(err);
+      throw err;
+    }
+
     clearError();
     try {
       await signOut(auth);
@@ -166,4 +174,3 @@ export function useAuth() {
   }
   return context;
 }
-
