@@ -5,15 +5,14 @@ import BinderInfo from './BinderInfo';
 import AddToCollectionButton from './AddToCollectionButton';
 import { categoryLabels } from '../constants';
 
-export default function CardTable({ cards }) {
+export default function CollectibleTable({ collectibles }) {
   const navigate = useNavigate();
 
-  const handleRowClick = (cardId, event) => {
-    // Don't navigate if clicking on action buttons
+  const handleRowClick = (collectibleId, event) => {
     if (event.target.closest('.add-to-collection')) {
       return;
     }
-    navigate(`/cards/${cardId}`);
+    navigate(`/collectibles/${collectibleId}`);
   };
 
   return (
@@ -33,31 +32,34 @@ export default function CardTable({ cards }) {
           </tr>
         </thead>
         <tbody>
-          {cards.map((card) => (
+          {collectibles.map((collectible) => (
             <tr
-              key={card.id}
+              key={collectible.id}
               className="cards-table__row--clickable"
-              onClick={(e) => handleRowClick(card.id, e)}
+              onClick={(e) => handleRowClick(collectible.id, e)}
             >
-              <td className="mono">{card.id}</td>
+              <td className="mono">{collectible.id}</td>
               <td>
-                <CategoryPill category={card.category} label={categoryLabels[card.category]} />
+                <CategoryPill
+                  category={collectible.category}
+                  label={categoryLabels[collectible.category]}
+                />
               </td>
-              <td>{card.storyTitle ?? '—'}</td>
-              <td>{card.number ?? '—'}</td>
+              <td>{collectible.storyTitle ?? '—'}</td>
+              <td>{collectible.number ?? '—'}</td>
               <td>
-                <div className="cell-title">{card.displayName}</div>
-                <div className="cell-subtitle">{card.detail}</div>
+                <div className="cell-title">{collectible.displayName}</div>
+                <div className="cell-subtitle">{collectible.detail}</div>
               </td>
-              <td>{card.rarity ?? '—'}</td>
+              <td>{collectible.rarity ?? '—'}</td>
               <td>
-                <FinishPills finishes={card.finishes} />
-              </td>
-              <td>
-                <BinderInfo binder={card.binder} layout="table" />
+                <FinishPills finishes={collectible.finishes} />
               </td>
               <td>
-                <AddToCollectionButton card={card} variant="table" />
+                <BinderInfo binder={collectible.binder} layout="table" />
+              </td>
+              <td>
+                <AddToCollectionButton collectible={collectible} variant="table" />
               </td>
             </tr>
           ))}

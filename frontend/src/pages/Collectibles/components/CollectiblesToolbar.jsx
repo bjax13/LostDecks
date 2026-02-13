@@ -1,6 +1,6 @@
 import { sortOptions } from '../constants';
 
-export default function CardsToolbar({
+export default function CollectiblesToolbar({
   searchTerm,
   onSearchChange,
   categoryFilter,
@@ -17,14 +17,14 @@ export default function CardsToolbar({
   stories,
   resultCount,
   totalCount,
-  onReset
+  onReset,
 }) {
   return (
     <section className="cards-toolbar">
       <div className="search-control">
-        <label htmlFor="card-search">Search</label>
+        <label htmlFor="collectible-search">Search</label>
         <input
-          id="card-search"
+          id="collectible-search"
           type="search"
           placeholder="Search by ID, story, or variant"
           value={searchTerm}
@@ -109,7 +109,7 @@ export default function CardsToolbar({
 
       <div className="toolbar-footer">
         <p>
-          Showing <strong>{resultCount}</strong> of <strong>{totalCount}</strong> cards
+          Showing <strong>{resultCount}</strong> of <strong>{totalCount}</strong> collectibles
         </p>
         <button type="button" className="reset-button" onClick={onReset}>
           Reset filters

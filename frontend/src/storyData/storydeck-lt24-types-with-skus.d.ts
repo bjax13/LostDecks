@@ -43,10 +43,10 @@ export type HeraldCardId = `${SetId}-HLD-${string}`;
 export type NonsenseCardId = `${SetId}-NS-${StoryCode}-${string}`;
 export type CardId = StoryCardId | HeraldCardId | NonsenseCardId;
 
-// SKU ID types
-export type StorySkuId = `${StoryCardId}#${Uppercase<Finish>}`;
-export type HeraldSkuId = `${HeraldCardId}#${Uppercase<Finish>}`;
-export type NonsenseSkuId = `${NonsenseCardId}#${Uppercase<Finish>}`;
+// SKU ID types (hyphen-only format)
+export type StorySkuId = `${StoryCardId}-${Uppercase<Finish>}`;
+export type HeraldSkuId = `${HeraldCardId}-${Uppercase<Finish>}`;
+export type NonsenseSkuId = `${NonsenseCardId}-${Uppercase<Finish>}`;
 export type SkuId = StorySkuId | HeraldSkuId | NonsenseSkuId;
 
 export interface BinderMosaic {
@@ -91,7 +91,7 @@ export interface NonsenseCard<StoryType extends StoryCode = StoryCode> {
 }
 
 export interface SKU {
-  skuId: SkuId;             // e.g., LT24-ELS-01#DUN or LT24-NS-ELS-24-DANCE#FOIL
+  skuId: SkuId;             // e.g., LT24-ELS-01-DUN or LT24-NS-ELS-24-DUN-DANCE
   cardId: CardId;           // references any card id (StoryCard | HeraldCard | NonsenseCard)
   finish: Finish;
 }
