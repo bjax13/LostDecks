@@ -19,8 +19,24 @@ service cloud.firestore {
     match /listings/{listingId} {
       allow read: if true;
 
+      function listingAllowedFields() {
+        return [
+          'type',
+          'status',
+          'cardId',
+          'priceCents',
+          'currency',
+          'quantity',
+          'createdByUid',
+          'createdByDisplayName',
+          'createdAt',
+          'updatedAt'
+        ];
+      }
+
       // Create OPEN listings only for yourself.
       allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(listingAllowedFields())
         && request.resource.data.status == 'OPEN'
         && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
         && request.resource.data.currency == 'USD'
@@ -33,10 +49,13 @@ service cloud.firestore {
 
       // Cancel: creator can cancel their own OPEN listing.
       allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(listingAllowedFields())
         && resource.data.createdByUid == request.auth.uid
         && resource.data.status == 'OPEN'
         && request.resource.data.status == 'CANCELLED'
         && request.resource.data.createdByUid == resource.data.createdByUid
+        && request.resource.data.createdByDisplayName == resource.data.createdByDisplayName
+        && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.type == resource.data.type
         && request.resource.data.cardId == resource.data.cardId
         && request.resource.data.priceCents == resource.data.priceCents
