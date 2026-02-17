@@ -1,25 +1,62 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
     // Collections collection - user's card collection entries
     match /collections/{entryId} {
-      // Users can read their own collection entries
-      allow read: if request.auth != null && request.auth.uid == resource.data.ownerUid;
-      
-      // Users can create entries if authenticated and setting their own UID
-      allow create: if request.auth != null 
-        && request.auth.uid == request.resource.data.ownerUid;
-      
-      // Users can update their own entries
-      allow update: if request.auth != null 
+      allow read: if signedIn() && request.auth.uid == resource.data.ownerUid;
+      allow create: if signedIn() && request.auth.uid == request.resource.data.ownerUid;
+      allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
-        && request.auth.uid == request.resource.data.ownerUid; // Prevent UID changes
-      
-      // Users can delete their own entries
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+        && request.auth.uid == request.resource.data.ownerUid;
+      allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
-    
-    // Deny all other collections by default
+
+    // Market listings (public read; auth write)
+    match /listings/{listingId} {
+      allow read: if true;
+
+      // Create OPEN listings only for yourself.
+      allow create: if signedIn()
+        && request.resource.data.status == 'OPEN'
+        && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
+        && request.resource.data.currency == 'USD'
+        && request.resource.data.quantity == 1
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.priceCents is int
+        && request.resource.data.priceCents > 0
+        && request.resource.data.cardId is string
+        && request.resource.data.cardId.size() > 0;
+
+      // Cancel: creator can cancel their own OPEN listing.
+      allow update: if signedIn()
+        && resource.data.createdByUid == request.auth.uid
+        && resource.data.status == 'OPEN'
+        && request.resource.data.status == 'CANCELLED'
+        && request.resource.data.createdByUid == resource.data.createdByUid
+        && request.resource.data.type == resource.data.type
+        && request.resource.data.cardId == resource.data.cardId
+        && request.resource.data.priceCents == resource.data.priceCents
+        && request.resource.data.currency == resource.data.currency
+        && request.resource.data.quantity == resource.data.quantity;
+
+      // Note: accepting listings is handled via a callable Cloud Function (admin privileges)
+      // so that listing ACCEPT + trade creation happen atomically.
+
+      allow delete: if signedIn()
+        && resource.data.createdByUid == request.auth.uid
+        && resource.data.status == 'OPEN';
+    }
+
+    // Trades are created by a callable Cloud Function so clients cannot spoof them.
+    match /trades/{tradeId} {
+      allow read: if signedIn() && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
+      allow create, update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AuthGuard from '../../components/Auth/AuthGuard';
 import { useAuth } from '../../contexts/AuthContext';
+import TradesPanel from './components/TradesPanel';
 import './Account.css';
 
 function AccountPage() {
@@ -50,6 +51,8 @@ function AccountPage() {
             </ul>
           </section>
         ) : null}
+
+        {user ? <TradesPanel user={user} /> : null}
 
         <section className="account-section">
           <h2>Additional contact information</h2>

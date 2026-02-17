@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import CardsHeader from './components/CardsHeader';
-import CardsToolbar from './components/CardsToolbar';
-import CardGrid from './components/CardGrid';
-import CardTable from './components/CardTable';
-import { useCardsExplorer } from './hooks/useCardsExplorer';
-import './Cards.css';
+import CollectiblesHeader from './components/CollectiblesHeader';
+import CollectiblesToolbar from './components/CollectiblesToolbar';
+import CollectibleGrid from './components/CollectibleGrid';
+import CollectibleTable from './components/CollectibleTable';
+import { useCollectiblesExplorer } from './hooks/useCollectiblesExplorer';
+import './Collectibles.css';
 
-export default function Cards() {
+export default function CollectiblesPage() {
   const [viewMode, setViewMode] = useState('grid');
   const {
-    cards,
-    totalCards,
+    collectibles,
+    totalCollectibles,
     datasetMeta,
     rarityOptions,
     stories,
@@ -26,8 +26,8 @@ export default function Cards() {
     setSortField,
     sortDirection,
     setSortDirection,
-    resetFilters
-  } = useCardsExplorer();
+    resetFilters,
+  } = useCollectiblesExplorer();
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -39,14 +39,14 @@ export default function Cards() {
 
   return (
     <div className="cards-page">
-      <CardsHeader
+      <CollectiblesHeader
         setName={datasetMeta.setName}
-        totalCards={totalCards}
+        totalCollectibles={totalCollectibles}
         viewMode={viewMode}
         onChangeView={handleViewChange}
       />
 
-      <CardsToolbar
+      <CollectiblesToolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         categoryFilter={categoryFilter}
@@ -61,12 +61,16 @@ export default function Cards() {
         onToggleSortDirection={handleToggleSortDirection}
         rarityOptions={rarityOptions}
         stories={stories}
-        resultCount={cards.length}
-        totalCount={totalCards}
+        resultCount={collectibles.length}
+        totalCount={totalCollectibles}
         onReset={resetFilters}
       />
 
-      {viewMode === 'table' ? <CardTable cards={cards} /> : <CardGrid cards={cards} />}
+      {viewMode === 'table' ? (
+        <CollectibleTable collectibles={collectibles} />
+      ) : (
+        <CollectibleGrid collectibles={collectibles} />
+      )}
     </div>
   );
 }

@@ -145,29 +145,59 @@
   border-top: 1px solid rgba(116, 92, 190, 0.3);
 }
 
-.card-detail__offers-placeholder {
-  display: flex;
-  flex-direction: column;
+.create-listing {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  background: rgba(24, 18, 45, 0.6);
+}
+
+.create-listing__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  align-items: flex-start;
 }
 
-.card-detail__offers-placeholder p {
-  margin: 0;
-  color: rgba(206, 193, 255, 0.7);
+.create-listing__label {
+  display: grid;
+  gap: 0.4rem;
+  color: rgba(206, 193, 255, 0.8);
+  font-size: 0.9rem;
 }
 
-.card-detail__offers-button {
+.create-listing select,
+.create-listing input {
+  border: 1px solid rgba(201, 182, 255, 0.35);
+  background: rgba(96, 66, 178, 0.25);
+  color: #ffffff;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+}
+
+.create-listing button {
+  justify-self: start;
   border: 1px solid rgba(201, 182, 255, 0.7);
   background: rgba(96, 66, 178, 0.45);
   color: #ffffff;
-  padding: 0.75rem 1.75rem;
+  padding: 0.65rem 1.25rem;
   border-radius: 999px;
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
+}
+
+.create-listing button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.55;
+}
+
+@media (max-width: 520px) {
+  .create-listing__row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card-detail__error {

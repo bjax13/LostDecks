@@ -1,14 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMemo } from 'react';
-import { getCardRecord, getSkuRecord } from '../../data/cards';
+import { getCollectibleRecord, getSkuRecord } from '../../data/collectibles';
 import { useAuth } from '../../contexts/AuthContext';
-import { useCardCollectionEntry } from './hooks/useCardCollectionEntry';
-import CategoryPill from '../Cards/components/CategoryPill';
-import FinishPills from '../Cards/components/FinishPills';
-import BinderInfo from '../Cards/components/BinderInfo';
-import AddToCollectionButton from '../Cards/components/AddToCollectionButton';
-import { categoryLabels } from '../Cards/constants';
-import './CardDetail.css';
+import { useCollectibleCollectionEntry } from './hooks/useCollectibleCollectionEntry';
+import CategoryPill from '../Collectibles/components/CategoryPill';
+import FinishPills from '../Collectibles/components/FinishPills';
+import BinderInfo from '../Collectibles/components/BinderInfo';
+import AddToCollectionButton from '../Collectibles/components/AddToCollectionButton';
+import { categoryLabels } from '../Collectibles/constants';
+import CreateListingForm from './components/CreateListingForm';
+import CollectibleListingsPanel from './components/CollectibleListingsPanel';
+import '../Market/Market.css';
+import './CollectibleDetail.css';
 
 function normalizeQuantity(entry) {
   if (!entry) return 0;
@@ -56,25 +59,22 @@ function formatDate(date) {
   }
 }
 
-export default function CardDetail() {
-  const { cardId, skuId } = useParams();
+export default function CollectibleDetailPage() {
+  const { collectibleId, skuId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
 
-  // Fetch card and SKU data
-  const cardRecord = useMemo(() => (cardId ? getCardRecord(cardId) : null), [cardId]);
-  const skuRecord = useMemo(() => (skuId ? getSkuRecord(skuId) : null), [skuId]);
-  
-  // Use card from SKU if available, otherwise use cardId
-  const card = skuRecord?.card ?? cardRecord;
-  
-  // Fetch collection entry
-  const { entry: collectionEntry, loading: collectionLoading } = useCardCollectionEntry(
-    ownerUid,
-    cardId,
-    skuId
+  const cardRecord = useMemo(
+    () => (collectibleId ? getCollectibleRecord(collectibleId) : null),
+    [collectibleId],
   );
+  const skuRecord = useMemo(() => (skuId ? getSkuRecord(skuId) : null), [skuId]);
+
+  const card = skuRecord?.card ?? cardRecord;
+
+  const { entry: collectionEntry, loading: collectionLoading } =
+    useCollectibleCollectionEntry(ownerUid, collectibleId, skuId);
 
   const quantity = useMemo(() => normalizeQuantity(collectionEntry), [collectionEntry]);
   const notes = useMemo(() => {
@@ -87,23 +87,19 @@ export default function CardDetail() {
   const updatedAt = useMemo(() => resolveTimestamp(collectionEntry), [collectionEntry]);
   const updatedAtLabel = useMemo(() => formatDate(updatedAt), [updatedAt]);
 
-  const finish = useMemo(() => {
-    if (collectionEntry?.finish) {
-      return typeof collectionEntry.finish === 'string' && collectionEntry.finish.trim().length > 0
-        ? collectionEntry.finish.toUpperCase()
-        : null;
-    }
-    return skuRecord?.finish ?? null;
-  }, [collectionEntry, skuRecord]);
+  const finish = useMemo(
+    () => skuRecord?.finish ?? (collectionEntry?.finish ? String(collectionEntry.finish).toUpperCase() : null),
+    [collectionEntry, skuRecord],
+  );
 
   if (!card) {
     return (
       <div className="card-detail-page">
         <div className="card-detail__error">
-          <h1>Card Not Found</h1>
-          <p>The card you're looking for doesn't exist.</p>
-          <button type="button" onClick={() => navigate('/cards')} className="card-detail__back-button">
-            Back to Cards
+          <h1>Collectible Not Found</h1>
+          <p>The collectible you're looking for doesn't exist.</p>
+          <button type="button" onClick={() => navigate('/collectibles')} className="card-detail__back-button">
+            Back to Collectibles
           </button>
         </div>
       </div>
@@ -133,7 +129,7 @@ export default function CardDetail() {
 
       <div className="card-detail__content">
         <section className="card-detail__info">
-          <h2 className="card-detail__section-title">Card Information</h2>
+          <h2 className="card-detail__section-title">Details</h2>
           
           <dl className="card-detail__stats">
             <div>
@@ -224,19 +220,20 @@ export default function CardDetail() {
             )}
 
             <div className="card-detail__collection-actions">
-              <AddToCollectionButton card={card} variant="card" />
+              <AddToCollectionButton collectible={card} variant="card" />
             </div>
           </section>
         )}
 
         <section className="card-detail__offers">
-          <h2 className="card-detail__section-title">Make Offer</h2>
-          <div className="card-detail__offers-placeholder">
-            <p>Offer functionality coming soon</p>
-            <button type="button" className="card-detail__offers-button" disabled>
-              Make Offer
-            </button>
-          </div>
+          <h2 className="card-detail__section-title">Market</h2>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Create a buy (bid) or sell (ask) listing for this collectible.
+          </p>
+          <CreateListingForm collectibleId={collectibleId} />
+
+          <h3 style={{ marginTop: '1.5rem' }}>Open listings</h3>
+          <CollectibleListingsPanel collectibleId={collectibleId} />
         </section>
       </div>
     </div>

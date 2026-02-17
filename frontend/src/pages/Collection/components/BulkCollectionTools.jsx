@@ -4,7 +4,7 @@ import {
   createCollectionTemplateCsv,
   parseBulkCollectionCsv
 } from '../utils/bulkImport';
-import { datasetSkus, datasetStories, getCardRecord, getSkuRecord } from '../../../data/cards';
+import { datasetSkus, datasetStories, getCollectibleRecord, getSkuRecord } from '../../../data/collectibles';
 
 function formatSummaryCount(count, singular, plural) {
   if (count === 0) {
@@ -42,16 +42,6 @@ function normalizeQuantity(entry) {
   return 1;
 }
 
-function normalizeSkuId(skuId) {
-  if (!skuId || typeof skuId !== 'string') {
-    return null;
-  }
-  const [cardId, finish] = skuId.split('#');
-  if (!finish) {
-    return skuId.trim();
-  }
-  return `${cardId}#${finish.toUpperCase()}`;
-}
 
 function getVariantLabel(detail) {
   if (!detail) {
@@ -105,24 +95,14 @@ function buildIsoUftPost(entries, options = {}) {
 
   entries.forEach((entry) => {
     const quantity = Math.max(0, normalizeQuantity(entry));
-    if (!quantity) {
-      return;
-    }
+    if (!quantity) return;
 
-    const normalizedSkuId = normalizeSkuId(entry.skuId);
-    const skuInfo = normalizedSkuId ? getSkuRecord(normalizedSkuId) : null;
-    const cardId = entry.cardId ?? skuInfo?.cardId ?? null;
-    const finish = typeof entry.finish === 'string' && entry.finish.trim().length > 0
-      ? entry.finish.trim().toUpperCase()
-      : skuInfo?.finish ?? null;
-    const skuKey = normalizedSkuId ?? (cardId && finish ? `${cardId}#${finish}` : null);
-
-    if (!skuKey) {
+    const skuId = entry.skuId ? String(entry.skuId).trim() : null;
+    if (!skuId) {
       skippedEntries += 1;
       return;
     }
-
-    ownedSkuCounts.set(skuKey, (ownedSkuCounts.get(skuKey) ?? 0) + quantity);
+    ownedSkuCounts.set(skuId, (ownedSkuCounts.get(skuId) ?? 0) + quantity);
   });
 
   const storyOrder = datasetStories.map((story) => story.title);
@@ -135,14 +115,13 @@ function buildIsoUftPost(entries, options = {}) {
     const groups = new Map();
 
     datasetSkus.forEach((sku) => {
-      const skuKey = normalizeSkuId(sku.skuId);
-      const ownedCount = skuKey ? ownedSkuCounts.get(skuKey) ?? 0 : 0;
+      const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
       if (mode === 'iso' ? ownedCount > 0 : ownedCount <= 1) {
         return;
       }
 
       const finish = sku.finish ? sku.finish.toUpperCase() : null;
-      const card = getCardRecord(sku.cardId);
+      const card = getCollectibleRecord(sku.cardId);
       if (!card || !predicate({ card, finish })) {
         return;
       }
@@ -361,7 +340,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
       }
       setPostStatus(
         skippedEntries > 0
-          ? `Copied ISO/UFT post. ${skippedEntries} entries without a finish were skipped.`
+          ? `Copied ISO/UFT post. ${skippedEntries} entries without a valid SKU were skipped.`
           : 'Copied ISO/UFT post to your clipboard.'
       );
     } catch (err) {

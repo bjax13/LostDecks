@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { toSkuId } from '../../../data/collectibles';
 
 const COLLECTIONS_PATH = 'collections';
 
@@ -11,9 +12,13 @@ export function useAddToCollection() {
   const [error, setError] = useState(null);
 
   const addToCollection = useCallback(
-    async ({ card, finish = null, quantity = 1 }) => {
+    async ({ card, finish = null, quantity = 1, notes }) => {
       if (!card || !card.id) {
-        throw new Error('A valid card is required to add to the collection.');
+        throw new Error('A valid collectible is required to add to the collection.');
+      }
+
+      if (!finish) {
+        throw new Error('A finish is required (e.g. DUN or FOIL).');
       }
 
       if (!user) {
@@ -22,37 +27,30 @@ export function useAddToCollection() {
         throw authError;
       }
 
+      const skuId = toSkuId(card.id, finish);
+      if (!skuId) {
+        throw new Error('Invalid card or finish.');
+      }
+
       setStatus('loading');
       setError(null);
 
       try {
         const payload = {
           ownerUid: user.uid,
-          cardId: card.id,
+          skuId,
           quantity,
           updatedAt: serverTimestamp(),
         };
-
-        // Only include finish if it has a value (matching bulkImport.js pattern)
-        if (finish) {
-          payload.finish = String(finish).toUpperCase();
-        }
-
-        if (card.displayName) {
-          payload.displayName = card.displayName;
-        }
-        if (card.storyTitle) {
-          payload.storyTitle = card.storyTitle;
-        }
-        if (card.category) {
-          payload.category = card.category;
+        if (typeof notes === 'string' && notes.trim().length > 0) {
+          payload.notes = notes.trim();
         }
 
         await addDoc(collection(db, COLLECTIONS_PATH), payload);
         setStatus('success');
         return payload;
       } catch (err) {
-        console.error('Failed to add card to collection', err);
+        console.error('Failed to add to collection', err);
         setError(err);
         setStatus('error');
         throw err;

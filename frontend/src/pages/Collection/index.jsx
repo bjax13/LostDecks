@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthGuard from '../../components/Auth/AuthGuard';
 import { useAuth } from '../../contexts/AuthContext';
-import { categoryLabels } from '../Cards/constants';
+import { categoryLabels } from '../Collectibles/constants';
 import {
   collectionProgressTargets,
   datasetMeta,
-  getCardRecord,
-  getSkuRecord
-} from '../../data/cards';
+  getCollectibleRecord,
+  getSkuRecord,
+} from '../../data/collectibles';
 import BulkCollectionTools from './components/BulkCollectionTools';
 import { useUserCollection } from './hooks/useUserCollection';
 import './Collection.css';
@@ -210,11 +210,10 @@ function CollectionTable({ entries }) {
       return;
     }
 
-    // Prefer skuId route if available, otherwise use cardId route
     if (entry.skuId && entry.cardId) {
-      navigate(`/cards/${entry.cardId}/${entry.skuId}`);
+      navigate(`/collectibles/${entry.cardId}/${entry.skuId}`);
     } else if (entry.cardId) {
-      navigate(`/cards/${entry.cardId}`);
+      navigate(`/collectibles/${entry.cardId}`);
     }
     // If neither exists, don't navigate
   };
@@ -293,58 +292,47 @@ function CollectionContent() {
   );
 
   const decoratedEntries = useMemo(() => {
-    const formatted = entries.map((entry) => {
-      const skuInfo = entry.skuId ? getSkuRecord(entry.skuId) : null;
-      const cardInfo = skuInfo?.card ?? (entry.cardId ? getCardRecord(entry.cardId) : null);
-      const finish = typeof entry.finish === 'string' && entry.finish.trim().length > 0
-        ? entry.finish.toUpperCase()
-        : skuInfo?.finish ?? null;
-      const quantity = Math.max(0, normalizeQuantity(entry));
-      const timestamp = resolveTimestamp(entry);
-      const updatedAtLabel = formatDate(timestamp, dateFormatter);
-      const notes = typeof entry.notes === 'string' && entry.notes.trim().length > 0
-        ? entry.notes.trim()
-        : null;
-      const binderLabel = cardInfo?.binder
-        ? `Binder · Page ${cardInfo.binder.page}, Slot ${cardInfo.binder.position}`
-        : null;
+    const formatted = entries
+      .filter((entry) => entry.skuId)
+      .map((entry) => {
+        const skuInfo = getSkuRecord(entry.skuId);
+        const cardInfo = skuInfo?.card ?? null;
+        const quantity = Math.max(0, normalizeQuantity(entry));
+        const timestamp = resolveTimestamp(entry);
+        const updatedAtLabel = formatDate(timestamp, dateFormatter);
+        const notes =
+          typeof entry.notes === 'string' && entry.notes.trim().length > 0
+            ? entry.notes.trim()
+            : null;
+        const binderLabel = cardInfo?.binder
+          ? `Binder · Page ${cardInfo.binder.page}, Slot ${cardInfo.binder.position}`
+          : null;
 
-      return {
-        ...entry,
-        quantity,
-        finish,
-        skuId: entry.skuId ?? skuInfo?.skuId ?? null,
-        cardId: cardInfo?.id ?? entry.cardId ?? skuInfo?.cardId ?? null,
-        displayName:
-          cardInfo?.displayName ??
-          entry.displayName ??
-          entry.cardId ??
-          entry.skuId ??
-          'Uncatalogued card',
-        detail: cardInfo?.detail ?? null,
-        category: cardInfo?.category ?? null,
-        categoryLabel: cardInfo?.category
-          ? categoryLabels[cardInfo.category] ?? cardInfo.category
-          : '—',
-        storyTitle: cardInfo?.storyTitle ?? null,
-        storyCode: cardInfo?.story ?? null,
-        binderLabel,
-        updatedAtLabel,
-        notes
-      };
-    });
-
-    return formatted
-      .sort((a, b) => {
-        const nameCompare = a.displayName.localeCompare(b.displayName);
-        if (nameCompare !== 0) {
-          return nameCompare;
-        }
-        if (a.cardId && b.cardId) {
-          return a.cardId.localeCompare(b.cardId);
-        }
-        return (a.skuId ?? '').localeCompare(b.skuId ?? '');
+        return {
+          ...entry,
+          quantity,
+          finish: skuInfo?.finish ?? null,
+          skuId: entry.skuId,
+          cardId: cardInfo?.id ?? skuInfo?.cardId ?? null,
+          displayName: cardInfo?.displayName ?? entry.skuId ?? 'Uncatalogued',
+          detail: cardInfo?.detail ?? null,
+          category: cardInfo?.category ?? null,
+          categoryLabel: cardInfo?.category
+            ? categoryLabels[cardInfo.category] ?? cardInfo.category
+            : '—',
+          storyTitle: cardInfo?.storyTitle ?? null,
+          storyCode: cardInfo?.story ?? null,
+          binderLabel,
+          updatedAtLabel,
+          notes,
+        };
       });
+
+    return formatted.sort((a, b) => {
+      const nameCompare = a.displayName.localeCompare(b.displayName);
+      if (nameCompare !== 0) return nameCompare;
+      return (a.skuId ?? '').localeCompare(b.skuId ?? '');
+    });
   }, [entries, dateFormatter]);
 
   const summary = useMemo(() => {
@@ -392,8 +380,7 @@ function CollectionContent() {
 
       const normalizedFinish = entry.finish ? entry.finish.toUpperCase() : null;
       const storySet = entry.storyCode ? storyProgress[entry.storyCode] : null;
-      const finishIdentifier = entry.skuId
-        ?? (entry.cardId && normalizedFinish ? `${entry.cardId}#${normalizedFinish}` : null);
+      const finishIdentifier = entry.skuId ?? null;
 
       if (entry.category === 'story' && storySet) {
         if (entry.cardId) {
@@ -514,7 +501,7 @@ function CollectionContent() {
         <h1>Your Collection</h1>
         <p>
           Track progress across the Stormlight Lost Tales deck. Your saved entries update
-          in real-time as you add cards from Firebase.
+          in real-time as you add collectibles from Firebase.
         </p>
       </header>
 
@@ -529,15 +516,15 @@ function CollectionContent() {
         {loading ? (
           <div className="collection-page__loading">
             <div className="collection-page__loading-spinner" aria-hidden="true" />
-            <p>Fetching your cards…</p>
+            <p>Fetching your collectibles…</p>
           </div>
         ) : decoratedEntries.length === 0 ? (
           <div className="collection-page__empty">
-            <strong>No cards catalogued yet</strong>
+            <strong>No collectibles catalogued yet</strong>
             <span>
-              Create documents in the <code>collections</code> Firestore collection with fields like
-              <code>ownerUid</code>, <code>cardId</code>, <code>skuId</code>, and <code>quantity</code>
-              to see them appear here.
+              Add items from the Collectibles page, or create documents in the{' '}
+              <code>collections</code> Firestore collection with <code>ownerUid</code>,{' '}
+              <code>skuId</code>, and <code>quantity</code>.
             </span>
             <span>Entries update instantly once they are saved to Firestore.</span>
           </div>
