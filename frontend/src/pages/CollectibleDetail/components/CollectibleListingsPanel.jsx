@@ -3,16 +3,16 @@ import { useAuth } from '../../../contexts/AuthContext';
 import useOpenListings from '../../Market/hooks/useOpenListings';
 import ListingRow from '../../Market/components/ListingRow';
 import { acceptListing, cancelListing } from '../../../lib/marketplace/listings';
-import { getCardRecord } from '../../../data/cards';
+import { getCollectibleRecord } from '../../../data/collectibles';
 
-export default function CardListingsPanel({ cardId }) {
+export default function CollectibleListingsPanel({ collectibleId }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { listings, loading, error } = useOpenListings({ cardId });
+  const { listings, loading, error } = useOpenListings({ cardId: collectibleId });
 
   const handleCancel = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/cards/${cardId}` } } });
+      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
       return;
     }
 
@@ -26,7 +26,7 @@ export default function CardListingsPanel({ cardId }) {
 
   const handleAccept = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/cards/${cardId}` } } });
+      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
       return;
     }
 
@@ -47,11 +47,13 @@ export default function CardListingsPanel({ cardId }) {
   }
 
   if (listings.length === 0) {
-    return <p className="muted">No open listings for this card yet.</p>;
+    return <p className="muted">No open listings for this collectible yet.</p>;
   }
 
-  const card = getCardRecord(cardId);
-  const cardLabel = card?.displayName ? `${card.displayName} (${cardId})` : undefined;
+  const collectible = getCollectibleRecord(collectibleId);
+  const collectibleLabel = collectible?.displayName
+    ? `${collectible.displayName} (${collectibleId})`
+    : undefined;
 
   return (
     <ul className="market-list">
@@ -59,7 +61,7 @@ export default function CardListingsPanel({ cardId }) {
         <ListingRow
           key={listing.id}
           listing={listing}
-          cardLabel={cardLabel}
+          cardLabel={collectibleLabel}
           onAccept={handleAccept}
           canAccept={!user || listing.createdByUid !== user.uid}
           canCancel={Boolean(user) && listing.createdByUid === user.uid}

@@ -11,7 +11,8 @@ function dollarsToCents(value) {
   return Math.round(parsed * 100);
 }
 
-export default function CreateListingForm({ cardId }) {
+export default function CreateListingForm({ collectibleId, cardId }) {
+  const id = collectibleId ?? cardId;
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -27,7 +28,7 @@ export default function CreateListingForm({ cardId }) {
     setError(null);
 
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/cards/${cardId}` } } });
+      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${id}` } } });
       return;
     }
 
@@ -40,7 +41,7 @@ export default function CreateListingForm({ cardId }) {
     try {
       await createListing({
         type,
-        cardId,
+        cardId: id,
         priceCents,
         currency: 'USD',
         quantity: 1,

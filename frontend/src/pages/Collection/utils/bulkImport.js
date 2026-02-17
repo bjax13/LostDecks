@@ -2,11 +2,12 @@ import { collection, doc, serverTimestamp, writeBatch } from 'firebase/firestore
 import { db } from '../../../lib/firebase';
 import {
   datasetSkus,
-  getCardRecord,
-  getSkuRecord
-} from '../../../data/cards';
+  getCollectibleRecord,
+  getSkuRecord,
+  toSkuId,
+} from '../../../data/collectibles';
 
-const csvHeaders = ['skuId', 'cardId', 'story', 'category', 'finish', 'displayName', 'quantity'];
+const csvHeaders = ['skuId', 'quantity', 'notes'];
 
 function escapeCsvValue(value) {
   if (value == null) {
@@ -35,30 +36,19 @@ export function createCollectionTemplateCsv() {
     return a.cardId.localeCompare(b.cardId);
   });
 
-  const rows = sortedSkus.map((sku) => {
-    const card = getCardRecord(sku.cardId);
-    return [
-      sku.skuId,
-      sku.cardId,
-      card?.storyTitle ?? '',
-      card?.category ?? '',
-      sku.finish.toUpperCase(),
-      card?.displayName ?? '',
-      ''
-    ];
-  });
+  const rows = sortedSkus.map((sku) => [sku.skuId, '1', '']);
 
   const csvLines = [csvHeaders, ...rows].map((row) => row.map(escapeCsvValue).join(','));
   return csvLines.join('\n');
 }
 
 const headerAliases = {
+  skuid: 'skuId',
+  sku: 'skuId',
   card: 'cardId',
   cardid: 'cardId',
   cardcode: 'cardId',
   id: 'cardId',
-  skuid: 'skuId',
-  sku: 'skuId',
   finish: 'finish',
   foil: 'finish',
   variant: 'finish',
@@ -68,7 +58,7 @@ const headerAliases = {
   copies: 'quantity',
   total: 'quantity',
   notes: 'notes',
-  note: 'notes'
+  note: 'notes',
 };
 
 function normalizeHeader(header) {
@@ -190,14 +180,8 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function toUniqueKey(skuId, cardId) {
-  if (skuId) {
-    return `sku:${skuId}`;
-  }
-  if (cardId) {
-    return `card:${cardId}`;
-  }
-  return null;
+function toUniqueKey(skuId) {
+  return skuId ? `sku:${skuId}` : null;
 }
 
 export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntries }) {
@@ -206,14 +190,9 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
   }
 
   const existingBySku = new Map();
-  const existingByCard = new Map();
-
   (existingEntries ?? []).forEach((entry) => {
     if (entry.skuId) {
       existingBySku.set(String(entry.skuId).toUpperCase(), entry);
-    }
-    if (entry.cardId) {
-      existingByCard.set(String(entry.cardId).toUpperCase(), entry);
     }
   });
 
@@ -231,17 +210,27 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     const line = row.__lineNumber ?? '?';
     const rawSku = row.skuId ?? row.skuid ?? null;
     const rawCard = row.cardId ?? row.card ?? null;
-    const skuId = rawSku ? String(rawSku).toUpperCase() : null;
-    let cardId = rawCard ? String(rawCard).toUpperCase() : null;
+    const rawFinish = row.finish ?? null;
 
-    if (!skuId && !cardId) {
-      issues.push({ line, message: 'Missing SKU or card identifier.' });
+    let skuId = rawSku ? String(rawSku).trim().toUpperCase() : null;
+    if (!skuId && rawCard && rawFinish) {
+      skuId = toSkuId(String(rawCard).trim().toUpperCase(), String(rawFinish).trim().toUpperCase());
+    }
+
+    if (!skuId) {
+      issues.push({ line, message: 'Missing skuId, or cardId+finish.' });
       return;
     }
 
-    const uniqueKey = toUniqueKey(skuId, cardId);
+    const skuRecord = getSkuRecord(skuId);
+    if (!skuRecord) {
+      issues.push({ line, message: `SKU "${skuId}" not found in catalog.` });
+      return;
+    }
+
+    const uniqueKey = toUniqueKey(skuId);
     if (uniqueKey && seenKeys.has(uniqueKey)) {
-      issues.push({ line, message: 'Duplicate row for the same card or SKU.' });
+      issues.push({ line, message: 'Duplicate row for the same SKU.' });
       return;
     }
     if (uniqueKey) {
@@ -256,26 +245,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
 
     const normalizedQuantity = Math.max(0, Math.round(quantityNumber));
 
-    const skuRecord = skuId ? getSkuRecord(skuId) : null;
-    const cardRecord = skuRecord?.card ?? (cardId ? getCardRecord(cardId) : null);
-
-    if (!cardRecord) {
-      issues.push({ line, message: 'Card could not be found in the Stormlight Lost Tales catalog.' });
-      return;
-    }
-
-    if (!cardId && cardRecord?.id) {
-      cardId = cardRecord.id;
-    }
-
-    let finish = row.finish ? String(row.finish).toUpperCase() : null;
-    if (!finish && skuRecord?.finish) {
-      finish = skuRecord.finish;
-    }
-
-    const existing = skuId
-      ? existingBySku.get(skuId)
-      : existingByCard.get(cardId ?? '');
+    const existing = existingBySku.get(skuId);
 
     if (normalizedQuantity === 0) {
       if (existing) {
@@ -288,20 +258,10 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     const docRef = existing ? doc(collectionRef, existing.id) : doc(collectionRef);
     const payload = {
       ownerUid,
+      skuId,
       quantity: normalizedQuantity,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     };
-
-    if (cardId) {
-      payload.cardId = cardId;
-    }
-    if (skuId) {
-      payload.skuId = skuId;
-    }
-    if (finish) {
-      payload.finish = finish;
-    }
-
     if (typeof row.notes === 'string' && row.notes.trim().length > 0) {
       payload.notes = row.notes.trim();
     }

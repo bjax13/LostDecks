@@ -1,17 +1,17 @@
 {
   "meta": {
     "setId": "LT24",
-    "setName": "Stormlight Lost Tales \u2014 Story Deck",
+    "setName": "Stormlight Lost Tales — Story Deck",
     "releaseEvent": "Dragonsteel Nexus 2024",
     "totalUniqueCards": 215,
     "totalSkus": 430,
     "notes": [
-      "Herald cards 7\u20139 are more rare than 1\u20136.",
-      "Story cards 49\u201354 are more rare than 1\u201348.",
+      "Herald cards 7–9 are more rare than 1–6.",
+      "Story cards 49–54 are more rare than 1–48.",
       "Story card L40 is abnormally rare.",
       "Story card E18 is abnormally rare.",
       "Nonsense cards are numbered by their base story card; some have multiple variants with distinct captions/art beats.",
-      "Chasmfriends Nonsense are nine contiguous cards (C19\u2013C27)."
+      "Chasmfriends Nonsense are nine contiguous cards (C19–C27)."
     ]
   },
   "stories": [
@@ -2918,2152 +2918,2152 @@
   },
   "skus": [
     {
-      "skuId": "LT24-ELS-01#DUN",
+      "skuId": "LT24-ELS-01-DUN",
       "cardId": "LT24-ELS-01",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-01#FOIL",
+      "skuId": "LT24-ELS-01-FOIL",
       "cardId": "LT24-ELS-01",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-02#DUN",
+      "skuId": "LT24-ELS-02-DUN",
       "cardId": "LT24-ELS-02",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-02#FOIL",
+      "skuId": "LT24-ELS-02-FOIL",
       "cardId": "LT24-ELS-02",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-03#DUN",
+      "skuId": "LT24-ELS-03-DUN",
       "cardId": "LT24-ELS-03",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-03#FOIL",
+      "skuId": "LT24-ELS-03-FOIL",
       "cardId": "LT24-ELS-03",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-04#DUN",
+      "skuId": "LT24-ELS-04-DUN",
       "cardId": "LT24-ELS-04",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-04#FOIL",
+      "skuId": "LT24-ELS-04-FOIL",
       "cardId": "LT24-ELS-04",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-05#DUN",
+      "skuId": "LT24-ELS-05-DUN",
       "cardId": "LT24-ELS-05",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-05#FOIL",
+      "skuId": "LT24-ELS-05-FOIL",
       "cardId": "LT24-ELS-05",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-06#DUN",
+      "skuId": "LT24-ELS-06-DUN",
       "cardId": "LT24-ELS-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-06#FOIL",
+      "skuId": "LT24-ELS-06-FOIL",
       "cardId": "LT24-ELS-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-07#DUN",
+      "skuId": "LT24-ELS-07-DUN",
       "cardId": "LT24-ELS-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-07#FOIL",
+      "skuId": "LT24-ELS-07-FOIL",
       "cardId": "LT24-ELS-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-08#DUN",
+      "skuId": "LT24-ELS-08-DUN",
       "cardId": "LT24-ELS-08",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-08#FOIL",
+      "skuId": "LT24-ELS-08-FOIL",
       "cardId": "LT24-ELS-08",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-09#DUN",
+      "skuId": "LT24-ELS-09-DUN",
       "cardId": "LT24-ELS-09",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-09#FOIL",
+      "skuId": "LT24-ELS-09-FOIL",
       "cardId": "LT24-ELS-09",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-10#DUN",
+      "skuId": "LT24-ELS-10-DUN",
       "cardId": "LT24-ELS-10",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-10#FOIL",
+      "skuId": "LT24-ELS-10-FOIL",
       "cardId": "LT24-ELS-10",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-11#DUN",
+      "skuId": "LT24-ELS-11-DUN",
       "cardId": "LT24-ELS-11",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-11#FOIL",
+      "skuId": "LT24-ELS-11-FOIL",
       "cardId": "LT24-ELS-11",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-12#DUN",
+      "skuId": "LT24-ELS-12-DUN",
       "cardId": "LT24-ELS-12",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-12#FOIL",
+      "skuId": "LT24-ELS-12-FOIL",
       "cardId": "LT24-ELS-12",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-13#DUN",
+      "skuId": "LT24-ELS-13-DUN",
       "cardId": "LT24-ELS-13",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-13#FOIL",
+      "skuId": "LT24-ELS-13-FOIL",
       "cardId": "LT24-ELS-13",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-14#DUN",
+      "skuId": "LT24-ELS-14-DUN",
       "cardId": "LT24-ELS-14",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-14#FOIL",
+      "skuId": "LT24-ELS-14-FOIL",
       "cardId": "LT24-ELS-14",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-15#DUN",
+      "skuId": "LT24-ELS-15-DUN",
       "cardId": "LT24-ELS-15",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-15#FOIL",
+      "skuId": "LT24-ELS-15-FOIL",
       "cardId": "LT24-ELS-15",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-16#DUN",
+      "skuId": "LT24-ELS-16-DUN",
       "cardId": "LT24-ELS-16",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-16#FOIL",
+      "skuId": "LT24-ELS-16-FOIL",
       "cardId": "LT24-ELS-16",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-17#DUN",
+      "skuId": "LT24-ELS-17-DUN",
       "cardId": "LT24-ELS-17",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-17#FOIL",
+      "skuId": "LT24-ELS-17-FOIL",
       "cardId": "LT24-ELS-17",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-18#DUN",
+      "skuId": "LT24-ELS-18-DUN",
       "cardId": "LT24-ELS-18",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-18#FOIL",
+      "skuId": "LT24-ELS-18-FOIL",
       "cardId": "LT24-ELS-18",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-19#DUN",
+      "skuId": "LT24-ELS-19-DUN",
       "cardId": "LT24-ELS-19",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-19#FOIL",
+      "skuId": "LT24-ELS-19-FOIL",
       "cardId": "LT24-ELS-19",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-20#DUN",
+      "skuId": "LT24-ELS-20-DUN",
       "cardId": "LT24-ELS-20",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-20#FOIL",
+      "skuId": "LT24-ELS-20-FOIL",
       "cardId": "LT24-ELS-20",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-21#DUN",
+      "skuId": "LT24-ELS-21-DUN",
       "cardId": "LT24-ELS-21",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-21#FOIL",
+      "skuId": "LT24-ELS-21-FOIL",
       "cardId": "LT24-ELS-21",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-22#DUN",
+      "skuId": "LT24-ELS-22-DUN",
       "cardId": "LT24-ELS-22",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-22#FOIL",
+      "skuId": "LT24-ELS-22-FOIL",
       "cardId": "LT24-ELS-22",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-23#DUN",
+      "skuId": "LT24-ELS-23-DUN",
       "cardId": "LT24-ELS-23",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-23#FOIL",
+      "skuId": "LT24-ELS-23-FOIL",
       "cardId": "LT24-ELS-23",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-24#DUN",
+      "skuId": "LT24-ELS-24-DUN",
       "cardId": "LT24-ELS-24",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-24#FOIL",
+      "skuId": "LT24-ELS-24-FOIL",
       "cardId": "LT24-ELS-24",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-25#DUN",
+      "skuId": "LT24-ELS-25-DUN",
       "cardId": "LT24-ELS-25",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-25#FOIL",
+      "skuId": "LT24-ELS-25-FOIL",
       "cardId": "LT24-ELS-25",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-26#DUN",
+      "skuId": "LT24-ELS-26-DUN",
       "cardId": "LT24-ELS-26",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-26#FOIL",
+      "skuId": "LT24-ELS-26-FOIL",
       "cardId": "LT24-ELS-26",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-27#DUN",
+      "skuId": "LT24-ELS-27-DUN",
       "cardId": "LT24-ELS-27",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-27#FOIL",
+      "skuId": "LT24-ELS-27-FOIL",
       "cardId": "LT24-ELS-27",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-28#DUN",
+      "skuId": "LT24-ELS-28-DUN",
       "cardId": "LT24-ELS-28",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-28#FOIL",
+      "skuId": "LT24-ELS-28-FOIL",
       "cardId": "LT24-ELS-28",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-29#DUN",
+      "skuId": "LT24-ELS-29-DUN",
       "cardId": "LT24-ELS-29",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-29#FOIL",
+      "skuId": "LT24-ELS-29-FOIL",
       "cardId": "LT24-ELS-29",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-30#DUN",
+      "skuId": "LT24-ELS-30-DUN",
       "cardId": "LT24-ELS-30",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-30#FOIL",
+      "skuId": "LT24-ELS-30-FOIL",
       "cardId": "LT24-ELS-30",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-31#DUN",
+      "skuId": "LT24-ELS-31-DUN",
       "cardId": "LT24-ELS-31",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-31#FOIL",
+      "skuId": "LT24-ELS-31-FOIL",
       "cardId": "LT24-ELS-31",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-32#DUN",
+      "skuId": "LT24-ELS-32-DUN",
       "cardId": "LT24-ELS-32",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-32#FOIL",
+      "skuId": "LT24-ELS-32-FOIL",
       "cardId": "LT24-ELS-32",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-33#DUN",
+      "skuId": "LT24-ELS-33-DUN",
       "cardId": "LT24-ELS-33",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-33#FOIL",
+      "skuId": "LT24-ELS-33-FOIL",
       "cardId": "LT24-ELS-33",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-34#DUN",
+      "skuId": "LT24-ELS-34-DUN",
       "cardId": "LT24-ELS-34",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-34#FOIL",
+      "skuId": "LT24-ELS-34-FOIL",
       "cardId": "LT24-ELS-34",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-35#DUN",
+      "skuId": "LT24-ELS-35-DUN",
       "cardId": "LT24-ELS-35",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-35#FOIL",
+      "skuId": "LT24-ELS-35-FOIL",
       "cardId": "LT24-ELS-35",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-36#DUN",
+      "skuId": "LT24-ELS-36-DUN",
       "cardId": "LT24-ELS-36",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-36#FOIL",
+      "skuId": "LT24-ELS-36-FOIL",
       "cardId": "LT24-ELS-36",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-37#DUN",
+      "skuId": "LT24-ELS-37-DUN",
       "cardId": "LT24-ELS-37",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-37#FOIL",
+      "skuId": "LT24-ELS-37-FOIL",
       "cardId": "LT24-ELS-37",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-38#DUN",
+      "skuId": "LT24-ELS-38-DUN",
       "cardId": "LT24-ELS-38",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-38#FOIL",
+      "skuId": "LT24-ELS-38-FOIL",
       "cardId": "LT24-ELS-38",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-39#DUN",
+      "skuId": "LT24-ELS-39-DUN",
       "cardId": "LT24-ELS-39",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-39#FOIL",
+      "skuId": "LT24-ELS-39-FOIL",
       "cardId": "LT24-ELS-39",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-40#DUN",
+      "skuId": "LT24-ELS-40-DUN",
       "cardId": "LT24-ELS-40",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-40#FOIL",
+      "skuId": "LT24-ELS-40-FOIL",
       "cardId": "LT24-ELS-40",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-41#DUN",
+      "skuId": "LT24-ELS-41-DUN",
       "cardId": "LT24-ELS-41",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-41#FOIL",
+      "skuId": "LT24-ELS-41-FOIL",
       "cardId": "LT24-ELS-41",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-42#DUN",
+      "skuId": "LT24-ELS-42-DUN",
       "cardId": "LT24-ELS-42",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-42#FOIL",
+      "skuId": "LT24-ELS-42-FOIL",
       "cardId": "LT24-ELS-42",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-43#DUN",
+      "skuId": "LT24-ELS-43-DUN",
       "cardId": "LT24-ELS-43",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-43#FOIL",
+      "skuId": "LT24-ELS-43-FOIL",
       "cardId": "LT24-ELS-43",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-44#DUN",
+      "skuId": "LT24-ELS-44-DUN",
       "cardId": "LT24-ELS-44",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-44#FOIL",
+      "skuId": "LT24-ELS-44-FOIL",
       "cardId": "LT24-ELS-44",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-45#DUN",
+      "skuId": "LT24-ELS-45-DUN",
       "cardId": "LT24-ELS-45",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-45#FOIL",
+      "skuId": "LT24-ELS-45-FOIL",
       "cardId": "LT24-ELS-45",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-46#DUN",
+      "skuId": "LT24-ELS-46-DUN",
       "cardId": "LT24-ELS-46",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-46#FOIL",
+      "skuId": "LT24-ELS-46-FOIL",
       "cardId": "LT24-ELS-46",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-47#DUN",
+      "skuId": "LT24-ELS-47-DUN",
       "cardId": "LT24-ELS-47",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-47#FOIL",
+      "skuId": "LT24-ELS-47-FOIL",
       "cardId": "LT24-ELS-47",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-48#DUN",
+      "skuId": "LT24-ELS-48-DUN",
       "cardId": "LT24-ELS-48",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-48#FOIL",
+      "skuId": "LT24-ELS-48-FOIL",
       "cardId": "LT24-ELS-48",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-49#DUN",
+      "skuId": "LT24-ELS-49-DUN",
       "cardId": "LT24-ELS-49",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-49#FOIL",
+      "skuId": "LT24-ELS-49-FOIL",
       "cardId": "LT24-ELS-49",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-50#DUN",
+      "skuId": "LT24-ELS-50-DUN",
       "cardId": "LT24-ELS-50",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-50#FOIL",
+      "skuId": "LT24-ELS-50-FOIL",
       "cardId": "LT24-ELS-50",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-51#DUN",
+      "skuId": "LT24-ELS-51-DUN",
       "cardId": "LT24-ELS-51",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-51#FOIL",
+      "skuId": "LT24-ELS-51-FOIL",
       "cardId": "LT24-ELS-51",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-52#DUN",
+      "skuId": "LT24-ELS-52-DUN",
       "cardId": "LT24-ELS-52",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-52#FOIL",
+      "skuId": "LT24-ELS-52-FOIL",
       "cardId": "LT24-ELS-52",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-53#DUN",
+      "skuId": "LT24-ELS-53-DUN",
       "cardId": "LT24-ELS-53",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-53#FOIL",
+      "skuId": "LT24-ELS-53-FOIL",
       "cardId": "LT24-ELS-53",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-ELS-54#DUN",
+      "skuId": "LT24-ELS-54-DUN",
       "cardId": "LT24-ELS-54",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-ELS-54#FOIL",
+      "skuId": "LT24-ELS-54-FOIL",
       "cardId": "LT24-ELS-54",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-01#DUN",
+      "skuId": "LT24-LOP-01-DUN",
       "cardId": "LT24-LOP-01",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-01#FOIL",
+      "skuId": "LT24-LOP-01-FOIL",
       "cardId": "LT24-LOP-01",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-02#DUN",
+      "skuId": "LT24-LOP-02-DUN",
       "cardId": "LT24-LOP-02",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-02#FOIL",
+      "skuId": "LT24-LOP-02-FOIL",
       "cardId": "LT24-LOP-02",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-03#DUN",
+      "skuId": "LT24-LOP-03-DUN",
       "cardId": "LT24-LOP-03",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-03#FOIL",
+      "skuId": "LT24-LOP-03-FOIL",
       "cardId": "LT24-LOP-03",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-04#DUN",
+      "skuId": "LT24-LOP-04-DUN",
       "cardId": "LT24-LOP-04",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-04#FOIL",
+      "skuId": "LT24-LOP-04-FOIL",
       "cardId": "LT24-LOP-04",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-05#DUN",
+      "skuId": "LT24-LOP-05-DUN",
       "cardId": "LT24-LOP-05",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-05#FOIL",
+      "skuId": "LT24-LOP-05-FOIL",
       "cardId": "LT24-LOP-05",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-06#DUN",
+      "skuId": "LT24-LOP-06-DUN",
       "cardId": "LT24-LOP-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-06#FOIL",
+      "skuId": "LT24-LOP-06-FOIL",
       "cardId": "LT24-LOP-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-07#DUN",
+      "skuId": "LT24-LOP-07-DUN",
       "cardId": "LT24-LOP-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-07#FOIL",
+      "skuId": "LT24-LOP-07-FOIL",
       "cardId": "LT24-LOP-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-08#DUN",
+      "skuId": "LT24-LOP-08-DUN",
       "cardId": "LT24-LOP-08",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-08#FOIL",
+      "skuId": "LT24-LOP-08-FOIL",
       "cardId": "LT24-LOP-08",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-09#DUN",
+      "skuId": "LT24-LOP-09-DUN",
       "cardId": "LT24-LOP-09",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-09#FOIL",
+      "skuId": "LT24-LOP-09-FOIL",
       "cardId": "LT24-LOP-09",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-10#DUN",
+      "skuId": "LT24-LOP-10-DUN",
       "cardId": "LT24-LOP-10",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-10#FOIL",
+      "skuId": "LT24-LOP-10-FOIL",
       "cardId": "LT24-LOP-10",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-11#DUN",
+      "skuId": "LT24-LOP-11-DUN",
       "cardId": "LT24-LOP-11",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-11#FOIL",
+      "skuId": "LT24-LOP-11-FOIL",
       "cardId": "LT24-LOP-11",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-12#DUN",
+      "skuId": "LT24-LOP-12-DUN",
       "cardId": "LT24-LOP-12",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-12#FOIL",
+      "skuId": "LT24-LOP-12-FOIL",
       "cardId": "LT24-LOP-12",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-13#DUN",
+      "skuId": "LT24-LOP-13-DUN",
       "cardId": "LT24-LOP-13",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-13#FOIL",
+      "skuId": "LT24-LOP-13-FOIL",
       "cardId": "LT24-LOP-13",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-14#DUN",
+      "skuId": "LT24-LOP-14-DUN",
       "cardId": "LT24-LOP-14",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-14#FOIL",
+      "skuId": "LT24-LOP-14-FOIL",
       "cardId": "LT24-LOP-14",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-15#DUN",
+      "skuId": "LT24-LOP-15-DUN",
       "cardId": "LT24-LOP-15",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-15#FOIL",
+      "skuId": "LT24-LOP-15-FOIL",
       "cardId": "LT24-LOP-15",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-16#DUN",
+      "skuId": "LT24-LOP-16-DUN",
       "cardId": "LT24-LOP-16",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-16#FOIL",
+      "skuId": "LT24-LOP-16-FOIL",
       "cardId": "LT24-LOP-16",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-17#DUN",
+      "skuId": "LT24-LOP-17-DUN",
       "cardId": "LT24-LOP-17",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-17#FOIL",
+      "skuId": "LT24-LOP-17-FOIL",
       "cardId": "LT24-LOP-17",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-18#DUN",
+      "skuId": "LT24-LOP-18-DUN",
       "cardId": "LT24-LOP-18",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-18#FOIL",
+      "skuId": "LT24-LOP-18-FOIL",
       "cardId": "LT24-LOP-18",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-19#DUN",
+      "skuId": "LT24-LOP-19-DUN",
       "cardId": "LT24-LOP-19",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-19#FOIL",
+      "skuId": "LT24-LOP-19-FOIL",
       "cardId": "LT24-LOP-19",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-20#DUN",
+      "skuId": "LT24-LOP-20-DUN",
       "cardId": "LT24-LOP-20",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-20#FOIL",
+      "skuId": "LT24-LOP-20-FOIL",
       "cardId": "LT24-LOP-20",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-21#DUN",
+      "skuId": "LT24-LOP-21-DUN",
       "cardId": "LT24-LOP-21",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-21#FOIL",
+      "skuId": "LT24-LOP-21-FOIL",
       "cardId": "LT24-LOP-21",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-22#DUN",
+      "skuId": "LT24-LOP-22-DUN",
       "cardId": "LT24-LOP-22",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-22#FOIL",
+      "skuId": "LT24-LOP-22-FOIL",
       "cardId": "LT24-LOP-22",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-23#DUN",
+      "skuId": "LT24-LOP-23-DUN",
       "cardId": "LT24-LOP-23",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-23#FOIL",
+      "skuId": "LT24-LOP-23-FOIL",
       "cardId": "LT24-LOP-23",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-24#DUN",
+      "skuId": "LT24-LOP-24-DUN",
       "cardId": "LT24-LOP-24",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-24#FOIL",
+      "skuId": "LT24-LOP-24-FOIL",
       "cardId": "LT24-LOP-24",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-25#DUN",
+      "skuId": "LT24-LOP-25-DUN",
       "cardId": "LT24-LOP-25",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-25#FOIL",
+      "skuId": "LT24-LOP-25-FOIL",
       "cardId": "LT24-LOP-25",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-26#DUN",
+      "skuId": "LT24-LOP-26-DUN",
       "cardId": "LT24-LOP-26",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-26#FOIL",
+      "skuId": "LT24-LOP-26-FOIL",
       "cardId": "LT24-LOP-26",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-27#DUN",
+      "skuId": "LT24-LOP-27-DUN",
       "cardId": "LT24-LOP-27",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-27#FOIL",
+      "skuId": "LT24-LOP-27-FOIL",
       "cardId": "LT24-LOP-27",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-28#DUN",
+      "skuId": "LT24-LOP-28-DUN",
       "cardId": "LT24-LOP-28",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-28#FOIL",
+      "skuId": "LT24-LOP-28-FOIL",
       "cardId": "LT24-LOP-28",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-29#DUN",
+      "skuId": "LT24-LOP-29-DUN",
       "cardId": "LT24-LOP-29",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-29#FOIL",
+      "skuId": "LT24-LOP-29-FOIL",
       "cardId": "LT24-LOP-29",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-30#DUN",
+      "skuId": "LT24-LOP-30-DUN",
       "cardId": "LT24-LOP-30",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-30#FOIL",
+      "skuId": "LT24-LOP-30-FOIL",
       "cardId": "LT24-LOP-30",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-31#DUN",
+      "skuId": "LT24-LOP-31-DUN",
       "cardId": "LT24-LOP-31",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-31#FOIL",
+      "skuId": "LT24-LOP-31-FOIL",
       "cardId": "LT24-LOP-31",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-32#DUN",
+      "skuId": "LT24-LOP-32-DUN",
       "cardId": "LT24-LOP-32",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-32#FOIL",
+      "skuId": "LT24-LOP-32-FOIL",
       "cardId": "LT24-LOP-32",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-33#DUN",
+      "skuId": "LT24-LOP-33-DUN",
       "cardId": "LT24-LOP-33",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-33#FOIL",
+      "skuId": "LT24-LOP-33-FOIL",
       "cardId": "LT24-LOP-33",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-34#DUN",
+      "skuId": "LT24-LOP-34-DUN",
       "cardId": "LT24-LOP-34",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-34#FOIL",
+      "skuId": "LT24-LOP-34-FOIL",
       "cardId": "LT24-LOP-34",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-35#DUN",
+      "skuId": "LT24-LOP-35-DUN",
       "cardId": "LT24-LOP-35",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-35#FOIL",
+      "skuId": "LT24-LOP-35-FOIL",
       "cardId": "LT24-LOP-35",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-36#DUN",
+      "skuId": "LT24-LOP-36-DUN",
       "cardId": "LT24-LOP-36",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-36#FOIL",
+      "skuId": "LT24-LOP-36-FOIL",
       "cardId": "LT24-LOP-36",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-37#DUN",
+      "skuId": "LT24-LOP-37-DUN",
       "cardId": "LT24-LOP-37",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-37#FOIL",
+      "skuId": "LT24-LOP-37-FOIL",
       "cardId": "LT24-LOP-37",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-38#DUN",
+      "skuId": "LT24-LOP-38-DUN",
       "cardId": "LT24-LOP-38",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-38#FOIL",
+      "skuId": "LT24-LOP-38-FOIL",
       "cardId": "LT24-LOP-38",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-39#DUN",
+      "skuId": "LT24-LOP-39-DUN",
       "cardId": "LT24-LOP-39",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-39#FOIL",
+      "skuId": "LT24-LOP-39-FOIL",
       "cardId": "LT24-LOP-39",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-40#DUN",
+      "skuId": "LT24-LOP-40-DUN",
       "cardId": "LT24-LOP-40",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-40#FOIL",
+      "skuId": "LT24-LOP-40-FOIL",
       "cardId": "LT24-LOP-40",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-41#DUN",
+      "skuId": "LT24-LOP-41-DUN",
       "cardId": "LT24-LOP-41",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-41#FOIL",
+      "skuId": "LT24-LOP-41-FOIL",
       "cardId": "LT24-LOP-41",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-42#DUN",
+      "skuId": "LT24-LOP-42-DUN",
       "cardId": "LT24-LOP-42",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-42#FOIL",
+      "skuId": "LT24-LOP-42-FOIL",
       "cardId": "LT24-LOP-42",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-43#DUN",
+      "skuId": "LT24-LOP-43-DUN",
       "cardId": "LT24-LOP-43",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-43#FOIL",
+      "skuId": "LT24-LOP-43-FOIL",
       "cardId": "LT24-LOP-43",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-44#DUN",
+      "skuId": "LT24-LOP-44-DUN",
       "cardId": "LT24-LOP-44",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-44#FOIL",
+      "skuId": "LT24-LOP-44-FOIL",
       "cardId": "LT24-LOP-44",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-45#DUN",
+      "skuId": "LT24-LOP-45-DUN",
       "cardId": "LT24-LOP-45",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-45#FOIL",
+      "skuId": "LT24-LOP-45-FOIL",
       "cardId": "LT24-LOP-45",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-46#DUN",
+      "skuId": "LT24-LOP-46-DUN",
       "cardId": "LT24-LOP-46",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-46#FOIL",
+      "skuId": "LT24-LOP-46-FOIL",
       "cardId": "LT24-LOP-46",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-47#DUN",
+      "skuId": "LT24-LOP-47-DUN",
       "cardId": "LT24-LOP-47",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-47#FOIL",
+      "skuId": "LT24-LOP-47-FOIL",
       "cardId": "LT24-LOP-47",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-48#DUN",
+      "skuId": "LT24-LOP-48-DUN",
       "cardId": "LT24-LOP-48",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-48#FOIL",
+      "skuId": "LT24-LOP-48-FOIL",
       "cardId": "LT24-LOP-48",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-49#DUN",
+      "skuId": "LT24-LOP-49-DUN",
       "cardId": "LT24-LOP-49",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-49#FOIL",
+      "skuId": "LT24-LOP-49-FOIL",
       "cardId": "LT24-LOP-49",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-50#DUN",
+      "skuId": "LT24-LOP-50-DUN",
       "cardId": "LT24-LOP-50",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-50#FOIL",
+      "skuId": "LT24-LOP-50-FOIL",
       "cardId": "LT24-LOP-50",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-51#DUN",
+      "skuId": "LT24-LOP-51-DUN",
       "cardId": "LT24-LOP-51",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-51#FOIL",
+      "skuId": "LT24-LOP-51-FOIL",
       "cardId": "LT24-LOP-51",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-52#DUN",
+      "skuId": "LT24-LOP-52-DUN",
       "cardId": "LT24-LOP-52",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-52#FOIL",
+      "skuId": "LT24-LOP-52-FOIL",
       "cardId": "LT24-LOP-52",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-53#DUN",
+      "skuId": "LT24-LOP-53-DUN",
       "cardId": "LT24-LOP-53",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-53#FOIL",
+      "skuId": "LT24-LOP-53-FOIL",
       "cardId": "LT24-LOP-53",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-LOP-54#DUN",
+      "skuId": "LT24-LOP-54-DUN",
       "cardId": "LT24-LOP-54",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-LOP-54#FOIL",
+      "skuId": "LT24-LOP-54-FOIL",
       "cardId": "LT24-LOP-54",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-01#DUN",
+      "skuId": "LT24-CHM-01-DUN",
       "cardId": "LT24-CHM-01",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-01#FOIL",
+      "skuId": "LT24-CHM-01-FOIL",
       "cardId": "LT24-CHM-01",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-02#DUN",
+      "skuId": "LT24-CHM-02-DUN",
       "cardId": "LT24-CHM-02",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-02#FOIL",
+      "skuId": "LT24-CHM-02-FOIL",
       "cardId": "LT24-CHM-02",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-03#DUN",
+      "skuId": "LT24-CHM-03-DUN",
       "cardId": "LT24-CHM-03",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-03#FOIL",
+      "skuId": "LT24-CHM-03-FOIL",
       "cardId": "LT24-CHM-03",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-04#DUN",
+      "skuId": "LT24-CHM-04-DUN",
       "cardId": "LT24-CHM-04",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-04#FOIL",
+      "skuId": "LT24-CHM-04-FOIL",
       "cardId": "LT24-CHM-04",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-05#DUN",
+      "skuId": "LT24-CHM-05-DUN",
       "cardId": "LT24-CHM-05",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-05#FOIL",
+      "skuId": "LT24-CHM-05-FOIL",
       "cardId": "LT24-CHM-05",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-06#DUN",
+      "skuId": "LT24-CHM-06-DUN",
       "cardId": "LT24-CHM-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-06#FOIL",
+      "skuId": "LT24-CHM-06-FOIL",
       "cardId": "LT24-CHM-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-07#DUN",
+      "skuId": "LT24-CHM-07-DUN",
       "cardId": "LT24-CHM-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-07#FOIL",
+      "skuId": "LT24-CHM-07-FOIL",
       "cardId": "LT24-CHM-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-08#DUN",
+      "skuId": "LT24-CHM-08-DUN",
       "cardId": "LT24-CHM-08",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-08#FOIL",
+      "skuId": "LT24-CHM-08-FOIL",
       "cardId": "LT24-CHM-08",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-09#DUN",
+      "skuId": "LT24-CHM-09-DUN",
       "cardId": "LT24-CHM-09",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-09#FOIL",
+      "skuId": "LT24-CHM-09-FOIL",
       "cardId": "LT24-CHM-09",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-10#DUN",
+      "skuId": "LT24-CHM-10-DUN",
       "cardId": "LT24-CHM-10",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-10#FOIL",
+      "skuId": "LT24-CHM-10-FOIL",
       "cardId": "LT24-CHM-10",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-11#DUN",
+      "skuId": "LT24-CHM-11-DUN",
       "cardId": "LT24-CHM-11",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-11#FOIL",
+      "skuId": "LT24-CHM-11-FOIL",
       "cardId": "LT24-CHM-11",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-12#DUN",
+      "skuId": "LT24-CHM-12-DUN",
       "cardId": "LT24-CHM-12",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-12#FOIL",
+      "skuId": "LT24-CHM-12-FOIL",
       "cardId": "LT24-CHM-12",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-13#DUN",
+      "skuId": "LT24-CHM-13-DUN",
       "cardId": "LT24-CHM-13",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-13#FOIL",
+      "skuId": "LT24-CHM-13-FOIL",
       "cardId": "LT24-CHM-13",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-14#DUN",
+      "skuId": "LT24-CHM-14-DUN",
       "cardId": "LT24-CHM-14",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-14#FOIL",
+      "skuId": "LT24-CHM-14-FOIL",
       "cardId": "LT24-CHM-14",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-15#DUN",
+      "skuId": "LT24-CHM-15-DUN",
       "cardId": "LT24-CHM-15",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-15#FOIL",
+      "skuId": "LT24-CHM-15-FOIL",
       "cardId": "LT24-CHM-15",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-16#DUN",
+      "skuId": "LT24-CHM-16-DUN",
       "cardId": "LT24-CHM-16",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-16#FOIL",
+      "skuId": "LT24-CHM-16-FOIL",
       "cardId": "LT24-CHM-16",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-17#DUN",
+      "skuId": "LT24-CHM-17-DUN",
       "cardId": "LT24-CHM-17",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-17#FOIL",
+      "skuId": "LT24-CHM-17-FOIL",
       "cardId": "LT24-CHM-17",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-18#DUN",
+      "skuId": "LT24-CHM-18-DUN",
       "cardId": "LT24-CHM-18",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-18#FOIL",
+      "skuId": "LT24-CHM-18-FOIL",
       "cardId": "LT24-CHM-18",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-19#DUN",
+      "skuId": "LT24-CHM-19-DUN",
       "cardId": "LT24-CHM-19",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-19#FOIL",
+      "skuId": "LT24-CHM-19-FOIL",
       "cardId": "LT24-CHM-19",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-20#DUN",
+      "skuId": "LT24-CHM-20-DUN",
       "cardId": "LT24-CHM-20",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-20#FOIL",
+      "skuId": "LT24-CHM-20-FOIL",
       "cardId": "LT24-CHM-20",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-21#DUN",
+      "skuId": "LT24-CHM-21-DUN",
       "cardId": "LT24-CHM-21",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-21#FOIL",
+      "skuId": "LT24-CHM-21-FOIL",
       "cardId": "LT24-CHM-21",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-22#DUN",
+      "skuId": "LT24-CHM-22-DUN",
       "cardId": "LT24-CHM-22",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-22#FOIL",
+      "skuId": "LT24-CHM-22-FOIL",
       "cardId": "LT24-CHM-22",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-23#DUN",
+      "skuId": "LT24-CHM-23-DUN",
       "cardId": "LT24-CHM-23",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-23#FOIL",
+      "skuId": "LT24-CHM-23-FOIL",
       "cardId": "LT24-CHM-23",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-24#DUN",
+      "skuId": "LT24-CHM-24-DUN",
       "cardId": "LT24-CHM-24",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-24#FOIL",
+      "skuId": "LT24-CHM-24-FOIL",
       "cardId": "LT24-CHM-24",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-25#DUN",
+      "skuId": "LT24-CHM-25-DUN",
       "cardId": "LT24-CHM-25",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-25#FOIL",
+      "skuId": "LT24-CHM-25-FOIL",
       "cardId": "LT24-CHM-25",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-26#DUN",
+      "skuId": "LT24-CHM-26-DUN",
       "cardId": "LT24-CHM-26",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-26#FOIL",
+      "skuId": "LT24-CHM-26-FOIL",
       "cardId": "LT24-CHM-26",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-27#DUN",
+      "skuId": "LT24-CHM-27-DUN",
       "cardId": "LT24-CHM-27",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-27#FOIL",
+      "skuId": "LT24-CHM-27-FOIL",
       "cardId": "LT24-CHM-27",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-28#DUN",
+      "skuId": "LT24-CHM-28-DUN",
       "cardId": "LT24-CHM-28",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-28#FOIL",
+      "skuId": "LT24-CHM-28-FOIL",
       "cardId": "LT24-CHM-28",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-29#DUN",
+      "skuId": "LT24-CHM-29-DUN",
       "cardId": "LT24-CHM-29",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-29#FOIL",
+      "skuId": "LT24-CHM-29-FOIL",
       "cardId": "LT24-CHM-29",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-30#DUN",
+      "skuId": "LT24-CHM-30-DUN",
       "cardId": "LT24-CHM-30",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-30#FOIL",
+      "skuId": "LT24-CHM-30-FOIL",
       "cardId": "LT24-CHM-30",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-31#DUN",
+      "skuId": "LT24-CHM-31-DUN",
       "cardId": "LT24-CHM-31",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-31#FOIL",
+      "skuId": "LT24-CHM-31-FOIL",
       "cardId": "LT24-CHM-31",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-32#DUN",
+      "skuId": "LT24-CHM-32-DUN",
       "cardId": "LT24-CHM-32",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-32#FOIL",
+      "skuId": "LT24-CHM-32-FOIL",
       "cardId": "LT24-CHM-32",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-33#DUN",
+      "skuId": "LT24-CHM-33-DUN",
       "cardId": "LT24-CHM-33",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-33#FOIL",
+      "skuId": "LT24-CHM-33-FOIL",
       "cardId": "LT24-CHM-33",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-34#DUN",
+      "skuId": "LT24-CHM-34-DUN",
       "cardId": "LT24-CHM-34",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-34#FOIL",
+      "skuId": "LT24-CHM-34-FOIL",
       "cardId": "LT24-CHM-34",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-35#DUN",
+      "skuId": "LT24-CHM-35-DUN",
       "cardId": "LT24-CHM-35",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-35#FOIL",
+      "skuId": "LT24-CHM-35-FOIL",
       "cardId": "LT24-CHM-35",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-36#DUN",
+      "skuId": "LT24-CHM-36-DUN",
       "cardId": "LT24-CHM-36",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-36#FOIL",
+      "skuId": "LT24-CHM-36-FOIL",
       "cardId": "LT24-CHM-36",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-37#DUN",
+      "skuId": "LT24-CHM-37-DUN",
       "cardId": "LT24-CHM-37",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-37#FOIL",
+      "skuId": "LT24-CHM-37-FOIL",
       "cardId": "LT24-CHM-37",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-38#DUN",
+      "skuId": "LT24-CHM-38-DUN",
       "cardId": "LT24-CHM-38",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-38#FOIL",
+      "skuId": "LT24-CHM-38-FOIL",
       "cardId": "LT24-CHM-38",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-39#DUN",
+      "skuId": "LT24-CHM-39-DUN",
       "cardId": "LT24-CHM-39",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-39#FOIL",
+      "skuId": "LT24-CHM-39-FOIL",
       "cardId": "LT24-CHM-39",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-40#DUN",
+      "skuId": "LT24-CHM-40-DUN",
       "cardId": "LT24-CHM-40",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-40#FOIL",
+      "skuId": "LT24-CHM-40-FOIL",
       "cardId": "LT24-CHM-40",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-41#DUN",
+      "skuId": "LT24-CHM-41-DUN",
       "cardId": "LT24-CHM-41",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-41#FOIL",
+      "skuId": "LT24-CHM-41-FOIL",
       "cardId": "LT24-CHM-41",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-42#DUN",
+      "skuId": "LT24-CHM-42-DUN",
       "cardId": "LT24-CHM-42",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-42#FOIL",
+      "skuId": "LT24-CHM-42-FOIL",
       "cardId": "LT24-CHM-42",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-43#DUN",
+      "skuId": "LT24-CHM-43-DUN",
       "cardId": "LT24-CHM-43",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-43#FOIL",
+      "skuId": "LT24-CHM-43-FOIL",
       "cardId": "LT24-CHM-43",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-44#DUN",
+      "skuId": "LT24-CHM-44-DUN",
       "cardId": "LT24-CHM-44",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-44#FOIL",
+      "skuId": "LT24-CHM-44-FOIL",
       "cardId": "LT24-CHM-44",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-45#DUN",
+      "skuId": "LT24-CHM-45-DUN",
       "cardId": "LT24-CHM-45",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-45#FOIL",
+      "skuId": "LT24-CHM-45-FOIL",
       "cardId": "LT24-CHM-45",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-46#DUN",
+      "skuId": "LT24-CHM-46-DUN",
       "cardId": "LT24-CHM-46",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-46#FOIL",
+      "skuId": "LT24-CHM-46-FOIL",
       "cardId": "LT24-CHM-46",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-47#DUN",
+      "skuId": "LT24-CHM-47-DUN",
       "cardId": "LT24-CHM-47",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-47#FOIL",
+      "skuId": "LT24-CHM-47-FOIL",
       "cardId": "LT24-CHM-47",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-48#DUN",
+      "skuId": "LT24-CHM-48-DUN",
       "cardId": "LT24-CHM-48",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-48#FOIL",
+      "skuId": "LT24-CHM-48-FOIL",
       "cardId": "LT24-CHM-48",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-49#DUN",
+      "skuId": "LT24-CHM-49-DUN",
       "cardId": "LT24-CHM-49",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-49#FOIL",
+      "skuId": "LT24-CHM-49-FOIL",
       "cardId": "LT24-CHM-49",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-50#DUN",
+      "skuId": "LT24-CHM-50-DUN",
       "cardId": "LT24-CHM-50",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-50#FOIL",
+      "skuId": "LT24-CHM-50-FOIL",
       "cardId": "LT24-CHM-50",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-51#DUN",
+      "skuId": "LT24-CHM-51-DUN",
       "cardId": "LT24-CHM-51",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-51#FOIL",
+      "skuId": "LT24-CHM-51-FOIL",
       "cardId": "LT24-CHM-51",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-52#DUN",
+      "skuId": "LT24-CHM-52-DUN",
       "cardId": "LT24-CHM-52",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-52#FOIL",
+      "skuId": "LT24-CHM-52-FOIL",
       "cardId": "LT24-CHM-52",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-53#DUN",
+      "skuId": "LT24-CHM-53-DUN",
       "cardId": "LT24-CHM-53",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-53#FOIL",
+      "skuId": "LT24-CHM-53-FOIL",
       "cardId": "LT24-CHM-53",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-CHM-54#DUN",
+      "skuId": "LT24-CHM-54-DUN",
       "cardId": "LT24-CHM-54",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-CHM-54#FOIL",
+      "skuId": "LT24-CHM-54-FOIL",
       "cardId": "LT24-CHM-54",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-01#DUN",
+      "skuId": "LT24-HLD-01-DUN",
       "cardId": "LT24-HLD-01",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-01#FOIL",
+      "skuId": "LT24-HLD-01-FOIL",
       "cardId": "LT24-HLD-01",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-02#DUN",
+      "skuId": "LT24-HLD-02-DUN",
       "cardId": "LT24-HLD-02",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-02#FOIL",
+      "skuId": "LT24-HLD-02-FOIL",
       "cardId": "LT24-HLD-02",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-03#DUN",
+      "skuId": "LT24-HLD-03-DUN",
       "cardId": "LT24-HLD-03",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-03#FOIL",
+      "skuId": "LT24-HLD-03-FOIL",
       "cardId": "LT24-HLD-03",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-04#DUN",
+      "skuId": "LT24-HLD-04-DUN",
       "cardId": "LT24-HLD-04",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-04#FOIL",
+      "skuId": "LT24-HLD-04-FOIL",
       "cardId": "LT24-HLD-04",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-05#DUN",
+      "skuId": "LT24-HLD-05-DUN",
       "cardId": "LT24-HLD-05",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-05#FOIL",
+      "skuId": "LT24-HLD-05-FOIL",
       "cardId": "LT24-HLD-05",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-06#DUN",
+      "skuId": "LT24-HLD-06-DUN",
       "cardId": "LT24-HLD-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-06#FOIL",
+      "skuId": "LT24-HLD-06-FOIL",
       "cardId": "LT24-HLD-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-07#DUN",
+      "skuId": "LT24-HLD-07-DUN",
       "cardId": "LT24-HLD-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-07#FOIL",
+      "skuId": "LT24-HLD-07-FOIL",
       "cardId": "LT24-HLD-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-08#DUN",
+      "skuId": "LT24-HLD-08-DUN",
       "cardId": "LT24-HLD-08",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-08#FOIL",
+      "skuId": "LT24-HLD-08-FOIL",
       "cardId": "LT24-HLD-08",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-HLD-09#DUN",
+      "skuId": "LT24-HLD-09-DUN",
       "cardId": "LT24-HLD-09",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-HLD-09#FOIL",
+      "skuId": "LT24-HLD-09-FOIL",
       "cardId": "LT24-HLD-09",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-02#DUN",
+      "skuId": "LT24-NS-ELS-02-DUN",
       "cardId": "LT24-NS-ELS-02",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-02#FOIL",
+      "skuId": "LT24-NS-ELS-02-FOIL",
       "cardId": "LT24-NS-ELS-02",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-06#DUN",
+      "skuId": "LT24-NS-ELS-06-DUN",
       "cardId": "LT24-NS-ELS-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-06#FOIL",
+      "skuId": "LT24-NS-ELS-06-FOIL",
       "cardId": "LT24-NS-ELS-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-07#DUN",
+      "skuId": "LT24-NS-ELS-07-DUN",
       "cardId": "LT24-NS-ELS-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-07#FOIL",
+      "skuId": "LT24-NS-ELS-07-FOIL",
       "cardId": "LT24-NS-ELS-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-10#DUN",
+      "skuId": "LT24-NS-ELS-10-DUN",
       "cardId": "LT24-NS-ELS-10",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-10#FOIL",
+      "skuId": "LT24-NS-ELS-10-FOIL",
       "cardId": "LT24-NS-ELS-10",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-14#DUN",
+      "skuId": "LT24-NS-ELS-14-DUN",
       "cardId": "LT24-NS-ELS-14",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-14#FOIL",
+      "skuId": "LT24-NS-ELS-14-FOIL",
       "cardId": "LT24-NS-ELS-14",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-20#DUN",
+      "skuId": "LT24-NS-ELS-20-DUN",
       "cardId": "LT24-NS-ELS-20",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-20#FOIL",
+      "skuId": "LT24-NS-ELS-20-FOIL",
       "cardId": "LT24-NS-ELS-20",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-24-DANCE#DUN",
+      "skuId": "LT24-NS-ELS-24-DUN-DANCE",
       "cardId": "LT24-NS-ELS-24-DANCE",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-24-DANCE#FOIL",
+      "skuId": "LT24-NS-ELS-24-FOIL-DANCE",
       "cardId": "LT24-NS-ELS-24-DANCE",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-24-STOLEN#DUN",
+      "skuId": "LT24-NS-ELS-24-DUN-STOLEN",
       "cardId": "LT24-NS-ELS-24-STOLEN",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-24-STOLEN#FOIL",
+      "skuId": "LT24-NS-ELS-24-FOIL-STOLEN",
       "cardId": "LT24-NS-ELS-24-STOLEN",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-24-TRADED#DUN",
+      "skuId": "LT24-NS-ELS-24-DUN-TRADED",
       "cardId": "LT24-NS-ELS-24-TRADED",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-24-TRADED#FOIL",
+      "skuId": "LT24-NS-ELS-24-FOIL-TRADED",
       "cardId": "LT24-NS-ELS-24-TRADED",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-25#DUN",
+      "skuId": "LT24-NS-ELS-25-DUN",
       "cardId": "LT24-NS-ELS-25",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-25#FOIL",
+      "skuId": "LT24-NS-ELS-25-FOIL",
       "cardId": "LT24-NS-ELS-25",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-28#DUN",
+      "skuId": "LT24-NS-ELS-28-DUN",
       "cardId": "LT24-NS-ELS-28",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-28#FOIL",
+      "skuId": "LT24-NS-ELS-28-FOIL",
       "cardId": "LT24-NS-ELS-28",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-32#DUN",
+      "skuId": "LT24-NS-ELS-32-DUN",
       "cardId": "LT24-NS-ELS-32",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-32#FOIL",
+      "skuId": "LT24-NS-ELS-32-FOIL",
       "cardId": "LT24-NS-ELS-32",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-34-PIRATES#DUN",
+      "skuId": "LT24-NS-ELS-34-DUN-PIRATES",
       "cardId": "LT24-NS-ELS-34-PIRATES",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-34-PIRATES#FOIL",
+      "skuId": "LT24-NS-ELS-34-FOIL-PIRATES",
       "cardId": "LT24-NS-ELS-34-PIRATES",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-34-SCADRIAL#DUN",
+      "skuId": "LT24-NS-ELS-34-DUN-SCADRIAL",
       "cardId": "LT24-NS-ELS-34-SCADRIAL",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-34-SCADRIAL#FOIL",
+      "skuId": "LT24-NS-ELS-34-FOIL-SCADRIAL",
       "cardId": "LT24-NS-ELS-34-SCADRIAL",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-34-SEW#DUN",
+      "skuId": "LT24-NS-ELS-34-DUN-SEW",
       "cardId": "LT24-NS-ELS-34-SEW",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-34-SEW#FOIL",
+      "skuId": "LT24-NS-ELS-34-FOIL-SEW",
       "cardId": "LT24-NS-ELS-34-SEW",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-38#DUN",
+      "skuId": "LT24-NS-ELS-38-DUN",
       "cardId": "LT24-NS-ELS-38",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-38#FOIL",
+      "skuId": "LT24-NS-ELS-38-FOIL",
       "cardId": "LT24-NS-ELS-38",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-42#DUN",
+      "skuId": "LT24-NS-ELS-42-DUN",
       "cardId": "LT24-NS-ELS-42",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-42#FOIL",
+      "skuId": "LT24-NS-ELS-42-FOIL",
       "cardId": "LT24-NS-ELS-42",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-43#DUN",
+      "skuId": "LT24-NS-ELS-43-DUN",
       "cardId": "LT24-NS-ELS-43",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-43#FOIL",
+      "skuId": "LT24-NS-ELS-43-FOIL",
       "cardId": "LT24-NS-ELS-43",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-50#DUN",
+      "skuId": "LT24-NS-ELS-50-DUN",
       "cardId": "LT24-NS-ELS-50",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-50#FOIL",
+      "skuId": "LT24-NS-ELS-50-FOIL",
       "cardId": "LT24-NS-ELS-50",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-54-MOUSE#DUN",
+      "skuId": "LT24-NS-ELS-54-DUN-MOUSE",
       "cardId": "LT24-NS-ELS-54-MOUSE",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-54-MOUSE#FOIL",
+      "skuId": "LT24-NS-ELS-54-FOIL-MOUSE",
       "cardId": "LT24-NS-ELS-54-MOUSE",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-ELS-54-WHALE#DUN",
+      "skuId": "LT24-NS-ELS-54-DUN-WHALE",
       "cardId": "LT24-NS-ELS-54-WHALE",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-ELS-54-WHALE#FOIL",
+      "skuId": "LT24-NS-ELS-54-FOIL-WHALE",
       "cardId": "LT24-NS-ELS-54-WHALE",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-01#DUN",
+      "skuId": "LT24-NS-LOP-01-DUN",
       "cardId": "LT24-NS-LOP-01",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-01#FOIL",
+      "skuId": "LT24-NS-LOP-01-FOIL",
       "cardId": "LT24-NS-LOP-01",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-06#DUN",
+      "skuId": "LT24-NS-LOP-06-DUN",
       "cardId": "LT24-NS-LOP-06",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-06#FOIL",
+      "skuId": "LT24-NS-LOP-06-FOIL",
       "cardId": "LT24-NS-LOP-06",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-07#DUN",
+      "skuId": "LT24-NS-LOP-07-DUN",
       "cardId": "LT24-NS-LOP-07",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-07#FOIL",
+      "skuId": "LT24-NS-LOP-07-FOIL",
       "cardId": "LT24-NS-LOP-07",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-08#DUN",
+      "skuId": "LT24-NS-LOP-08-DUN",
       "cardId": "LT24-NS-LOP-08",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-08#FOIL",
+      "skuId": "LT24-NS-LOP-08-FOIL",
       "cardId": "LT24-NS-LOP-08",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-17#DUN",
+      "skuId": "LT24-NS-LOP-17-DUN",
       "cardId": "LT24-NS-LOP-17",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-17#FOIL",
+      "skuId": "LT24-NS-LOP-17-FOIL",
       "cardId": "LT24-NS-LOP-17",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-23#DUN",
+      "skuId": "LT24-NS-LOP-23-DUN",
       "cardId": "LT24-NS-LOP-23",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-23#FOIL",
+      "skuId": "LT24-NS-LOP-23-FOIL",
       "cardId": "LT24-NS-LOP-23",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-24#DUN",
+      "skuId": "LT24-NS-LOP-24-DUN",
       "cardId": "LT24-NS-LOP-24",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-24#FOIL",
+      "skuId": "LT24-NS-LOP-24-FOIL",
       "cardId": "LT24-NS-LOP-24",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-26#DUN",
+      "skuId": "LT24-NS-LOP-26-DUN",
       "cardId": "LT24-NS-LOP-26",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-26#FOIL",
+      "skuId": "LT24-NS-LOP-26-FOIL",
       "cardId": "LT24-NS-LOP-26",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-28#DUN",
+      "skuId": "LT24-NS-LOP-28-DUN",
       "cardId": "LT24-NS-LOP-28",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-28#FOIL",
+      "skuId": "LT24-NS-LOP-28-FOIL",
       "cardId": "LT24-NS-LOP-28",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-29#DUN",
+      "skuId": "LT24-NS-LOP-29-DUN",
       "cardId": "LT24-NS-LOP-29",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-29#FOIL",
+      "skuId": "LT24-NS-LOP-29-FOIL",
       "cardId": "LT24-NS-LOP-29",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-36#DUN",
+      "skuId": "LT24-NS-LOP-36-DUN",
       "cardId": "LT24-NS-LOP-36",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-36#FOIL",
+      "skuId": "LT24-NS-LOP-36-FOIL",
       "cardId": "LT24-NS-LOP-36",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-39#DUN",
+      "skuId": "LT24-NS-LOP-39-DUN",
       "cardId": "LT24-NS-LOP-39",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-39#FOIL",
+      "skuId": "LT24-NS-LOP-39-FOIL",
       "cardId": "LT24-NS-LOP-39",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-50#DUN",
+      "skuId": "LT24-NS-LOP-50-DUN",
       "cardId": "LT24-NS-LOP-50",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-50#FOIL",
+      "skuId": "LT24-NS-LOP-50-FOIL",
       "cardId": "LT24-NS-LOP-50",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-LOP-53#DUN",
+      "skuId": "LT24-NS-LOP-53-DUN",
       "cardId": "LT24-NS-LOP-53",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-LOP-53#FOIL",
+      "skuId": "LT24-NS-LOP-53-FOIL",
       "cardId": "LT24-NS-LOP-53",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-19#DUN",
+      "skuId": "LT24-NS-CHM-19-DUN",
       "cardId": "LT24-NS-CHM-19",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-19#FOIL",
+      "skuId": "LT24-NS-CHM-19-FOIL",
       "cardId": "LT24-NS-CHM-19",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-20#DUN",
+      "skuId": "LT24-NS-CHM-20-DUN",
       "cardId": "LT24-NS-CHM-20",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-20#FOIL",
+      "skuId": "LT24-NS-CHM-20-FOIL",
       "cardId": "LT24-NS-CHM-20",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-21#DUN",
+      "skuId": "LT24-NS-CHM-21-DUN",
       "cardId": "LT24-NS-CHM-21",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-21#FOIL",
+      "skuId": "LT24-NS-CHM-21-FOIL",
       "cardId": "LT24-NS-CHM-21",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-22#DUN",
+      "skuId": "LT24-NS-CHM-22-DUN",
       "cardId": "LT24-NS-CHM-22",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-22#FOIL",
+      "skuId": "LT24-NS-CHM-22-FOIL",
       "cardId": "LT24-NS-CHM-22",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-23#DUN",
+      "skuId": "LT24-NS-CHM-23-DUN",
       "cardId": "LT24-NS-CHM-23",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-23#FOIL",
+      "skuId": "LT24-NS-CHM-23-FOIL",
       "cardId": "LT24-NS-CHM-23",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-24#DUN",
+      "skuId": "LT24-NS-CHM-24-DUN",
       "cardId": "LT24-NS-CHM-24",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-24#FOIL",
+      "skuId": "LT24-NS-CHM-24-FOIL",
       "cardId": "LT24-NS-CHM-24",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-25#DUN",
+      "skuId": "LT24-NS-CHM-25-DUN",
       "cardId": "LT24-NS-CHM-25",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-25#FOIL",
+      "skuId": "LT24-NS-CHM-25-FOIL",
       "cardId": "LT24-NS-CHM-25",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-26#DUN",
+      "skuId": "LT24-NS-CHM-26-DUN",
       "cardId": "LT24-NS-CHM-26",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-26#FOIL",
+      "skuId": "LT24-NS-CHM-26-FOIL",
       "cardId": "LT24-NS-CHM-26",
       "finish": "foil"
     },
     {
-      "skuId": "LT24-NS-CHM-27#DUN",
+      "skuId": "LT24-NS-CHM-27-DUN",
       "cardId": "LT24-NS-CHM-27",
       "finish": "dun"
     },
     {
-      "skuId": "LT24-NS-CHM-27#FOIL",
+      "skuId": "LT24-NS-CHM-27-FOIL",
       "cardId": "LT24-NS-CHM-27",
       "finish": "foil"
     }
@@ -7926,2153 +7926,2153 @@
       }
     },
     "bySkuId": {
-      "LT24-ELS-01#DUN": {
-        "skuId": "LT24-ELS-01#DUN",
+      "LT24-ELS-01-DUN": {
+        "skuId": "LT24-ELS-01-DUN",
         "cardId": "LT24-ELS-01",
         "finish": "dun"
       },
-      "LT24-ELS-01#FOIL": {
-        "skuId": "LT24-ELS-01#FOIL",
+      "LT24-ELS-01-FOIL": {
+        "skuId": "LT24-ELS-01-FOIL",
         "cardId": "LT24-ELS-01",
         "finish": "foil"
       },
-      "LT24-ELS-02#DUN": {
-        "skuId": "LT24-ELS-02#DUN",
+      "LT24-ELS-02-DUN": {
+        "skuId": "LT24-ELS-02-DUN",
         "cardId": "LT24-ELS-02",
         "finish": "dun"
       },
-      "LT24-ELS-02#FOIL": {
-        "skuId": "LT24-ELS-02#FOIL",
+      "LT24-ELS-02-FOIL": {
+        "skuId": "LT24-ELS-02-FOIL",
         "cardId": "LT24-ELS-02",
         "finish": "foil"
       },
-      "LT24-ELS-03#DUN": {
-        "skuId": "LT24-ELS-03#DUN",
+      "LT24-ELS-03-DUN": {
+        "skuId": "LT24-ELS-03-DUN",
         "cardId": "LT24-ELS-03",
         "finish": "dun"
       },
-      "LT24-ELS-03#FOIL": {
-        "skuId": "LT24-ELS-03#FOIL",
+      "LT24-ELS-03-FOIL": {
+        "skuId": "LT24-ELS-03-FOIL",
         "cardId": "LT24-ELS-03",
         "finish": "foil"
       },
-      "LT24-ELS-04#DUN": {
-        "skuId": "LT24-ELS-04#DUN",
+      "LT24-ELS-04-DUN": {
+        "skuId": "LT24-ELS-04-DUN",
         "cardId": "LT24-ELS-04",
         "finish": "dun"
       },
-      "LT24-ELS-04#FOIL": {
-        "skuId": "LT24-ELS-04#FOIL",
+      "LT24-ELS-04-FOIL": {
+        "skuId": "LT24-ELS-04-FOIL",
         "cardId": "LT24-ELS-04",
         "finish": "foil"
       },
-      "LT24-ELS-05#DUN": {
-        "skuId": "LT24-ELS-05#DUN",
+      "LT24-ELS-05-DUN": {
+        "skuId": "LT24-ELS-05-DUN",
         "cardId": "LT24-ELS-05",
         "finish": "dun"
       },
-      "LT24-ELS-05#FOIL": {
-        "skuId": "LT24-ELS-05#FOIL",
+      "LT24-ELS-05-FOIL": {
+        "skuId": "LT24-ELS-05-FOIL",
         "cardId": "LT24-ELS-05",
         "finish": "foil"
       },
-      "LT24-ELS-06#DUN": {
-        "skuId": "LT24-ELS-06#DUN",
+      "LT24-ELS-06-DUN": {
+        "skuId": "LT24-ELS-06-DUN",
         "cardId": "LT24-ELS-06",
         "finish": "dun"
       },
-      "LT24-ELS-06#FOIL": {
-        "skuId": "LT24-ELS-06#FOIL",
+      "LT24-ELS-06-FOIL": {
+        "skuId": "LT24-ELS-06-FOIL",
         "cardId": "LT24-ELS-06",
         "finish": "foil"
       },
-      "LT24-ELS-07#DUN": {
-        "skuId": "LT24-ELS-07#DUN",
+      "LT24-ELS-07-DUN": {
+        "skuId": "LT24-ELS-07-DUN",
         "cardId": "LT24-ELS-07",
         "finish": "dun"
       },
-      "LT24-ELS-07#FOIL": {
-        "skuId": "LT24-ELS-07#FOIL",
+      "LT24-ELS-07-FOIL": {
+        "skuId": "LT24-ELS-07-FOIL",
         "cardId": "LT24-ELS-07",
         "finish": "foil"
       },
-      "LT24-ELS-08#DUN": {
-        "skuId": "LT24-ELS-08#DUN",
+      "LT24-ELS-08-DUN": {
+        "skuId": "LT24-ELS-08-DUN",
         "cardId": "LT24-ELS-08",
         "finish": "dun"
       },
-      "LT24-ELS-08#FOIL": {
-        "skuId": "LT24-ELS-08#FOIL",
+      "LT24-ELS-08-FOIL": {
+        "skuId": "LT24-ELS-08-FOIL",
         "cardId": "LT24-ELS-08",
         "finish": "foil"
       },
-      "LT24-ELS-09#DUN": {
-        "skuId": "LT24-ELS-09#DUN",
+      "LT24-ELS-09-DUN": {
+        "skuId": "LT24-ELS-09-DUN",
         "cardId": "LT24-ELS-09",
         "finish": "dun"
       },
-      "LT24-ELS-09#FOIL": {
-        "skuId": "LT24-ELS-09#FOIL",
+      "LT24-ELS-09-FOIL": {
+        "skuId": "LT24-ELS-09-FOIL",
         "cardId": "LT24-ELS-09",
         "finish": "foil"
       },
-      "LT24-ELS-10#DUN": {
-        "skuId": "LT24-ELS-10#DUN",
+      "LT24-ELS-10-DUN": {
+        "skuId": "LT24-ELS-10-DUN",
         "cardId": "LT24-ELS-10",
         "finish": "dun"
       },
-      "LT24-ELS-10#FOIL": {
-        "skuId": "LT24-ELS-10#FOIL",
+      "LT24-ELS-10-FOIL": {
+        "skuId": "LT24-ELS-10-FOIL",
         "cardId": "LT24-ELS-10",
         "finish": "foil"
       },
-      "LT24-ELS-11#DUN": {
-        "skuId": "LT24-ELS-11#DUN",
+      "LT24-ELS-11-DUN": {
+        "skuId": "LT24-ELS-11-DUN",
         "cardId": "LT24-ELS-11",
         "finish": "dun"
       },
-      "LT24-ELS-11#FOIL": {
-        "skuId": "LT24-ELS-11#FOIL",
+      "LT24-ELS-11-FOIL": {
+        "skuId": "LT24-ELS-11-FOIL",
         "cardId": "LT24-ELS-11",
         "finish": "foil"
       },
-      "LT24-ELS-12#DUN": {
-        "skuId": "LT24-ELS-12#DUN",
+      "LT24-ELS-12-DUN": {
+        "skuId": "LT24-ELS-12-DUN",
         "cardId": "LT24-ELS-12",
         "finish": "dun"
       },
-      "LT24-ELS-12#FOIL": {
-        "skuId": "LT24-ELS-12#FOIL",
+      "LT24-ELS-12-FOIL": {
+        "skuId": "LT24-ELS-12-FOIL",
         "cardId": "LT24-ELS-12",
         "finish": "foil"
       },
-      "LT24-ELS-13#DUN": {
-        "skuId": "LT24-ELS-13#DUN",
+      "LT24-ELS-13-DUN": {
+        "skuId": "LT24-ELS-13-DUN",
         "cardId": "LT24-ELS-13",
         "finish": "dun"
       },
-      "LT24-ELS-13#FOIL": {
-        "skuId": "LT24-ELS-13#FOIL",
+      "LT24-ELS-13-FOIL": {
+        "skuId": "LT24-ELS-13-FOIL",
         "cardId": "LT24-ELS-13",
         "finish": "foil"
       },
-      "LT24-ELS-14#DUN": {
-        "skuId": "LT24-ELS-14#DUN",
+      "LT24-ELS-14-DUN": {
+        "skuId": "LT24-ELS-14-DUN",
         "cardId": "LT24-ELS-14",
         "finish": "dun"
       },
-      "LT24-ELS-14#FOIL": {
-        "skuId": "LT24-ELS-14#FOIL",
+      "LT24-ELS-14-FOIL": {
+        "skuId": "LT24-ELS-14-FOIL",
         "cardId": "LT24-ELS-14",
         "finish": "foil"
       },
-      "LT24-ELS-15#DUN": {
-        "skuId": "LT24-ELS-15#DUN",
+      "LT24-ELS-15-DUN": {
+        "skuId": "LT24-ELS-15-DUN",
         "cardId": "LT24-ELS-15",
         "finish": "dun"
       },
-      "LT24-ELS-15#FOIL": {
-        "skuId": "LT24-ELS-15#FOIL",
+      "LT24-ELS-15-FOIL": {
+        "skuId": "LT24-ELS-15-FOIL",
         "cardId": "LT24-ELS-15",
         "finish": "foil"
       },
-      "LT24-ELS-16#DUN": {
-        "skuId": "LT24-ELS-16#DUN",
+      "LT24-ELS-16-DUN": {
+        "skuId": "LT24-ELS-16-DUN",
         "cardId": "LT24-ELS-16",
         "finish": "dun"
       },
-      "LT24-ELS-16#FOIL": {
-        "skuId": "LT24-ELS-16#FOIL",
+      "LT24-ELS-16-FOIL": {
+        "skuId": "LT24-ELS-16-FOIL",
         "cardId": "LT24-ELS-16",
         "finish": "foil"
       },
-      "LT24-ELS-17#DUN": {
-        "skuId": "LT24-ELS-17#DUN",
+      "LT24-ELS-17-DUN": {
+        "skuId": "LT24-ELS-17-DUN",
         "cardId": "LT24-ELS-17",
         "finish": "dun"
       },
-      "LT24-ELS-17#FOIL": {
-        "skuId": "LT24-ELS-17#FOIL",
+      "LT24-ELS-17-FOIL": {
+        "skuId": "LT24-ELS-17-FOIL",
         "cardId": "LT24-ELS-17",
         "finish": "foil"
       },
-      "LT24-ELS-18#DUN": {
-        "skuId": "LT24-ELS-18#DUN",
+      "LT24-ELS-18-DUN": {
+        "skuId": "LT24-ELS-18-DUN",
         "cardId": "LT24-ELS-18",
         "finish": "dun"
       },
-      "LT24-ELS-18#FOIL": {
-        "skuId": "LT24-ELS-18#FOIL",
+      "LT24-ELS-18-FOIL": {
+        "skuId": "LT24-ELS-18-FOIL",
         "cardId": "LT24-ELS-18",
         "finish": "foil"
       },
-      "LT24-ELS-19#DUN": {
-        "skuId": "LT24-ELS-19#DUN",
+      "LT24-ELS-19-DUN": {
+        "skuId": "LT24-ELS-19-DUN",
         "cardId": "LT24-ELS-19",
         "finish": "dun"
       },
-      "LT24-ELS-19#FOIL": {
-        "skuId": "LT24-ELS-19#FOIL",
+      "LT24-ELS-19-FOIL": {
+        "skuId": "LT24-ELS-19-FOIL",
         "cardId": "LT24-ELS-19",
         "finish": "foil"
       },
-      "LT24-ELS-20#DUN": {
-        "skuId": "LT24-ELS-20#DUN",
+      "LT24-ELS-20-DUN": {
+        "skuId": "LT24-ELS-20-DUN",
         "cardId": "LT24-ELS-20",
         "finish": "dun"
       },
-      "LT24-ELS-20#FOIL": {
-        "skuId": "LT24-ELS-20#FOIL",
+      "LT24-ELS-20-FOIL": {
+        "skuId": "LT24-ELS-20-FOIL",
         "cardId": "LT24-ELS-20",
         "finish": "foil"
       },
-      "LT24-ELS-21#DUN": {
-        "skuId": "LT24-ELS-21#DUN",
+      "LT24-ELS-21-DUN": {
+        "skuId": "LT24-ELS-21-DUN",
         "cardId": "LT24-ELS-21",
         "finish": "dun"
       },
-      "LT24-ELS-21#FOIL": {
-        "skuId": "LT24-ELS-21#FOIL",
+      "LT24-ELS-21-FOIL": {
+        "skuId": "LT24-ELS-21-FOIL",
         "cardId": "LT24-ELS-21",
         "finish": "foil"
       },
-      "LT24-ELS-22#DUN": {
-        "skuId": "LT24-ELS-22#DUN",
+      "LT24-ELS-22-DUN": {
+        "skuId": "LT24-ELS-22-DUN",
         "cardId": "LT24-ELS-22",
         "finish": "dun"
       },
-      "LT24-ELS-22#FOIL": {
-        "skuId": "LT24-ELS-22#FOIL",
+      "LT24-ELS-22-FOIL": {
+        "skuId": "LT24-ELS-22-FOIL",
         "cardId": "LT24-ELS-22",
         "finish": "foil"
       },
-      "LT24-ELS-23#DUN": {
-        "skuId": "LT24-ELS-23#DUN",
+      "LT24-ELS-23-DUN": {
+        "skuId": "LT24-ELS-23-DUN",
         "cardId": "LT24-ELS-23",
         "finish": "dun"
       },
-      "LT24-ELS-23#FOIL": {
-        "skuId": "LT24-ELS-23#FOIL",
+      "LT24-ELS-23-FOIL": {
+        "skuId": "LT24-ELS-23-FOIL",
         "cardId": "LT24-ELS-23",
         "finish": "foil"
       },
-      "LT24-ELS-24#DUN": {
-        "skuId": "LT24-ELS-24#DUN",
+      "LT24-ELS-24-DUN": {
+        "skuId": "LT24-ELS-24-DUN",
         "cardId": "LT24-ELS-24",
         "finish": "dun"
       },
-      "LT24-ELS-24#FOIL": {
-        "skuId": "LT24-ELS-24#FOIL",
+      "LT24-ELS-24-FOIL": {
+        "skuId": "LT24-ELS-24-FOIL",
         "cardId": "LT24-ELS-24",
         "finish": "foil"
       },
-      "LT24-ELS-25#DUN": {
-        "skuId": "LT24-ELS-25#DUN",
+      "LT24-ELS-25-DUN": {
+        "skuId": "LT24-ELS-25-DUN",
         "cardId": "LT24-ELS-25",
         "finish": "dun"
       },
-      "LT24-ELS-25#FOIL": {
-        "skuId": "LT24-ELS-25#FOIL",
+      "LT24-ELS-25-FOIL": {
+        "skuId": "LT24-ELS-25-FOIL",
         "cardId": "LT24-ELS-25",
         "finish": "foil"
       },
-      "LT24-ELS-26#DUN": {
-        "skuId": "LT24-ELS-26#DUN",
+      "LT24-ELS-26-DUN": {
+        "skuId": "LT24-ELS-26-DUN",
         "cardId": "LT24-ELS-26",
         "finish": "dun"
       },
-      "LT24-ELS-26#FOIL": {
-        "skuId": "LT24-ELS-26#FOIL",
+      "LT24-ELS-26-FOIL": {
+        "skuId": "LT24-ELS-26-FOIL",
         "cardId": "LT24-ELS-26",
         "finish": "foil"
       },
-      "LT24-ELS-27#DUN": {
-        "skuId": "LT24-ELS-27#DUN",
+      "LT24-ELS-27-DUN": {
+        "skuId": "LT24-ELS-27-DUN",
         "cardId": "LT24-ELS-27",
         "finish": "dun"
       },
-      "LT24-ELS-27#FOIL": {
-        "skuId": "LT24-ELS-27#FOIL",
+      "LT24-ELS-27-FOIL": {
+        "skuId": "LT24-ELS-27-FOIL",
         "cardId": "LT24-ELS-27",
         "finish": "foil"
       },
-      "LT24-ELS-28#DUN": {
-        "skuId": "LT24-ELS-28#DUN",
+      "LT24-ELS-28-DUN": {
+        "skuId": "LT24-ELS-28-DUN",
         "cardId": "LT24-ELS-28",
         "finish": "dun"
       },
-      "LT24-ELS-28#FOIL": {
-        "skuId": "LT24-ELS-28#FOIL",
+      "LT24-ELS-28-FOIL": {
+        "skuId": "LT24-ELS-28-FOIL",
         "cardId": "LT24-ELS-28",
         "finish": "foil"
       },
-      "LT24-ELS-29#DUN": {
-        "skuId": "LT24-ELS-29#DUN",
+      "LT24-ELS-29-DUN": {
+        "skuId": "LT24-ELS-29-DUN",
         "cardId": "LT24-ELS-29",
         "finish": "dun"
       },
-      "LT24-ELS-29#FOIL": {
-        "skuId": "LT24-ELS-29#FOIL",
+      "LT24-ELS-29-FOIL": {
+        "skuId": "LT24-ELS-29-FOIL",
         "cardId": "LT24-ELS-29",
         "finish": "foil"
       },
-      "LT24-ELS-30#DUN": {
-        "skuId": "LT24-ELS-30#DUN",
+      "LT24-ELS-30-DUN": {
+        "skuId": "LT24-ELS-30-DUN",
         "cardId": "LT24-ELS-30",
         "finish": "dun"
       },
-      "LT24-ELS-30#FOIL": {
-        "skuId": "LT24-ELS-30#FOIL",
+      "LT24-ELS-30-FOIL": {
+        "skuId": "LT24-ELS-30-FOIL",
         "cardId": "LT24-ELS-30",
         "finish": "foil"
       },
-      "LT24-ELS-31#DUN": {
-        "skuId": "LT24-ELS-31#DUN",
+      "LT24-ELS-31-DUN": {
+        "skuId": "LT24-ELS-31-DUN",
         "cardId": "LT24-ELS-31",
         "finish": "dun"
       },
-      "LT24-ELS-31#FOIL": {
-        "skuId": "LT24-ELS-31#FOIL",
+      "LT24-ELS-31-FOIL": {
+        "skuId": "LT24-ELS-31-FOIL",
         "cardId": "LT24-ELS-31",
         "finish": "foil"
       },
-      "LT24-ELS-32#DUN": {
-        "skuId": "LT24-ELS-32#DUN",
+      "LT24-ELS-32-DUN": {
+        "skuId": "LT24-ELS-32-DUN",
         "cardId": "LT24-ELS-32",
         "finish": "dun"
       },
-      "LT24-ELS-32#FOIL": {
-        "skuId": "LT24-ELS-32#FOIL",
+      "LT24-ELS-32-FOIL": {
+        "skuId": "LT24-ELS-32-FOIL",
         "cardId": "LT24-ELS-32",
         "finish": "foil"
       },
-      "LT24-ELS-33#DUN": {
-        "skuId": "LT24-ELS-33#DUN",
+      "LT24-ELS-33-DUN": {
+        "skuId": "LT24-ELS-33-DUN",
         "cardId": "LT24-ELS-33",
         "finish": "dun"
       },
-      "LT24-ELS-33#FOIL": {
-        "skuId": "LT24-ELS-33#FOIL",
+      "LT24-ELS-33-FOIL": {
+        "skuId": "LT24-ELS-33-FOIL",
         "cardId": "LT24-ELS-33",
         "finish": "foil"
       },
-      "LT24-ELS-34#DUN": {
-        "skuId": "LT24-ELS-34#DUN",
+      "LT24-ELS-34-DUN": {
+        "skuId": "LT24-ELS-34-DUN",
         "cardId": "LT24-ELS-34",
         "finish": "dun"
       },
-      "LT24-ELS-34#FOIL": {
-        "skuId": "LT24-ELS-34#FOIL",
+      "LT24-ELS-34-FOIL": {
+        "skuId": "LT24-ELS-34-FOIL",
         "cardId": "LT24-ELS-34",
         "finish": "foil"
       },
-      "LT24-ELS-35#DUN": {
-        "skuId": "LT24-ELS-35#DUN",
+      "LT24-ELS-35-DUN": {
+        "skuId": "LT24-ELS-35-DUN",
         "cardId": "LT24-ELS-35",
         "finish": "dun"
       },
-      "LT24-ELS-35#FOIL": {
-        "skuId": "LT24-ELS-35#FOIL",
+      "LT24-ELS-35-FOIL": {
+        "skuId": "LT24-ELS-35-FOIL",
         "cardId": "LT24-ELS-35",
         "finish": "foil"
       },
-      "LT24-ELS-36#DUN": {
-        "skuId": "LT24-ELS-36#DUN",
+      "LT24-ELS-36-DUN": {
+        "skuId": "LT24-ELS-36-DUN",
         "cardId": "LT24-ELS-36",
         "finish": "dun"
       },
-      "LT24-ELS-36#FOIL": {
-        "skuId": "LT24-ELS-36#FOIL",
+      "LT24-ELS-36-FOIL": {
+        "skuId": "LT24-ELS-36-FOIL",
         "cardId": "LT24-ELS-36",
         "finish": "foil"
       },
-      "LT24-ELS-37#DUN": {
-        "skuId": "LT24-ELS-37#DUN",
+      "LT24-ELS-37-DUN": {
+        "skuId": "LT24-ELS-37-DUN",
         "cardId": "LT24-ELS-37",
         "finish": "dun"
       },
-      "LT24-ELS-37#FOIL": {
-        "skuId": "LT24-ELS-37#FOIL",
+      "LT24-ELS-37-FOIL": {
+        "skuId": "LT24-ELS-37-FOIL",
         "cardId": "LT24-ELS-37",
         "finish": "foil"
       },
-      "LT24-ELS-38#DUN": {
-        "skuId": "LT24-ELS-38#DUN",
+      "LT24-ELS-38-DUN": {
+        "skuId": "LT24-ELS-38-DUN",
         "cardId": "LT24-ELS-38",
         "finish": "dun"
       },
-      "LT24-ELS-38#FOIL": {
-        "skuId": "LT24-ELS-38#FOIL",
+      "LT24-ELS-38-FOIL": {
+        "skuId": "LT24-ELS-38-FOIL",
         "cardId": "LT24-ELS-38",
         "finish": "foil"
       },
-      "LT24-ELS-39#DUN": {
-        "skuId": "LT24-ELS-39#DUN",
+      "LT24-ELS-39-DUN": {
+        "skuId": "LT24-ELS-39-DUN",
         "cardId": "LT24-ELS-39",
         "finish": "dun"
       },
-      "LT24-ELS-39#FOIL": {
-        "skuId": "LT24-ELS-39#FOIL",
+      "LT24-ELS-39-FOIL": {
+        "skuId": "LT24-ELS-39-FOIL",
         "cardId": "LT24-ELS-39",
         "finish": "foil"
       },
-      "LT24-ELS-40#DUN": {
-        "skuId": "LT24-ELS-40#DUN",
+      "LT24-ELS-40-DUN": {
+        "skuId": "LT24-ELS-40-DUN",
         "cardId": "LT24-ELS-40",
         "finish": "dun"
       },
-      "LT24-ELS-40#FOIL": {
-        "skuId": "LT24-ELS-40#FOIL",
+      "LT24-ELS-40-FOIL": {
+        "skuId": "LT24-ELS-40-FOIL",
         "cardId": "LT24-ELS-40",
         "finish": "foil"
       },
-      "LT24-ELS-41#DUN": {
-        "skuId": "LT24-ELS-41#DUN",
+      "LT24-ELS-41-DUN": {
+        "skuId": "LT24-ELS-41-DUN",
         "cardId": "LT24-ELS-41",
         "finish": "dun"
       },
-      "LT24-ELS-41#FOIL": {
-        "skuId": "LT24-ELS-41#FOIL",
+      "LT24-ELS-41-FOIL": {
+        "skuId": "LT24-ELS-41-FOIL",
         "cardId": "LT24-ELS-41",
         "finish": "foil"
       },
-      "LT24-ELS-42#DUN": {
-        "skuId": "LT24-ELS-42#DUN",
+      "LT24-ELS-42-DUN": {
+        "skuId": "LT24-ELS-42-DUN",
         "cardId": "LT24-ELS-42",
         "finish": "dun"
       },
-      "LT24-ELS-42#FOIL": {
-        "skuId": "LT24-ELS-42#FOIL",
+      "LT24-ELS-42-FOIL": {
+        "skuId": "LT24-ELS-42-FOIL",
         "cardId": "LT24-ELS-42",
         "finish": "foil"
       },
-      "LT24-ELS-43#DUN": {
-        "skuId": "LT24-ELS-43#DUN",
+      "LT24-ELS-43-DUN": {
+        "skuId": "LT24-ELS-43-DUN",
         "cardId": "LT24-ELS-43",
         "finish": "dun"
       },
-      "LT24-ELS-43#FOIL": {
-        "skuId": "LT24-ELS-43#FOIL",
+      "LT24-ELS-43-FOIL": {
+        "skuId": "LT24-ELS-43-FOIL",
         "cardId": "LT24-ELS-43",
         "finish": "foil"
       },
-      "LT24-ELS-44#DUN": {
-        "skuId": "LT24-ELS-44#DUN",
+      "LT24-ELS-44-DUN": {
+        "skuId": "LT24-ELS-44-DUN",
         "cardId": "LT24-ELS-44",
         "finish": "dun"
       },
-      "LT24-ELS-44#FOIL": {
-        "skuId": "LT24-ELS-44#FOIL",
+      "LT24-ELS-44-FOIL": {
+        "skuId": "LT24-ELS-44-FOIL",
         "cardId": "LT24-ELS-44",
         "finish": "foil"
       },
-      "LT24-ELS-45#DUN": {
-        "skuId": "LT24-ELS-45#DUN",
+      "LT24-ELS-45-DUN": {
+        "skuId": "LT24-ELS-45-DUN",
         "cardId": "LT24-ELS-45",
         "finish": "dun"
       },
-      "LT24-ELS-45#FOIL": {
-        "skuId": "LT24-ELS-45#FOIL",
+      "LT24-ELS-45-FOIL": {
+        "skuId": "LT24-ELS-45-FOIL",
         "cardId": "LT24-ELS-45",
         "finish": "foil"
       },
-      "LT24-ELS-46#DUN": {
-        "skuId": "LT24-ELS-46#DUN",
+      "LT24-ELS-46-DUN": {
+        "skuId": "LT24-ELS-46-DUN",
         "cardId": "LT24-ELS-46",
         "finish": "dun"
       },
-      "LT24-ELS-46#FOIL": {
-        "skuId": "LT24-ELS-46#FOIL",
+      "LT24-ELS-46-FOIL": {
+        "skuId": "LT24-ELS-46-FOIL",
         "cardId": "LT24-ELS-46",
         "finish": "foil"
       },
-      "LT24-ELS-47#DUN": {
-        "skuId": "LT24-ELS-47#DUN",
+      "LT24-ELS-47-DUN": {
+        "skuId": "LT24-ELS-47-DUN",
         "cardId": "LT24-ELS-47",
         "finish": "dun"
       },
-      "LT24-ELS-47#FOIL": {
-        "skuId": "LT24-ELS-47#FOIL",
+      "LT24-ELS-47-FOIL": {
+        "skuId": "LT24-ELS-47-FOIL",
         "cardId": "LT24-ELS-47",
         "finish": "foil"
       },
-      "LT24-ELS-48#DUN": {
-        "skuId": "LT24-ELS-48#DUN",
+      "LT24-ELS-48-DUN": {
+        "skuId": "LT24-ELS-48-DUN",
         "cardId": "LT24-ELS-48",
         "finish": "dun"
       },
-      "LT24-ELS-48#FOIL": {
-        "skuId": "LT24-ELS-48#FOIL",
+      "LT24-ELS-48-FOIL": {
+        "skuId": "LT24-ELS-48-FOIL",
         "cardId": "LT24-ELS-48",
         "finish": "foil"
       },
-      "LT24-ELS-49#DUN": {
-        "skuId": "LT24-ELS-49#DUN",
+      "LT24-ELS-49-DUN": {
+        "skuId": "LT24-ELS-49-DUN",
         "cardId": "LT24-ELS-49",
         "finish": "dun"
       },
-      "LT24-ELS-49#FOIL": {
-        "skuId": "LT24-ELS-49#FOIL",
+      "LT24-ELS-49-FOIL": {
+        "skuId": "LT24-ELS-49-FOIL",
         "cardId": "LT24-ELS-49",
         "finish": "foil"
       },
-      "LT24-ELS-50#DUN": {
-        "skuId": "LT24-ELS-50#DUN",
+      "LT24-ELS-50-DUN": {
+        "skuId": "LT24-ELS-50-DUN",
         "cardId": "LT24-ELS-50",
         "finish": "dun"
       },
-      "LT24-ELS-50#FOIL": {
-        "skuId": "LT24-ELS-50#FOIL",
+      "LT24-ELS-50-FOIL": {
+        "skuId": "LT24-ELS-50-FOIL",
         "cardId": "LT24-ELS-50",
         "finish": "foil"
       },
-      "LT24-ELS-51#DUN": {
-        "skuId": "LT24-ELS-51#DUN",
+      "LT24-ELS-51-DUN": {
+        "skuId": "LT24-ELS-51-DUN",
         "cardId": "LT24-ELS-51",
         "finish": "dun"
       },
-      "LT24-ELS-51#FOIL": {
-        "skuId": "LT24-ELS-51#FOIL",
+      "LT24-ELS-51-FOIL": {
+        "skuId": "LT24-ELS-51-FOIL",
         "cardId": "LT24-ELS-51",
         "finish": "foil"
       },
-      "LT24-ELS-52#DUN": {
-        "skuId": "LT24-ELS-52#DUN",
+      "LT24-ELS-52-DUN": {
+        "skuId": "LT24-ELS-52-DUN",
         "cardId": "LT24-ELS-52",
         "finish": "dun"
       },
-      "LT24-ELS-52#FOIL": {
-        "skuId": "LT24-ELS-52#FOIL",
+      "LT24-ELS-52-FOIL": {
+        "skuId": "LT24-ELS-52-FOIL",
         "cardId": "LT24-ELS-52",
         "finish": "foil"
       },
-      "LT24-ELS-53#DUN": {
-        "skuId": "LT24-ELS-53#DUN",
+      "LT24-ELS-53-DUN": {
+        "skuId": "LT24-ELS-53-DUN",
         "cardId": "LT24-ELS-53",
         "finish": "dun"
       },
-      "LT24-ELS-53#FOIL": {
-        "skuId": "LT24-ELS-53#FOIL",
+      "LT24-ELS-53-FOIL": {
+        "skuId": "LT24-ELS-53-FOIL",
         "cardId": "LT24-ELS-53",
         "finish": "foil"
       },
-      "LT24-ELS-54#DUN": {
-        "skuId": "LT24-ELS-54#DUN",
+      "LT24-ELS-54-DUN": {
+        "skuId": "LT24-ELS-54-DUN",
         "cardId": "LT24-ELS-54",
         "finish": "dun"
       },
-      "LT24-ELS-54#FOIL": {
-        "skuId": "LT24-ELS-54#FOIL",
+      "LT24-ELS-54-FOIL": {
+        "skuId": "LT24-ELS-54-FOIL",
         "cardId": "LT24-ELS-54",
         "finish": "foil"
       },
-      "LT24-LOP-01#DUN": {
-        "skuId": "LT24-LOP-01#DUN",
+      "LT24-LOP-01-DUN": {
+        "skuId": "LT24-LOP-01-DUN",
         "cardId": "LT24-LOP-01",
         "finish": "dun"
       },
-      "LT24-LOP-01#FOIL": {
-        "skuId": "LT24-LOP-01#FOIL",
+      "LT24-LOP-01-FOIL": {
+        "skuId": "LT24-LOP-01-FOIL",
         "cardId": "LT24-LOP-01",
         "finish": "foil"
       },
-      "LT24-LOP-02#DUN": {
-        "skuId": "LT24-LOP-02#DUN",
+      "LT24-LOP-02-DUN": {
+        "skuId": "LT24-LOP-02-DUN",
         "cardId": "LT24-LOP-02",
         "finish": "dun"
       },
-      "LT24-LOP-02#FOIL": {
-        "skuId": "LT24-LOP-02#FOIL",
+      "LT24-LOP-02-FOIL": {
+        "skuId": "LT24-LOP-02-FOIL",
         "cardId": "LT24-LOP-02",
         "finish": "foil"
       },
-      "LT24-LOP-03#DUN": {
-        "skuId": "LT24-LOP-03#DUN",
+      "LT24-LOP-03-DUN": {
+        "skuId": "LT24-LOP-03-DUN",
         "cardId": "LT24-LOP-03",
         "finish": "dun"
       },
-      "LT24-LOP-03#FOIL": {
-        "skuId": "LT24-LOP-03#FOIL",
+      "LT24-LOP-03-FOIL": {
+        "skuId": "LT24-LOP-03-FOIL",
         "cardId": "LT24-LOP-03",
         "finish": "foil"
       },
-      "LT24-LOP-04#DUN": {
-        "skuId": "LT24-LOP-04#DUN",
+      "LT24-LOP-04-DUN": {
+        "skuId": "LT24-LOP-04-DUN",
         "cardId": "LT24-LOP-04",
         "finish": "dun"
       },
-      "LT24-LOP-04#FOIL": {
-        "skuId": "LT24-LOP-04#FOIL",
+      "LT24-LOP-04-FOIL": {
+        "skuId": "LT24-LOP-04-FOIL",
         "cardId": "LT24-LOP-04",
         "finish": "foil"
       },
-      "LT24-LOP-05#DUN": {
-        "skuId": "LT24-LOP-05#DUN",
+      "LT24-LOP-05-DUN": {
+        "skuId": "LT24-LOP-05-DUN",
         "cardId": "LT24-LOP-05",
         "finish": "dun"
       },
-      "LT24-LOP-05#FOIL": {
-        "skuId": "LT24-LOP-05#FOIL",
+      "LT24-LOP-05-FOIL": {
+        "skuId": "LT24-LOP-05-FOIL",
         "cardId": "LT24-LOP-05",
         "finish": "foil"
       },
-      "LT24-LOP-06#DUN": {
-        "skuId": "LT24-LOP-06#DUN",
+      "LT24-LOP-06-DUN": {
+        "skuId": "LT24-LOP-06-DUN",
         "cardId": "LT24-LOP-06",
         "finish": "dun"
       },
-      "LT24-LOP-06#FOIL": {
-        "skuId": "LT24-LOP-06#FOIL",
+      "LT24-LOP-06-FOIL": {
+        "skuId": "LT24-LOP-06-FOIL",
         "cardId": "LT24-LOP-06",
         "finish": "foil"
       },
-      "LT24-LOP-07#DUN": {
-        "skuId": "LT24-LOP-07#DUN",
+      "LT24-LOP-07-DUN": {
+        "skuId": "LT24-LOP-07-DUN",
         "cardId": "LT24-LOP-07",
         "finish": "dun"
       },
-      "LT24-LOP-07#FOIL": {
-        "skuId": "LT24-LOP-07#FOIL",
+      "LT24-LOP-07-FOIL": {
+        "skuId": "LT24-LOP-07-FOIL",
         "cardId": "LT24-LOP-07",
         "finish": "foil"
       },
-      "LT24-LOP-08#DUN": {
-        "skuId": "LT24-LOP-08#DUN",
+      "LT24-LOP-08-DUN": {
+        "skuId": "LT24-LOP-08-DUN",
         "cardId": "LT24-LOP-08",
         "finish": "dun"
       },
-      "LT24-LOP-08#FOIL": {
-        "skuId": "LT24-LOP-08#FOIL",
+      "LT24-LOP-08-FOIL": {
+        "skuId": "LT24-LOP-08-FOIL",
         "cardId": "LT24-LOP-08",
         "finish": "foil"
       },
-      "LT24-LOP-09#DUN": {
-        "skuId": "LT24-LOP-09#DUN",
+      "LT24-LOP-09-DUN": {
+        "skuId": "LT24-LOP-09-DUN",
         "cardId": "LT24-LOP-09",
         "finish": "dun"
       },
-      "LT24-LOP-09#FOIL": {
-        "skuId": "LT24-LOP-09#FOIL",
+      "LT24-LOP-09-FOIL": {
+        "skuId": "LT24-LOP-09-FOIL",
         "cardId": "LT24-LOP-09",
         "finish": "foil"
       },
-      "LT24-LOP-10#DUN": {
-        "skuId": "LT24-LOP-10#DUN",
+      "LT24-LOP-10-DUN": {
+        "skuId": "LT24-LOP-10-DUN",
         "cardId": "LT24-LOP-10",
         "finish": "dun"
       },
-      "LT24-LOP-10#FOIL": {
-        "skuId": "LT24-LOP-10#FOIL",
+      "LT24-LOP-10-FOIL": {
+        "skuId": "LT24-LOP-10-FOIL",
         "cardId": "LT24-LOP-10",
         "finish": "foil"
       },
-      "LT24-LOP-11#DUN": {
-        "skuId": "LT24-LOP-11#DUN",
+      "LT24-LOP-11-DUN": {
+        "skuId": "LT24-LOP-11-DUN",
         "cardId": "LT24-LOP-11",
         "finish": "dun"
       },
-      "LT24-LOP-11#FOIL": {
-        "skuId": "LT24-LOP-11#FOIL",
+      "LT24-LOP-11-FOIL": {
+        "skuId": "LT24-LOP-11-FOIL",
         "cardId": "LT24-LOP-11",
         "finish": "foil"
       },
-      "LT24-LOP-12#DUN": {
-        "skuId": "LT24-LOP-12#DUN",
+      "LT24-LOP-12-DUN": {
+        "skuId": "LT24-LOP-12-DUN",
         "cardId": "LT24-LOP-12",
         "finish": "dun"
       },
-      "LT24-LOP-12#FOIL": {
-        "skuId": "LT24-LOP-12#FOIL",
+      "LT24-LOP-12-FOIL": {
+        "skuId": "LT24-LOP-12-FOIL",
         "cardId": "LT24-LOP-12",
         "finish": "foil"
       },
-      "LT24-LOP-13#DUN": {
-        "skuId": "LT24-LOP-13#DUN",
+      "LT24-LOP-13-DUN": {
+        "skuId": "LT24-LOP-13-DUN",
         "cardId": "LT24-LOP-13",
         "finish": "dun"
       },
-      "LT24-LOP-13#FOIL": {
-        "skuId": "LT24-LOP-13#FOIL",
+      "LT24-LOP-13-FOIL": {
+        "skuId": "LT24-LOP-13-FOIL",
         "cardId": "LT24-LOP-13",
         "finish": "foil"
       },
-      "LT24-LOP-14#DUN": {
-        "skuId": "LT24-LOP-14#DUN",
+      "LT24-LOP-14-DUN": {
+        "skuId": "LT24-LOP-14-DUN",
         "cardId": "LT24-LOP-14",
         "finish": "dun"
       },
-      "LT24-LOP-14#FOIL": {
-        "skuId": "LT24-LOP-14#FOIL",
+      "LT24-LOP-14-FOIL": {
+        "skuId": "LT24-LOP-14-FOIL",
         "cardId": "LT24-LOP-14",
         "finish": "foil"
       },
-      "LT24-LOP-15#DUN": {
-        "skuId": "LT24-LOP-15#DUN",
+      "LT24-LOP-15-DUN": {
+        "skuId": "LT24-LOP-15-DUN",
         "cardId": "LT24-LOP-15",
         "finish": "dun"
       },
-      "LT24-LOP-15#FOIL": {
-        "skuId": "LT24-LOP-15#FOIL",
+      "LT24-LOP-15-FOIL": {
+        "skuId": "LT24-LOP-15-FOIL",
         "cardId": "LT24-LOP-15",
         "finish": "foil"
       },
-      "LT24-LOP-16#DUN": {
-        "skuId": "LT24-LOP-16#DUN",
+      "LT24-LOP-16-DUN": {
+        "skuId": "LT24-LOP-16-DUN",
         "cardId": "LT24-LOP-16",
         "finish": "dun"
       },
-      "LT24-LOP-16#FOIL": {
-        "skuId": "LT24-LOP-16#FOIL",
+      "LT24-LOP-16-FOIL": {
+        "skuId": "LT24-LOP-16-FOIL",
         "cardId": "LT24-LOP-16",
         "finish": "foil"
       },
-      "LT24-LOP-17#DUN": {
-        "skuId": "LT24-LOP-17#DUN",
+      "LT24-LOP-17-DUN": {
+        "skuId": "LT24-LOP-17-DUN",
         "cardId": "LT24-LOP-17",
         "finish": "dun"
       },
-      "LT24-LOP-17#FOIL": {
-        "skuId": "LT24-LOP-17#FOIL",
+      "LT24-LOP-17-FOIL": {
+        "skuId": "LT24-LOP-17-FOIL",
         "cardId": "LT24-LOP-17",
         "finish": "foil"
       },
-      "LT24-LOP-18#DUN": {
-        "skuId": "LT24-LOP-18#DUN",
+      "LT24-LOP-18-DUN": {
+        "skuId": "LT24-LOP-18-DUN",
         "cardId": "LT24-LOP-18",
         "finish": "dun"
       },
-      "LT24-LOP-18#FOIL": {
-        "skuId": "LT24-LOP-18#FOIL",
+      "LT24-LOP-18-FOIL": {
+        "skuId": "LT24-LOP-18-FOIL",
         "cardId": "LT24-LOP-18",
         "finish": "foil"
       },
-      "LT24-LOP-19#DUN": {
-        "skuId": "LT24-LOP-19#DUN",
+      "LT24-LOP-19-DUN": {
+        "skuId": "LT24-LOP-19-DUN",
         "cardId": "LT24-LOP-19",
         "finish": "dun"
       },
-      "LT24-LOP-19#FOIL": {
-        "skuId": "LT24-LOP-19#FOIL",
+      "LT24-LOP-19-FOIL": {
+        "skuId": "LT24-LOP-19-FOIL",
         "cardId": "LT24-LOP-19",
         "finish": "foil"
       },
-      "LT24-LOP-20#DUN": {
-        "skuId": "LT24-LOP-20#DUN",
+      "LT24-LOP-20-DUN": {
+        "skuId": "LT24-LOP-20-DUN",
         "cardId": "LT24-LOP-20",
         "finish": "dun"
       },
-      "LT24-LOP-20#FOIL": {
-        "skuId": "LT24-LOP-20#FOIL",
+      "LT24-LOP-20-FOIL": {
+        "skuId": "LT24-LOP-20-FOIL",
         "cardId": "LT24-LOP-20",
         "finish": "foil"
       },
-      "LT24-LOP-21#DUN": {
-        "skuId": "LT24-LOP-21#DUN",
+      "LT24-LOP-21-DUN": {
+        "skuId": "LT24-LOP-21-DUN",
         "cardId": "LT24-LOP-21",
         "finish": "dun"
       },
-      "LT24-LOP-21#FOIL": {
-        "skuId": "LT24-LOP-21#FOIL",
+      "LT24-LOP-21-FOIL": {
+        "skuId": "LT24-LOP-21-FOIL",
         "cardId": "LT24-LOP-21",
         "finish": "foil"
       },
-      "LT24-LOP-22#DUN": {
-        "skuId": "LT24-LOP-22#DUN",
+      "LT24-LOP-22-DUN": {
+        "skuId": "LT24-LOP-22-DUN",
         "cardId": "LT24-LOP-22",
         "finish": "dun"
       },
-      "LT24-LOP-22#FOIL": {
-        "skuId": "LT24-LOP-22#FOIL",
+      "LT24-LOP-22-FOIL": {
+        "skuId": "LT24-LOP-22-FOIL",
         "cardId": "LT24-LOP-22",
         "finish": "foil"
       },
-      "LT24-LOP-23#DUN": {
-        "skuId": "LT24-LOP-23#DUN",
+      "LT24-LOP-23-DUN": {
+        "skuId": "LT24-LOP-23-DUN",
         "cardId": "LT24-LOP-23",
         "finish": "dun"
       },
-      "LT24-LOP-23#FOIL": {
-        "skuId": "LT24-LOP-23#FOIL",
+      "LT24-LOP-23-FOIL": {
+        "skuId": "LT24-LOP-23-FOIL",
         "cardId": "LT24-LOP-23",
         "finish": "foil"
       },
-      "LT24-LOP-24#DUN": {
-        "skuId": "LT24-LOP-24#DUN",
+      "LT24-LOP-24-DUN": {
+        "skuId": "LT24-LOP-24-DUN",
         "cardId": "LT24-LOP-24",
         "finish": "dun"
       },
-      "LT24-LOP-24#FOIL": {
-        "skuId": "LT24-LOP-24#FOIL",
+      "LT24-LOP-24-FOIL": {
+        "skuId": "LT24-LOP-24-FOIL",
         "cardId": "LT24-LOP-24",
         "finish": "foil"
       },
-      "LT24-LOP-25#DUN": {
-        "skuId": "LT24-LOP-25#DUN",
+      "LT24-LOP-25-DUN": {
+        "skuId": "LT24-LOP-25-DUN",
         "cardId": "LT24-LOP-25",
         "finish": "dun"
       },
-      "LT24-LOP-25#FOIL": {
-        "skuId": "LT24-LOP-25#FOIL",
+      "LT24-LOP-25-FOIL": {
+        "skuId": "LT24-LOP-25-FOIL",
         "cardId": "LT24-LOP-25",
         "finish": "foil"
       },
-      "LT24-LOP-26#DUN": {
-        "skuId": "LT24-LOP-26#DUN",
+      "LT24-LOP-26-DUN": {
+        "skuId": "LT24-LOP-26-DUN",
         "cardId": "LT24-LOP-26",
         "finish": "dun"
       },
-      "LT24-LOP-26#FOIL": {
-        "skuId": "LT24-LOP-26#FOIL",
+      "LT24-LOP-26-FOIL": {
+        "skuId": "LT24-LOP-26-FOIL",
         "cardId": "LT24-LOP-26",
         "finish": "foil"
       },
-      "LT24-LOP-27#DUN": {
-        "skuId": "LT24-LOP-27#DUN",
+      "LT24-LOP-27-DUN": {
+        "skuId": "LT24-LOP-27-DUN",
         "cardId": "LT24-LOP-27",
         "finish": "dun"
       },
-      "LT24-LOP-27#FOIL": {
-        "skuId": "LT24-LOP-27#FOIL",
+      "LT24-LOP-27-FOIL": {
+        "skuId": "LT24-LOP-27-FOIL",
         "cardId": "LT24-LOP-27",
         "finish": "foil"
       },
-      "LT24-LOP-28#DUN": {
-        "skuId": "LT24-LOP-28#DUN",
+      "LT24-LOP-28-DUN": {
+        "skuId": "LT24-LOP-28-DUN",
         "cardId": "LT24-LOP-28",
         "finish": "dun"
       },
-      "LT24-LOP-28#FOIL": {
-        "skuId": "LT24-LOP-28#FOIL",
+      "LT24-LOP-28-FOIL": {
+        "skuId": "LT24-LOP-28-FOIL",
         "cardId": "LT24-LOP-28",
         "finish": "foil"
       },
-      "LT24-LOP-29#DUN": {
-        "skuId": "LT24-LOP-29#DUN",
+      "LT24-LOP-29-DUN": {
+        "skuId": "LT24-LOP-29-DUN",
         "cardId": "LT24-LOP-29",
         "finish": "dun"
       },
-      "LT24-LOP-29#FOIL": {
-        "skuId": "LT24-LOP-29#FOIL",
+      "LT24-LOP-29-FOIL": {
+        "skuId": "LT24-LOP-29-FOIL",
         "cardId": "LT24-LOP-29",
         "finish": "foil"
       },
-      "LT24-LOP-30#DUN": {
-        "skuId": "LT24-LOP-30#DUN",
+      "LT24-LOP-30-DUN": {
+        "skuId": "LT24-LOP-30-DUN",
         "cardId": "LT24-LOP-30",
         "finish": "dun"
       },
-      "LT24-LOP-30#FOIL": {
-        "skuId": "LT24-LOP-30#FOIL",
+      "LT24-LOP-30-FOIL": {
+        "skuId": "LT24-LOP-30-FOIL",
         "cardId": "LT24-LOP-30",
         "finish": "foil"
       },
-      "LT24-LOP-31#DUN": {
-        "skuId": "LT24-LOP-31#DUN",
+      "LT24-LOP-31-DUN": {
+        "skuId": "LT24-LOP-31-DUN",
         "cardId": "LT24-LOP-31",
         "finish": "dun"
       },
-      "LT24-LOP-31#FOIL": {
-        "skuId": "LT24-LOP-31#FOIL",
+      "LT24-LOP-31-FOIL": {
+        "skuId": "LT24-LOP-31-FOIL",
         "cardId": "LT24-LOP-31",
         "finish": "foil"
       },
-      "LT24-LOP-32#DUN": {
-        "skuId": "LT24-LOP-32#DUN",
+      "LT24-LOP-32-DUN": {
+        "skuId": "LT24-LOP-32-DUN",
         "cardId": "LT24-LOP-32",
         "finish": "dun"
       },
-      "LT24-LOP-32#FOIL": {
-        "skuId": "LT24-LOP-32#FOIL",
+      "LT24-LOP-32-FOIL": {
+        "skuId": "LT24-LOP-32-FOIL",
         "cardId": "LT24-LOP-32",
         "finish": "foil"
       },
-      "LT24-LOP-33#DUN": {
-        "skuId": "LT24-LOP-33#DUN",
+      "LT24-LOP-33-DUN": {
+        "skuId": "LT24-LOP-33-DUN",
         "cardId": "LT24-LOP-33",
         "finish": "dun"
       },
-      "LT24-LOP-33#FOIL": {
-        "skuId": "LT24-LOP-33#FOIL",
+      "LT24-LOP-33-FOIL": {
+        "skuId": "LT24-LOP-33-FOIL",
         "cardId": "LT24-LOP-33",
         "finish": "foil"
       },
-      "LT24-LOP-34#DUN": {
-        "skuId": "LT24-LOP-34#DUN",
+      "LT24-LOP-34-DUN": {
+        "skuId": "LT24-LOP-34-DUN",
         "cardId": "LT24-LOP-34",
         "finish": "dun"
       },
-      "LT24-LOP-34#FOIL": {
-        "skuId": "LT24-LOP-34#FOIL",
+      "LT24-LOP-34-FOIL": {
+        "skuId": "LT24-LOP-34-FOIL",
         "cardId": "LT24-LOP-34",
         "finish": "foil"
       },
-      "LT24-LOP-35#DUN": {
-        "skuId": "LT24-LOP-35#DUN",
+      "LT24-LOP-35-DUN": {
+        "skuId": "LT24-LOP-35-DUN",
         "cardId": "LT24-LOP-35",
         "finish": "dun"
       },
-      "LT24-LOP-35#FOIL": {
-        "skuId": "LT24-LOP-35#FOIL",
+      "LT24-LOP-35-FOIL": {
+        "skuId": "LT24-LOP-35-FOIL",
         "cardId": "LT24-LOP-35",
         "finish": "foil"
       },
-      "LT24-LOP-36#DUN": {
-        "skuId": "LT24-LOP-36#DUN",
+      "LT24-LOP-36-DUN": {
+        "skuId": "LT24-LOP-36-DUN",
         "cardId": "LT24-LOP-36",
         "finish": "dun"
       },
-      "LT24-LOP-36#FOIL": {
-        "skuId": "LT24-LOP-36#FOIL",
+      "LT24-LOP-36-FOIL": {
+        "skuId": "LT24-LOP-36-FOIL",
         "cardId": "LT24-LOP-36",
         "finish": "foil"
       },
-      "LT24-LOP-37#DUN": {
-        "skuId": "LT24-LOP-37#DUN",
+      "LT24-LOP-37-DUN": {
+        "skuId": "LT24-LOP-37-DUN",
         "cardId": "LT24-LOP-37",
         "finish": "dun"
       },
-      "LT24-LOP-37#FOIL": {
-        "skuId": "LT24-LOP-37#FOIL",
+      "LT24-LOP-37-FOIL": {
+        "skuId": "LT24-LOP-37-FOIL",
         "cardId": "LT24-LOP-37",
         "finish": "foil"
       },
-      "LT24-LOP-38#DUN": {
-        "skuId": "LT24-LOP-38#DUN",
+      "LT24-LOP-38-DUN": {
+        "skuId": "LT24-LOP-38-DUN",
         "cardId": "LT24-LOP-38",
         "finish": "dun"
       },
-      "LT24-LOP-38#FOIL": {
-        "skuId": "LT24-LOP-38#FOIL",
+      "LT24-LOP-38-FOIL": {
+        "skuId": "LT24-LOP-38-FOIL",
         "cardId": "LT24-LOP-38",
         "finish": "foil"
       },
-      "LT24-LOP-39#DUN": {
-        "skuId": "LT24-LOP-39#DUN",
+      "LT24-LOP-39-DUN": {
+        "skuId": "LT24-LOP-39-DUN",
         "cardId": "LT24-LOP-39",
         "finish": "dun"
       },
-      "LT24-LOP-39#FOIL": {
-        "skuId": "LT24-LOP-39#FOIL",
+      "LT24-LOP-39-FOIL": {
+        "skuId": "LT24-LOP-39-FOIL",
         "cardId": "LT24-LOP-39",
         "finish": "foil"
       },
-      "LT24-LOP-40#DUN": {
-        "skuId": "LT24-LOP-40#DUN",
+      "LT24-LOP-40-DUN": {
+        "skuId": "LT24-LOP-40-DUN",
         "cardId": "LT24-LOP-40",
         "finish": "dun"
       },
-      "LT24-LOP-40#FOIL": {
-        "skuId": "LT24-LOP-40#FOIL",
+      "LT24-LOP-40-FOIL": {
+        "skuId": "LT24-LOP-40-FOIL",
         "cardId": "LT24-LOP-40",
         "finish": "foil"
       },
-      "LT24-LOP-41#DUN": {
-        "skuId": "LT24-LOP-41#DUN",
+      "LT24-LOP-41-DUN": {
+        "skuId": "LT24-LOP-41-DUN",
         "cardId": "LT24-LOP-41",
         "finish": "dun"
       },
-      "LT24-LOP-41#FOIL": {
-        "skuId": "LT24-LOP-41#FOIL",
+      "LT24-LOP-41-FOIL": {
+        "skuId": "LT24-LOP-41-FOIL",
         "cardId": "LT24-LOP-41",
         "finish": "foil"
       },
-      "LT24-LOP-42#DUN": {
-        "skuId": "LT24-LOP-42#DUN",
+      "LT24-LOP-42-DUN": {
+        "skuId": "LT24-LOP-42-DUN",
         "cardId": "LT24-LOP-42",
         "finish": "dun"
       },
-      "LT24-LOP-42#FOIL": {
-        "skuId": "LT24-LOP-42#FOIL",
+      "LT24-LOP-42-FOIL": {
+        "skuId": "LT24-LOP-42-FOIL",
         "cardId": "LT24-LOP-42",
         "finish": "foil"
       },
-      "LT24-LOP-43#DUN": {
-        "skuId": "LT24-LOP-43#DUN",
+      "LT24-LOP-43-DUN": {
+        "skuId": "LT24-LOP-43-DUN",
         "cardId": "LT24-LOP-43",
         "finish": "dun"
       },
-      "LT24-LOP-43#FOIL": {
-        "skuId": "LT24-LOP-43#FOIL",
+      "LT24-LOP-43-FOIL": {
+        "skuId": "LT24-LOP-43-FOIL",
         "cardId": "LT24-LOP-43",
         "finish": "foil"
       },
-      "LT24-LOP-44#DUN": {
-        "skuId": "LT24-LOP-44#DUN",
+      "LT24-LOP-44-DUN": {
+        "skuId": "LT24-LOP-44-DUN",
         "cardId": "LT24-LOP-44",
         "finish": "dun"
       },
-      "LT24-LOP-44#FOIL": {
-        "skuId": "LT24-LOP-44#FOIL",
+      "LT24-LOP-44-FOIL": {
+        "skuId": "LT24-LOP-44-FOIL",
         "cardId": "LT24-LOP-44",
         "finish": "foil"
       },
-      "LT24-LOP-45#DUN": {
-        "skuId": "LT24-LOP-45#DUN",
+      "LT24-LOP-45-DUN": {
+        "skuId": "LT24-LOP-45-DUN",
         "cardId": "LT24-LOP-45",
         "finish": "dun"
       },
-      "LT24-LOP-45#FOIL": {
-        "skuId": "LT24-LOP-45#FOIL",
+      "LT24-LOP-45-FOIL": {
+        "skuId": "LT24-LOP-45-FOIL",
         "cardId": "LT24-LOP-45",
         "finish": "foil"
       },
-      "LT24-LOP-46#DUN": {
-        "skuId": "LT24-LOP-46#DUN",
+      "LT24-LOP-46-DUN": {
+        "skuId": "LT24-LOP-46-DUN",
         "cardId": "LT24-LOP-46",
         "finish": "dun"
       },
-      "LT24-LOP-46#FOIL": {
-        "skuId": "LT24-LOP-46#FOIL",
+      "LT24-LOP-46-FOIL": {
+        "skuId": "LT24-LOP-46-FOIL",
         "cardId": "LT24-LOP-46",
         "finish": "foil"
       },
-      "LT24-LOP-47#DUN": {
-        "skuId": "LT24-LOP-47#DUN",
+      "LT24-LOP-47-DUN": {
+        "skuId": "LT24-LOP-47-DUN",
         "cardId": "LT24-LOP-47",
         "finish": "dun"
       },
-      "LT24-LOP-47#FOIL": {
-        "skuId": "LT24-LOP-47#FOIL",
+      "LT24-LOP-47-FOIL": {
+        "skuId": "LT24-LOP-47-FOIL",
         "cardId": "LT24-LOP-47",
         "finish": "foil"
       },
-      "LT24-LOP-48#DUN": {
-        "skuId": "LT24-LOP-48#DUN",
+      "LT24-LOP-48-DUN": {
+        "skuId": "LT24-LOP-48-DUN",
         "cardId": "LT24-LOP-48",
         "finish": "dun"
       },
-      "LT24-LOP-48#FOIL": {
-        "skuId": "LT24-LOP-48#FOIL",
+      "LT24-LOP-48-FOIL": {
+        "skuId": "LT24-LOP-48-FOIL",
         "cardId": "LT24-LOP-48",
         "finish": "foil"
       },
-      "LT24-LOP-49#DUN": {
-        "skuId": "LT24-LOP-49#DUN",
+      "LT24-LOP-49-DUN": {
+        "skuId": "LT24-LOP-49-DUN",
         "cardId": "LT24-LOP-49",
         "finish": "dun"
       },
-      "LT24-LOP-49#FOIL": {
-        "skuId": "LT24-LOP-49#FOIL",
+      "LT24-LOP-49-FOIL": {
+        "skuId": "LT24-LOP-49-FOIL",
         "cardId": "LT24-LOP-49",
         "finish": "foil"
       },
-      "LT24-LOP-50#DUN": {
-        "skuId": "LT24-LOP-50#DUN",
+      "LT24-LOP-50-DUN": {
+        "skuId": "LT24-LOP-50-DUN",
         "cardId": "LT24-LOP-50",
         "finish": "dun"
       },
-      "LT24-LOP-50#FOIL": {
-        "skuId": "LT24-LOP-50#FOIL",
+      "LT24-LOP-50-FOIL": {
+        "skuId": "LT24-LOP-50-FOIL",
         "cardId": "LT24-LOP-50",
         "finish": "foil"
       },
-      "LT24-LOP-51#DUN": {
-        "skuId": "LT24-LOP-51#DUN",
+      "LT24-LOP-51-DUN": {
+        "skuId": "LT24-LOP-51-DUN",
         "cardId": "LT24-LOP-51",
         "finish": "dun"
       },
-      "LT24-LOP-51#FOIL": {
-        "skuId": "LT24-LOP-51#FOIL",
+      "LT24-LOP-51-FOIL": {
+        "skuId": "LT24-LOP-51-FOIL",
         "cardId": "LT24-LOP-51",
         "finish": "foil"
       },
-      "LT24-LOP-52#DUN": {
-        "skuId": "LT24-LOP-52#DUN",
+      "LT24-LOP-52-DUN": {
+        "skuId": "LT24-LOP-52-DUN",
         "cardId": "LT24-LOP-52",
         "finish": "dun"
       },
-      "LT24-LOP-52#FOIL": {
-        "skuId": "LT24-LOP-52#FOIL",
+      "LT24-LOP-52-FOIL": {
+        "skuId": "LT24-LOP-52-FOIL",
         "cardId": "LT24-LOP-52",
         "finish": "foil"
       },
-      "LT24-LOP-53#DUN": {
-        "skuId": "LT24-LOP-53#DUN",
+      "LT24-LOP-53-DUN": {
+        "skuId": "LT24-LOP-53-DUN",
         "cardId": "LT24-LOP-53",
         "finish": "dun"
       },
-      "LT24-LOP-53#FOIL": {
-        "skuId": "LT24-LOP-53#FOIL",
+      "LT24-LOP-53-FOIL": {
+        "skuId": "LT24-LOP-53-FOIL",
         "cardId": "LT24-LOP-53",
         "finish": "foil"
       },
-      "LT24-LOP-54#DUN": {
-        "skuId": "LT24-LOP-54#DUN",
+      "LT24-LOP-54-DUN": {
+        "skuId": "LT24-LOP-54-DUN",
         "cardId": "LT24-LOP-54",
         "finish": "dun"
       },
-      "LT24-LOP-54#FOIL": {
-        "skuId": "LT24-LOP-54#FOIL",
+      "LT24-LOP-54-FOIL": {
+        "skuId": "LT24-LOP-54-FOIL",
         "cardId": "LT24-LOP-54",
         "finish": "foil"
       },
-      "LT24-CHM-01#DUN": {
-        "skuId": "LT24-CHM-01#DUN",
+      "LT24-CHM-01-DUN": {
+        "skuId": "LT24-CHM-01-DUN",
         "cardId": "LT24-CHM-01",
         "finish": "dun"
       },
-      "LT24-CHM-01#FOIL": {
-        "skuId": "LT24-CHM-01#FOIL",
+      "LT24-CHM-01-FOIL": {
+        "skuId": "LT24-CHM-01-FOIL",
         "cardId": "LT24-CHM-01",
         "finish": "foil"
       },
-      "LT24-CHM-02#DUN": {
-        "skuId": "LT24-CHM-02#DUN",
+      "LT24-CHM-02-DUN": {
+        "skuId": "LT24-CHM-02-DUN",
         "cardId": "LT24-CHM-02",
         "finish": "dun"
       },
-      "LT24-CHM-02#FOIL": {
-        "skuId": "LT24-CHM-02#FOIL",
+      "LT24-CHM-02-FOIL": {
+        "skuId": "LT24-CHM-02-FOIL",
         "cardId": "LT24-CHM-02",
         "finish": "foil"
       },
-      "LT24-CHM-03#DUN": {
-        "skuId": "LT24-CHM-03#DUN",
+      "LT24-CHM-03-DUN": {
+        "skuId": "LT24-CHM-03-DUN",
         "cardId": "LT24-CHM-03",
         "finish": "dun"
       },
-      "LT24-CHM-03#FOIL": {
-        "skuId": "LT24-CHM-03#FOIL",
+      "LT24-CHM-03-FOIL": {
+        "skuId": "LT24-CHM-03-FOIL",
         "cardId": "LT24-CHM-03",
         "finish": "foil"
       },
-      "LT24-CHM-04#DUN": {
-        "skuId": "LT24-CHM-04#DUN",
+      "LT24-CHM-04-DUN": {
+        "skuId": "LT24-CHM-04-DUN",
         "cardId": "LT24-CHM-04",
         "finish": "dun"
       },
-      "LT24-CHM-04#FOIL": {
-        "skuId": "LT24-CHM-04#FOIL",
+      "LT24-CHM-04-FOIL": {
+        "skuId": "LT24-CHM-04-FOIL",
         "cardId": "LT24-CHM-04",
         "finish": "foil"
       },
-      "LT24-CHM-05#DUN": {
-        "skuId": "LT24-CHM-05#DUN",
+      "LT24-CHM-05-DUN": {
+        "skuId": "LT24-CHM-05-DUN",
         "cardId": "LT24-CHM-05",
         "finish": "dun"
       },
-      "LT24-CHM-05#FOIL": {
-        "skuId": "LT24-CHM-05#FOIL",
+      "LT24-CHM-05-FOIL": {
+        "skuId": "LT24-CHM-05-FOIL",
         "cardId": "LT24-CHM-05",
         "finish": "foil"
       },
-      "LT24-CHM-06#DUN": {
-        "skuId": "LT24-CHM-06#DUN",
+      "LT24-CHM-06-DUN": {
+        "skuId": "LT24-CHM-06-DUN",
         "cardId": "LT24-CHM-06",
         "finish": "dun"
       },
-      "LT24-CHM-06#FOIL": {
-        "skuId": "LT24-CHM-06#FOIL",
+      "LT24-CHM-06-FOIL": {
+        "skuId": "LT24-CHM-06-FOIL",
         "cardId": "LT24-CHM-06",
         "finish": "foil"
       },
-      "LT24-CHM-07#DUN": {
-        "skuId": "LT24-CHM-07#DUN",
+      "LT24-CHM-07-DUN": {
+        "skuId": "LT24-CHM-07-DUN",
         "cardId": "LT24-CHM-07",
         "finish": "dun"
       },
-      "LT24-CHM-07#FOIL": {
-        "skuId": "LT24-CHM-07#FOIL",
+      "LT24-CHM-07-FOIL": {
+        "skuId": "LT24-CHM-07-FOIL",
         "cardId": "LT24-CHM-07",
         "finish": "foil"
       },
-      "LT24-CHM-08#DUN": {
-        "skuId": "LT24-CHM-08#DUN",
+      "LT24-CHM-08-DUN": {
+        "skuId": "LT24-CHM-08-DUN",
         "cardId": "LT24-CHM-08",
         "finish": "dun"
       },
-      "LT24-CHM-08#FOIL": {
-        "skuId": "LT24-CHM-08#FOIL",
+      "LT24-CHM-08-FOIL": {
+        "skuId": "LT24-CHM-08-FOIL",
         "cardId": "LT24-CHM-08",
         "finish": "foil"
       },
-      "LT24-CHM-09#DUN": {
-        "skuId": "LT24-CHM-09#DUN",
+      "LT24-CHM-09-DUN": {
+        "skuId": "LT24-CHM-09-DUN",
         "cardId": "LT24-CHM-09",
         "finish": "dun"
       },
-      "LT24-CHM-09#FOIL": {
-        "skuId": "LT24-CHM-09#FOIL",
+      "LT24-CHM-09-FOIL": {
+        "skuId": "LT24-CHM-09-FOIL",
         "cardId": "LT24-CHM-09",
         "finish": "foil"
       },
-      "LT24-CHM-10#DUN": {
-        "skuId": "LT24-CHM-10#DUN",
+      "LT24-CHM-10-DUN": {
+        "skuId": "LT24-CHM-10-DUN",
         "cardId": "LT24-CHM-10",
         "finish": "dun"
       },
-      "LT24-CHM-10#FOIL": {
-        "skuId": "LT24-CHM-10#FOIL",
+      "LT24-CHM-10-FOIL": {
+        "skuId": "LT24-CHM-10-FOIL",
         "cardId": "LT24-CHM-10",
         "finish": "foil"
       },
-      "LT24-CHM-11#DUN": {
-        "skuId": "LT24-CHM-11#DUN",
+      "LT24-CHM-11-DUN": {
+        "skuId": "LT24-CHM-11-DUN",
         "cardId": "LT24-CHM-11",
         "finish": "dun"
       },
-      "LT24-CHM-11#FOIL": {
-        "skuId": "LT24-CHM-11#FOIL",
+      "LT24-CHM-11-FOIL": {
+        "skuId": "LT24-CHM-11-FOIL",
         "cardId": "LT24-CHM-11",
         "finish": "foil"
       },
-      "LT24-CHM-12#DUN": {
-        "skuId": "LT24-CHM-12#DUN",
+      "LT24-CHM-12-DUN": {
+        "skuId": "LT24-CHM-12-DUN",
         "cardId": "LT24-CHM-12",
         "finish": "dun"
       },
-      "LT24-CHM-12#FOIL": {
-        "skuId": "LT24-CHM-12#FOIL",
+      "LT24-CHM-12-FOIL": {
+        "skuId": "LT24-CHM-12-FOIL",
         "cardId": "LT24-CHM-12",
         "finish": "foil"
       },
-      "LT24-CHM-13#DUN": {
-        "skuId": "LT24-CHM-13#DUN",
+      "LT24-CHM-13-DUN": {
+        "skuId": "LT24-CHM-13-DUN",
         "cardId": "LT24-CHM-13",
         "finish": "dun"
       },
-      "LT24-CHM-13#FOIL": {
-        "skuId": "LT24-CHM-13#FOIL",
+      "LT24-CHM-13-FOIL": {
+        "skuId": "LT24-CHM-13-FOIL",
         "cardId": "LT24-CHM-13",
         "finish": "foil"
       },
-      "LT24-CHM-14#DUN": {
-        "skuId": "LT24-CHM-14#DUN",
+      "LT24-CHM-14-DUN": {
+        "skuId": "LT24-CHM-14-DUN",
         "cardId": "LT24-CHM-14",
         "finish": "dun"
       },
-      "LT24-CHM-14#FOIL": {
-        "skuId": "LT24-CHM-14#FOIL",
+      "LT24-CHM-14-FOIL": {
+        "skuId": "LT24-CHM-14-FOIL",
         "cardId": "LT24-CHM-14",
         "finish": "foil"
       },
-      "LT24-CHM-15#DUN": {
-        "skuId": "LT24-CHM-15#DUN",
+      "LT24-CHM-15-DUN": {
+        "skuId": "LT24-CHM-15-DUN",
         "cardId": "LT24-CHM-15",
         "finish": "dun"
       },
-      "LT24-CHM-15#FOIL": {
-        "skuId": "LT24-CHM-15#FOIL",
+      "LT24-CHM-15-FOIL": {
+        "skuId": "LT24-CHM-15-FOIL",
         "cardId": "LT24-CHM-15",
         "finish": "foil"
       },
-      "LT24-CHM-16#DUN": {
-        "skuId": "LT24-CHM-16#DUN",
+      "LT24-CHM-16-DUN": {
+        "skuId": "LT24-CHM-16-DUN",
         "cardId": "LT24-CHM-16",
         "finish": "dun"
       },
-      "LT24-CHM-16#FOIL": {
-        "skuId": "LT24-CHM-16#FOIL",
+      "LT24-CHM-16-FOIL": {
+        "skuId": "LT24-CHM-16-FOIL",
         "cardId": "LT24-CHM-16",
         "finish": "foil"
       },
-      "LT24-CHM-17#DUN": {
-        "skuId": "LT24-CHM-17#DUN",
+      "LT24-CHM-17-DUN": {
+        "skuId": "LT24-CHM-17-DUN",
         "cardId": "LT24-CHM-17",
         "finish": "dun"
       },
-      "LT24-CHM-17#FOIL": {
-        "skuId": "LT24-CHM-17#FOIL",
+      "LT24-CHM-17-FOIL": {
+        "skuId": "LT24-CHM-17-FOIL",
         "cardId": "LT24-CHM-17",
         "finish": "foil"
       },
-      "LT24-CHM-18#DUN": {
-        "skuId": "LT24-CHM-18#DUN",
+      "LT24-CHM-18-DUN": {
+        "skuId": "LT24-CHM-18-DUN",
         "cardId": "LT24-CHM-18",
         "finish": "dun"
       },
-      "LT24-CHM-18#FOIL": {
-        "skuId": "LT24-CHM-18#FOIL",
+      "LT24-CHM-18-FOIL": {
+        "skuId": "LT24-CHM-18-FOIL",
         "cardId": "LT24-CHM-18",
         "finish": "foil"
       },
-      "LT24-CHM-19#DUN": {
-        "skuId": "LT24-CHM-19#DUN",
+      "LT24-CHM-19-DUN": {
+        "skuId": "LT24-CHM-19-DUN",
         "cardId": "LT24-CHM-19",
         "finish": "dun"
       },
-      "LT24-CHM-19#FOIL": {
-        "skuId": "LT24-CHM-19#FOIL",
+      "LT24-CHM-19-FOIL": {
+        "skuId": "LT24-CHM-19-FOIL",
         "cardId": "LT24-CHM-19",
         "finish": "foil"
       },
-      "LT24-CHM-20#DUN": {
-        "skuId": "LT24-CHM-20#DUN",
+      "LT24-CHM-20-DUN": {
+        "skuId": "LT24-CHM-20-DUN",
         "cardId": "LT24-CHM-20",
         "finish": "dun"
       },
-      "LT24-CHM-20#FOIL": {
-        "skuId": "LT24-CHM-20#FOIL",
+      "LT24-CHM-20-FOIL": {
+        "skuId": "LT24-CHM-20-FOIL",
         "cardId": "LT24-CHM-20",
         "finish": "foil"
       },
-      "LT24-CHM-21#DUN": {
-        "skuId": "LT24-CHM-21#DUN",
+      "LT24-CHM-21-DUN": {
+        "skuId": "LT24-CHM-21-DUN",
         "cardId": "LT24-CHM-21",
         "finish": "dun"
       },
-      "LT24-CHM-21#FOIL": {
-        "skuId": "LT24-CHM-21#FOIL",
+      "LT24-CHM-21-FOIL": {
+        "skuId": "LT24-CHM-21-FOIL",
         "cardId": "LT24-CHM-21",
         "finish": "foil"
       },
-      "LT24-CHM-22#DUN": {
-        "skuId": "LT24-CHM-22#DUN",
+      "LT24-CHM-22-DUN": {
+        "skuId": "LT24-CHM-22-DUN",
         "cardId": "LT24-CHM-22",
         "finish": "dun"
       },
-      "LT24-CHM-22#FOIL": {
-        "skuId": "LT24-CHM-22#FOIL",
+      "LT24-CHM-22-FOIL": {
+        "skuId": "LT24-CHM-22-FOIL",
         "cardId": "LT24-CHM-22",
         "finish": "foil"
       },
-      "LT24-CHM-23#DUN": {
-        "skuId": "LT24-CHM-23#DUN",
+      "LT24-CHM-23-DUN": {
+        "skuId": "LT24-CHM-23-DUN",
         "cardId": "LT24-CHM-23",
         "finish": "dun"
       },
-      "LT24-CHM-23#FOIL": {
-        "skuId": "LT24-CHM-23#FOIL",
+      "LT24-CHM-23-FOIL": {
+        "skuId": "LT24-CHM-23-FOIL",
         "cardId": "LT24-CHM-23",
         "finish": "foil"
       },
-      "LT24-CHM-24#DUN": {
-        "skuId": "LT24-CHM-24#DUN",
+      "LT24-CHM-24-DUN": {
+        "skuId": "LT24-CHM-24-DUN",
         "cardId": "LT24-CHM-24",
         "finish": "dun"
       },
-      "LT24-CHM-24#FOIL": {
-        "skuId": "LT24-CHM-24#FOIL",
+      "LT24-CHM-24-FOIL": {
+        "skuId": "LT24-CHM-24-FOIL",
         "cardId": "LT24-CHM-24",
         "finish": "foil"
       },
-      "LT24-CHM-25#DUN": {
-        "skuId": "LT24-CHM-25#DUN",
+      "LT24-CHM-25-DUN": {
+        "skuId": "LT24-CHM-25-DUN",
         "cardId": "LT24-CHM-25",
         "finish": "dun"
       },
-      "LT24-CHM-25#FOIL": {
-        "skuId": "LT24-CHM-25#FOIL",
+      "LT24-CHM-25-FOIL": {
+        "skuId": "LT24-CHM-25-FOIL",
         "cardId": "LT24-CHM-25",
         "finish": "foil"
       },
-      "LT24-CHM-26#DUN": {
-        "skuId": "LT24-CHM-26#DUN",
+      "LT24-CHM-26-DUN": {
+        "skuId": "LT24-CHM-26-DUN",
         "cardId": "LT24-CHM-26",
         "finish": "dun"
       },
-      "LT24-CHM-26#FOIL": {
-        "skuId": "LT24-CHM-26#FOIL",
+      "LT24-CHM-26-FOIL": {
+        "skuId": "LT24-CHM-26-FOIL",
         "cardId": "LT24-CHM-26",
         "finish": "foil"
       },
-      "LT24-CHM-27#DUN": {
-        "skuId": "LT24-CHM-27#DUN",
+      "LT24-CHM-27-DUN": {
+        "skuId": "LT24-CHM-27-DUN",
         "cardId": "LT24-CHM-27",
         "finish": "dun"
       },
-      "LT24-CHM-27#FOIL": {
-        "skuId": "LT24-CHM-27#FOIL",
+      "LT24-CHM-27-FOIL": {
+        "skuId": "LT24-CHM-27-FOIL",
         "cardId": "LT24-CHM-27",
         "finish": "foil"
       },
-      "LT24-CHM-28#DUN": {
-        "skuId": "LT24-CHM-28#DUN",
+      "LT24-CHM-28-DUN": {
+        "skuId": "LT24-CHM-28-DUN",
         "cardId": "LT24-CHM-28",
         "finish": "dun"
       },
-      "LT24-CHM-28#FOIL": {
-        "skuId": "LT24-CHM-28#FOIL",
+      "LT24-CHM-28-FOIL": {
+        "skuId": "LT24-CHM-28-FOIL",
         "cardId": "LT24-CHM-28",
         "finish": "foil"
       },
-      "LT24-CHM-29#DUN": {
-        "skuId": "LT24-CHM-29#DUN",
+      "LT24-CHM-29-DUN": {
+        "skuId": "LT24-CHM-29-DUN",
         "cardId": "LT24-CHM-29",
         "finish": "dun"
       },
-      "LT24-CHM-29#FOIL": {
-        "skuId": "LT24-CHM-29#FOIL",
+      "LT24-CHM-29-FOIL": {
+        "skuId": "LT24-CHM-29-FOIL",
         "cardId": "LT24-CHM-29",
         "finish": "foil"
       },
-      "LT24-CHM-30#DUN": {
-        "skuId": "LT24-CHM-30#DUN",
+      "LT24-CHM-30-DUN": {
+        "skuId": "LT24-CHM-30-DUN",
         "cardId": "LT24-CHM-30",
         "finish": "dun"
       },
-      "LT24-CHM-30#FOIL": {
-        "skuId": "LT24-CHM-30#FOIL",
+      "LT24-CHM-30-FOIL": {
+        "skuId": "LT24-CHM-30-FOIL",
         "cardId": "LT24-CHM-30",
         "finish": "foil"
       },
-      "LT24-CHM-31#DUN": {
-        "skuId": "LT24-CHM-31#DUN",
+      "LT24-CHM-31-DUN": {
+        "skuId": "LT24-CHM-31-DUN",
         "cardId": "LT24-CHM-31",
         "finish": "dun"
       },
-      "LT24-CHM-31#FOIL": {
-        "skuId": "LT24-CHM-31#FOIL",
+      "LT24-CHM-31-FOIL": {
+        "skuId": "LT24-CHM-31-FOIL",
         "cardId": "LT24-CHM-31",
         "finish": "foil"
       },
-      "LT24-CHM-32#DUN": {
-        "skuId": "LT24-CHM-32#DUN",
+      "LT24-CHM-32-DUN": {
+        "skuId": "LT24-CHM-32-DUN",
         "cardId": "LT24-CHM-32",
         "finish": "dun"
       },
-      "LT24-CHM-32#FOIL": {
-        "skuId": "LT24-CHM-32#FOIL",
+      "LT24-CHM-32-FOIL": {
+        "skuId": "LT24-CHM-32-FOIL",
         "cardId": "LT24-CHM-32",
         "finish": "foil"
       },
-      "LT24-CHM-33#DUN": {
-        "skuId": "LT24-CHM-33#DUN",
+      "LT24-CHM-33-DUN": {
+        "skuId": "LT24-CHM-33-DUN",
         "cardId": "LT24-CHM-33",
         "finish": "dun"
       },
-      "LT24-CHM-33#FOIL": {
-        "skuId": "LT24-CHM-33#FOIL",
+      "LT24-CHM-33-FOIL": {
+        "skuId": "LT24-CHM-33-FOIL",
         "cardId": "LT24-CHM-33",
         "finish": "foil"
       },
-      "LT24-CHM-34#DUN": {
-        "skuId": "LT24-CHM-34#DUN",
+      "LT24-CHM-34-DUN": {
+        "skuId": "LT24-CHM-34-DUN",
         "cardId": "LT24-CHM-34",
         "finish": "dun"
       },
-      "LT24-CHM-34#FOIL": {
-        "skuId": "LT24-CHM-34#FOIL",
+      "LT24-CHM-34-FOIL": {
+        "skuId": "LT24-CHM-34-FOIL",
         "cardId": "LT24-CHM-34",
         "finish": "foil"
       },
-      "LT24-CHM-35#DUN": {
-        "skuId": "LT24-CHM-35#DUN",
+      "LT24-CHM-35-DUN": {
+        "skuId": "LT24-CHM-35-DUN",
         "cardId": "LT24-CHM-35",
         "finish": "dun"
       },
-      "LT24-CHM-35#FOIL": {
-        "skuId": "LT24-CHM-35#FOIL",
+      "LT24-CHM-35-FOIL": {
+        "skuId": "LT24-CHM-35-FOIL",
         "cardId": "LT24-CHM-35",
         "finish": "foil"
       },
-      "LT24-CHM-36#DUN": {
-        "skuId": "LT24-CHM-36#DUN",
+      "LT24-CHM-36-DUN": {
+        "skuId": "LT24-CHM-36-DUN",
         "cardId": "LT24-CHM-36",
         "finish": "dun"
       },
-      "LT24-CHM-36#FOIL": {
-        "skuId": "LT24-CHM-36#FOIL",
+      "LT24-CHM-36-FOIL": {
+        "skuId": "LT24-CHM-36-FOIL",
         "cardId": "LT24-CHM-36",
         "finish": "foil"
       },
-      "LT24-CHM-37#DUN": {
-        "skuId": "LT24-CHM-37#DUN",
+      "LT24-CHM-37-DUN": {
+        "skuId": "LT24-CHM-37-DUN",
         "cardId": "LT24-CHM-37",
         "finish": "dun"
       },
-      "LT24-CHM-37#FOIL": {
-        "skuId": "LT24-CHM-37#FOIL",
+      "LT24-CHM-37-FOIL": {
+        "skuId": "LT24-CHM-37-FOIL",
         "cardId": "LT24-CHM-37",
         "finish": "foil"
       },
-      "LT24-CHM-38#DUN": {
-        "skuId": "LT24-CHM-38#DUN",
+      "LT24-CHM-38-DUN": {
+        "skuId": "LT24-CHM-38-DUN",
         "cardId": "LT24-CHM-38",
         "finish": "dun"
       },
-      "LT24-CHM-38#FOIL": {
-        "skuId": "LT24-CHM-38#FOIL",
+      "LT24-CHM-38-FOIL": {
+        "skuId": "LT24-CHM-38-FOIL",
         "cardId": "LT24-CHM-38",
         "finish": "foil"
       },
-      "LT24-CHM-39#DUN": {
-        "skuId": "LT24-CHM-39#DUN",
+      "LT24-CHM-39-DUN": {
+        "skuId": "LT24-CHM-39-DUN",
         "cardId": "LT24-CHM-39",
         "finish": "dun"
       },
-      "LT24-CHM-39#FOIL": {
-        "skuId": "LT24-CHM-39#FOIL",
+      "LT24-CHM-39-FOIL": {
+        "skuId": "LT24-CHM-39-FOIL",
         "cardId": "LT24-CHM-39",
         "finish": "foil"
       },
-      "LT24-CHM-40#DUN": {
-        "skuId": "LT24-CHM-40#DUN",
+      "LT24-CHM-40-DUN": {
+        "skuId": "LT24-CHM-40-DUN",
         "cardId": "LT24-CHM-40",
         "finish": "dun"
       },
-      "LT24-CHM-40#FOIL": {
-        "skuId": "LT24-CHM-40#FOIL",
+      "LT24-CHM-40-FOIL": {
+        "skuId": "LT24-CHM-40-FOIL",
         "cardId": "LT24-CHM-40",
         "finish": "foil"
       },
-      "LT24-CHM-41#DUN": {
-        "skuId": "LT24-CHM-41#DUN",
+      "LT24-CHM-41-DUN": {
+        "skuId": "LT24-CHM-41-DUN",
         "cardId": "LT24-CHM-41",
         "finish": "dun"
       },
-      "LT24-CHM-41#FOIL": {
-        "skuId": "LT24-CHM-41#FOIL",
+      "LT24-CHM-41-FOIL": {
+        "skuId": "LT24-CHM-41-FOIL",
         "cardId": "LT24-CHM-41",
         "finish": "foil"
       },
-      "LT24-CHM-42#DUN": {
-        "skuId": "LT24-CHM-42#DUN",
+      "LT24-CHM-42-DUN": {
+        "skuId": "LT24-CHM-42-DUN",
         "cardId": "LT24-CHM-42",
         "finish": "dun"
       },
-      "LT24-CHM-42#FOIL": {
-        "skuId": "LT24-CHM-42#FOIL",
+      "LT24-CHM-42-FOIL": {
+        "skuId": "LT24-CHM-42-FOIL",
         "cardId": "LT24-CHM-42",
         "finish": "foil"
       },
-      "LT24-CHM-43#DUN": {
-        "skuId": "LT24-CHM-43#DUN",
+      "LT24-CHM-43-DUN": {
+        "skuId": "LT24-CHM-43-DUN",
         "cardId": "LT24-CHM-43",
         "finish": "dun"
       },
-      "LT24-CHM-43#FOIL": {
-        "skuId": "LT24-CHM-43#FOIL",
+      "LT24-CHM-43-FOIL": {
+        "skuId": "LT24-CHM-43-FOIL",
         "cardId": "LT24-CHM-43",
         "finish": "foil"
       },
-      "LT24-CHM-44#DUN": {
-        "skuId": "LT24-CHM-44#DUN",
+      "LT24-CHM-44-DUN": {
+        "skuId": "LT24-CHM-44-DUN",
         "cardId": "LT24-CHM-44",
         "finish": "dun"
       },
-      "LT24-CHM-44#FOIL": {
-        "skuId": "LT24-CHM-44#FOIL",
+      "LT24-CHM-44-FOIL": {
+        "skuId": "LT24-CHM-44-FOIL",
         "cardId": "LT24-CHM-44",
         "finish": "foil"
       },
-      "LT24-CHM-45#DUN": {
-        "skuId": "LT24-CHM-45#DUN",
+      "LT24-CHM-45-DUN": {
+        "skuId": "LT24-CHM-45-DUN",
         "cardId": "LT24-CHM-45",
         "finish": "dun"
       },
-      "LT24-CHM-45#FOIL": {
-        "skuId": "LT24-CHM-45#FOIL",
+      "LT24-CHM-45-FOIL": {
+        "skuId": "LT24-CHM-45-FOIL",
         "cardId": "LT24-CHM-45",
         "finish": "foil"
       },
-      "LT24-CHM-46#DUN": {
-        "skuId": "LT24-CHM-46#DUN",
+      "LT24-CHM-46-DUN": {
+        "skuId": "LT24-CHM-46-DUN",
         "cardId": "LT24-CHM-46",
         "finish": "dun"
       },
-      "LT24-CHM-46#FOIL": {
-        "skuId": "LT24-CHM-46#FOIL",
+      "LT24-CHM-46-FOIL": {
+        "skuId": "LT24-CHM-46-FOIL",
         "cardId": "LT24-CHM-46",
         "finish": "foil"
       },
-      "LT24-CHM-47#DUN": {
-        "skuId": "LT24-CHM-47#DUN",
+      "LT24-CHM-47-DUN": {
+        "skuId": "LT24-CHM-47-DUN",
         "cardId": "LT24-CHM-47",
         "finish": "dun"
       },
-      "LT24-CHM-47#FOIL": {
-        "skuId": "LT24-CHM-47#FOIL",
+      "LT24-CHM-47-FOIL": {
+        "skuId": "LT24-CHM-47-FOIL",
         "cardId": "LT24-CHM-47",
         "finish": "foil"
       },
-      "LT24-CHM-48#DUN": {
-        "skuId": "LT24-CHM-48#DUN",
+      "LT24-CHM-48-DUN": {
+        "skuId": "LT24-CHM-48-DUN",
         "cardId": "LT24-CHM-48",
         "finish": "dun"
       },
-      "LT24-CHM-48#FOIL": {
-        "skuId": "LT24-CHM-48#FOIL",
+      "LT24-CHM-48-FOIL": {
+        "skuId": "LT24-CHM-48-FOIL",
         "cardId": "LT24-CHM-48",
         "finish": "foil"
       },
-      "LT24-CHM-49#DUN": {
-        "skuId": "LT24-CHM-49#DUN",
+      "LT24-CHM-49-DUN": {
+        "skuId": "LT24-CHM-49-DUN",
         "cardId": "LT24-CHM-49",
         "finish": "dun"
       },
-      "LT24-CHM-49#FOIL": {
-        "skuId": "LT24-CHM-49#FOIL",
+      "LT24-CHM-49-FOIL": {
+        "skuId": "LT24-CHM-49-FOIL",
         "cardId": "LT24-CHM-49",
         "finish": "foil"
       },
-      "LT24-CHM-50#DUN": {
-        "skuId": "LT24-CHM-50#DUN",
+      "LT24-CHM-50-DUN": {
+        "skuId": "LT24-CHM-50-DUN",
         "cardId": "LT24-CHM-50",
         "finish": "dun"
       },
-      "LT24-CHM-50#FOIL": {
-        "skuId": "LT24-CHM-50#FOIL",
+      "LT24-CHM-50-FOIL": {
+        "skuId": "LT24-CHM-50-FOIL",
         "cardId": "LT24-CHM-50",
         "finish": "foil"
       },
-      "LT24-CHM-51#DUN": {
-        "skuId": "LT24-CHM-51#DUN",
+      "LT24-CHM-51-DUN": {
+        "skuId": "LT24-CHM-51-DUN",
         "cardId": "LT24-CHM-51",
         "finish": "dun"
       },
-      "LT24-CHM-51#FOIL": {
-        "skuId": "LT24-CHM-51#FOIL",
+      "LT24-CHM-51-FOIL": {
+        "skuId": "LT24-CHM-51-FOIL",
         "cardId": "LT24-CHM-51",
         "finish": "foil"
       },
-      "LT24-CHM-52#DUN": {
-        "skuId": "LT24-CHM-52#DUN",
+      "LT24-CHM-52-DUN": {
+        "skuId": "LT24-CHM-52-DUN",
         "cardId": "LT24-CHM-52",
         "finish": "dun"
       },
-      "LT24-CHM-52#FOIL": {
-        "skuId": "LT24-CHM-52#FOIL",
+      "LT24-CHM-52-FOIL": {
+        "skuId": "LT24-CHM-52-FOIL",
         "cardId": "LT24-CHM-52",
         "finish": "foil"
       },
-      "LT24-CHM-53#DUN": {
-        "skuId": "LT24-CHM-53#DUN",
+      "LT24-CHM-53-DUN": {
+        "skuId": "LT24-CHM-53-DUN",
         "cardId": "LT24-CHM-53",
         "finish": "dun"
       },
-      "LT24-CHM-53#FOIL": {
-        "skuId": "LT24-CHM-53#FOIL",
+      "LT24-CHM-53-FOIL": {
+        "skuId": "LT24-CHM-53-FOIL",
         "cardId": "LT24-CHM-53",
         "finish": "foil"
       },
-      "LT24-CHM-54#DUN": {
-        "skuId": "LT24-CHM-54#DUN",
+      "LT24-CHM-54-DUN": {
+        "skuId": "LT24-CHM-54-DUN",
         "cardId": "LT24-CHM-54",
         "finish": "dun"
       },
-      "LT24-CHM-54#FOIL": {
-        "skuId": "LT24-CHM-54#FOIL",
+      "LT24-CHM-54-FOIL": {
+        "skuId": "LT24-CHM-54-FOIL",
         "cardId": "LT24-CHM-54",
         "finish": "foil"
       },
-      "LT24-HLD-01#DUN": {
-        "skuId": "LT24-HLD-01#DUN",
+      "LT24-HLD-01-DUN": {
+        "skuId": "LT24-HLD-01-DUN",
         "cardId": "LT24-HLD-01",
         "finish": "dun"
       },
-      "LT24-HLD-01#FOIL": {
-        "skuId": "LT24-HLD-01#FOIL",
+      "LT24-HLD-01-FOIL": {
+        "skuId": "LT24-HLD-01-FOIL",
         "cardId": "LT24-HLD-01",
         "finish": "foil"
       },
-      "LT24-HLD-02#DUN": {
-        "skuId": "LT24-HLD-02#DUN",
+      "LT24-HLD-02-DUN": {
+        "skuId": "LT24-HLD-02-DUN",
         "cardId": "LT24-HLD-02",
         "finish": "dun"
       },
-      "LT24-HLD-02#FOIL": {
-        "skuId": "LT24-HLD-02#FOIL",
+      "LT24-HLD-02-FOIL": {
+        "skuId": "LT24-HLD-02-FOIL",
         "cardId": "LT24-HLD-02",
         "finish": "foil"
       },
-      "LT24-HLD-03#DUN": {
-        "skuId": "LT24-HLD-03#DUN",
+      "LT24-HLD-03-DUN": {
+        "skuId": "LT24-HLD-03-DUN",
         "cardId": "LT24-HLD-03",
         "finish": "dun"
       },
-      "LT24-HLD-03#FOIL": {
-        "skuId": "LT24-HLD-03#FOIL",
+      "LT24-HLD-03-FOIL": {
+        "skuId": "LT24-HLD-03-FOIL",
         "cardId": "LT24-HLD-03",
         "finish": "foil"
       },
-      "LT24-HLD-04#DUN": {
-        "skuId": "LT24-HLD-04#DUN",
+      "LT24-HLD-04-DUN": {
+        "skuId": "LT24-HLD-04-DUN",
         "cardId": "LT24-HLD-04",
         "finish": "dun"
       },
-      "LT24-HLD-04#FOIL": {
-        "skuId": "LT24-HLD-04#FOIL",
+      "LT24-HLD-04-FOIL": {
+        "skuId": "LT24-HLD-04-FOIL",
         "cardId": "LT24-HLD-04",
         "finish": "foil"
       },
-      "LT24-HLD-05#DUN": {
-        "skuId": "LT24-HLD-05#DUN",
+      "LT24-HLD-05-DUN": {
+        "skuId": "LT24-HLD-05-DUN",
         "cardId": "LT24-HLD-05",
         "finish": "dun"
       },
-      "LT24-HLD-05#FOIL": {
-        "skuId": "LT24-HLD-05#FOIL",
+      "LT24-HLD-05-FOIL": {
+        "skuId": "LT24-HLD-05-FOIL",
         "cardId": "LT24-HLD-05",
         "finish": "foil"
       },
-      "LT24-HLD-06#DUN": {
-        "skuId": "LT24-HLD-06#DUN",
+      "LT24-HLD-06-DUN": {
+        "skuId": "LT24-HLD-06-DUN",
         "cardId": "LT24-HLD-06",
         "finish": "dun"
       },
-      "LT24-HLD-06#FOIL": {
-        "skuId": "LT24-HLD-06#FOIL",
+      "LT24-HLD-06-FOIL": {
+        "skuId": "LT24-HLD-06-FOIL",
         "cardId": "LT24-HLD-06",
         "finish": "foil"
       },
-      "LT24-HLD-07#DUN": {
-        "skuId": "LT24-HLD-07#DUN",
+      "LT24-HLD-07-DUN": {
+        "skuId": "LT24-HLD-07-DUN",
         "cardId": "LT24-HLD-07",
         "finish": "dun"
       },
-      "LT24-HLD-07#FOIL": {
-        "skuId": "LT24-HLD-07#FOIL",
+      "LT24-HLD-07-FOIL": {
+        "skuId": "LT24-HLD-07-FOIL",
         "cardId": "LT24-HLD-07",
         "finish": "foil"
       },
-      "LT24-HLD-08#DUN": {
-        "skuId": "LT24-HLD-08#DUN",
+      "LT24-HLD-08-DUN": {
+        "skuId": "LT24-HLD-08-DUN",
         "cardId": "LT24-HLD-08",
         "finish": "dun"
       },
-      "LT24-HLD-08#FOIL": {
-        "skuId": "LT24-HLD-08#FOIL",
+      "LT24-HLD-08-FOIL": {
+        "skuId": "LT24-HLD-08-FOIL",
         "cardId": "LT24-HLD-08",
         "finish": "foil"
       },
-      "LT24-HLD-09#DUN": {
-        "skuId": "LT24-HLD-09#DUN",
+      "LT24-HLD-09-DUN": {
+        "skuId": "LT24-HLD-09-DUN",
         "cardId": "LT24-HLD-09",
         "finish": "dun"
       },
-      "LT24-HLD-09#FOIL": {
-        "skuId": "LT24-HLD-09#FOIL",
+      "LT24-HLD-09-FOIL": {
+        "skuId": "LT24-HLD-09-FOIL",
         "cardId": "LT24-HLD-09",
         "finish": "foil"
       },
-      "LT24-NS-ELS-02#DUN": {
-        "skuId": "LT24-NS-ELS-02#DUN",
+      "LT24-NS-ELS-02-DUN": {
+        "skuId": "LT24-NS-ELS-02-DUN",
         "cardId": "LT24-NS-ELS-02",
         "finish": "dun"
       },
-      "LT24-NS-ELS-02#FOIL": {
-        "skuId": "LT24-NS-ELS-02#FOIL",
+      "LT24-NS-ELS-02-FOIL": {
+        "skuId": "LT24-NS-ELS-02-FOIL",
         "cardId": "LT24-NS-ELS-02",
         "finish": "foil"
       },
-      "LT24-NS-ELS-06#DUN": {
-        "skuId": "LT24-NS-ELS-06#DUN",
+      "LT24-NS-ELS-06-DUN": {
+        "skuId": "LT24-NS-ELS-06-DUN",
         "cardId": "LT24-NS-ELS-06",
         "finish": "dun"
       },
-      "LT24-NS-ELS-06#FOIL": {
-        "skuId": "LT24-NS-ELS-06#FOIL",
+      "LT24-NS-ELS-06-FOIL": {
+        "skuId": "LT24-NS-ELS-06-FOIL",
         "cardId": "LT24-NS-ELS-06",
         "finish": "foil"
       },
-      "LT24-NS-ELS-07#DUN": {
-        "skuId": "LT24-NS-ELS-07#DUN",
+      "LT24-NS-ELS-07-DUN": {
+        "skuId": "LT24-NS-ELS-07-DUN",
         "cardId": "LT24-NS-ELS-07",
         "finish": "dun"
       },
-      "LT24-NS-ELS-07#FOIL": {
-        "skuId": "LT24-NS-ELS-07#FOIL",
+      "LT24-NS-ELS-07-FOIL": {
+        "skuId": "LT24-NS-ELS-07-FOIL",
         "cardId": "LT24-NS-ELS-07",
         "finish": "foil"
       },
-      "LT24-NS-ELS-10#DUN": {
-        "skuId": "LT24-NS-ELS-10#DUN",
+      "LT24-NS-ELS-10-DUN": {
+        "skuId": "LT24-NS-ELS-10-DUN",
         "cardId": "LT24-NS-ELS-10",
         "finish": "dun"
       },
-      "LT24-NS-ELS-10#FOIL": {
-        "skuId": "LT24-NS-ELS-10#FOIL",
+      "LT24-NS-ELS-10-FOIL": {
+        "skuId": "LT24-NS-ELS-10-FOIL",
         "cardId": "LT24-NS-ELS-10",
         "finish": "foil"
       },
-      "LT24-NS-ELS-14#DUN": {
-        "skuId": "LT24-NS-ELS-14#DUN",
+      "LT24-NS-ELS-14-DUN": {
+        "skuId": "LT24-NS-ELS-14-DUN",
         "cardId": "LT24-NS-ELS-14",
         "finish": "dun"
       },
-      "LT24-NS-ELS-14#FOIL": {
-        "skuId": "LT24-NS-ELS-14#FOIL",
+      "LT24-NS-ELS-14-FOIL": {
+        "skuId": "LT24-NS-ELS-14-FOIL",
         "cardId": "LT24-NS-ELS-14",
         "finish": "foil"
       },
-      "LT24-NS-ELS-20#DUN": {
-        "skuId": "LT24-NS-ELS-20#DUN",
+      "LT24-NS-ELS-20-DUN": {
+        "skuId": "LT24-NS-ELS-20-DUN",
         "cardId": "LT24-NS-ELS-20",
         "finish": "dun"
       },
-      "LT24-NS-ELS-20#FOIL": {
-        "skuId": "LT24-NS-ELS-20#FOIL",
+      "LT24-NS-ELS-20-FOIL": {
+        "skuId": "LT24-NS-ELS-20-FOIL",
         "cardId": "LT24-NS-ELS-20",
         "finish": "foil"
       },
-      "LT24-NS-ELS-24-DANCE#DUN": {
-        "skuId": "LT24-NS-ELS-24-DANCE#DUN",
+      "LT24-NS-ELS-24-DUN-DANCE": {
+        "skuId": "LT24-NS-ELS-24-DUN-DANCE",
         "cardId": "LT24-NS-ELS-24-DANCE",
         "finish": "dun"
       },
-      "LT24-NS-ELS-24-DANCE#FOIL": {
-        "skuId": "LT24-NS-ELS-24-DANCE#FOIL",
+      "LT24-NS-ELS-24-FOIL-DANCE": {
+        "skuId": "LT24-NS-ELS-24-FOIL-DANCE",
         "cardId": "LT24-NS-ELS-24-DANCE",
         "finish": "foil"
       },
-      "LT24-NS-ELS-24-STOLEN#DUN": {
-        "skuId": "LT24-NS-ELS-24-STOLEN#DUN",
+      "LT24-NS-ELS-24-DUN-STOLEN": {
+        "skuId": "LT24-NS-ELS-24-DUN-STOLEN",
         "cardId": "LT24-NS-ELS-24-STOLEN",
         "finish": "dun"
       },
-      "LT24-NS-ELS-24-STOLEN#FOIL": {
-        "skuId": "LT24-NS-ELS-24-STOLEN#FOIL",
+      "LT24-NS-ELS-24-FOIL-STOLEN": {
+        "skuId": "LT24-NS-ELS-24-FOIL-STOLEN",
         "cardId": "LT24-NS-ELS-24-STOLEN",
         "finish": "foil"
       },
-      "LT24-NS-ELS-24-TRADED#DUN": {
-        "skuId": "LT24-NS-ELS-24-TRADED#DUN",
+      "LT24-NS-ELS-24-DUN-TRADED": {
+        "skuId": "LT24-NS-ELS-24-DUN-TRADED",
         "cardId": "LT24-NS-ELS-24-TRADED",
         "finish": "dun"
       },
-      "LT24-NS-ELS-24-TRADED#FOIL": {
-        "skuId": "LT24-NS-ELS-24-TRADED#FOIL",
+      "LT24-NS-ELS-24-FOIL-TRADED": {
+        "skuId": "LT24-NS-ELS-24-FOIL-TRADED",
         "cardId": "LT24-NS-ELS-24-TRADED",
         "finish": "foil"
       },
-      "LT24-NS-ELS-25#DUN": {
-        "skuId": "LT24-NS-ELS-25#DUN",
+      "LT24-NS-ELS-25-DUN": {
+        "skuId": "LT24-NS-ELS-25-DUN",
         "cardId": "LT24-NS-ELS-25",
         "finish": "dun"
       },
-      "LT24-NS-ELS-25#FOIL": {
-        "skuId": "LT24-NS-ELS-25#FOIL",
+      "LT24-NS-ELS-25-FOIL": {
+        "skuId": "LT24-NS-ELS-25-FOIL",
         "cardId": "LT24-NS-ELS-25",
         "finish": "foil"
       },
-      "LT24-NS-ELS-28#DUN": {
-        "skuId": "LT24-NS-ELS-28#DUN",
+      "LT24-NS-ELS-28-DUN": {
+        "skuId": "LT24-NS-ELS-28-DUN",
         "cardId": "LT24-NS-ELS-28",
         "finish": "dun"
       },
-      "LT24-NS-ELS-28#FOIL": {
-        "skuId": "LT24-NS-ELS-28#FOIL",
+      "LT24-NS-ELS-28-FOIL": {
+        "skuId": "LT24-NS-ELS-28-FOIL",
         "cardId": "LT24-NS-ELS-28",
         "finish": "foil"
       },
-      "LT24-NS-ELS-32#DUN": {
-        "skuId": "LT24-NS-ELS-32#DUN",
+      "LT24-NS-ELS-32-DUN": {
+        "skuId": "LT24-NS-ELS-32-DUN",
         "cardId": "LT24-NS-ELS-32",
         "finish": "dun"
       },
-      "LT24-NS-ELS-32#FOIL": {
-        "skuId": "LT24-NS-ELS-32#FOIL",
+      "LT24-NS-ELS-32-FOIL": {
+        "skuId": "LT24-NS-ELS-32-FOIL",
         "cardId": "LT24-NS-ELS-32",
         "finish": "foil"
       },
-      "LT24-NS-ELS-34-PIRATES#DUN": {
-        "skuId": "LT24-NS-ELS-34-PIRATES#DUN",
+      "LT24-NS-ELS-34-DUN-PIRATES": {
+        "skuId": "LT24-NS-ELS-34-DUN-PIRATES",
         "cardId": "LT24-NS-ELS-34-PIRATES",
         "finish": "dun"
       },
-      "LT24-NS-ELS-34-PIRATES#FOIL": {
-        "skuId": "LT24-NS-ELS-34-PIRATES#FOIL",
+      "LT24-NS-ELS-34-FOIL-PIRATES": {
+        "skuId": "LT24-NS-ELS-34-FOIL-PIRATES",
         "cardId": "LT24-NS-ELS-34-PIRATES",
         "finish": "foil"
       },
-      "LT24-NS-ELS-34-SCADRIAL#DUN": {
-        "skuId": "LT24-NS-ELS-34-SCADRIAL#DUN",
+      "LT24-NS-ELS-34-DUN-SCADRIAL": {
+        "skuId": "LT24-NS-ELS-34-DUN-SCADRIAL",
         "cardId": "LT24-NS-ELS-34-SCADRIAL",
         "finish": "dun"
       },
-      "LT24-NS-ELS-34-SCADRIAL#FOIL": {
-        "skuId": "LT24-NS-ELS-34-SCADRIAL#FOIL",
+      "LT24-NS-ELS-34-FOIL-SCADRIAL": {
+        "skuId": "LT24-NS-ELS-34-FOIL-SCADRIAL",
         "cardId": "LT24-NS-ELS-34-SCADRIAL",
         "finish": "foil"
       },
-      "LT24-NS-ELS-34-SEW#DUN": {
-        "skuId": "LT24-NS-ELS-34-SEW#DUN",
+      "LT24-NS-ELS-34-DUN-SEW": {
+        "skuId": "LT24-NS-ELS-34-DUN-SEW",
         "cardId": "LT24-NS-ELS-34-SEW",
         "finish": "dun"
       },
-      "LT24-NS-ELS-34-SEW#FOIL": {
-        "skuId": "LT24-NS-ELS-34-SEW#FOIL",
+      "LT24-NS-ELS-34-FOIL-SEW": {
+        "skuId": "LT24-NS-ELS-34-FOIL-SEW",
         "cardId": "LT24-NS-ELS-34-SEW",
         "finish": "foil"
       },
-      "LT24-NS-ELS-38#DUN": {
-        "skuId": "LT24-NS-ELS-38#DUN",
+      "LT24-NS-ELS-38-DUN": {
+        "skuId": "LT24-NS-ELS-38-DUN",
         "cardId": "LT24-NS-ELS-38",
         "finish": "dun"
       },
-      "LT24-NS-ELS-38#FOIL": {
-        "skuId": "LT24-NS-ELS-38#FOIL",
+      "LT24-NS-ELS-38-FOIL": {
+        "skuId": "LT24-NS-ELS-38-FOIL",
         "cardId": "LT24-NS-ELS-38",
         "finish": "foil"
       },
-      "LT24-NS-ELS-42#DUN": {
-        "skuId": "LT24-NS-ELS-42#DUN",
+      "LT24-NS-ELS-42-DUN": {
+        "skuId": "LT24-NS-ELS-42-DUN",
         "cardId": "LT24-NS-ELS-42",
         "finish": "dun"
       },
-      "LT24-NS-ELS-42#FOIL": {
-        "skuId": "LT24-NS-ELS-42#FOIL",
+      "LT24-NS-ELS-42-FOIL": {
+        "skuId": "LT24-NS-ELS-42-FOIL",
         "cardId": "LT24-NS-ELS-42",
         "finish": "foil"
       },
-      "LT24-NS-ELS-43#DUN": {
-        "skuId": "LT24-NS-ELS-43#DUN",
+      "LT24-NS-ELS-43-DUN": {
+        "skuId": "LT24-NS-ELS-43-DUN",
         "cardId": "LT24-NS-ELS-43",
         "finish": "dun"
       },
-      "LT24-NS-ELS-43#FOIL": {
-        "skuId": "LT24-NS-ELS-43#FOIL",
+      "LT24-NS-ELS-43-FOIL": {
+        "skuId": "LT24-NS-ELS-43-FOIL",
         "cardId": "LT24-NS-ELS-43",
         "finish": "foil"
       },
-      "LT24-NS-ELS-50#DUN": {
-        "skuId": "LT24-NS-ELS-50#DUN",
+      "LT24-NS-ELS-50-DUN": {
+        "skuId": "LT24-NS-ELS-50-DUN",
         "cardId": "LT24-NS-ELS-50",
         "finish": "dun"
       },
-      "LT24-NS-ELS-50#FOIL": {
-        "skuId": "LT24-NS-ELS-50#FOIL",
+      "LT24-NS-ELS-50-FOIL": {
+        "skuId": "LT24-NS-ELS-50-FOIL",
         "cardId": "LT24-NS-ELS-50",
         "finish": "foil"
       },
-      "LT24-NS-ELS-54-MOUSE#DUN": {
-        "skuId": "LT24-NS-ELS-54-MOUSE#DUN",
+      "LT24-NS-ELS-54-DUN-MOUSE": {
+        "skuId": "LT24-NS-ELS-54-DUN-MOUSE",
         "cardId": "LT24-NS-ELS-54-MOUSE",
         "finish": "dun"
       },
-      "LT24-NS-ELS-54-MOUSE#FOIL": {
-        "skuId": "LT24-NS-ELS-54-MOUSE#FOIL",
+      "LT24-NS-ELS-54-FOIL-MOUSE": {
+        "skuId": "LT24-NS-ELS-54-FOIL-MOUSE",
         "cardId": "LT24-NS-ELS-54-MOUSE",
         "finish": "foil"
       },
-      "LT24-NS-ELS-54-WHALE#DUN": {
-        "skuId": "LT24-NS-ELS-54-WHALE#DUN",
+      "LT24-NS-ELS-54-DUN-WHALE": {
+        "skuId": "LT24-NS-ELS-54-DUN-WHALE",
         "cardId": "LT24-NS-ELS-54-WHALE",
         "finish": "dun"
       },
-      "LT24-NS-ELS-54-WHALE#FOIL": {
-        "skuId": "LT24-NS-ELS-54-WHALE#FOIL",
+      "LT24-NS-ELS-54-FOIL-WHALE": {
+        "skuId": "LT24-NS-ELS-54-FOIL-WHALE",
         "cardId": "LT24-NS-ELS-54-WHALE",
         "finish": "foil"
       },
-      "LT24-NS-LOP-01#DUN": {
-        "skuId": "LT24-NS-LOP-01#DUN",
+      "LT24-NS-LOP-01-DUN": {
+        "skuId": "LT24-NS-LOP-01-DUN",
         "cardId": "LT24-NS-LOP-01",
         "finish": "dun"
       },
-      "LT24-NS-LOP-01#FOIL": {
-        "skuId": "LT24-NS-LOP-01#FOIL",
+      "LT24-NS-LOP-01-FOIL": {
+        "skuId": "LT24-NS-LOP-01-FOIL",
         "cardId": "LT24-NS-LOP-01",
         "finish": "foil"
       },
-      "LT24-NS-LOP-06#DUN": {
-        "skuId": "LT24-NS-LOP-06#DUN",
+      "LT24-NS-LOP-06-DUN": {
+        "skuId": "LT24-NS-LOP-06-DUN",
         "cardId": "LT24-NS-LOP-06",
         "finish": "dun"
       },
-      "LT24-NS-LOP-06#FOIL": {
-        "skuId": "LT24-NS-LOP-06#FOIL",
+      "LT24-NS-LOP-06-FOIL": {
+        "skuId": "LT24-NS-LOP-06-FOIL",
         "cardId": "LT24-NS-LOP-06",
         "finish": "foil"
       },
-      "LT24-NS-LOP-07#DUN": {
-        "skuId": "LT24-NS-LOP-07#DUN",
+      "LT24-NS-LOP-07-DUN": {
+        "skuId": "LT24-NS-LOP-07-DUN",
         "cardId": "LT24-NS-LOP-07",
         "finish": "dun"
       },
-      "LT24-NS-LOP-07#FOIL": {
-        "skuId": "LT24-NS-LOP-07#FOIL",
+      "LT24-NS-LOP-07-FOIL": {
+        "skuId": "LT24-NS-LOP-07-FOIL",
         "cardId": "LT24-NS-LOP-07",
         "finish": "foil"
       },
-      "LT24-NS-LOP-08#DUN": {
-        "skuId": "LT24-NS-LOP-08#DUN",
+      "LT24-NS-LOP-08-DUN": {
+        "skuId": "LT24-NS-LOP-08-DUN",
         "cardId": "LT24-NS-LOP-08",
         "finish": "dun"
       },
-      "LT24-NS-LOP-08#FOIL": {
-        "skuId": "LT24-NS-LOP-08#FOIL",
+      "LT24-NS-LOP-08-FOIL": {
+        "skuId": "LT24-NS-LOP-08-FOIL",
         "cardId": "LT24-NS-LOP-08",
         "finish": "foil"
       },
-      "LT24-NS-LOP-17#DUN": {
-        "skuId": "LT24-NS-LOP-17#DUN",
+      "LT24-NS-LOP-17-DUN": {
+        "skuId": "LT24-NS-LOP-17-DUN",
         "cardId": "LT24-NS-LOP-17",
         "finish": "dun"
       },
-      "LT24-NS-LOP-17#FOIL": {
-        "skuId": "LT24-NS-LOP-17#FOIL",
+      "LT24-NS-LOP-17-FOIL": {
+        "skuId": "LT24-NS-LOP-17-FOIL",
         "cardId": "LT24-NS-LOP-17",
         "finish": "foil"
       },
-      "LT24-NS-LOP-23#DUN": {
-        "skuId": "LT24-NS-LOP-23#DUN",
+      "LT24-NS-LOP-23-DUN": {
+        "skuId": "LT24-NS-LOP-23-DUN",
         "cardId": "LT24-NS-LOP-23",
         "finish": "dun"
       },
-      "LT24-NS-LOP-23#FOIL": {
-        "skuId": "LT24-NS-LOP-23#FOIL",
+      "LT24-NS-LOP-23-FOIL": {
+        "skuId": "LT24-NS-LOP-23-FOIL",
         "cardId": "LT24-NS-LOP-23",
         "finish": "foil"
       },
-      "LT24-NS-LOP-24#DUN": {
-        "skuId": "LT24-NS-LOP-24#DUN",
+      "LT24-NS-LOP-24-DUN": {
+        "skuId": "LT24-NS-LOP-24-DUN",
         "cardId": "LT24-NS-LOP-24",
         "finish": "dun"
       },
-      "LT24-NS-LOP-24#FOIL": {
-        "skuId": "LT24-NS-LOP-24#FOIL",
+      "LT24-NS-LOP-24-FOIL": {
+        "skuId": "LT24-NS-LOP-24-FOIL",
         "cardId": "LT24-NS-LOP-24",
         "finish": "foil"
       },
-      "LT24-NS-LOP-26#DUN": {
-        "skuId": "LT24-NS-LOP-26#DUN",
+      "LT24-NS-LOP-26-DUN": {
+        "skuId": "LT24-NS-LOP-26-DUN",
         "cardId": "LT24-NS-LOP-26",
         "finish": "dun"
       },
-      "LT24-NS-LOP-26#FOIL": {
-        "skuId": "LT24-NS-LOP-26#FOIL",
+      "LT24-NS-LOP-26-FOIL": {
+        "skuId": "LT24-NS-LOP-26-FOIL",
         "cardId": "LT24-NS-LOP-26",
         "finish": "foil"
       },
-      "LT24-NS-LOP-28#DUN": {
-        "skuId": "LT24-NS-LOP-28#DUN",
+      "LT24-NS-LOP-28-DUN": {
+        "skuId": "LT24-NS-LOP-28-DUN",
         "cardId": "LT24-NS-LOP-28",
         "finish": "dun"
       },
-      "LT24-NS-LOP-28#FOIL": {
-        "skuId": "LT24-NS-LOP-28#FOIL",
+      "LT24-NS-LOP-28-FOIL": {
+        "skuId": "LT24-NS-LOP-28-FOIL",
         "cardId": "LT24-NS-LOP-28",
         "finish": "foil"
       },
-      "LT24-NS-LOP-29#DUN": {
-        "skuId": "LT24-NS-LOP-29#DUN",
+      "LT24-NS-LOP-29-DUN": {
+        "skuId": "LT24-NS-LOP-29-DUN",
         "cardId": "LT24-NS-LOP-29",
         "finish": "dun"
       },
-      "LT24-NS-LOP-29#FOIL": {
-        "skuId": "LT24-NS-LOP-29#FOIL",
+      "LT24-NS-LOP-29-FOIL": {
+        "skuId": "LT24-NS-LOP-29-FOIL",
         "cardId": "LT24-NS-LOP-29",
         "finish": "foil"
       },
-      "LT24-NS-LOP-36#DUN": {
-        "skuId": "LT24-NS-LOP-36#DUN",
+      "LT24-NS-LOP-36-DUN": {
+        "skuId": "LT24-NS-LOP-36-DUN",
         "cardId": "LT24-NS-LOP-36",
         "finish": "dun"
       },
-      "LT24-NS-LOP-36#FOIL": {
-        "skuId": "LT24-NS-LOP-36#FOIL",
+      "LT24-NS-LOP-36-FOIL": {
+        "skuId": "LT24-NS-LOP-36-FOIL",
         "cardId": "LT24-NS-LOP-36",
         "finish": "foil"
       },
-      "LT24-NS-LOP-39#DUN": {
-        "skuId": "LT24-NS-LOP-39#DUN",
+      "LT24-NS-LOP-39-DUN": {
+        "skuId": "LT24-NS-LOP-39-DUN",
         "cardId": "LT24-NS-LOP-39",
         "finish": "dun"
       },
-      "LT24-NS-LOP-39#FOIL": {
-        "skuId": "LT24-NS-LOP-39#FOIL",
+      "LT24-NS-LOP-39-FOIL": {
+        "skuId": "LT24-NS-LOP-39-FOIL",
         "cardId": "LT24-NS-LOP-39",
         "finish": "foil"
       },
-      "LT24-NS-LOP-50#DUN": {
-        "skuId": "LT24-NS-LOP-50#DUN",
+      "LT24-NS-LOP-50-DUN": {
+        "skuId": "LT24-NS-LOP-50-DUN",
         "cardId": "LT24-NS-LOP-50",
         "finish": "dun"
       },
-      "LT24-NS-LOP-50#FOIL": {
-        "skuId": "LT24-NS-LOP-50#FOIL",
+      "LT24-NS-LOP-50-FOIL": {
+        "skuId": "LT24-NS-LOP-50-FOIL",
         "cardId": "LT24-NS-LOP-50",
         "finish": "foil"
       },
-      "LT24-NS-LOP-53#DUN": {
-        "skuId": "LT24-NS-LOP-53#DUN",
+      "LT24-NS-LOP-53-DUN": {
+        "skuId": "LT24-NS-LOP-53-DUN",
         "cardId": "LT24-NS-LOP-53",
         "finish": "dun"
       },
-      "LT24-NS-LOP-53#FOIL": {
-        "skuId": "LT24-NS-LOP-53#FOIL",
+      "LT24-NS-LOP-53-FOIL": {
+        "skuId": "LT24-NS-LOP-53-FOIL",
         "cardId": "LT24-NS-LOP-53",
         "finish": "foil"
       },
-      "LT24-NS-CHM-19#DUN": {
-        "skuId": "LT24-NS-CHM-19#DUN",
+      "LT24-NS-CHM-19-DUN": {
+        "skuId": "LT24-NS-CHM-19-DUN",
         "cardId": "LT24-NS-CHM-19",
         "finish": "dun"
       },
-      "LT24-NS-CHM-19#FOIL": {
-        "skuId": "LT24-NS-CHM-19#FOIL",
+      "LT24-NS-CHM-19-FOIL": {
+        "skuId": "LT24-NS-CHM-19-FOIL",
         "cardId": "LT24-NS-CHM-19",
         "finish": "foil"
       },
-      "LT24-NS-CHM-20#DUN": {
-        "skuId": "LT24-NS-CHM-20#DUN",
+      "LT24-NS-CHM-20-DUN": {
+        "skuId": "LT24-NS-CHM-20-DUN",
         "cardId": "LT24-NS-CHM-20",
         "finish": "dun"
       },
-      "LT24-NS-CHM-20#FOIL": {
-        "skuId": "LT24-NS-CHM-20#FOIL",
+      "LT24-NS-CHM-20-FOIL": {
+        "skuId": "LT24-NS-CHM-20-FOIL",
         "cardId": "LT24-NS-CHM-20",
         "finish": "foil"
       },
-      "LT24-NS-CHM-21#DUN": {
-        "skuId": "LT24-NS-CHM-21#DUN",
+      "LT24-NS-CHM-21-DUN": {
+        "skuId": "LT24-NS-CHM-21-DUN",
         "cardId": "LT24-NS-CHM-21",
         "finish": "dun"
       },
-      "LT24-NS-CHM-21#FOIL": {
-        "skuId": "LT24-NS-CHM-21#FOIL",
+      "LT24-NS-CHM-21-FOIL": {
+        "skuId": "LT24-NS-CHM-21-FOIL",
         "cardId": "LT24-NS-CHM-21",
         "finish": "foil"
       },
-      "LT24-NS-CHM-22#DUN": {
-        "skuId": "LT24-NS-CHM-22#DUN",
+      "LT24-NS-CHM-22-DUN": {
+        "skuId": "LT24-NS-CHM-22-DUN",
         "cardId": "LT24-NS-CHM-22",
         "finish": "dun"
       },
-      "LT24-NS-CHM-22#FOIL": {
-        "skuId": "LT24-NS-CHM-22#FOIL",
+      "LT24-NS-CHM-22-FOIL": {
+        "skuId": "LT24-NS-CHM-22-FOIL",
         "cardId": "LT24-NS-CHM-22",
         "finish": "foil"
       },
-      "LT24-NS-CHM-23#DUN": {
-        "skuId": "LT24-NS-CHM-23#DUN",
+      "LT24-NS-CHM-23-DUN": {
+        "skuId": "LT24-NS-CHM-23-DUN",
         "cardId": "LT24-NS-CHM-23",
         "finish": "dun"
       },
-      "LT24-NS-CHM-23#FOIL": {
-        "skuId": "LT24-NS-CHM-23#FOIL",
+      "LT24-NS-CHM-23-FOIL": {
+        "skuId": "LT24-NS-CHM-23-FOIL",
         "cardId": "LT24-NS-CHM-23",
         "finish": "foil"
       },
-      "LT24-NS-CHM-24#DUN": {
-        "skuId": "LT24-NS-CHM-24#DUN",
+      "LT24-NS-CHM-24-DUN": {
+        "skuId": "LT24-NS-CHM-24-DUN",
         "cardId": "LT24-NS-CHM-24",
         "finish": "dun"
       },
-      "LT24-NS-CHM-24#FOIL": {
-        "skuId": "LT24-NS-CHM-24#FOIL",
+      "LT24-NS-CHM-24-FOIL": {
+        "skuId": "LT24-NS-CHM-24-FOIL",
         "cardId": "LT24-NS-CHM-24",
         "finish": "foil"
       },
-      "LT24-NS-CHM-25#DUN": {
-        "skuId": "LT24-NS-CHM-25#DUN",
+      "LT24-NS-CHM-25-DUN": {
+        "skuId": "LT24-NS-CHM-25-DUN",
         "cardId": "LT24-NS-CHM-25",
         "finish": "dun"
       },
-      "LT24-NS-CHM-25#FOIL": {
-        "skuId": "LT24-NS-CHM-25#FOIL",
+      "LT24-NS-CHM-25-FOIL": {
+        "skuId": "LT24-NS-CHM-25-FOIL",
         "cardId": "LT24-NS-CHM-25",
         "finish": "foil"
       },
-      "LT24-NS-CHM-26#DUN": {
-        "skuId": "LT24-NS-CHM-26#DUN",
+      "LT24-NS-CHM-26-DUN": {
+        "skuId": "LT24-NS-CHM-26-DUN",
         "cardId": "LT24-NS-CHM-26",
         "finish": "dun"
       },
-      "LT24-NS-CHM-26#FOIL": {
-        "skuId": "LT24-NS-CHM-26#FOIL",
+      "LT24-NS-CHM-26-FOIL": {
+        "skuId": "LT24-NS-CHM-26-FOIL",
         "cardId": "LT24-NS-CHM-26",
         "finish": "foil"
       },
-      "LT24-NS-CHM-27#DUN": {
-        "skuId": "LT24-NS-CHM-27#DUN",
+      "LT24-NS-CHM-27-DUN": {
+        "skuId": "LT24-NS-CHM-27-DUN",
         "cardId": "LT24-NS-CHM-27",
         "finish": "dun"
       },
-      "LT24-NS-CHM-27#FOIL": {
-        "skuId": "LT24-NS-CHM-27#FOIL",
+      "LT24-NS-CHM-27-FOIL": {
+        "skuId": "LT24-NS-CHM-27-FOIL",
         "cardId": "LT24-NS-CHM-27",
         "finish": "foil"
       }

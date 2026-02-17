@@ -3,7 +3,7 @@ import { useAddToCollection } from '../hooks/useAddToCollection';
 import { useAuthModal } from '../../../contexts/AuthModalContext.jsx';
 
 const successMessage = 'Added to your collection!';
-const errorMessage = "Couldn't add card. Please try again.";
+const errorMessage = "Couldn't add collectible. Please try again.";
 
 function formatFinishLabel(finish) {
   if (!finish || typeof finish !== 'string') {
@@ -13,14 +13,15 @@ function formatFinishLabel(finish) {
   return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
 }
 
-export default function AddToCollectionButton({ card, variant = 'card' }) {
+export default function AddToCollectionButton({ collectible, card, variant = 'card' }) {
+  const item = collectible ?? card;
   const { addToCollection, status, error, user, reset } = useAddToCollection();
   const { openAuthModal } = useAuthModal();
   const [feedback, setFeedback] = useState(null);
   const [pendingFinish, setPendingFinish] = useState(null);
   const [lastFinish, setLastFinish] = useState(null);
 
-  const finishes = useMemo(() => card?.finishes ?? [], [card]);
+  const finishes = useMemo(() => item?.finishes ?? [], [item]);
   const availableFinishes = useMemo(
     () =>
       finishes.reduce((acc, finish) => {
@@ -31,14 +32,12 @@ export default function AddToCollectionButton({ card, variant = 'card' }) {
   );
 
   useEffect(() => {
-    if (!card) {
-      return;
-    }
+    if (!item) return;
     setFeedback(null);
     setPendingFinish(null);
     setLastFinish(null);
     reset();
-  }, [card?.id, reset]);
+  }, [item?.id, reset]);
 
   useEffect(() => {
     if (status === 'success') {
@@ -72,9 +71,7 @@ export default function AddToCollectionButton({ card, variant = 'card' }) {
   }, [status]);
 
   const handleAdd = async (finish) => {
-    if (!card) {
-      return;
-    }
+    if (!item) return;
 
     if (!user) {
       openAuthModal({ reason: 'add-to-collection' });
@@ -86,7 +83,7 @@ export default function AddToCollectionButton({ card, variant = 'card' }) {
       setLastFinish(finish);
       setFeedback(null);
       await addToCollection({
-        card,
+        card: item,
         finish: finish ?? null,
         quantity: 1,
       });

@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import useOpenListings from './hooks/useOpenListings';
 import ListingRow from './components/ListingRow';
 import { acceptListing, cancelListing, createListing } from '../../lib/marketplace/listings';
-import { cardsIndex, getCardRecord } from '../../data/cards';
+import { collectiblesIndex, getCollectibleRecord } from '../../data/collectibles';
 import './Market.css';
 
 function dollarsToCents(value) {
@@ -19,12 +19,12 @@ function resolveCardIdFromInput(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
 
-  if (getCardRecord(raw)) return raw;
+  if (getCollectibleRecord(raw)) return raw;
 
   const upper = raw.toUpperCase();
-  if (getCardRecord(upper)) return upper;
+  if (getCollectibleRecord(upper)) return upper;
 
-  const caseInsensitive = cardsIndex.find((card) => card.id.toLowerCase() === raw.toLowerCase());
+  const caseInsensitive = collectiblesIndex.find((c) => c.id.toLowerCase() === raw.toLowerCase());
   return caseInsensitive?.id || '';
 }
 
@@ -52,7 +52,7 @@ function MarketPage() {
     return listings.filter((l) => {
       if (typeFilter !== 'ALL' && l.type !== typeFilter) return false;
       if (!q) return true;
-      const card = getCardRecord(l.cardId);
+      const card = getCollectibleRecord(l.cardId);
       const haystack = `${l.cardId} ${card?.displayName || ''} ${card?.detail || ''}`.toLowerCase();
       return haystack.includes(q);
     });
@@ -61,14 +61,14 @@ function MarketPage() {
   const searchedCard = useMemo(() => {
     const q = queryText.trim();
     if (!q) return null;
-    const exact = getCardRecord(q);
+    const exact = getCollectibleRecord(q);
     return exact || null;
   }, [queryText]);
 
   const emptyMessage = listings.length === 0 ? 'No open listings yet.' : 'No open listings found.';
   const selectableCards = useMemo(
     () =>
-      [...cardsIndex].sort((a, b) => {
+      [...collectiblesIndex].sort((a, b) => {
         const byName = a.displayName.localeCompare(b.displayName);
         if (byName !== 0) {
           return byName;
@@ -267,14 +267,14 @@ function MarketPage() {
       <div className="market-header">
         <div>
           <h1>Market</h1>
-          <p>Browse active buy (bid) and sell (ask) listings for Lost Tales cards.</p>
+          <p>Browse active buy (bid) and sell (ask) listings for Lost Tales collectibles.</p>
         </div>
         <div className="market-header__actions">
           <button type="button" className="market-pill-button" onClick={openCreateModal}>
             Create listing
           </button>
-          <button type="button" className="market-pill-button" onClick={() => navigate('/cards')}>
-            Browse cards
+          <button type="button" className="market-pill-button" onClick={() => navigate('/collectibles')}>
+            Browse collectibles
           </button>
         </div>
       </div>
@@ -296,7 +296,7 @@ function MarketPage() {
           <input
             value={queryText}
             onChange={(e) => setQueryText(e.target.value)}
-            placeholder="Search cards… (or paste a card id)"
+            placeholder="Search collectibles… (or paste an id)"
           />
         </label>
       </div>
@@ -320,7 +320,7 @@ function MarketPage() {
       ) : (
         <ul className="market-list">
           {filteredListings.map((listing) => {
-            const card = getCardRecord(listing.cardId);
+            const card = getCollectibleRecord(listing.cardId);
             const cardLabel = card?.displayName ? `${card.displayName} (${listing.cardId})` : undefined;
             return (
               <ListingRow
@@ -417,7 +417,7 @@ function MarketPage() {
                         </button>
                       </li>
                     ))}
-                    {createResults.length === 0 ? <li className="muted">No matching cards found.</li> : null}
+                    {createResults.length === 0 ? <li className="muted">No matching collectibles found.</li> : null}
                   </ul>
                 ) : null}
               </div>

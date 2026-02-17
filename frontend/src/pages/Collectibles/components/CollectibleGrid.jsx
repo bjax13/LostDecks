@@ -4,58 +4,57 @@ import FinishPills from './FinishPills';
 import BinderInfo from './BinderInfo';
 import AddToCollectionButton from './AddToCollectionButton';
 
-export default function CardGrid({ cards }) {
+export default function CollectibleGrid({ collectibles }) {
   const navigate = useNavigate();
 
-  const handleCardClick = (cardId, event) => {
-    // Don't navigate if clicking on the action button area
+  const handleCollectibleClick = (collectibleId, event) => {
     if (event.target.closest('.card-actions')) {
       return;
     }
-    navigate(`/cards/${cardId}`);
+    navigate(`/collectibles/${collectibleId}`);
   };
 
   return (
     <div className="cards-grid">
-      {cards.map((card) => (
+      {collectibles.map((collectible) => (
         <article
-          key={card.id}
+          key={collectible.id}
           className="card-tile card-tile--clickable"
-          onClick={(e) => handleCardClick(card.id, e)}
+          onClick={(e) => handleCollectibleClick(collectible.id, e)}
         >
           <header>
-            <CategoryPill category={card.category} />
-            <span className="card-id mono">{card.id}</span>
+            <CategoryPill category={collectible.category} />
+            <span className="card-id mono">{collectible.id}</span>
           </header>
-          <h2>{card.displayName}</h2>
-          <p className="card-detail">{card.detail}</p>
+          <h2>{collectible.displayName}</h2>
+          <p className="card-detail">{collectible.detail}</p>
           <dl className="card-stats">
             <div>
               <dt>Story</dt>
-              <dd>{card.storyTitle ?? '—'}</dd>
+              <dd>{collectible.storyTitle ?? '—'}</dd>
             </div>
             <div>
               <dt>Number</dt>
-              <dd>{card.number ?? '—'}</dd>
+              <dd>{collectible.number ?? '—'}</dd>
             </div>
             <div>
               <dt>Rarity</dt>
-              <dd>{card.rarity ?? '—'}</dd>
+              <dd>{collectible.rarity ?? '—'}</dd>
             </div>
           </dl>
           <div className="finishes">
             <h3>Finishes</h3>
             <FinishPills
-              finishes={card.finishes}
+              finishes={collectible.finishes}
               empty={<p className="muted">No finishes recorded</p>}
             />
           </div>
           <div className="binder">
             <h3>Binder location</h3>
-            <BinderInfo binder={card.binder} layout="grid" />
+            <BinderInfo binder={collectible.binder} layout="grid" />
           </div>
           <div className="card-actions">
-            <AddToCollectionButton card={card} variant="card" />
+            <AddToCollectionButton collectible={collectible} variant="card" />
           </div>
         </article>
       ))}

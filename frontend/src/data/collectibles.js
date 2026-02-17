@@ -22,6 +22,25 @@ function toFinishList(cardId) {
   return Array.from(finishSet).sort();
 }
 
+/**
+ * Build hyphen-only SKU from cardId and finish.
+ * Story/Herald: LT24-ELS-01 + DUN -> LT24-ELS-01-DUN
+ * Nonsense with variant: LT24-NS-ELS-24-DANCE + DUN -> LT24-NS-ELS-24-DUN-DANCE
+ */
+export function toSkuId(cardId, finish) {
+  if (!cardId || !finish) return null;
+  const finishUpper = String(finish).toUpperCase();
+  const parts = String(cardId).split('-');
+  if (parts[1] === 'NS' && parts.length >= 5) {
+    const lastPart = parts[parts.length - 1];
+    if (/^[A-Z]+$/i.test(lastPart)) {
+      const base = parts.slice(0, -1).join('-');
+      return `${base}-${finishUpper}-${lastPart}`;
+    }
+  }
+  return `${cardId}-${finishUpper}`;
+}
+
 function formatStoryCard(card) {
   const storyTitle = storyTitleByCode[card.story] ?? card.story;
   const displayName = `${storyTitle} #${card.number.toString().padStart(2, '0')}`;
@@ -36,7 +55,7 @@ function formatStoryCard(card) {
     displayName,
     detail: 'Story card',
     finishes: toFinishList(card.id),
-    searchTokens: [card.id, card.story, storyTitle, displayName].join(' ').toLowerCase()
+    searchTokens: [card.id, card.story, storyTitle, displayName].join(' ').toLowerCase(),
   };
 }
 
@@ -54,7 +73,7 @@ function formatHeraldCard(card) {
     displayName,
     detail: 'Herald of the Almighty',
     finishes: toFinishList(card.id),
-    searchTokens: [card.id, displayName, 'Herald', card.rarityTier ?? ''].join(' ').toLowerCase()
+    searchTokens: [card.id, displayName, 'Herald', card.rarityTier ?? ''].join(' ').toLowerCase(),
   };
 }
 
@@ -75,18 +94,18 @@ function formatNonsenseCard(card) {
     finishes: toFinishList(card.id),
     searchTokens: [card.id, card.story, storyTitle, variantLabel, displayName]
       .join(' ')
-      .toLowerCase()
+      .toLowerCase(),
   };
 }
 
-const cardRecords = [
+const collectibleRecords = [
   ...dataset.storyCards.map(formatStoryCard),
   ...dataset.heralds.map(formatHeraldCard),
-  ...dataset.nonsense.knownCards.map(formatNonsenseCard)
+  ...dataset.nonsense.knownCards.map(formatNonsenseCard),
 ];
 
-const cardsById = cardRecords.reduce((acc, card) => {
-  acc[card.id] = card;
+const collectiblesById = collectibleRecords.reduce((acc, rec) => {
+  acc[rec.id] = rec;
   return acc;
 }, {});
 
@@ -97,7 +116,7 @@ const storyProgressSets = dataset.stories.reduce((acc, story) => {
     storyDunSkus: new Set(),
     storyFoilSkus: new Set(),
     nonsenseDunSkus: new Set(),
-    nonsenseFoilSkus: new Set()
+    nonsenseFoilSkus: new Set(),
   };
   return acc;
 }, {});
@@ -105,50 +124,35 @@ const storyProgressSets = dataset.stories.reduce((acc, story) => {
 const heraldProgressSets = {
   title: 'Heralds',
   dunSkus: new Set(),
-  foilSkus: new Set()
+  foilSkus: new Set(),
 };
 
-cardRecords.forEach((card) => {
-  if (!card.story || !storyProgressSets[card.story]) {
-    return;
-  }
-
-  if (card.category === 'story') {
-    storyProgressSets[card.story].storyCards.add(card.id);
+collectibleRecords.forEach((rec) => {
+  if (!rec.story || !storyProgressSets[rec.story]) return;
+  if (rec.category === 'story') {
+    storyProgressSets[rec.story].storyCards.add(rec.id);
   }
 });
 
 dataset.skus.forEach((sku) => {
   const normalizedFinish = sku.finish.toUpperCase();
-  const card = cardsById[sku.cardId];
-  if (!card) {
+  const rec = collectiblesById[sku.cardId];
+  if (!rec) return;
+
+  if (rec.category === 'story' && rec.story && storyProgressSets[rec.story]) {
+    if (normalizedFinish === 'DUN') storyProgressSets[rec.story].storyDunSkus.add(sku.skuId);
+    else if (normalizedFinish === 'FOIL') storyProgressSets[rec.story].storyFoilSkus.add(sku.skuId);
     return;
   }
-
-  if (card.category === 'story' && card.story && storyProgressSets[card.story]) {
-    if (normalizedFinish === 'DUN') {
-      storyProgressSets[card.story].storyDunSkus.add(sku.skuId);
-    } else if (normalizedFinish === 'FOIL') {
-      storyProgressSets[card.story].storyFoilSkus.add(sku.skuId);
-    }
+  if (rec.category === 'nonsense' && rec.story && storyProgressSets[rec.story]) {
+    if (normalizedFinish === 'DUN') storyProgressSets[rec.story].nonsenseDunSkus.add(sku.skuId);
+    else if (normalizedFinish === 'FOIL')
+      storyProgressSets[rec.story].nonsenseFoilSkus.add(sku.skuId);
     return;
   }
-
-  if (card.category === 'nonsense' && card.story && storyProgressSets[card.story]) {
-    if (normalizedFinish === 'DUN') {
-      storyProgressSets[card.story].nonsenseDunSkus.add(sku.skuId);
-    } else if (normalizedFinish === 'FOIL') {
-      storyProgressSets[card.story].nonsenseFoilSkus.add(sku.skuId);
-    }
-    return;
-  }
-
-  if (card.category === 'herald') {
-    if (normalizedFinish === 'DUN') {
-      heraldProgressSets.dunSkus.add(sku.skuId);
-    } else if (normalizedFinish === 'FOIL') {
-      heraldProgressSets.foilSkus.add(sku.skuId);
-    }
+  if (rec.category === 'herald') {
+    if (normalizedFinish === 'DUN') heraldProgressSets.dunSkus.add(sku.skuId);
+    else if (normalizedFinish === 'FOIL') heraldProgressSets.foilSkus.add(sku.skuId);
   }
 });
 
@@ -160,8 +164,8 @@ const storyProgressTargets = Object.entries(storyProgressSets).map(([code, sets]
     storyDunSkus: sets.storyDunSkus.size,
     storyFoilSkus: sets.storyFoilSkus.size,
     nonsenseDunSkus: sets.nonsenseDunSkus.size,
-    nonsenseFoilSkus: sets.nonsenseFoilSkus.size
-  }
+    nonsenseFoilSkus: sets.nonsenseFoilSkus.size,
+  },
 }));
 
 const storyProgressByCode = storyProgressTargets.reduce((acc, entry) => {
@@ -170,11 +174,10 @@ const storyProgressByCode = storyProgressTargets.reduce((acc, entry) => {
 }, {});
 
 const skusById = dataset.skus.reduce((acc, sku) => {
-  const normalizedFinish = sku.finish.toUpperCase();
   acc[sku.skuId] = {
     skuId: sku.skuId,
     cardId: sku.cardId,
-    finish: normalizedFinish
+    finish: sku.finish.toUpperCase(),
   };
   return acc;
 }, {});
@@ -184,30 +187,28 @@ const storiesByCode = { ...storyTitleByCode };
 export const datasetMeta = dataset.meta;
 export const datasetStories = dataset.stories;
 export const datasetSkus = dataset.skus;
-export const cardsIndex = cardRecords;
+export const collectiblesIndex = collectibleRecords;
 export const collectionProgressTargets = {
   stories: storyProgressTargets,
   storiesByCode: storyProgressByCode,
   heralds: {
     totals: {
       dunSkus: heraldProgressSets.dunSkus.size,
-      foilSkus: heraldProgressSets.foilSkus.size
-    }
-  }
+      foilSkus: heraldProgressSets.foilSkus.size,
+    },
+  },
 };
 
-export function getCardRecord(cardId) {
-  return cardsById[cardId] ?? null;
+export function getCollectibleRecord(cardId) {
+  return collectiblesById[cardId] ?? null;
 }
 
 export function getSkuRecord(skuId) {
   const sku = skusById[skuId];
-  if (!sku) {
-    return null;
-  }
+  if (!sku) return null;
   return {
     ...sku,
-    card: getCardRecord(sku.cardId) ?? null
+    card: getCollectibleRecord(sku.cardId) ?? null,
   };
 }
 
@@ -218,5 +219,11 @@ export function getStoryTitle(storyCode) {
 export function getFinishesForCard(cardId) {
   return toFinishList(cardId);
 }
+
+/** @deprecated Use getCollectibleRecord */
+export const getCardRecord = getCollectibleRecord;
+
+/** @deprecated Use collectiblesIndex */
+export const cardsIndex = collectibleRecords;
 
 export default dataset;

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
-import Cards from './pages/Cards';
-import CardDetail from './pages/CardDetail';
+import CollectiblesPage from './pages/Collectibles';
+import CollectibleDetailPage from './pages/CollectibleDetail';
 import NotFound from './pages/NotFound';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -29,7 +29,7 @@ function App() {
       <nav className="main-nav">
         <div className="main-nav__links">
           <Link to="/">Home</Link>
-          <Link to="/cards">Cards</Link>
+          <Link to="/collectibles">Collectibles</Link>
           <Link to="/collections">Collection</Link>
           <Link to="/market">Market</Link>
           <Link to="/account">Account</Link>
@@ -57,9 +57,9 @@ function App() {
       <hr />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/cards" element={<Cards />} />
-        <Route path="/cards/:cardId" element={<CardDetail />} />
-        <Route path="/cards/:cardId/:skuId" element={<CardDetail />} />
+        <Route path="/collectibles" element={<CollectiblesPage />} />
+        <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
+        <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
         <Route path="/collections" element={<CollectionPage />} />
         <Route path="/market" element={<MarketPage />} />
         <Route path="/account" element={<AccountPage />} />
