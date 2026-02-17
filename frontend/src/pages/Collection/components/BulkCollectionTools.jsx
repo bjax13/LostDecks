@@ -79,7 +79,17 @@ function formatTradeItem(card) {
   return { text: card.displayName ?? card.id ?? 'Unknown', sortKey: [card.displayName ?? '', ''] };
 }
 
-function buildIsoUftPost(entries) {
+const defaultPostSections = {
+  storyFoil: true,
+  storyDun: true,
+  heraldFoil: true,
+  heraldDun: true,
+  nonsenseDun: true,
+  nonsenseFoil: true
+};
+
+function buildIsoUftPost(entries, options = {}) {
+  const sectionsEnabled = options.sectionsEnabled ?? defaultPostSections;
   const ownedSkuCounts = new Map();
   let skippedEntries = 0;
 
@@ -153,36 +163,42 @@ function buildIsoUftPost(entries) {
 
   const sections = [
     {
+      key: 'storyFoil',
       title: 'Story Foils',
       groupSuffix: 'Foils',
       predicate: ({ card, finish }) => card.category === 'story' && finish === 'FOIL'
     },
     {
+      key: 'storyDun',
       title: 'Story Dun',
       groupSuffix: 'Dun',
       predicate: ({ card, finish }) => card.category === 'story' && finish === 'DUN'
     },
     {
+      key: 'heraldFoil',
       title: 'Heralds (Foil)',
       groupSuffix: 'Heralds',
       predicate: ({ card, finish }) => card.category === 'herald' && finish === 'FOIL'
     },
     {
+      key: 'heraldDun',
       title: 'Heralds (Dun)',
       groupSuffix: 'Heralds',
       predicate: ({ card, finish }) => card.category === 'herald' && finish === 'DUN'
     },
     {
+      key: 'nonsenseDun',
       title: 'Nonsense (Dun)',
       groupSuffix: 'Nonsense',
       predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'DUN'
     },
     {
+      key: 'nonsenseFoil',
       title: 'Nonsense (Foil)',
       groupSuffix: 'Nonsense',
       predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'FOIL'
     }
-  ];
+  ].filter((section) => sectionsEnabled[section.key]);
 
   const buildBlock = (label, mode) => {
     const lines = [label, ''];
@@ -230,8 +246,16 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [lastFileName, setLastFileName] = useState('');
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
+  const [postModalOpen, setPostModalOpen] = useState(false);
+  const [postOptions, setPostOptions] = useState(defaultPostSections);
+  const [modalStatus, setModalStatus] = useState(null);
+  const [modalError, setModalError] = useState(null);
 
   const existingEntries = useMemo(() => entries ?? [], [entries]);
+  const postPreview = useMemo(
+    () => buildIsoUftPost(existingEntries, { sectionsEnabled: postOptions }),
+    [existingEntries, postOptions]
+  );
 
   const handleDownloadTemplate = () => {
     if (!ownerUid || processing) {
@@ -299,7 +323,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
     setPostStatus(null);
     setPostError(null);
 
-    const { text, skippedEntries } = buildIsoUftPost(existingEntries);
+    const { text, skippedEntries } = postPreview;
 
     try {
       if (navigator.clipboard?.writeText) {
@@ -327,6 +351,37 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
   const summaryText = report ? combineSummary(report) : null;
 
+  const handleModalCopy = async () => {
+    setModalStatus(null);
+    setModalError(null);
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(postPreview.text);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = postPreview.text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setModalStatus('Copied ISO/UFT post to your clipboard.');
+    } catch (err) {
+      console.error('Failed to copy ISO/UFT post', err);
+      setModalError('Unable to copy the post. Please try again.');
+    }
+  };
+
+  const handleToggleSection = (key) => (event) => {
+    setPostOptions((prev) => ({
+      ...prev,
+      [key]: event.target.checked
+    }));
+  };
+
   return (
     <section className="collection-bulk" aria-label="Bulk update tools">
       <div className="collection-bulk__header">
@@ -352,11 +407,23 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         </button>
         <button
           type="button"
-          className="collection-bulk__button"
+          className="collection-bulk__button is-compact"
           onClick={handleCopyPost}
           disabled={!ownerUid || disabled || processing}
         >
-          Copy ISO/UFT post
+          Copy post
+        </button>
+        <button
+          type="button"
+          className="collection-bulk__button"
+          onClick={() => {
+            setModalStatus(null);
+            setModalError(null);
+            setPostModalOpen(true);
+          }}
+          disabled={!ownerUid || disabled || processing}
+        >
+          Customize post
         </button>
         <label className={`collection-bulk__upload ${processing ? 'is-uploading' : ''}`}>
           <input
@@ -382,6 +449,110 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
       {postError ? (
         <div className="collection-bulk__post-status is-error" role="alert">
           {postError}
+        </div>
+      ) : null}
+
+      {postModalOpen ? (
+        <div className="collection-bulk__modal" role="dialog" aria-modal="true">
+          <div
+            className="collection-bulk__modal-overlay"
+            onClick={() => setPostModalOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="collection-bulk__modal-card">
+            <header className="collection-bulk__modal-header">
+              <div>
+                <h3>Customize ISO/UFT post</h3>
+                <p>Toggle groups on or off, then copy the preview.</p>
+              </div>
+              <button
+                type="button"
+                className="collection-bulk__modal-close"
+                onClick={() => setPostModalOpen(false)}
+              >
+                Close
+              </button>
+            </header>
+
+            <div className="collection-bulk__modal-body">
+              <div className="collection-bulk__modal-options">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.storyFoil}
+                    onChange={handleToggleSection('storyFoil')}
+                  />
+                  Story Foils
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.storyDun}
+                    onChange={handleToggleSection('storyDun')}
+                  />
+                  Story Dun
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.nonsenseDun}
+                    onChange={handleToggleSection('nonsenseDun')}
+                  />
+                  Nonsense (Dun)
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.nonsenseFoil}
+                    onChange={handleToggleSection('nonsenseFoil')}
+                  />
+                  Nonsense (Foil)
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.heraldDun}
+                    onChange={handleToggleSection('heraldDun')}
+                  />
+                  Heralds (Dun)
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={postOptions.heraldFoil}
+                    onChange={handleToggleSection('heraldFoil')}
+                  />
+                  Heralds (Foil)
+                </label>
+              </div>
+
+              <div className="collection-bulk__modal-preview">
+                <span className="collection-bulk__modal-label">Preview</span>
+                <textarea readOnly value={postPreview.text} />
+                {postPreview.skippedEntries > 0 ? (
+                  <span className="collection-bulk__modal-note">
+                    {postPreview.skippedEntries} entries without a finish were skipped.
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <footer className="collection-bulk__modal-footer">
+              <button
+                type="button"
+                className="collection-bulk__button"
+                onClick={handleModalCopy}
+              >
+                Copy post
+              </button>
+              {modalStatus ? (
+                <span className="collection-bulk__modal-status">{modalStatus}</span>
+              ) : null}
+              {modalError ? (
+                <span className="collection-bulk__modal-status is-error">{modalError}</span>
+              ) : null}
+            </footer>
+          </div>
         </div>
       ) : null}
 
