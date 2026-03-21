@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import CollectiblesHeader from './components/CollectiblesHeader';
-import CollectiblesToolbar from './components/CollectiblesToolbar';
-import CollectibleGrid from './components/CollectibleGrid';
-import CollectibleTable from './components/CollectibleTable';
-import { useCollectiblesExplorer } from './hooks/useCollectiblesExplorer';
-import './Collectibles.css';
+import { useState } from "react";
+import CollectibleGrid from "./components/CollectibleGrid";
+import CollectiblesHeader from "./components/CollectiblesHeader";
+import CollectiblesToolbar from "./components/CollectiblesToolbar";
+import CollectibleTable from "./components/CollectibleTable";
+import { useCollectiblesExplorer } from "./hooks/useCollectiblesExplorer";
+import "./Collectibles.css";
 
 export default function CollectiblesPage() {
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState("grid");
   const {
     collectibles,
     totalCollectibles,
@@ -34,7 +34,7 @@ export default function CollectiblesPage() {
   };
 
   const handleToggleSortDirection = () => {
-    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
   return (
@@ -66,7 +66,7 @@ export default function CollectiblesPage() {
         onReset={resetFilters}
       />
 
-      {viewMode === 'table' ? (
+      {viewMode === "table" ? (
         <CollectibleTable collectibles={collectibles} />
       ) : (
         <CollectibleGrid collectibles={collectibles} />

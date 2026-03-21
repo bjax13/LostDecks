@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
-export function useRequireAuth(redirectTo = '/auth/login') {
+export function useRequireAuth(redirectTo = "/auth/login") {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

@@ -1,0 +1,14 @@
+{
+  "name": "lost-tales-marketplace-repo",
+  "private": true,
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check --write .",
+    "ci": "biome ci .",
+    "test": "npm run test --prefix frontend"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.8"
+  }
+}

@@ -1,17 +1,34 @@
 /** Stormlight Lost Tales — Story Deck (LT24) typed interfaces with distinct SKU records */
 
 // Base enums and types
-export type StoryCode = 'ELS' | 'LOP' | 'CHM'; // Elsecaller, Lopen, Chasmfriends
-export type Finish = 'dun' | 'foil';
-export type RarityTier = 'base' | 'rare';
-export type SetId = 'LT24';
-export type Category = 'story' | 'herald' | 'nonsense';
+export type StoryCode = "ELS" | "LOP" | "CHM"; // Elsecaller, Lopen, Chasmfriends
+export type Finish = "dun" | "foil";
+export type RarityTier = "base" | "rare";
+export type SetId = "LT24";
+export type Category = "story" | "herald" | "nonsense";
 
 // Herald names as a reusable type
-export type HeraldName = 'Jezrien' | 'Nale' | 'Chanarach' | 'Vedel' | 'Paliah' | 'Shalash' | 'Kalak' | 'Talenel' | 'Ishar';
+export type HeraldName =
+  | "Jezrien"
+  | "Nale"
+  | "Chanarach"
+  | "Vedel"
+  | "Paliah"
+  | "Shalash"
+  | "Kalak"
+  | "Talenel"
+  | "Ishar";
 
 // Nonsense variant names enum
-export type VariantName = 'Dance' | 'Mouse' | 'Pirates' | 'Scadrial' | 'Sew' | 'Stolen' | 'Traded' | 'Whale';
+export type VariantName =
+  | "Dance"
+  | "Mouse"
+  | "Pirates"
+  | "Scadrial"
+  | "Sew"
+  | "Stolen"
+  | "Traded"
+  | "Whale";
 
 // Story-specific nonsense card number ranges
 export type NonsenseCardNumbers = {
@@ -28,14 +45,14 @@ export type NonsenseCardForStory<StoryType extends StoryCode> = NonsenseCard<Sto
 export type AllNonsenseNumbers = NonsenseCardNumbers[StoryCode];
 
 // Add this before the utility types
-type Range<N extends number, Acc extends number[] = []> = Acc['length'] extends N
+type Range<N extends number, Acc extends number[] = []> = Acc["length"] extends N
   ? Acc[number]
-  : Range<N, [...Acc, Acc['length']]>;
+  : Range<N, [...Acc, Acc["length"]]>;
 
 // Utility types for common ranges
 export type Digit1To54 = Exclude<Range<55>, 0>; // 1 | 2 | 3 |...| 52 | 53 | 54
 export type Digit1To9 = Exclude<Range<10>, 0>; // 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-export type Digit1To3 = Exclude<Range<4>, 0>;  // 1 | 2 | 3
+export type Digit1To3 = Exclude<Range<4>, 0>; // 1 | 2 | 3
 
 // Template literal types for ID generation
 export type StoryCardId = `${SetId}-${StoryCode}-${string}`;
@@ -50,10 +67,10 @@ export type NonsenseSkuId = `${NonsenseCardId}-${Uppercase<Finish>}`;
 export type SkuId = StorySkuId | HeraldSkuId | NonsenseSkuId;
 
 export interface BinderMosaic {
-  page: number;      // 1..6 (9-card pages)
-  position: Digit1To9;  // 1..9 within page (L->R, T->B)
-  row: Digit1To3;       // 1..3
-  col: Digit1To3;       // 1..3
+  page: number; // 1..6 (9-card pages)
+  position: Digit1To9; // 1..9 within page (L->R, T->B)
+  row: Digit1To3; // 1..3
+  col: Digit1To3; // 1..3
 }
 
 export interface Story {
@@ -62,42 +79,42 @@ export interface Story {
 }
 
 export interface StoryCard {
-  id: StoryCardId;          // e.g., LT24-ELS-01
+  id: StoryCardId; // e.g., LT24-ELS-01
   setId: SetId;
-  category: 'story';
+  category: "story";
   story: StoryCode;
   storyTitle: string;
-  number: Digit1To54;           // 1..54
+  number: Digit1To54; // 1..54
   rarityTier: RarityTier;
   mosaic: BinderMosaic;
 }
 
 export interface HeraldCard {
-  id: HeraldCardId;        // e.g., LT24-HLD-01
+  id: HeraldCardId; // e.g., LT24-HLD-01
   setId: SetId;
-  category: 'herald';
-  number: Digit1To9;        // 1..9
+  category: "herald";
+  number: Digit1To9; // 1..9
   rarityTier: RarityTier;
   heraldName: HeraldName;
 }
 
 export interface NonsenseCard<StoryType extends StoryCode = StoryCode> {
-  id: NonsenseCardId;      // e.g., LT24-NS-ELS-24-DANCE (label normalized uppercase, non-alnum stripped)
+  id: NonsenseCardId; // e.g., LT24-NS-ELS-24-DANCE (label normalized uppercase, non-alnum stripped)
   setId: SetId;
-  category: 'nonsense';
+  category: "nonsense";
   story: StoryType;
-  baseNumber: NonsenseNumbersForStory<StoryType>;  // points to the story card number it alters
+  baseNumber: NonsenseNumbersForStory<StoryType>; // points to the story card number it alters
   variantName: VariantName | null;
 }
 
 export interface SKU {
-  skuId: SkuId;             // e.g., LT24-ELS-01-DUN or LT24-NS-ELS-24-DUN-DANCE
-  cardId: CardId;           // references any card id (StoryCard | HeraldCard | NonsenseCard)
+  skuId: SkuId; // e.g., LT24-ELS-01-DUN or LT24-NS-ELS-24-DUN-DANCE
+  cardId: CardId; // references any card id (StoryCard | HeraldCard | NonsenseCard)
   finish: Finish;
 }
 
 export interface NonsenseVariantInfo {
-  id: NonsenseCardId;       // e.g., LT24-NS-ELS-24 (variant group root)
+  id: NonsenseCardId; // e.g., LT24-NS-ELS-24 (variant group root)
   story: StoryCode;
   baseNumber: number;
   variantCount: number;
@@ -115,11 +132,11 @@ export interface LT24DataSet {
     setId: SetId;
     setName: string;
     releaseEvent: string;
-    totalUniqueCards: number;     // 215
-    totalSkus: number;            // 430
+    totalUniqueCards: number; // 215
+    totalSkus: number; // 430
     notes: string[];
     packConfigurationExample: {
-      cardsPerPack: number;       // 15
+      cardsPerPack: number; // 15
       composition: string;
     };
   };

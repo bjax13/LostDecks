@@ -1,4 +1,4 @@
-import { sortOptions } from '../constants';
+import { sortOptions } from "../constants";
 
 export default function CollectiblesToolbar({
   searchTerm,
@@ -99,9 +99,9 @@ export default function CollectiblesToolbar({
               type="button"
               className="sort-direction"
               onClick={onToggleSortDirection}
-              aria-label={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
+              aria-label={`Sort ${sortDirection === "asc" ? "ascending" : "descending"}`}
             >
-              {sortDirection === 'asc' ? '↑' : '↓'}
+              {sortDirection === "asc" ? "↑" : "↓"}
             </button>
           </div>
         </div>

@@ -25,7 +25,11 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
 
 ### Lint / Test / Build
 
-- **No linter or test framework** is currently configured in this repo.
+- **Biome** (format, lint, import organization) runs from the repo root after `npm install`:
+  - `npm run format` — write formatting
+  - `npm run check` — format, lint, and organize imports (writes fixes)
+  - `npm run ci` — read-only check for CI (`biome ci .`)
+- **Vitest** (unit tests for the Vite app): `cd frontend && npm test` (or `npm run test` from the repo root).
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
 
 ### Gotchas

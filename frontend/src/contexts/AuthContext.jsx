@@ -1,14 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
+  onAuthStateChanged,
   sendPasswordResetEmail,
-  updateProfile,
+  signInWithEmailAndPassword,
   signInWithPopup,
-} from 'firebase/auth';
-import { auth, googleProvider, githubProvider, hasFirebaseConfig } from '../lib/firebase';
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { auth, githubProvider, googleProvider, hasFirebaseConfig } from "../lib/firebase";
 
 const AuthContext = createContext(null);
 
@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const handleError = useCallback((err) => {
-    console.error('Firebase auth error', err);
+    console.error("Firebase auth error", err);
     setError(err);
   }, []);
 
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     async (email, password) => {
       if (!auth) {
         const err = new Error(
-          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-in.',
+          "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-in.",
         );
         handleError(err);
         throw err;
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
     async (email, password, profile = {}) => {
       if (!auth) {
         const err = new Error(
-          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable registration.',
+          "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable registration.",
         );
         handleError(err);
         throw err;
@@ -98,7 +98,7 @@ export function AuthProvider({ children }) {
     async (email) => {
       if (!auth) {
         const err = new Error(
-          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable password reset.',
+          "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable password reset.",
         );
         handleError(err);
         throw err;
@@ -119,7 +119,7 @@ export function AuthProvider({ children }) {
     async (provider) => {
       if (!auth || !provider) {
         const err = new Error(
-          'Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable social sign-in.',
+          "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable social sign-in.",
         );
         handleError(err);
         throw err;
@@ -136,8 +136,14 @@ export function AuthProvider({ children }) {
     [clearError, handleError],
   );
 
-  const loginWithGoogle = useCallback(() => signInWithProvider(googleProvider), [signInWithProvider]);
-  const loginWithGithub = useCallback(() => signInWithProvider(githubProvider), [signInWithProvider]);
+  const loginWithGoogle = useCallback(
+    () => signInWithProvider(googleProvider),
+    [signInWithProvider],
+  );
+  const loginWithGithub = useCallback(
+    () => signInWithProvider(githubProvider),
+    [signInWithProvider],
+  );
 
   const value = useMemo(
     () => ({
@@ -153,7 +159,18 @@ export function AuthProvider({ children }) {
       loginWithGithub,
       hasFirebaseConfig,
     }),
-    [user, loading, error, clearError, login, register, logout, resetPassword, loginWithGoogle, loginWithGithub],
+    [
+      user,
+      loading,
+      error,
+      clearError,
+      login,
+      register,
+      logout,
+      resetPassword,
+      loginWithGoogle,
+      loginWithGithub,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -162,8 +179,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
-

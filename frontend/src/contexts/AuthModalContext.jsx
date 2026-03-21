@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import AuthModal from '../components/Auth/AuthModal.jsx';
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import AuthModal from "../components/Auth/AuthModal.jsx";
 
 const AuthModalContext = createContext(null);
 
@@ -38,7 +38,7 @@ export function AuthModalProvider({ children }) {
 export function useAuthModal() {
   const context = useContext(AuthModalContext);
   if (!context) {
-    throw new Error('useAuthModal must be used within an AuthModalProvider');
+    throw new Error("useAuthModal must be used within an AuthModalProvider");
   }
   return context;
 }

@@ -1,15 +1,15 @@
-import { useNavigate } from 'react-router-dom';
-import CategoryPill from './CategoryPill';
-import FinishPills from './FinishPills';
-import BinderInfo from './BinderInfo';
-import AddToCollectionButton from './AddToCollectionButton';
-import { categoryLabels } from '../constants';
+import { useNavigate } from "react-router-dom";
+import { categoryLabels } from "../constants";
+import AddToCollectionButton from "./AddToCollectionButton";
+import BinderInfo from "./BinderInfo";
+import CategoryPill from "./CategoryPill";
+import FinishPills from "./FinishPills";
 
 export default function CollectibleTable({ collectibles }) {
   const navigate = useNavigate();
 
   const handleRowClick = (collectibleId, event) => {
-    if (event.target.closest('.add-to-collection')) {
+    if (event.target.closest(".add-to-collection")) {
       return;
     }
     navigate(`/collectibles/${collectibleId}`);
@@ -45,13 +45,13 @@ export default function CollectibleTable({ collectibles }) {
                   label={categoryLabels[collectible.category]}
                 />
               </td>
-              <td>{collectible.storyTitle ?? '—'}</td>
-              <td>{collectible.number ?? '—'}</td>
+              <td>{collectible.storyTitle ?? "—"}</td>
+              <td>{collectible.number ?? "—"}</td>
               <td>
                 <div className="cell-title">{collectible.displayName}</div>
                 <div className="cell-subtitle">{collectible.detail}</div>
               </td>
-              <td>{collectible.rarity ?? '—'}</td>
+              <td>{collectible.rarity ?? "—"}</td>
               <td>
                 <FinishPills finishes={collectible.finishes} />
               </td>

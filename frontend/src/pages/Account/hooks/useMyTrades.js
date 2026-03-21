@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
-import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { useEffect, useMemo, useState } from "react";
+import { db } from "../../../lib/firebase";
 
 export default function useMyTrades(uid) {
   const [trades, setTrades] = useState([]);
@@ -10,9 +10,9 @@ export default function useMyTrades(uid) {
   const q = useMemo(() => {
     if (!uid) return null;
     return query(
-      collection(db, 'trades'),
-      where('participants', 'array-contains', uid),
-      orderBy('createdAt', 'desc'),
+      collection(db, "trades"),
+      where("participants", "array-contains", uid),
+      orderBy("createdAt", "desc"),
     );
   }, [uid]);
 
@@ -34,7 +34,7 @@ export default function useMyTrades(uid) {
         setLoading(false);
       },
       (err) => {
-        console.error('Failed to load trades', err);
+        console.error("Failed to load trades", err);
         setError(err);
         setLoading(false);
       },

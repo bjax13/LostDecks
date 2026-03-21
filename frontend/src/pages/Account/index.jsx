@@ -1,16 +1,16 @@
-import { useState } from 'react';
-import AuthGuard from '../../components/Auth/AuthGuard';
-import { useAuth } from '../../contexts/AuthContext';
-import TradesPanel from './components/TradesPanel';
-import './Account.css';
+import { useState } from "react";
+import AuthGuard from "../../components/Auth/AuthGuard";
+import { useAuth } from "../../contexts/AuthContext";
+import TradesPanel from "./components/TradesPanel";
+import "./Account.css";
 
 function AccountPage() {
   const { user } = useAuth();
   const [additionalInfo, setAdditionalInfo] = useState({
-    phoneNumber: '',
-    address: '',
-    backupEmailPrimary: '',
-    backupEmailSecondary: '',
+    phoneNumber: "",
+    address: "",
+    backupEmailPrimary: "",
+    backupEmailSecondary: "",
   });
   const [additionalInfoSaved, setAdditionalInfoSaved] = useState(false);
 
@@ -42,7 +42,7 @@ function AccountPage() {
             <ul className="account-summary">
               <li>
                 <span className="account-summary-label">Display name</span>
-                <span>{user.displayName || 'Not set'}</span>
+                <span>{user.displayName || "Not set"}</span>
               </li>
               <li>
                 <span className="account-summary-label">Primary email</span>
@@ -119,8 +119,8 @@ function AccountPage() {
         <section className="account-section">
           <h2>Notification preferences</h2>
           <p className="account-hint">
-            We are designing notification controls for trade activity alerts.
-            Expect options like the ones below in an upcoming release.
+            We are designing notification controls for trade activity alerts. Expect options like
+            the ones below in an upcoming release.
           </p>
           <fieldset className="notification-preview" disabled>
             <legend className="sr-only">Notification controls preview</legend>

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 function ForgotPassword() {
   const { resetPassword, error, clearError } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (event) => {
@@ -14,7 +14,7 @@ function ForgotPassword() {
       await resetPassword(email);
       setSubmitted(true);
     } catch (err) {
-      console.error('Reset password failed', err);
+      console.error("Reset password failed", err);
     }
   };
 
@@ -28,7 +28,12 @@ function ForgotPassword() {
         <form className="auth-page__form" onSubmit={handleSubmit}>
           <label>
             <span>Email</span>
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
           </label>
           <button type="submit">Send reset email</button>
         </form>

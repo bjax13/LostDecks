@@ -1,16 +1,16 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import Home from './pages/Home';
-import CollectiblesPage from './pages/Collectibles';
-import CollectibleDetailPage from './pages/CollectibleDetail';
-import NotFound from './pages/NotFound';
-import Login from './pages/Auth/Login';
-import Register from './pages/Auth/Register';
-import ForgotPassword from './pages/Auth/ForgotPassword';
-import CollectionPage from './pages/Collection';
-import MarketPage from './pages/Market';
-import AccountPage from './pages/Account';
-import { useAuth } from './contexts/AuthContext';
-import { useAuthModal } from './contexts/AuthModalContext.jsx';
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import { useAuthModal } from "./contexts/AuthModalContext.jsx";
+import AccountPage from "./pages/Account";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+import CollectibleDetailPage from "./pages/CollectibleDetail";
+import CollectiblesPage from "./pages/Collectibles";
+import CollectionPage from "./pages/Collection";
+import Home from "./pages/Home";
+import MarketPage from "./pages/Market";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -20,7 +20,7 @@ function App() {
     try {
       await logout();
     } catch (err) {
-      console.error('Sign out failed', err);
+      console.error("Sign out failed", err);
     }
   };
 

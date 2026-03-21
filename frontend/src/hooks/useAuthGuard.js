@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export function useAuthGuard() {
   const { user, loading } = useAuth();

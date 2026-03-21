@@ -1,23 +1,23 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
-import { getCollectibleRecord, getSkuRecord } from '../../data/collectibles';
-import { useAuth } from '../../contexts/AuthContext';
-import { useCollectibleCollectionEntry } from './hooks/useCollectibleCollectionEntry';
-import CategoryPill from '../Collectibles/components/CategoryPill';
-import FinishPills from '../Collectibles/components/FinishPills';
-import BinderInfo from '../Collectibles/components/BinderInfo';
-import AddToCollectionButton from '../Collectibles/components/AddToCollectionButton';
-import { categoryLabels } from '../Collectibles/constants';
-import CreateListingForm from './components/CreateListingForm';
-import CollectibleListingsPanel from './components/CollectibleListingsPanel';
-import '../Market/Market.css';
-import './CollectibleDetail.css';
+import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { getCollectibleRecord, getSkuRecord } from "../../data/collectibles";
+import AddToCollectionButton from "../Collectibles/components/AddToCollectionButton";
+import BinderInfo from "../Collectibles/components/BinderInfo";
+import CategoryPill from "../Collectibles/components/CategoryPill";
+import FinishPills from "../Collectibles/components/FinishPills";
+import { categoryLabels } from "../Collectibles/constants";
+import CollectibleListingsPanel from "./components/CollectibleListingsPanel";
+import CreateListingForm from "./components/CreateListingForm";
+import { useCollectibleCollectionEntry } from "./hooks/useCollectibleCollectionEntry";
+import "../Market/Market.css";
+import "./CollectibleDetail.css";
 
 function normalizeQuantity(entry) {
   if (!entry) return 0;
   const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
   for (const candidate of candidates) {
-    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
       return candidate;
     }
   }
@@ -31,11 +31,11 @@ function resolveTimestamp(entry) {
     return null;
   }
 
-  if (typeof possible.toDate === 'function') {
+  if (typeof possible.toDate === "function") {
     try {
       return possible.toDate();
     } catch (err) {
-      console.warn('Failed to convert Firestore timestamp', err);
+      console.warn("Failed to convert Firestore timestamp", err);
     }
   }
 
@@ -52,9 +52,11 @@ function formatDate(date) {
     return null;
   }
   try {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+    return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
+      date,
+    );
   } catch (err) {
-    console.warn('Failed to format date', err);
+    console.warn("Failed to format date", err);
     return date.toISOString();
   }
 }
@@ -73,22 +75,27 @@ export default function CollectibleDetailPage() {
 
   const card = skuRecord?.card ?? cardRecord;
 
-  const { entry: collectionEntry, loading: collectionLoading } =
-    useCollectibleCollectionEntry(ownerUid, collectibleId, skuId);
+  const { entry: collectionEntry, loading: collectionLoading } = useCollectibleCollectionEntry(
+    ownerUid,
+    collectibleId,
+    skuId,
+  );
 
   const quantity = useMemo(() => normalizeQuantity(collectionEntry), [collectionEntry]);
   const notes = useMemo(() => {
     if (!collectionEntry) return null;
-    return typeof collectionEntry.notes === 'string' && collectionEntry.notes.trim().length > 0
+    return typeof collectionEntry.notes === "string" && collectionEntry.notes.trim().length > 0
       ? collectionEntry.notes.trim()
       : null;
   }, [collectionEntry]);
-  
+
   const updatedAt = useMemo(() => resolveTimestamp(collectionEntry), [collectionEntry]);
   const updatedAtLabel = useMemo(() => formatDate(updatedAt), [updatedAt]);
 
   const finish = useMemo(
-    () => skuRecord?.finish ?? (collectionEntry?.finish ? String(collectionEntry.finish).toUpperCase() : null),
+    () =>
+      skuRecord?.finish ??
+      (collectionEntry?.finish ? String(collectionEntry.finish).toUpperCase() : null),
     [collectionEntry, skuRecord],
   );
 
@@ -98,7 +105,11 @@ export default function CollectibleDetailPage() {
         <div className="card-detail__error">
           <h1>Collectible Not Found</h1>
           <p>The collectible you're looking for doesn't exist.</p>
-          <button type="button" onClick={() => navigate('/collectibles')} className="card-detail__back-button">
+          <button
+            type="button"
+            onClick={() => navigate("/collectibles")}
+            className="card-detail__back-button"
+          >
             Back to Collectibles
           </button>
         </div>
@@ -108,11 +119,7 @@ export default function CollectibleDetailPage() {
 
   return (
     <div className="card-detail-page">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="card-detail__back-button"
-      >
+      <button type="button" onClick={() => navigate(-1)} className="card-detail__back-button">
         ← Back
       </button>
 
@@ -130,7 +137,7 @@ export default function CollectibleDetailPage() {
       <div className="card-detail__content">
         <section className="card-detail__info">
           <h2 className="card-detail__section-title">Details</h2>
-          
+
           <dl className="card-detail__stats">
             <div>
               <dt>Category</dt>
@@ -140,15 +147,15 @@ export default function CollectibleDetailPage() {
             </div>
             <div>
               <dt>Story</dt>
-              <dd>{card.storyTitle ?? '—'}</dd>
+              <dd>{card.storyTitle ?? "—"}</dd>
             </div>
             <div>
               <dt>Number</dt>
-              <dd>{card.number ?? '—'}</dd>
+              <dd>{card.number ?? "—"}</dd>
             </div>
             <div>
               <dt>Rarity</dt>
-              <dd>{card.rarity ?? '—'}</dd>
+              <dd>{card.rarity ?? "—"}</dd>
             </div>
             <div>
               <dt>Finishes</dt>
@@ -185,7 +192,7 @@ export default function CollectibleDetailPage() {
         {user && (
           <section className="card-detail__collection">
             <h2 className="card-detail__section-title">Your Collection</h2>
-            
+
             {collectionLoading ? (
               <div className="card-detail__loading">Loading collection data…</div>
             ) : collectionEntry ? (
@@ -232,11 +239,10 @@ export default function CollectibleDetailPage() {
           </p>
           <CreateListingForm collectibleId={collectibleId} />
 
-          <h3 style={{ marginTop: '1.5rem' }}>Open listings</h3>
+          <h3 style={{ marginTop: "1.5rem" }}>Open listings</h3>
           <CollectibleListingsPanel collectibleId={collectibleId} />
         </section>
       </div>
     </div>
   );
 }
-
