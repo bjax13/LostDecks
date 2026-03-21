@@ -9,5 +9,18 @@ export default defineConfig({
     include: ["src/**/*.{test,spec}.{js,jsx}", "src/**/__tests__/**/*.{js,jsx}"],
     setupFiles: ["./src/test/setup.js"],
     css: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "html"],
+      reportsDirectory: "./coverage",
+      include: ["src/**/*.{js,jsx}"],
+      exclude: [
+        "src/**/*.test.{js,jsx}",
+        "src/**/__tests__/**",
+        "src/main.jsx",
+        "src/test/**",
+        "src/data/**",
+      ],
+    },
   },
 });

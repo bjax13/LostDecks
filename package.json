@@ -6,7 +6,8 @@
     "lint": "biome lint .",
     "check": "biome check --write .",
     "ci": "biome ci .",
-    "test": "npm run test --prefix frontend"
+    "test": "npm run test --prefix frontend",
+    "test:coverage": "npm run test:coverage --prefix frontend"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.8"
