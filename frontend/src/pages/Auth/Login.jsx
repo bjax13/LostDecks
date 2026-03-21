@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import SocialLoginButtons from '../../components/Auth/SocialLoginButtons';
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Login() {
   const { login, error, clearError } = useAuth();
-  const [formState, setFormState] = useState({ email: '', password: '' });
+  const [formState, setFormState] = useState({ email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname ?? '/collections';
+  const from = location.state?.from?.pathname ?? "/collections";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -24,7 +24,7 @@ function Login() {
       await login(formState.email, formState.password);
       navigate(from, { replace: true });
     } catch (err) {
-      console.error('Login failed', err);
+      console.error("Login failed", err);
     } finally {
       setSubmitting(false);
     }
@@ -56,7 +56,7 @@ function Login() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? 'Signing in…' : 'Sign In'}
+          {submitting ? "Signing in…" : "Sign In"}
         </button>
       </form>
       <div className="auth-page__links">

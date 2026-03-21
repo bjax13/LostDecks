@@ -30,10 +30,25 @@
 
 .view-toggle {
   display: inline-flex;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
   background: rgba(81, 53, 147, 0.35);
   border: 1px solid rgba(157, 129, 255, 0.4);
   border-radius: 999px;
   overflow: hidden;
+}
+
+.view-toggle__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .view-toggle button {
@@ -45,7 +60,9 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
 .view-toggle button.active,
@@ -84,7 +101,9 @@
   background: rgba(16, 11, 33, 0.9);
   color: #f8f6ff;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .filter-control select {
@@ -95,7 +114,9 @@
   background: rgba(16, 11, 33, 0.9);
   color: #f8f6ff;
   font-size: 0.95rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path fill='none' stroke='%23f8f6ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M9 1 5 5 1 1'/></svg>");
   background-repeat: no-repeat;
@@ -134,7 +155,9 @@
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .sort-direction:hover {
@@ -161,7 +184,9 @@
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .reset-button:hover {
@@ -208,7 +233,7 @@
 }
 
 .mono {
-  font-family: 'Fira Code', 'Roboto Mono', Menlo, Monaco, monospace;
+  font-family: "Fira Code", "Roboto Mono", Menlo, Monaco, monospace;
   letter-spacing: 0.04em;
 }
 
@@ -301,8 +326,13 @@
 }
 
 .card-tile--clickable {
+  color: inherit;
+  text-decoration: none;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .card-tile--clickable:hover {
@@ -418,7 +448,10 @@
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .add-to-collection__button:hover {

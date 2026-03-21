@@ -9,22 +9,23 @@ export default function CollectiblesHeader({ setName, totalCollectibles, viewMod
           the tools below to search, filter, and sort story, herald, and nonsense variants.
         </p>
       </div>
-      <div className="view-toggle" role="group" aria-label="View mode toggle">
+      <fieldset className="view-toggle">
+        <legend className="view-toggle__legend">View mode</legend>
         <button
           type="button"
-          className={viewMode === 'grid' ? 'active' : ''}
-          onClick={() => onChangeView('grid')}
+          className={viewMode === "grid" ? "active" : ""}
+          onClick={() => onChangeView("grid")}
         >
           Grid view
         </button>
         <button
           type="button"
-          className={viewMode === 'table' ? 'active' : ''}
-          onClick={() => onChangeView('table')}
+          className={viewMode === "table" ? "active" : ""}
+          onClick={() => onChangeView("table")}
         >
           Table view
         </button>
-      </div>
+      </fieldset>
     </header>
   );
 }

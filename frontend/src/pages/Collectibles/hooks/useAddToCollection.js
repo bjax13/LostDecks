@@ -1,38 +1,38 @@
-import { useCallback, useState } from 'react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import { useAuth } from '../../../contexts/AuthContext';
-import { toSkuId } from '../../../data/collectibles';
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useCallback, useState } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { toSkuId } from "../../../data/collectibles";
+import { db } from "../../../lib/firebase";
 
-const COLLECTIONS_PATH = 'collections';
+const COLLECTIONS_PATH = "collections";
 
 export function useAddToCollection() {
   const { user } = useAuth();
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState("idle");
   const [error, setError] = useState(null);
 
   const addToCollection = useCallback(
     async ({ card, finish = null, quantity = 1, notes }) => {
       if (!card || !card.id) {
-        throw new Error('A valid collectible is required to add to the collection.');
+        throw new Error("A valid collectible is required to add to the collection.");
       }
 
       if (!finish) {
-        throw new Error('A finish is required (e.g. DUN or FOIL).');
+        throw new Error("A finish is required (e.g. DUN or FOIL).");
       }
 
       if (!user) {
-        const authError = new Error('Authentication required');
-        authError.code = 'auth-required';
+        const authError = new Error("Authentication required");
+        authError.code = "auth-required";
         throw authError;
       }
 
       const skuId = toSkuId(card.id, finish);
       if (!skuId) {
-        throw new Error('Invalid card or finish.');
+        throw new Error("Invalid card or finish.");
       }
 
-      setStatus('loading');
+      setStatus("loading");
       setError(null);
 
       try {
@@ -42,17 +42,17 @@ export function useAddToCollection() {
           quantity,
           updatedAt: serverTimestamp(),
         };
-        if (typeof notes === 'string' && notes.trim().length > 0) {
+        if (typeof notes === "string" && notes.trim().length > 0) {
           payload.notes = notes.trim();
         }
 
         await addDoc(collection(db, COLLECTIONS_PATH), payload);
-        setStatus('success');
+        setStatus("success");
         return payload;
       } catch (err) {
-        console.error('Failed to add to collection', err);
+        console.error("Failed to add to collection", err);
         setError(err);
-        setStatus('error');
+        setStatus("error");
         throw err;
       }
     },
@@ -60,7 +60,7 @@ export function useAddToCollection() {
   );
 
   const reset = useCallback(() => {
-    setStatus('idle');
+    setStatus("idle");
     setError(null);
   }, []);
 

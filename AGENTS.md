@@ -25,7 +25,11 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
 
 ### Lint / Test / Build
 
-- **Unit & integration tests**: Vitest + Testing Library (`cd frontend && npm run test`). Tests live next to source as `*.test.{js,jsx}`; setup is `frontend/src/test/setup.js`. Prefer queries from [Testing Library priority](https://testing-library.com/docs/queries/about#priority) (role, label, placeholder, text) and `userEvent` over `fireEvent` where it reflects real interaction.
+- **Biome** (format, lint, import organization) runs from the repo root after `npm install`:
+  - `npm run format` — write formatting
+  - `npm run check` — format, lint, and organize imports (writes fixes)
+  - `npm run ci` — read-only check for CI (`biome ci .`)
+- **Unit & integration tests**: Vitest + Testing Library (`cd frontend && npm run test`, or `npm run test` from the repo root). Tests live next to source as `*.test.{js,jsx}`; setup is `frontend/src/test/setup.js`. Prefer queries from [Testing Library priority](https://testing-library.com/docs/queries/about#priority) (role, label, placeholder, text) and `userEvent` over `fireEvent` where it reflects real interaction.
 - **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). The config builds and serves the production bundle on port 4173; smoke coverage lives under `frontend/e2e/`.
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
 

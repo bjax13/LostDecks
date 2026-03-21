@@ -115,7 +115,9 @@
   border: 1px solid rgba(176, 148, 255, 0.35);
   background: rgba(16, 11, 33, 0.9);
   color: #f8f6ff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .form-field input::placeholder,
@@ -156,7 +158,9 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .account-page button:hover {

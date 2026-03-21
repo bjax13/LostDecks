@@ -25,7 +25,7 @@
   .home-container {
     padding: 1rem;
   }
-  
+
   .cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;

@@ -1,5 +1,5 @@
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
-const admin = require('firebase-admin');
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const admin = require("firebase-admin");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -8,8 +8,8 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 function asInt(value, field) {
-  if (typeof value !== 'number' || !Number.isFinite(value) || Math.floor(value) !== value) {
-    throw new HttpsError('invalid-argument', `${field} must be an integer`);
+  if (typeof value !== "number" || !Number.isFinite(value) || Math.floor(value) !== value) {
+    throw new HttpsError("invalid-argument", `${field} must be an integer`);
   }
   return value;
 }
@@ -17,58 +17,58 @@ function asInt(value, field) {
 exports.acceptListing = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) {
-    throw new HttpsError('unauthenticated', 'Must be signed in to accept a listing');
+    throw new HttpsError("unauthenticated", "Must be signed in to accept a listing");
   }
 
   const { listingId } = request.data || {};
-  if (typeof listingId !== 'string' || listingId.trim().length === 0) {
-    throw new HttpsError('invalid-argument', 'listingId is required');
+  if (typeof listingId !== "string" || listingId.trim().length === 0) {
+    throw new HttpsError("invalid-argument", "listingId is required");
   }
 
   const acceptedByUid = auth.uid;
   const acceptedByDisplayName = (auth.token && (auth.token.name || auth.token.email)) || auth.uid;
 
-  const listingRef = db.collection('listings').doc(listingId);
-  const tradeRef = db.collection('trades').doc();
+  const listingRef = db.collection("listings").doc(listingId);
+  const tradeRef = db.collection("trades").doc();
 
   const result = await db.runTransaction(async (tx) => {
     const snap = await tx.get(listingRef);
     if (!snap.exists) {
-      throw new HttpsError('not-found', 'Listing not found');
+      throw new HttpsError("not-found", "Listing not found");
     }
 
     const listing = snap.data();
-    if (listing.status !== 'OPEN') {
-      throw new HttpsError('failed-precondition', 'Listing is not open');
+    if (listing.status !== "OPEN") {
+      throw new HttpsError("failed-precondition", "Listing is not open");
     }
     if (listing.createdByUid === acceptedByUid) {
-      throw new HttpsError('failed-precondition', 'Cannot accept your own listing');
+      throw new HttpsError("failed-precondition", "Cannot accept your own listing");
     }
 
-    if (listing.currency !== 'USD') {
-      throw new HttpsError('failed-precondition', 'Unsupported currency');
+    if (listing.currency !== "USD") {
+      throw new HttpsError("failed-precondition", "Unsupported currency");
     }
 
     // MVP constraints (keep things simple + consistent)
-    asInt(listing.priceCents, 'priceCents');
+    asInt(listing.priceCents, "priceCents");
 
     const listingType = listing.type;
-    if (listingType !== 'BID' && listingType !== 'ASK') {
-      throw new HttpsError('failed-precondition', 'Invalid listing type');
+    if (listingType !== "BID" && listingType !== "ASK") {
+      throw new HttpsError("failed-precondition", "Invalid listing type");
     }
 
     const creatorUid = listing.createdByUid;
-    const creatorName = listing.createdByDisplayName || 'Anonymous';
+    const creatorName = listing.createdByDisplayName || "Anonymous";
 
-    const buyerUid = listingType === 'ASK' ? acceptedByUid : creatorUid;
-    const buyerDisplayName = listingType === 'ASK' ? acceptedByDisplayName : creatorName;
-    const sellerUid = listingType === 'ASK' ? creatorUid : acceptedByUid;
-    const sellerDisplayName = listingType === 'ASK' ? creatorName : acceptedByDisplayName;
+    const buyerUid = listingType === "ASK" ? acceptedByUid : creatorUid;
+    const buyerDisplayName = listingType === "ASK" ? acceptedByDisplayName : creatorName;
+    const sellerUid = listingType === "ASK" ? creatorUid : acceptedByUid;
+    const sellerDisplayName = listingType === "ASK" ? creatorName : acceptedByDisplayName;
 
     const now = admin.firestore.FieldValue.serverTimestamp();
 
     tx.update(listingRef, {
-      status: 'ACCEPTED',
+      status: "ACCEPTED",
       acceptedByUid,
       acceptedByDisplayName,
       acceptedAt: now,
@@ -81,14 +81,14 @@ exports.acceptListing = onCall(async (request) => {
       cardDisplayName: listing.cardDisplayName || null,
       type: listingType,
       priceCents: listing.priceCents,
-      currency: 'USD',
+      currency: "USD",
       quantity: 1,
       buyerUid,
       buyerDisplayName,
       sellerUid,
       sellerDisplayName,
       participants: [buyerUid, sellerUid],
-      status: 'PENDING',
+      status: "PENDING",
       createdAt: now,
       updatedAt: now,
     });
@@ -102,36 +102,36 @@ exports.acceptListing = onCall(async (request) => {
 exports.updateTradeStatus = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) {
-    throw new HttpsError('unauthenticated', 'Must be signed in');
+    throw new HttpsError("unauthenticated", "Must be signed in");
   }
 
   const { tradeId, status } = request.data || {};
-  if (typeof tradeId !== 'string' || tradeId.trim().length === 0) {
-    throw new HttpsError('invalid-argument', 'tradeId is required');
+  if (typeof tradeId !== "string" || tradeId.trim().length === 0) {
+    throw new HttpsError("invalid-argument", "tradeId is required");
   }
 
-  const allowed = new Set(['COMPLETED', 'CANCELLED']);
-  if (typeof status !== 'string' || !allowed.has(status)) {
-    throw new HttpsError('invalid-argument', 'status must be COMPLETED or CANCELLED');
+  const allowed = new Set(["COMPLETED", "CANCELLED"]);
+  if (typeof status !== "string" || !allowed.has(status)) {
+    throw new HttpsError("invalid-argument", "status must be COMPLETED or CANCELLED");
   }
 
-  const tradeRef = db.collection('trades').doc(tradeId);
+  const tradeRef = db.collection("trades").doc(tradeId);
 
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(tradeRef);
     if (!snap.exists) {
-      throw new HttpsError('not-found', 'Trade not found');
+      throw new HttpsError("not-found", "Trade not found");
     }
 
     const trade = snap.data();
 
     const participants = Array.isArray(trade.participants) ? trade.participants : [];
     if (!participants.includes(auth.uid)) {
-      throw new HttpsError('permission-denied', 'Only trade participants can update status');
+      throw new HttpsError("permission-denied", "Only trade participants can update status");
     }
 
-    if (trade.status !== 'PENDING') {
-      throw new HttpsError('failed-precondition', 'Trade is not pending');
+    if (trade.status !== "PENDING") {
+      throw new HttpsError("failed-precondition", "Trade is not pending");
     }
 
     tx.update(tradeRef, {

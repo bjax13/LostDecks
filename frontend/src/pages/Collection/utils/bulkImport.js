@@ -1,20 +1,15 @@
-import { collection, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import {
-  datasetSkus,
-  getCollectibleRecord,
-  getSkuRecord,
-  toSkuId,
-} from '../../../data/collectibles';
+import { collection, doc, serverTimestamp, writeBatch } from "firebase/firestore";
+import { datasetSkus, getSkuRecord, toSkuId } from "../../../data/collectibles";
+import { db } from "../../../lib/firebase";
 
-const csvHeaders = ['skuId', 'quantity', 'notes'];
+const csvHeaders = ["skuId", "quantity", "notes"];
 
 function escapeCsvValue(value) {
   if (value == null) {
-    return '';
+    return "";
   }
   const stringValue = String(value);
-  if (stringValue.includes('"') || stringValue.includes(',') || stringValue.includes('\n')) {
+  if (stringValue.includes('"') || stringValue.includes(",") || stringValue.includes("\n")) {
     return `"${stringValue.replace(/"/g, '""')}"`;
   }
   return stringValue;
@@ -24,53 +19,56 @@ export function createCollectionTemplateCsv() {
   const sortedSkus = [...datasetSkus].sort((a, b) => {
     const finishA = a.finish.toUpperCase();
     const finishB = b.finish.toUpperCase();
-    
+
     // Sort by finish: DUN comes before FOIL
     if (finishA !== finishB) {
-      if (finishA === 'DUN') return -1;
-      if (finishB === 'DUN') return 1;
+      if (finishA === "DUN") return -1;
+      if (finishB === "DUN") return 1;
       return finishA.localeCompare(finishB);
     }
-    
+
     // Secondary sort by cardId within each finish group
     return a.cardId.localeCompare(b.cardId);
   });
 
-  const rows = sortedSkus.map((sku) => [sku.skuId, '1', '']);
+  const rows = sortedSkus.map((sku) => [sku.skuId, "1", ""]);
 
-  const csvLines = [csvHeaders, ...rows].map((row) => row.map(escapeCsvValue).join(','));
-  return csvLines.join('\n');
+  const csvLines = [csvHeaders, ...rows].map((row) => row.map(escapeCsvValue).join(","));
+  return csvLines.join("\n");
 }
 
 const headerAliases = {
-  skuid: 'skuId',
-  sku: 'skuId',
-  card: 'cardId',
-  cardid: 'cardId',
-  cardcode: 'cardId',
-  id: 'cardId',
-  finish: 'finish',
-  foil: 'finish',
-  variant: 'finish',
-  quantity: 'quantity',
-  qty: 'quantity',
-  count: 'quantity',
-  copies: 'quantity',
-  total: 'quantity',
-  notes: 'notes',
-  note: 'notes',
+  skuid: "skuId",
+  sku: "skuId",
+  card: "cardId",
+  cardid: "cardId",
+  cardcode: "cardId",
+  id: "cardId",
+  finish: "finish",
+  foil: "finish",
+  variant: "finish",
+  quantity: "quantity",
+  qty: "quantity",
+  count: "quantity",
+  copies: "quantity",
+  total: "quantity",
+  notes: "notes",
+  note: "notes",
 };
 
 function normalizeHeader(header) {
   if (!header) {
     return null;
   }
-  const normalized = header.trim().toLowerCase().replace(/[\s_-]+/g, '');
+  const normalized = header
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
   return headerAliases[normalized] ?? normalized;
 }
 
 function sanitizeRows(text) {
-  if (typeof text !== 'string') {
+  if (typeof text !== "string") {
     return [];
   }
 
@@ -78,10 +76,10 @@ function sanitizeRows(text) {
   if (source.charCodeAt(0) === 0xfeff) {
     source = source.slice(1);
   }
-  source = source.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  source = source.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   const rows = [];
-  let current = '';
+  let current = "";
   let row = [];
   let inQuotes = false;
 
@@ -106,17 +104,17 @@ function sanitizeRows(text) {
       continue;
     }
 
-    if (char === ',') {
+    if (char === ",") {
       row.push(current);
-      current = '';
+      current = "";
       continue;
     }
 
-    if (char === '\n') {
+    if (char === "\n") {
       row.push(current);
       rows.push(row);
       row = [];
-      current = '';
+      current = "";
       continue;
     }
 
@@ -143,7 +141,7 @@ export function parseBulkCollectionCsv(text) {
   for (let i = 1; i < matrix.length; i += 1) {
     const rawRow = matrix[i];
     const values = rawRow ?? [];
-    if (values.every((value) => (value ?? '').trim().length === 0)) {
+    if (values.every((value) => (value ?? "").trim().length === 0)) {
       continue;
     }
 
@@ -155,7 +153,7 @@ export function parseBulkCollectionCsv(text) {
       if (record[header] !== undefined) {
         return;
       }
-      const value = values[index] ?? '';
+      const value = values[index] ?? "";
       record[header] = value.trim();
     });
 
@@ -169,7 +167,7 @@ function toNumber(value) {
   if (value === null || value === undefined) {
     return null;
   }
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     return Number.isFinite(value) ? value : null;
   }
   const trimmed = value.trim();
@@ -186,7 +184,7 @@ function toUniqueKey(skuId) {
 
 export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntries }) {
   if (!ownerUid) {
-    throw new Error('You need to be signed in to update your collection.');
+    throw new Error("You need to be signed in to update your collection.");
   }
 
   const existingBySku = new Map();
@@ -204,10 +202,10 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
   let updated = 0;
   let deleted = 0;
 
-  const collectionRef = collection(db, 'collections');
+  const collectionRef = collection(db, "collections");
 
   rows.forEach((row) => {
-    const line = row.__lineNumber ?? '?';
+    const line = row.__lineNumber ?? "?";
     const rawSku = row.skuId ?? row.skuid ?? null;
     const rawCard = row.cardId ?? row.card ?? null;
     const rawFinish = row.finish ?? null;
@@ -218,7 +216,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     }
 
     if (!skuId) {
-      issues.push({ line, message: 'Missing skuId, or cardId+finish.' });
+      issues.push({ line, message: "Missing skuId, or cardId+finish." });
       return;
     }
 
@@ -230,7 +228,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
 
     const uniqueKey = toUniqueKey(skuId);
     if (uniqueKey && seenKeys.has(uniqueKey)) {
-      issues.push({ line, message: 'Duplicate row for the same SKU.' });
+      issues.push({ line, message: "Duplicate row for the same SKU." });
       return;
     }
     if (uniqueKey) {
@@ -249,7 +247,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
 
     if (normalizedQuantity === 0) {
       if (existing) {
-        operations.push({ type: 'delete', ref: doc(collectionRef, existing.id) });
+        operations.push({ type: "delete", ref: doc(collectionRef, existing.id) });
         deleted += 1;
       }
       return;
@@ -262,11 +260,11 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
       quantity: normalizedQuantity,
       updatedAt: serverTimestamp(),
     };
-    if (typeof row.notes === 'string' && row.notes.trim().length > 0) {
+    if (typeof row.notes === "string" && row.notes.trim().length > 0) {
       payload.notes = row.notes.trim();
     }
 
-    operations.push({ type: 'set', ref: docRef, data: payload, merge: true });
+    operations.push({ type: "set", ref: docRef, data: payload, merge: true });
     if (existing) {
       updated += 1;
     } else {
@@ -280,7 +278,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
       const batch = writeBatch(db);
       const slice = operations.slice(start, start + chunkSize);
       slice.forEach((operation) => {
-        if (operation.type === 'delete') {
+        if (operation.type === "delete") {
           batch.delete(operation.ref);
         } else {
           batch.set(operation.ref, operation.data, { merge: operation.merge });
@@ -295,6 +293,6 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     created,
     updated,
     deleted,
-    issues
+    issues,
   };
 }

@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
-import { createListing } from '../../../lib/marketplace/listings';
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
+import { createListing } from "../../../lib/marketplace/listings";
 
 function dollarsToCents(value) {
-  const normalized = String(value || '').trim();
+  const normalized = String(value || "").trim();
   if (!normalized) return null;
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed) || parsed <= 0) return null;
@@ -16,8 +16,8 @@ export default function CreateListingForm({ collectibleId, cardId }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [type, setType] = useState('BID');
-  const [price, setPrice] = useState('');
+  const [type, setType] = useState("BID");
+  const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -28,12 +28,12 @@ export default function CreateListingForm({ collectibleId, cardId }) {
     setError(null);
 
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${id}` } } });
+      navigate("/auth/login", { state: { from: { pathname: `/collectibles/${id}` } } });
       return;
     }
 
     if (!priceCents) {
-      setError('Enter a valid price.');
+      setError("Enter a valid price.");
       return;
     }
 
@@ -43,15 +43,15 @@ export default function CreateListingForm({ collectibleId, cardId }) {
         type,
         cardId: id,
         priceCents,
-        currency: 'USD',
+        currency: "USD",
         quantity: 1,
         createdByUid: user.uid,
         createdByDisplayName: user.displayName || user.email,
       });
-      setPrice('');
+      setPrice("");
     } catch (err) {
-      console.error('Failed to create listing', err);
-      setError('Failed to create listing.');
+      console.error("Failed to create listing", err);
+      setError("Failed to create listing.");
     } finally {
       setSubmitting(false);
     }
@@ -86,10 +86,10 @@ export default function CreateListingForm({ collectibleId, cardId }) {
       {error && <p className="muted">{error}</p>}
 
       <button type="submit" disabled={submitting}>
-        {user ? 'Create listing' : 'Sign in to create listing'}
+        {user ? "Create listing" : "Sign in to create listing"}
       </button>
 
-      <p className="muted" style={{ marginTop: '0.75rem' }}>
+      <p className="muted" style={{ marginTop: "0.75rem" }}>
         Quantity is fixed to 1 for now. We can add multi-quantity listings later.
       </p>
     </form>

@@ -1,4 +1,4 @@
-import { categoryLabels } from '../constants';
+import { categoryLabels } from "../constants";
 
 export default function CategoryPill({ category, label }) {
   const displayLabel = label ?? categoryLabels[category] ?? category;

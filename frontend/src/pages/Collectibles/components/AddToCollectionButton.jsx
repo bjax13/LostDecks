@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useAddToCollection } from '../hooks/useAddToCollection';
-import { useAuthModal } from '../../../contexts/AuthModalContext.jsx';
+import { useEffect, useMemo, useState } from "react";
+import { useAuthModal } from "../../../contexts/AuthModalContext.jsx";
+import { useAddToCollection } from "../hooks/useAddToCollection";
 
-const successMessage = 'Added to your collection!';
+const successMessage = "Added to your collection!";
 const errorMessage = "Couldn't add collectible. Please try again.";
 
 function formatFinishLabel(finish) {
-  if (!finish || typeof finish !== 'string') {
-    return '';
+  if (!finish || typeof finish !== "string") {
+    return "";
   }
   const lower = finish.toLowerCase();
   return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
 }
 
-export default function AddToCollectionButton({ collectible, card, variant = 'card' }) {
+export default function AddToCollectionButton({ collectible, card, variant = "card" }) {
   const item = collectible ?? card;
   const { addToCollection, status, error, user, reset } = useAddToCollection();
   const { openAuthModal } = useAuthModal();
@@ -37,16 +37,14 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
     setPendingFinish(null);
     setLastFinish(null);
     reset();
-  }, [item?.id, reset]);
+  }, [item, reset]);
 
   useEffect(() => {
-    if (status === 'success') {
+    if (status === "success") {
       const finishLabel = lastFinish ? formatFinishLabel(lastFinish) : null;
       setFeedback({
-        type: 'success',
-        message: finishLabel
-          ? `Added ${finishLabel} to your collection!`
-          : successMessage,
+        type: "success",
+        message: finishLabel ? `Added ${finishLabel} to your collection!` : successMessage,
       });
       const timer = setTimeout(() => {
         setFeedback(null);
@@ -55,8 +53,8 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
       return () => clearTimeout(timer);
     }
 
-    if (status === 'error') {
-      setFeedback({ type: 'error', message: errorMessage });
+    if (status === "error") {
+      setFeedback({ type: "error", message: errorMessage });
     }
 
     return undefined;
@@ -65,7 +63,7 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
   useEffect(() => () => reset(), [reset]);
 
   useEffect(() => {
-    if (status !== 'loading') {
+    if (status !== "loading") {
       setPendingFinish(null);
     }
   }, [status]);
@@ -74,7 +72,7 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
     if (!item) return;
 
     if (!user) {
-      openAuthModal({ reason: 'add-to-collection' });
+      openAuthModal({ reason: "add-to-collection" });
       return;
     }
 
@@ -88,18 +86,18 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
         quantity: 1,
       });
     } catch (err) {
-      if (err?.code === 'auth-required') {
-        openAuthModal({ reason: 'add-to-collection' });
+      if (err?.code === "auth-required") {
+        openAuthModal({ reason: "add-to-collection" });
       } else {
-        setFeedback({ type: 'error', message: errorMessage });
+        setFeedback({ type: "error", message: errorMessage });
       }
     }
   };
 
-  const isLoading = status === 'loading';
+  const isLoading = status === "loading";
   const finishButtons = useMemo(
     () =>
-      ['DUN', 'FOIL']
+      ["DUN", "FOIL"]
         .filter((finish) => availableFinishes[finish])
         .map((finish) => ({
           finish,
@@ -120,9 +118,7 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
               onClick={() => handleAdd(finish)}
               disabled={isLoading}
             >
-              {isLoading && pendingFinish === finish
-                ? `Adding ${label}…`
-                : `Add ${label}`}
+              {isLoading && pendingFinish === finish ? `Adding ${label}…` : `Add ${label}`}
             </button>
           ))}
         </div>
@@ -140,9 +136,9 @@ export default function AddToCollectionButton({ collectible, card, variant = 'ca
         </span>
       ) : null}
 
-      {status === 'error' && error?.code && error.code !== 'auth-required' ? (
+      {status === "error" && error?.code && error.code !== "auth-required" ? (
         <span className="add-to-collection__feedback add-to-collection__feedback--error add-to-collection__feedback--details">
-          {error.message ?? 'Unexpected error'}
+          {error.message ?? "Unexpected error"}
         </span>
       ) : null}
     </div>

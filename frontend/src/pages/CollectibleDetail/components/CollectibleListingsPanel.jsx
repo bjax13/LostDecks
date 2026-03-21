@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../contexts/AuthContext';
-import useOpenListings from '../../Market/hooks/useOpenListings';
-import ListingRow from '../../Market/components/ListingRow';
-import { acceptListing, cancelListing } from '../../../lib/marketplace/listings';
-import { getCollectibleRecord } from '../../../data/collectibles';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
+import { getCollectibleRecord } from "../../../data/collectibles";
+import { acceptListing, cancelListing } from "../../../lib/marketplace/listings";
+import ListingRow from "../../Market/components/ListingRow";
+import useOpenListings from "../../Market/hooks/useOpenListings";
 
 export default function CollectibleListingsPanel({ collectibleId }) {
   const navigate = useNavigate();
@@ -12,29 +12,29 @@ export default function CollectibleListingsPanel({ collectibleId }) {
 
   const handleCancel = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
+      navigate("/auth/login", { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
       return;
     }
 
     try {
       await cancelListing({ listingId: listing.id, cancelledByUid: user.uid });
     } catch (err) {
-      console.error('Failed to cancel listing', err);
-      alert(err?.message || 'Failed to cancel listing');
+      console.error("Failed to cancel listing", err);
+      alert(err?.message || "Failed to cancel listing");
     }
   };
 
   const handleAccept = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
+      navigate("/auth/login", { state: { from: { pathname: `/collectibles/${collectibleId}` } } });
       return;
     }
 
     try {
       await acceptListing({ listingId: listing.id });
     } catch (err) {
-      console.error('Failed to accept listing', err);
-      alert(err?.message || 'Failed to accept listing');
+      console.error("Failed to accept listing", err);
+      alert(err?.message || "Failed to accept listing");
     }
   };
 

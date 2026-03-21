@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import useOpenListings from './hooks/useOpenListings';
-import ListingRow from './components/ListingRow';
-import { acceptListing, cancelListing, createListing } from '../../lib/marketplace/listings';
-import { collectiblesIndex, getCollectibleRecord } from '../../data/collectibles';
-import './Market.css';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { collectiblesIndex, getCollectibleRecord } from "../../data/collectibles";
+import { acceptListing, cancelListing, createListing } from "../../lib/marketplace/listings";
+import ListingRow from "./components/ListingRow";
+import useOpenListings from "./hooks/useOpenListings";
+import "./Market.css";
 
 function dollarsToCents(value) {
-  const normalized = String(value || '').trim();
+  const normalized = String(value || "").trim();
   if (!normalized) return null;
   const parsed = Number(normalized);
   if (!Number.isFinite(parsed) || parsed <= 0) return null;
@@ -16,8 +16,8 @@ function dollarsToCents(value) {
 }
 
 function resolveCardIdFromInput(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
+  const raw = String(value || "").trim();
+  if (!raw) return "";
 
   if (getCollectibleRecord(raw)) return raw;
 
@@ -25,35 +25,36 @@ function resolveCardIdFromInput(value) {
   if (getCollectibleRecord(upper)) return upper;
 
   const caseInsensitive = collectiblesIndex.find((c) => c.id.toLowerCase() === raw.toLowerCase());
-  return caseInsensitive?.id || '';
+  return caseInsensitive?.id || "";
 }
 
 function MarketPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { listings, loading, error } = useOpenListings();
-  const [typeFilter, setTypeFilter] = useState('ALL');
-  const [queryText, setQueryText] = useState('');
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [queryText, setQueryText] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [createSearchText, setCreateSearchText] = useState('');
-  const [selectedCreateCardId, setSelectedCreateCardId] = useState('');
-  const [createType, setCreateType] = useState('BID');
-  const [createPrice, setCreatePrice] = useState('');
+  const [createSearchText, setCreateSearchText] = useState("");
+  const [selectedCreateCardId, setSelectedCreateCardId] = useState("");
+  const [createType, setCreateType] = useState("BID");
+  const [createPrice, setCreatePrice] = useState("");
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState(null);
-  const [createSuccess, setCreateSuccess] = useState('');
+  const [createSuccess, setCreateSuccess] = useState("");
   const [isCardPickerOpen, setIsCardPickerOpen] = useState(false);
   const [activeResultIndex, setActiveResultIndex] = useState(-1);
   const [suppressNextCardFocusOpen, setSuppressNextCardFocusOpen] = useState(false);
   const cardPickerRef = useRef(null);
+  const createSearchInputRef = useRef(null);
 
   const filteredListings = useMemo(() => {
     const q = queryText.trim().toLowerCase();
     return listings.filter((l) => {
-      if (typeFilter !== 'ALL' && l.type !== typeFilter) return false;
+      if (typeFilter !== "ALL" && l.type !== typeFilter) return false;
       if (!q) return true;
       const card = getCollectibleRecord(l.cardId);
-      const haystack = `${l.cardId} ${card?.displayName || ''} ${card?.detail || ''}`.toLowerCase();
+      const haystack = `${l.cardId} ${card?.displayName || ""} ${card?.detail || ""}`.toLowerCase();
       return haystack.includes(q);
     });
   }, [listings, typeFilter, queryText]);
@@ -65,7 +66,7 @@ function MarketPage() {
     return exact || null;
   }, [queryText]);
 
-  const emptyMessage = listings.length === 0 ? 'No open listings yet.' : 'No open listings found.';
+  const emptyMessage = listings.length === 0 ? "No open listings yet." : "No open listings found.";
   const selectableCards = useMemo(
     () =>
       [...collectiblesIndex].sort((a, b) => {
@@ -84,7 +85,7 @@ function MarketPage() {
     }
     return selectableCards
       .filter((card) =>
-        `${card.id} ${card.displayName} ${card.detail || ''} ${card.storyTitle || ''}`
+        `${card.id} ${card.displayName} ${card.detail || ""} ${card.storyTitle || ""}`
           .toLowerCase()
           .includes(q),
       )
@@ -100,13 +101,18 @@ function MarketPage() {
     if (!isCreateModalOpen) return undefined;
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsCreateModalOpen(false);
       }
     };
 
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isCreateModalOpen]);
+
+  useEffect(() => {
+    if (!isCreateModalOpen) return;
+    createSearchInputRef.current?.focus();
   }, [isCreateModalOpen]);
 
   useEffect(() => {
@@ -118,8 +124,8 @@ function MarketPage() {
       }
     };
 
-    window.addEventListener('mousedown', handleOutsideClick);
-    return () => window.removeEventListener('mousedown', handleOutsideClick);
+    window.addEventListener("mousedown", handleOutsideClick);
+    return () => window.removeEventListener("mousedown", handleOutsideClick);
   }, [isCreateModalOpen, isCardPickerOpen]);
 
   useEffect(() => {
@@ -137,40 +143,40 @@ function MarketPage() {
 
   const handleCancel = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: '/market' } } });
+      navigate("/auth/login", { state: { from: { pathname: "/market" } } });
       return;
     }
 
     try {
       await cancelListing({ listingId: listing.id, cancelledByUid: user.uid });
     } catch (err) {
-      console.error('Failed to cancel listing', err);
-      alert(err?.message || 'Failed to cancel listing');
+      console.error("Failed to cancel listing", err);
+      alert(err?.message || "Failed to cancel listing");
     }
   };
 
   const handleAccept = async (listing) => {
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: '/market' } } });
+      navigate("/auth/login", { state: { from: { pathname: "/market" } } });
       return;
     }
 
     try {
       await acceptListing({ listingId: listing.id });
     } catch (err) {
-      console.error('Failed to accept listing', err);
-      alert(err?.message || 'Failed to accept listing');
+      console.error("Failed to accept listing", err);
+      alert(err?.message || "Failed to accept listing");
     }
   };
 
   const openCreateModal = () => {
-    const initialCard = searchedCard?.id || '';
+    const initialCard = searchedCard?.id || "";
     setSelectedCreateCardId(initialCard);
     setCreateSearchText(initialCard);
-    setCreateType('BID');
-    setCreatePrice('');
+    setCreateType("BID");
+    setCreatePrice("");
     setCreateError(null);
-    setCreateSuccess('');
+    setCreateSuccess("");
     setIsCardPickerOpen(false);
     setActiveResultIndex(-1);
     setSuppressNextCardFocusOpen(true);
@@ -180,13 +186,13 @@ function MarketPage() {
   const selectCreateCard = (card) => {
     setSelectedCreateCardId(card.id);
     setCreateSearchText(card.id);
-    setCreateSuccess('');
+    setCreateSuccess("");
     setIsCardPickerOpen(false);
     setActiveResultIndex(-1);
   };
 
   const handleCardSearchKeyDown = (event) => {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
       setIsCardPickerOpen(false);
@@ -195,25 +201,25 @@ function MarketPage() {
     }
 
     if (!shouldShowCardResults || createResults.length === 0) {
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         setIsCardPickerOpen(true);
       }
       return;
     }
 
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       event.preventDefault();
       setActiveResultIndex((prev) => (prev + 1) % createResults.length);
       return;
     }
 
-    if (event.key === 'ArrowUp') {
+    if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveResultIndex((prev) => (prev <= 0 ? createResults.length - 1 : prev - 1));
       return;
     }
 
-    if (event.key === 'Enter' && activeResultIndex >= 0) {
+    if (event.key === "Enter" && activeResultIndex >= 0) {
       event.preventDefault();
       selectCreateCard(createResults[activeResultIndex]);
     }
@@ -222,22 +228,22 @@ function MarketPage() {
   const handleCreateListingSubmit = async (event) => {
     event.preventDefault();
     setCreateError(null);
-    setCreateSuccess('');
+    setCreateSuccess("");
 
     if (!user) {
-      navigate('/auth/login', { state: { from: { pathname: '/market' } } });
+      navigate("/auth/login", { state: { from: { pathname: "/market" } } });
       return;
     }
 
     const cardIdToCreate = selectedCreateCardId || resolveCardIdFromInput(createSearchText);
     if (!cardIdToCreate) {
-      setCreateError('Select a card first.');
+      setCreateError("Select a card first.");
       return;
     }
 
     const priceCents = dollarsToCents(createPrice);
     if (!priceCents) {
-      setCreateError('Enter a valid price.');
+      setCreateError("Enter a valid price.");
       return;
     }
 
@@ -247,16 +253,16 @@ function MarketPage() {
         type: createType,
         cardId: cardIdToCreate,
         priceCents,
-        currency: 'USD',
+        currency: "USD",
         quantity: 1,
         createdByUid: user.uid,
         createdByDisplayName: user.displayName || user.email,
       });
-      setCreatePrice('');
-      setCreateSuccess('Listing created.');
+      setCreatePrice("");
+      setCreateSuccess("Listing created.");
     } catch (err) {
-      console.error('Failed to create listing', err);
-      setCreateError('Failed to create listing.');
+      console.error("Failed to create listing", err);
+      setCreateError("Failed to create listing.");
     } finally {
       setCreateSubmitting(false);
     }
@@ -273,7 +279,11 @@ function MarketPage() {
           <button type="button" className="market-pill-button" onClick={openCreateModal}>
             Create listing
           </button>
-          <button type="button" className="market-pill-button" onClick={() => navigate('/collectibles')}>
+          <button
+            type="button"
+            className="market-pill-button"
+            onClick={() => navigate("/collectibles")}
+          >
             Browse collectibles
           </button>
         </div>
@@ -321,7 +331,9 @@ function MarketPage() {
         <ul className="market-list">
           {filteredListings.map((listing) => {
             const card = getCollectibleRecord(listing.cardId);
-            const cardLabel = card?.displayName ? `${card.displayName} (${listing.cardId})` : undefined;
+            const cardLabel = card?.displayName
+              ? `${card.displayName} (${listing.cardId})`
+              : undefined;
             return (
               <ListingRow
                 key={listing.id}
@@ -338,142 +350,159 @@ function MarketPage() {
       )}
 
       {!user && (
-        <p className="muted" style={{ marginTop: '1rem' }}>
+        <p className="muted" style={{ marginTop: "1rem" }}>
           Sign in to create listings or accept an existing listing.
         </p>
       )}
 
       {isCreateModalOpen ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal backdrop; Escape closes via window listener
+        // biome-ignore lint/a11y/useKeyWithClickEvents: dismiss is pointer-only; keyboard users use Escape
         <div className="market-create-modal__backdrop" onClick={() => setIsCreateModalOpen(false)}>
-          <div
-            className="market-create-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Create listing for a card"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="market-create-modal__header">
-              <h2>Create listing</h2>
-              <button
-                type="button"
-                className="market-create-modal__close"
-                onClick={() => setIsCreateModalOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            <p className="muted">Pick a card, set type and price, then create your listing here.</p>
+          {/* biome-ignore lint/complexity/noUselessFragments: fragment isolates the next suppression from the dialog root */}
+          <>
+            {/* biome-ignore lint/a11y/useKeyWithClickEvents: stops click bubbling to backdrop */}
+            <div
+              className="market-create-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Create listing for a card"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="market-create-modal__header">
+                <h2>Create listing</h2>
+                <button
+                  type="button"
+                  className="market-create-modal__close"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <p className="muted">
+                Pick a card, set type and price, then create your listing here.
+              </p>
 
-            <form className="market-create-form" onSubmit={handleCreateListingSubmit}>
-              <div className="market-card-picker" ref={cardPickerRef}>
-                <label className="market-controls__field">
-                  Card
-                  <input
-                    value={createSearchText}
-                    onFocus={() => {
-                      if (suppressNextCardFocusOpen) {
-                        setSuppressNextCardFocusOpen(false);
-                        return;
-                      }
-                      setIsCardPickerOpen(true);
-                    }}
-                    onKeyDown={handleCardSearchKeyDown}
-                    onChange={(event) => {
-                      setCreateSearchText(event.target.value);
-                      setSelectedCreateCardId('');
-                      setCreateSuccess('');
-                      setIsCardPickerOpen(true);
-                      setActiveResultIndex(-1);
-                    }}
-                    placeholder="Search by card name or id"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    aria-expanded={shouldShowCardResults}
-                    aria-controls="market-card-options"
-                    aria-activedescendant={activeResultId}
-                    autoFocus
-                  />
-                </label>
+              <form className="market-create-form" onSubmit={handleCreateListingSubmit}>
+                <div className="market-card-picker" ref={cardPickerRef}>
+                  <label className="market-controls__field">
+                    Card
+                    <input
+                      ref={createSearchInputRef}
+                      value={createSearchText}
+                      onFocus={() => {
+                        if (suppressNextCardFocusOpen) {
+                          setSuppressNextCardFocusOpen(false);
+                          return;
+                        }
+                        setIsCardPickerOpen(true);
+                      }}
+                      onKeyDown={handleCardSearchKeyDown}
+                      onChange={(event) => {
+                        setCreateSearchText(event.target.value);
+                        setSelectedCreateCardId("");
+                        setCreateSuccess("");
+                        setIsCardPickerOpen(true);
+                        setActiveResultIndex(-1);
+                      }}
+                      placeholder="Search by card name or id"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded={shouldShowCardResults}
+                      aria-controls="market-card-options"
+                      aria-activedescendant={activeResultId}
+                    />
+                  </label>
 
-                {shouldShowCardResults ? (
-                  <ul className="market-create-modal__results" role="listbox" id="market-card-options">
-                    {createResults.map((card, index) => (
-                      <li
-                        key={card.id}
-                        id={`market-card-option-${card.id}`}
-                        role="option"
-                        aria-selected={selectedCreateCardId === card.id || activeResultIndex === index}
-                        onMouseEnter={() => setActiveResultIndex(index)}
-                      >
+                  {shouldShowCardResults ? (
+                    <div
+                      className="market-create-modal__results"
+                      role="listbox"
+                      id="market-card-options"
+                    >
+                      {createResults.map((card, index) => (
                         <button
+                          key={card.id}
                           type="button"
+                          id={`market-card-option-${card.id}`}
+                          role="option"
+                          aria-selected={
+                            selectedCreateCardId === card.id || activeResultIndex === index
+                          }
                           className={`market-create-modal__result ${
-                            selectedCreateCardId === card.id ? 'is-selected' : ''
-                          } ${activeResultIndex === index ? 'is-active' : ''}`}
+                            selectedCreateCardId === card.id ? "is-selected" : ""
+                          } ${activeResultIndex === index ? "is-active" : ""}`}
+                          onMouseEnter={() => setActiveResultIndex(index)}
                           onClick={() => selectCreateCard(card)}
                         >
                           <span>{card.displayName}</span>
                           <span className="muted">{card.id}</span>
                         </button>
-                      </li>
-                    ))}
-                    {createResults.length === 0 ? <li className="muted">No matching collectibles found.</li> : null}
-                  </ul>
-                ) : null}
-              </div>
+                      ))}
+                      {createResults.length === 0 ? (
+                        <div className="muted">No matching collectibles found.</div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
 
-              <div className="market-create-form__row">
-                <label className="market-controls__field">
-                  Type
-                  <select
-                    value={createType}
-                    onChange={(event) => {
-                      setCreateType(event.target.value);
-                      setCreateSuccess('');
-                    }}
+                <div className="market-create-form__row">
+                  <label className="market-controls__field">
+                    Type
+                    <select
+                      value={createType}
+                      onChange={(event) => {
+                        setCreateType(event.target.value);
+                        setCreateSuccess("");
+                      }}
+                      disabled={createSubmitting}
+                    >
+                      <option value="BID">Buy (Bid)</option>
+                      <option value="ASK">Sell (Ask)</option>
+                    </select>
+                  </label>
+
+                  <label className="market-controls__field">
+                    Price (USD)
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={createPrice}
+                      onChange={(event) => {
+                        setCreatePrice(event.target.value);
+                        setCreateSuccess("");
+                      }}
+                      placeholder="10.00"
+                      disabled={createSubmitting}
+                    />
+                  </label>
+                </div>
+
+                {createError ? <p className="muted">{createError}</p> : null}
+                {createSuccess ? <p className="muted">{createSuccess}</p> : null}
+
+                <div className="market-create-modal__actions">
+                  <button
+                    type="button"
+                    className="market-pill-button"
+                    onClick={() => setIsCreateModalOpen(false)}
                     disabled={createSubmitting}
                   >
-                    <option value="BID">Buy (Bid)</option>
-                    <option value="ASK">Sell (Ask)</option>
-                  </select>
-                </label>
-
-                <label className="market-controls__field">
-                  Price (USD)
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={createPrice}
-                    onChange={(event) => {
-                      setCreatePrice(event.target.value);
-                      setCreateSuccess('');
-                    }}
-                    placeholder="10.00"
-                    disabled={createSubmitting}
-                  />
-                </label>
-              </div>
-
-              {createError ? <p className="muted">{createError}</p> : null}
-              {createSuccess ? <p className="muted">{createSuccess}</p> : null}
-
-              <div className="market-create-modal__actions">
-                <button
-                  type="button"
-                  className="market-pill-button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  disabled={createSubmitting}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="market-pill-button" disabled={createSubmitting}>
-                  {user ? (createSubmitting ? 'Creating…' : 'Create listing') : 'Sign in to create listing'}
-                </button>
-              </div>
-            </form>
-          </div>
+                    Cancel
+                  </button>
+                  <button type="submit" className="market-pill-button" disabled={createSubmitting}>
+                    {user
+                      ? createSubmitting
+                        ? "Creating…"
+                        : "Create listing"
+                      : "Sign in to create listing"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </>
         </div>
       ) : null}
     </section>

@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
+import { datasetSkus, datasetStories, getCollectibleRecord } from "../../../data/collectibles";
 import {
   applyBulkCollectionUpdate,
   createCollectionTemplateCsv,
-  parseBulkCollectionCsv
-} from '../utils/bulkImport';
-import { datasetSkus, datasetStories, getCollectibleRecord, getSkuRecord } from '../../../data/collectibles';
+  parseBulkCollectionCsv,
+} from "../utils/bulkImport";
 
 function formatSummaryCount(count, singular, plural) {
   if (count === 0) {
@@ -16,43 +16,42 @@ function formatSummaryCount(count, singular, plural) {
 
 function combineSummary(report) {
   const segments = [
-    formatSummaryCount(report.created ?? 0, 'new entry', 'new entries'),
-    formatSummaryCount(report.updated ?? 0, 'update', 'updates'),
-    formatSummaryCount(report.deleted ?? 0, 'removal', 'removals')
+    formatSummaryCount(report.created ?? 0, "new entry", "new entries"),
+    formatSummaryCount(report.updated ?? 0, "update", "updates"),
+    formatSummaryCount(report.deleted ?? 0, "removal", "removals"),
   ].filter(Boolean);
 
   if (segments.length === 0) {
-    return 'No changes were necessary.';
+    return "No changes were necessary.";
   }
 
   if (segments.length === 1) {
     return segments[0];
   }
 
-  return `${segments.slice(0, -1).join(', ')} and ${segments.at(-1)}`;
+  return `${segments.slice(0, -1).join(", ")} and ${segments.at(-1)}`;
 }
 
 function normalizeQuantity(entry) {
   const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
   for (const candidate of candidates) {
-    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
       return candidate;
     }
   }
   return 1;
 }
 
-
 function getVariantLabel(detail) {
   if (!detail) {
     return null;
   }
   const trimmed = detail.trim();
-  if (trimmed.toLowerCase() === 'standard variant') {
+  if (trimmed.toLowerCase() === "standard variant") {
     return null;
   }
-  if (trimmed.toLowerCase().startsWith('variant:')) {
-    return trimmed.slice('variant:'.length).trim();
+  if (trimmed.toLowerCase().startsWith("variant:")) {
+    return trimmed.slice("variant:".length).trim();
   }
   return trimmed;
 }
@@ -61,22 +60,22 @@ function formatTradeItem(card) {
   if (!card) {
     return null;
   }
-  if (card.category === 'story') {
-    return { text: `${card.number}`, sortKey: [card.number, ''] };
+  if (card.category === "story") {
+    return { text: `${card.number}`, sortKey: [card.number, ""] };
   }
-  if (card.category === 'herald') {
-    const label = card.displayName ?? 'Unknown Herald';
+  if (card.category === "herald") {
+    const label = card.displayName ?? "Unknown Herald";
     const number = Number.isFinite(card.number) ? card.number : 0;
     return { text: `${number} ${label}`, sortKey: [number, label] };
   }
-  if (card.category === 'nonsense') {
+  if (card.category === "nonsense") {
     const variant = getVariantLabel(card.detail);
     return {
       text: variant ? `${card.number} ${variant}` : `${card.number}`,
-      sortKey: [card.number, variant ?? '']
+      sortKey: [card.number, variant ?? ""],
     };
   }
-  return { text: card.displayName ?? card.id ?? 'Unknown', sortKey: [card.displayName ?? '', ''] };
+  return { text: card.displayName ?? card.id ?? "Unknown", sortKey: [card.displayName ?? "", ""] };
 }
 
 function buildIsoUftPost(entries) {
@@ -106,7 +105,7 @@ function buildIsoUftPost(entries) {
 
     datasetSkus.forEach((sku) => {
       const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
-      if (mode === 'iso' ? ownedCount > 0 : ownedCount <= 1) {
+      if (mode === "iso" ? ownedCount > 0 : ownedCount <= 1) {
         return;
       }
 
@@ -121,7 +120,7 @@ function buildIsoUftPost(entries) {
         return;
       }
 
-      const storyTitle = card.storyTitle ?? 'Other';
+      const storyTitle = card.storyTitle ?? "Other";
       if (!groups.has(storyTitle)) {
         groups.set(storyTitle, []);
       }
@@ -145,7 +144,7 @@ function buildIsoUftPost(entries) {
         }
         return String(a.sortKey[1]).localeCompare(String(b.sortKey[1]));
       });
-      lines.push(`${storyTitle} ${groupSuffix}: ${items.map((item) => item.text).join(', ')}`);
+      lines.push(`${storyTitle} ${groupSuffix}: ${items.map((item) => item.text).join(", ")}`);
     });
 
     return lines;
@@ -153,39 +152,39 @@ function buildIsoUftPost(entries) {
 
   const sections = [
     {
-      title: 'Story Foils',
-      groupSuffix: 'Foils',
-      predicate: ({ card, finish }) => card.category === 'story' && finish === 'FOIL'
+      title: "Story Foils",
+      groupSuffix: "Foils",
+      predicate: ({ card, finish }) => card.category === "story" && finish === "FOIL",
     },
     {
-      title: 'Story Dun',
-      groupSuffix: 'Dun',
-      predicate: ({ card, finish }) => card.category === 'story' && finish === 'DUN'
+      title: "Story Dun",
+      groupSuffix: "Dun",
+      predicate: ({ card, finish }) => card.category === "story" && finish === "DUN",
     },
     {
-      title: 'Heralds (Foil)',
-      groupSuffix: 'Heralds',
-      predicate: ({ card, finish }) => card.category === 'herald' && finish === 'FOIL'
+      title: "Heralds (Foil)",
+      groupSuffix: "Heralds",
+      predicate: ({ card, finish }) => card.category === "herald" && finish === "FOIL",
     },
     {
-      title: 'Heralds (Dun)',
-      groupSuffix: 'Heralds',
-      predicate: ({ card, finish }) => card.category === 'herald' && finish === 'DUN'
+      title: "Heralds (Dun)",
+      groupSuffix: "Heralds",
+      predicate: ({ card, finish }) => card.category === "herald" && finish === "DUN",
     },
     {
-      title: 'Nonsense (Dun)',
-      groupSuffix: 'Nonsense',
-      predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'DUN'
+      title: "Nonsense (Dun)",
+      groupSuffix: "Nonsense",
+      predicate: ({ card, finish }) => card.category === "nonsense" && finish === "DUN",
     },
     {
-      title: 'Nonsense (Foil)',
-      groupSuffix: 'Nonsense',
-      predicate: ({ card, finish }) => card.category === 'nonsense' && finish === 'FOIL'
-    }
+      title: "Nonsense (Foil)",
+      groupSuffix: "Nonsense",
+      predicate: ({ card, finish }) => card.category === "nonsense" && finish === "FOIL",
+    },
   ];
 
   const buildBlock = (label, mode) => {
-    const lines = [label, ''];
+    const lines = [label, ""];
     let hasContent = false;
 
     sections.forEach((section) => {
@@ -196,29 +195,26 @@ function buildIsoUftPost(entries) {
       hasContent = true;
       lines.push(`${section.title}:`);
       lines.push(...sectionLines);
-      lines.push('');
+      lines.push("");
     });
 
     if (!hasContent) {
-      lines.push(mode === 'iso' ? 'None needed yet.' : 'None available yet.');
-      lines.push('');
+      lines.push(mode === "iso" ? "None needed yet." : "None available yet.");
+      lines.push("");
     }
 
     return lines;
   };
 
-  const lines = [
-    ...buildBlock('ISO:', 'iso'),
-    ...buildBlock('UFT:', 'uft')
-  ];
+  const lines = [...buildBlock("ISO:", "iso"), ...buildBlock("UFT:", "uft")];
 
-  while (lines.length > 0 && lines.at(-1) === '') {
+  while (lines.length > 0 && lines.at(-1) === "") {
     lines.pop();
   }
 
   return {
-    text: lines.join('\n'),
-    skippedEntries
+    text: lines.join("\n"),
+    skippedEntries,
   };
 }
 
@@ -227,7 +223,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
-  const [lastFileName, setLastFileName] = useState('');
+  const [lastFileName, setLastFileName] = useState("");
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
 
@@ -239,12 +235,12 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
     }
 
     const csv = createCollectionTemplateCsv();
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'lost-tales-collection-template.csv';
+    link.download = "lost-tales-collection-template.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -268,25 +264,25 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
       const rows = parseBulkCollectionCsv(text);
 
       if (rows.length === 0) {
-        setError('The uploaded file did not contain any collection updates.');
+        setError("The uploaded file did not contain any collection updates.");
         return;
       }
 
       const result = await applyBulkCollectionUpdate({
         ownerUid,
         rows,
-        existingEntries
+        existingEntries,
       });
 
       setReport(result);
       setIssues(result.issues ?? []);
     } catch (err) {
-      console.error('Bulk collection upload failed', err);
-      setError(err.message ?? 'Failed to process the uploaded file.');
+      console.error("Bulk collection upload failed", err);
+      setError(err.message ?? "Failed to process the uploaded file.");
     } finally {
       setProcessing(false);
       if (event.target) {
-        event.target.value = '';
+        event.target.value = "";
       }
     }
   };
@@ -305,23 +301,23 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
       } else {
-        const textarea = document.createElement('textarea');
+        const textarea = document.createElement("textarea");
         textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
         document.body.appendChild(textarea);
         textarea.select();
-        document.execCommand('copy');
+        document.execCommand("copy");
         document.body.removeChild(textarea);
       }
       setPostStatus(
         skippedEntries > 0
           ? `Copied ISO/UFT post. ${skippedEntries} entries without a valid SKU were skipped.`
-          : 'Copied ISO/UFT post to your clipboard.'
+          : "Copied ISO/UFT post to your clipboard.",
       );
     } catch (err) {
-      console.error('Failed to copy ISO/UFT post', err);
-      setPostError('Unable to copy the post. Please try again.');
+      console.error("Failed to copy ISO/UFT post", err);
+      setPostError("Unable to copy the post. Please try again.");
     }
   };
 
@@ -358,14 +354,14 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         >
           Copy ISO/UFT post
         </button>
-        <label className={`collection-bulk__upload ${processing ? 'is-uploading' : ''}`}>
+        <label className={`collection-bulk__upload ${processing ? "is-uploading" : ""}`}>
           <input
             type="file"
             accept=".csv,text/csv"
             onChange={handleFileChange}
             disabled={!ownerUid || disabled || processing}
           />
-          <span>{processing ? 'Uploading…' : 'Upload filled template'}</span>
+          <span>{processing ? "Uploading…" : "Upload filled template"}</span>
         </label>
       </div>
 
@@ -397,9 +393,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
           <ul>
             {issues.map((issue) => (
               <li key={`${issue.line}-${issue.message}`}>
-                {issue.line === '?' ? 'Row' : `Line ${issue.line}`}:
-                {' '}
-                {issue.message}
+                {issue.line === "?" ? "Row" : `Line ${issue.line}`}: {issue.message}
               </li>
             ))}
           </ul>
