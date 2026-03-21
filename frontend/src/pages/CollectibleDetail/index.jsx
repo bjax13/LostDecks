@@ -237,7 +237,7 @@ export default function CollectibleDetailPage() {
           <p className="muted" style={{ marginTop: 0 }}>
             Create a buy (bid) or sell (ask) listing for this collectible.
           </p>
-          <CreateListingForm collectibleId={collectibleId} />
+          <CreateListingForm collectibleId={collectibleId} cardDisplayName={card?.displayName} />
 
           <h3 style={{ marginTop: "1.5rem" }}>Open listings</h3>
           <CollectibleListingsPanel collectibleId={collectibleId} />

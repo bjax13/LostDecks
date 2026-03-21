@@ -16,20 +16,10 @@ service cloud.firestore {
     }
 
     // Market listings (public read; auth write)
+    // Create is handled by createListing callable (server derives createdByDisplayName).
     match /listings/{listingId} {
       allow read: if true;
-
-      // Create OPEN listings only for yourself.
-      allow create: if signedIn()
-        && request.resource.data.status == 'OPEN'
-        && (request.resource.data.type == 'BID' || request.resource.data.type == 'ASK')
-        && request.resource.data.currency == 'USD'
-        && request.resource.data.quantity == 1
-        && request.resource.data.createdByUid == request.auth.uid
-        && request.resource.data.priceCents is int
-        && request.resource.data.priceCents > 0
-        && request.resource.data.cardId is string
-        && request.resource.data.cardId.size() > 0;
+      allow create: if false;
 
       // Cancel: creator can cancel their own OPEN listing.
       allow update: if signedIn()

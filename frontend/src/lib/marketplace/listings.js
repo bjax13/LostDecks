@@ -1,5 +1,4 @@
 import {
-  addDoc,
   collection,
   doc,
   onSnapshot,
@@ -68,27 +67,24 @@ export async function createListing({
   type,
   cardId,
   priceCents,
-  currency = "USD",
-  quantity = 1,
-  createdByUid,
-  createdByDisplayName,
+  cardDisplayName,
 }) {
-  if (!type || !cardId || !createdByUid) {
+  if (!type || !cardId) {
     throw new Error("Missing required listing fields");
   }
+  if (typeof priceCents !== "number" || priceCents <= 0) {
+    throw new Error("priceCents must be a positive number");
+  }
 
-  const payload = {
+  const call = httpsCallable(functions, "createListing");
+  const res = await call({
     type,
-    status: "OPEN",
-    cardId,
+    cardId: String(cardId).trim(),
     priceCents,
-    currency,
-    quantity,
-    createdByUid,
-    createdByDisplayName: createdByDisplayName || "Anonymous",
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  };
-
-  return addDoc(collection(db, LISTINGS_PATH), payload);
+    cardDisplayName:
+      typeof cardDisplayName === "string" && cardDisplayName.trim().length > 0
+        ? cardDisplayName.trim()
+        : undefined,
+  });
+  return res.data;
 }

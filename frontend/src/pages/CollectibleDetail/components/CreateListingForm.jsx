@@ -11,7 +11,7 @@ function dollarsToCents(value) {
   return Math.round(parsed * 100);
 }
 
-export default function CreateListingForm({ collectibleId, cardId }) {
+export default function CreateListingForm({ collectibleId, cardId, cardDisplayName }) {
   const id = collectibleId ?? cardId;
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,10 +43,7 @@ export default function CreateListingForm({ collectibleId, cardId }) {
         type,
         cardId: id,
         priceCents,
-        currency: "USD",
-        quantity: 1,
-        createdByUid: user.uid,
-        createdByDisplayName: user.displayName || user.email,
+        cardDisplayName,
       });
       setPrice("");
     } catch (err) {

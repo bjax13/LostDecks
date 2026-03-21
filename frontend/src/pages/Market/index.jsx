@@ -249,14 +249,12 @@ function MarketPage() {
 
     setCreateSubmitting(true);
     try {
+      const card = getCollectibleRecord(cardIdToCreate);
       await createListing({
         type: createType,
         cardId: cardIdToCreate,
         priceCents,
-        currency: "USD",
-        quantity: 1,
-        createdByUid: user.uid,
-        createdByDisplayName: user.displayName || user.email,
+        cardDisplayName: card?.displayName,
       });
       setCreatePrice("");
       setCreateSuccess("Listing created.");

@@ -14,6 +14,53 @@ function asInt(value, field) {
   return value;
 }
 
+exports.createListing = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) {
+    throw new HttpsError("unauthenticated", "Must be signed in to create a listing");
+  }
+
+  const { type, cardId, priceCents, cardDisplayName } = request.data || {};
+
+  if (typeof type !== "string" || (type !== "BID" && type !== "ASK")) {
+    throw new HttpsError("invalid-argument", "type must be BID or ASK");
+  }
+  if (typeof cardId !== "string" || cardId.trim().length === 0) {
+    throw new HttpsError("invalid-argument", "cardId is required");
+  }
+  const price = asInt(priceCents, "priceCents");
+  if (price <= 0) {
+    throw new HttpsError("invalid-argument", "priceCents must be positive");
+  }
+
+  const createdByDisplayName =
+    (auth.token && (auth.token.name || auth.token.email)) || auth.uid;
+
+  const listingRef = db.collection("listings").doc();
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const listingData = {
+    type,
+    status: "OPEN",
+    cardId: cardId.trim(),
+    cardDisplayName:
+      typeof cardDisplayName === "string" && cardDisplayName.trim().length > 0
+        ? cardDisplayName.trim()
+        : null,
+    priceCents: price,
+    currency: "USD",
+    quantity: 1,
+    createdByUid: auth.uid,
+    createdByDisplayName,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await listingRef.set(listingData);
+
+  return { listingId: listingRef.id };
+});
+
 exports.acceptListing = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) {
