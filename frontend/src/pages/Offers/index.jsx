@@ -1,4 +1,4 @@
-import AuthGuard from '../../components/Auth/AuthGuard';
+import AuthGuard from "../../components/Auth/AuthGuard";
 
 function OffersPage() {
   return (

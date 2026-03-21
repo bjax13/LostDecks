@@ -1,4 +1,4 @@
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from "../../contexts/AuthContext";
 
 function SocialLoginButtons({ onSuccess }) {
   const { loginWithGoogle, loginWithGithub } = useAuth();
@@ -10,7 +10,7 @@ function SocialLoginButtons({ onSuccess }) {
         onSuccess();
       }
     } catch (err) {
-      console.error('Google sign-in failed', err);
+      console.error("Google sign-in failed", err);
     }
   };
 
@@ -21,7 +21,7 @@ function SocialLoginButtons({ onSuccess }) {
         onSuccess();
       }
     } catch (err) {
-      console.error('GitHub sign-in failed', err);
+      console.error("GitHub sign-in failed", err);
     }
   };
 

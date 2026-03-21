@@ -15,7 +15,9 @@
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   margin-bottom: 2rem;
 }
 
@@ -224,7 +226,7 @@
 }
 
 .mono {
-  font-family: 'Fira Code', 'Roboto Mono', Menlo, Monaco, monospace;
+  font-family: "Fira Code", "Roboto Mono", Menlo, Monaco, monospace;
   letter-spacing: 0.04em;
 }
 
@@ -252,4 +254,3 @@
     grid-template-columns: 1fr;
   }
 }
-

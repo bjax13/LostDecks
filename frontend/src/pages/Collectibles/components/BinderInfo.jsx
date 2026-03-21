@@ -1,16 +1,18 @@
 export default function BinderInfo({ binder, layout }) {
   if (!binder) {
-    if (layout === 'grid') {
+    if (layout === "grid") {
       return <p className="muted">Not in binder mosaic</p>;
     }
     return <span className="muted">—</span>;
   }
 
-  if (layout === 'grid') {
+  if (layout === "grid") {
     return (
       <ul>
         <li>Page {binder.page}</li>
-        <li>Row {binder.row} · Col {binder.col}</li>
+        <li>
+          Row {binder.row} · Col {binder.col}
+        </li>
         <li>Slot {binder.position}</li>
       </ul>
     );

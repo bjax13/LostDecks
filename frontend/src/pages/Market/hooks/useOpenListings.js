@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { subscribeOpenListings } from '../../../lib/marketplace/listings';
+import { useEffect, useMemo, useState } from "react";
+import { subscribeOpenListings } from "../../../lib/marketplace/listings";
 
 export default function useOpenListings({ cardId } = {}) {
   const [listings, setListings] = useState([]);
@@ -20,7 +20,7 @@ export default function useOpenListings({ cardId } = {}) {
         setLoading(false);
       },
       (err) => {
-        console.error('Failed to load open listings', err);
+        console.error("Failed to load open listings", err);
         setError(err);
         setLoading(false);
       },

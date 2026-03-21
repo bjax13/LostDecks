@@ -6,13 +6,10 @@
   position: relative;
   border: 1px solid var(--card-border-hover, rgba(138, 43, 226, 0.3));
   background: var(--card-front-gradient, linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%));
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
   border-color: var(--card-border, rgba(138, 43, 226, 0.5));
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 20px var(--card-glow, rgba(138, 43, 226, 0.1)),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -26,12 +23,11 @@
 /* Locked state styling */
 .card.locked {
   border-color: var(--card-border-locked, rgba(255, 215, 0, 0.6));
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     0 0 20px var(--card-glow-locked, rgba(255, 215, 0, 0.2)),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-
 
 /* Card flip animation */
 .card-inner {
@@ -47,7 +43,8 @@
   transform: rotateY(180deg);
 }
 
-.card-front, .card-back {
+.card-front,
+.card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -61,7 +58,7 @@
 }
 
 .card-front {
-  background: 
+  background:
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -76,9 +73,21 @@
       var(--card-pattern-overlay-secondary, rgba(138, 43, 226, 0.05)) 8px,
       var(--card-pattern-overlay-secondary, rgba(138, 43, 226, 0.05)) 16px
     ),
-    radial-gradient(circle at 20% 20%, var(--card-radial-overlay-1, rgba(138, 43, 226, 0.3)) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, var(--card-radial-overlay-2, rgba(138, 43, 226, 0.2)) 0%, transparent 50%),
-    radial-gradient(circle at 40% 60%, var(--card-radial-overlay-3, rgba(138, 43, 226, 0.15)) 0%, transparent 50%),
+    radial-gradient(
+      circle at 20% 20%,
+      var(--card-radial-overlay-1, rgba(138, 43, 226, 0.3)) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      var(--card-radial-overlay-2, rgba(138, 43, 226, 0.2)) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 60%,
+      var(--card-radial-overlay-3, rgba(138, 43, 226, 0.15)) 0%,
+      transparent 50%
+    ),
     var(--card-front-gradient, linear-gradient(145deg, #1a1a1a 0%, #0f0f0f 100%));
 }
 
@@ -110,7 +119,11 @@
   font-weight: 700;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  background: linear-gradient(135deg, var(--card-text, #ffffff) 0%, var(--card-text-secondary, #b0b0b0) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--card-text, #ffffff) 0%,
+    var(--card-text-secondary, #b0b0b0) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -181,7 +194,7 @@
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: #DC143C;
+  background: #dc143c;
   color: white;
   font-size: 12px;
   font-weight: bold;
@@ -193,13 +206,9 @@
   text-align: center;
   opacity: 0.9;
   z-index: 10;
-  box-shadow: 
-    0 0 0 3px rgba(255, 255, 255, 0.3),
-    0 0 0 6px rgba(220, 20, 60, 0.2),
-    0 4px 8px rgba(0, 0, 0, 0.3);
-  
+
   /* Frilly border effect using multiple box-shadows */
-  box-shadow: 
+  box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.4),
     0 0 0 4px rgba(220, 20, 60, 0.3),
     0 0 0 6px rgba(255, 255, 255, 0.2),
@@ -209,18 +218,20 @@
 
 /* Add scalloped edge effect using pseudo-elements */
 .card-stamp::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -4px;
   left: -4px;
   right: -4px;
   bottom: -4px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, 
-    transparent 40%, 
-    rgba(255, 255, 255, 0.1) 42%, 
-    rgba(255, 255, 255, 0.1) 44%, 
-    transparent 46%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.1) 42%,
+    rgba(255, 255, 255, 0.1) 44%,
+    transparent 46%
+  );
   pointer-events: none;
 }
 
@@ -230,7 +241,7 @@
     width: 280px;
     height: 380px;
   }
-  
+
   .card-stamp {
     width: 80px;
     height: 80px;
@@ -243,11 +254,11 @@
     width: 260px;
     height: 360px;
   }
-  
+
   .card-title {
     font-size: 1.2rem;
   }
-  
+
   .card-stamp {
     width: 70px;
     height: 70px;

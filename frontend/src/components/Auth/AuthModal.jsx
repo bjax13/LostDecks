@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import SocialLoginButtons from './SocialLoginButtons';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import SocialLoginButtons from "./SocialLoginButtons";
 
 const modes = {
-  LOGIN: 'login',
-  REGISTER: 'register',
-  FORGOT: 'forgot',
+  LOGIN: "login",
+  REGISTER: "register",
+  FORGOT: "forgot",
 };
 
 function AuthModal({ isOpen, onClose }) {
   const [mode, setMode] = useState(modes.LOGIN);
-  const [formState, setFormState] = useState({ email: '', password: '', displayName: '' });
+  const [formState, setFormState] = useState({ email: "", password: "", displayName: "" });
   const { login, register, resetPassword, error, clearError } = useAuth();
 
   useEffect(() => {
     if (!isOpen) {
-      setFormState({ email: '', password: '', displayName: '' });
+      setFormState({ email: "", password: "", displayName: "" });
       setMode(modes.LOGIN);
       clearError();
     }
@@ -43,7 +43,7 @@ function AuthModal({ isOpen, onClose }) {
         await login(formState.email, formState.password);
         handleClose();
       } catch (err) {
-        console.error('Login failed', err);
+        console.error("Login failed", err);
       }
       return;
     }
@@ -53,7 +53,7 @@ function AuthModal({ isOpen, onClose }) {
         await register(formState.email, formState.password, { displayName: formState.displayName });
         handleClose();
       } catch (err) {
-        console.error('Registration failed', err);
+        console.error("Registration failed", err);
       }
       return;
     }
@@ -63,14 +63,14 @@ function AuthModal({ isOpen, onClose }) {
         await resetPassword(formState.email);
         handleClose();
       } catch (err) {
-        console.error('Reset password failed', err);
+        console.error("Reset password failed", err);
       }
     }
   };
 
   const handleClose = () => {
     clearError();
-    setFormState({ email: '', password: '', displayName: '' });
+    setFormState({ email: "", password: "", displayName: "" });
     setMode(modes.LOGIN);
     onClose();
   };
@@ -82,13 +82,13 @@ function AuthModal({ isOpen, onClose }) {
           ×
         </button>
         <h2 className="auth-modal__title">
-          {mode === modes.LOGIN && 'Sign In'}
-          {mode === modes.REGISTER && 'Create Account'}
-          {mode === modes.FORGOT && 'Reset Password'}
+          {mode === modes.LOGIN && "Sign In"}
+          {mode === modes.REGISTER && "Create Account"}
+          {mode === modes.FORGOT && "Reset Password"}
         </h2>
         {error ? <p className="auth-modal__error">{error.message}</p> : null}
         <form className="auth-modal__form" onSubmit={handleSubmit}>
-          {(mode === modes.REGISTER) && (
+          {mode === modes.REGISTER && (
             <label className="auth-modal__field">
               <span>Display Name</span>
               <input
@@ -118,7 +118,7 @@ function AuthModal({ isOpen, onClose }) {
               <input
                 name="password"
                 type="password"
-                autoComplete={mode === modes.LOGIN ? 'current-password' : 'new-password'}
+                autoComplete={mode === modes.LOGIN ? "current-password" : "new-password"}
                 value={formState.password}
                 onChange={handleChange}
                 required
@@ -127,14 +127,18 @@ function AuthModal({ isOpen, onClose }) {
             </label>
           )}
           <button type="submit" className="auth-modal__submit">
-            {mode === modes.LOGIN && 'Sign In'}
-            {mode === modes.REGISTER && 'Sign Up'}
-            {mode === modes.FORGOT && 'Send Reset Email'}
+            {mode === modes.LOGIN && "Sign In"}
+            {mode === modes.REGISTER && "Sign Up"}
+            {mode === modes.FORGOT && "Send Reset Email"}
           </button>
         </form>
 
         {mode === modes.LOGIN && (
-          <button type="button" className="auth-modal__link" onClick={() => handleModeChange(modes.FORGOT)}>
+          <button
+            type="button"
+            className="auth-modal__link"
+            onClick={() => handleModeChange(modes.FORGOT)}
+          >
             Forgot password?
           </button>
         )}

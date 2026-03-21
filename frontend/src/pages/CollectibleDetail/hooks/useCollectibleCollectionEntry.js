@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
-import { getFinishesForCard, toSkuId } from '../../../data/collectibles';
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { getFinishesForCard, toSkuId } from "../../../data/collectibles";
+import { db } from "../../../lib/firebase";
 
 const initialState = {
   entry: null,
@@ -25,15 +25,15 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
     setLoading(true);
     setError(null);
 
-    const collectionRef = collection(db, 'collections');
+    const collectionRef = collection(db, "collections");
 
     let collectionQuery;
 
     if (skuId) {
       collectionQuery = query(
         collectionRef,
-        where('ownerUid', '==', ownerUid),
-        where('skuId', '==', skuId),
+        where("ownerUid", "==", ownerUid),
+        where("skuId", "==", skuId),
       );
     } else if (collectibleId) {
       const finishes = getFinishesForCard(collectibleId);
@@ -46,14 +46,14 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
       if (skuIds.length === 1) {
         collectionQuery = query(
           collectionRef,
-          where('ownerUid', '==', ownerUid),
-          where('skuId', '==', skuIds[0]),
+          where("ownerUid", "==", ownerUid),
+          where("skuId", "==", skuIds[0]),
         );
       } else {
         collectionQuery = query(
           collectionRef,
-          where('ownerUid', '==', ownerUid),
-          where('skuId', 'in', skuIds),
+          where("ownerUid", "==", ownerUid),
+          where("skuId", "in", skuIds),
         );
       }
     } else {
@@ -78,7 +78,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
         setLoading(false);
       },
       (err) => {
-        console.error('Failed to load collection entry', err);
+        console.error("Failed to load collection entry", err);
         setError(err);
         setLoading(false);
       },

@@ -1,22 +1,17 @@
-import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AuthGuard from '../../components/Auth/AuthGuard';
-import { useAuth } from '../../contexts/AuthContext';
-import { categoryLabels } from '../Collectibles/constants';
-import {
-  collectionProgressTargets,
-  datasetMeta,
-  getCollectibleRecord,
-  getSkuRecord,
-} from '../../data/collectibles';
-import BulkCollectionTools from './components/BulkCollectionTools';
-import { useUserCollection } from './hooks/useUserCollection';
-import './Collection.css';
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthGuard from "../../components/Auth/AuthGuard";
+import { useAuth } from "../../contexts/AuthContext";
+import { collectionProgressTargets, datasetMeta, getSkuRecord } from "../../data/collectibles";
+import { categoryLabels } from "../Collectibles/constants";
+import BulkCollectionTools from "./components/BulkCollectionTools";
+import { useUserCollection } from "./hooks/useUserCollection";
+import "./Collection.css";
 
 function normalizeQuantity(entry) {
   const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
   for (const candidate of candidates) {
-    if (typeof candidate === 'number' && Number.isFinite(candidate)) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
       return candidate;
     }
   }
@@ -29,11 +24,11 @@ function resolveTimestamp(entry) {
     return null;
   }
 
-  if (typeof possible.toDate === 'function') {
+  if (typeof possible.toDate === "function") {
     try {
       return possible.toDate();
     } catch (err) {
-      console.warn('Failed to convert Firestore timestamp', err);
+      console.warn("Failed to convert Firestore timestamp", err);
     }
   }
 
@@ -52,7 +47,7 @@ function formatDate(date, formatter) {
   try {
     return formatter.format(date);
   } catch (err) {
-    console.warn('Failed to format date', err);
+    console.warn("Failed to format date", err);
     return date.toISOString();
   }
 }
@@ -70,9 +65,7 @@ function SummaryStat({ label, value, sublabel }) {
 function CollectionSummary({ summary }) {
   const completionPercent = Math.round(summary.completionRate * 100);
 
-  const finishEntries = Object.entries(summary.finishCounts).sort(([a], [b]) =>
-    a.localeCompare(b),
-  );
+  const finishEntries = Object.entries(summary.finishCounts).sort(([a], [b]) => a.localeCompare(b));
   const categoryEntries = Object.entries(summary.categoryCounts).sort(([a], [b]) =>
     a.localeCompare(b),
   );
@@ -121,7 +114,9 @@ function CollectionSummary({ summary }) {
                   <li key={item.key} className="collection-summary__subset-item">
                     <div className="collection-summary__subset-meta">
                       <span>{item.label}</span>
-                      <span>{item.owned} / {item.total}</span>
+                      <span>
+                        {item.owned} / {item.total}
+                      </span>
                     </div>
                     <div
                       className="collection-summary__subset-track"
@@ -149,7 +144,9 @@ function CollectionSummary({ summary }) {
                   <li key={item.key} className="collection-summary__subset-item">
                     <div className="collection-summary__subset-meta">
                       <span>{item.label}</span>
-                      <span>{item.owned} / {item.total}</span>
+                      <span>
+                        {item.owned} / {item.total}
+                      </span>
                     </div>
                     <div
                       className="collection-summary__subset-track"
@@ -206,7 +203,7 @@ function CollectionTable({ entries }) {
 
   const handleRowClick = (entry, event) => {
     // Don't navigate if clicking on interactive elements
-    if (event.target.closest('button, a, input, select, textarea')) {
+    if (event.target.closest("button, a, input, select, textarea")) {
       return;
     }
 
@@ -234,7 +231,7 @@ function CollectionTable({ entries }) {
           {entries.map((entry) => (
             <tr
               key={entry.id}
-              className={entry.cardId || entry.skuId ? 'collection-table__row--clickable' : ''}
+              className={entry.cardId || entry.skuId ? "collection-table__row--clickable" : ""}
               onClick={(e) => handleRowClick(entry, e)}
             >
               <td>
@@ -260,7 +257,9 @@ function CollectionTable({ entries }) {
                   ) : (
                     <span>—</span>
                   )}
-                  {entry.skuId ? <span className="collection-table__sku">{entry.skuId}</span> : null}
+                  {entry.skuId ? (
+                    <span className="collection-table__sku">{entry.skuId}</span>
+                  ) : null}
                 </div>
               </td>
               <td>
@@ -268,7 +267,7 @@ function CollectionTable({ entries }) {
               </td>
               <td>
                 <div className="collection-table__updated">
-                  <span>{entry.updatedAtLabel ?? '—'}</span>
+                  <span>{entry.updatedAtLabel ?? "—"}</span>
                   {entry.notes ? (
                     <span className="collection-table__notes">{entry.notes}</span>
                   ) : null}
@@ -287,7 +286,7 @@ function CollectionContent() {
   const ownerUid = user?.uid ?? null;
   const { entries, loading, error } = useUserCollection(ownerUid);
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }),
+    () => new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }),
     [],
   );
 
@@ -301,7 +300,7 @@ function CollectionContent() {
         const timestamp = resolveTimestamp(entry);
         const updatedAtLabel = formatDate(timestamp, dateFormatter);
         const notes =
-          typeof entry.notes === 'string' && entry.notes.trim().length > 0
+          typeof entry.notes === "string" && entry.notes.trim().length > 0
             ? entry.notes.trim()
             : null;
         const binderLabel = cardInfo?.binder
@@ -314,12 +313,12 @@ function CollectionContent() {
           finish: skuInfo?.finish ?? null,
           skuId: entry.skuId,
           cardId: cardInfo?.id ?? skuInfo?.cardId ?? null,
-          displayName: cardInfo?.displayName ?? entry.skuId ?? 'Uncatalogued',
+          displayName: cardInfo?.displayName ?? entry.skuId ?? "Uncatalogued",
           detail: cardInfo?.detail ?? null,
           category: cardInfo?.category ?? null,
           categoryLabel: cardInfo?.category
-            ? categoryLabels[cardInfo.category] ?? cardInfo.category
-            : '—',
+            ? (categoryLabels[cardInfo.category] ?? cardInfo.category)
+            : "—",
           storyTitle: cardInfo?.storyTitle ?? null,
           storyCode: cardInfo?.story ?? null,
           binderLabel,
@@ -331,7 +330,7 @@ function CollectionContent() {
     return formatted.sort((a, b) => {
       const nameCompare = a.displayName.localeCompare(b.displayName);
       if (nameCompare !== 0) return nameCompare;
-      return (a.skuId ?? '').localeCompare(b.skuId ?? '');
+      return (a.skuId ?? "").localeCompare(b.skuId ?? "");
     });
   }, [entries, dateFormatter]);
 
@@ -348,14 +347,14 @@ function CollectionContent() {
         storyDunSkus: new Set(),
         storyFoilSkus: new Set(),
         nonsenseDunSkus: new Set(),
-        nonsenseFoilSkus: new Set()
+        nonsenseFoilSkus: new Set(),
       };
       return acc;
     }, {});
 
     const heraldProgress = {
       dunSkus: new Set(),
-      foilSkus: new Set()
+      foilSkus: new Set(),
     };
 
     decoratedEntries.forEach((entry) => {
@@ -382,25 +381,25 @@ function CollectionContent() {
       const storySet = entry.storyCode ? storyProgress[entry.storyCode] : null;
       const finishIdentifier = entry.skuId ?? null;
 
-      if (entry.category === 'story' && storySet) {
+      if (entry.category === "story" && storySet) {
         if (entry.cardId) {
           storySet.storyCards.add(entry.cardId);
         }
-        if (normalizedFinish === 'DUN' && finishIdentifier) {
+        if (normalizedFinish === "DUN" && finishIdentifier) {
           storySet.storyDunSkus.add(finishIdentifier);
-        } else if (normalizedFinish === 'FOIL' && finishIdentifier) {
+        } else if (normalizedFinish === "FOIL" && finishIdentifier) {
           storySet.storyFoilSkus.add(finishIdentifier);
         }
-      } else if (entry.category === 'nonsense' && storySet) {
-        if (normalizedFinish === 'DUN' && finishIdentifier) {
+      } else if (entry.category === "nonsense" && storySet) {
+        if (normalizedFinish === "DUN" && finishIdentifier) {
           storySet.nonsenseDunSkus.add(finishIdentifier);
-        } else if (normalizedFinish === 'FOIL' && finishIdentifier) {
+        } else if (normalizedFinish === "FOIL" && finishIdentifier) {
           storySet.nonsenseFoilSkus.add(finishIdentifier);
         }
-      } else if (entry.category === 'herald' && normalizedFinish && finishIdentifier) {
-        if (normalizedFinish === 'DUN') {
+      } else if (entry.category === "herald" && normalizedFinish && finishIdentifier) {
+        if (normalizedFinish === "DUN") {
           heraldProgress.dunSkus.add(finishIdentifier);
-        } else if (normalizedFinish === 'FOIL') {
+        } else if (normalizedFinish === "FOIL") {
           heraldProgress.foilSkus.add(finishIdentifier);
         }
       }
@@ -416,69 +415,69 @@ function CollectionContent() {
         storyDunSkus: new Set(),
         storyFoilSkus: new Set(),
         nonsenseDunSkus: new Set(),
-        nonsenseFoilSkus: new Set()
+        nonsenseFoilSkus: new Set(),
       };
       const totals = story.totals;
       const items = [
         {
-          key: 'storyCards',
-          label: 'Story cards',
+          key: "storyCards",
+          label: "Story cards",
           owned: owned.storyCards.size,
-          total: totals.storyCards
+          total: totals.storyCards,
         },
         {
-          key: 'storyDunSkus',
-          label: 'Dun finish',
+          key: "storyDunSkus",
+          label: "Dun finish",
           owned: owned.storyDunSkus.size,
-          total: totals.storyDunSkus
+          total: totals.storyDunSkus,
         },
         {
-          key: 'storyFoilSkus',
-          label: 'Foil finish',
+          key: "storyFoilSkus",
+          label: "Foil finish",
           owned: owned.storyFoilSkus.size,
-          total: totals.storyFoilSkus
+          total: totals.storyFoilSkus,
         },
         {
-          key: 'nonsenseDunSkus',
-          label: 'Nonsense',
+          key: "nonsenseDunSkus",
+          label: "Nonsense",
           owned: owned.nonsenseDunSkus.size,
-          total: totals.nonsenseDunSkus
+          total: totals.nonsenseDunSkus,
         },
         {
-          key: 'nonsenseFoilSkus',
-          label: 'Nonsense foil',
+          key: "nonsenseFoilSkus",
+          label: "Nonsense foil",
           owned: owned.nonsenseFoilSkus.size,
-          total: totals.nonsenseFoilSkus
-        }
+          total: totals.nonsenseFoilSkus,
+        },
       ].map((item) => ({
         ...item,
-        percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0
+        percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0,
       }));
 
       return {
         code: story.code,
         title: story.title,
-        items
+        items,
       };
     });
 
     const heraldTotals = collectionProgressTargets.heralds.totals ?? { dunSkus: 0, foilSkus: 0 };
     const heraldBreakdown = [
       {
-        key: 'dunSkus',
-        label: 'Herald dun',
+        key: "dunSkus",
+        label: "Herald dun",
         owned: heraldProgress.dunSkus.size,
-        total: heraldTotals.dunSkus
+        total: heraldTotals.dunSkus,
       },
       {
-        key: 'foilSkus',
-        label: 'Herald foil',
+        key: "foilSkus",
+        label: "Herald foil",
         owned: heraldProgress.foilSkus.size,
-        total: heraldTotals.foilSkus
-      }
+        total: heraldTotals.foilSkus,
+      },
     ].map((item) => ({
       ...item,
-      percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0
+      percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0,
     }));
 
     return {
@@ -490,8 +489,8 @@ function CollectionContent() {
       completionRate,
       progressBreakdowns: {
         stories: storyBreakdowns,
-        heralds: heraldBreakdown
-      }
+        heralds: heraldBreakdown,
+      },
     };
   }, [decoratedEntries]);
 
@@ -500,14 +499,14 @@ function CollectionContent() {
       <header className="collection-page__header">
         <h1>Your Collection</h1>
         <p>
-          Track progress across the Stormlight Lost Tales deck. Your saved entries update
-          in real-time as you add collectibles from Firebase.
+          Track progress across the Stormlight Lost Tales deck. Your saved entries update in
+          real-time as you add collectibles from Firebase.
         </p>
       </header>
 
       {error ? (
         <div className="collection-page__error">
-          Failed to load your collection. {error.message ?? 'Please try again in a moment.'}
+          Failed to load your collection. {error.message ?? "Please try again in a moment."}
         </div>
       ) : null}
 
@@ -522,8 +521,8 @@ function CollectionContent() {
           <div className="collection-page__empty">
             <strong>No collectibles catalogued yet</strong>
             <span>
-              Add items from the Collectibles page, or create documents in the{' '}
-              <code>collections</code> Firestore collection with <code>ownerUid</code>,{' '}
+              Add items from the Collectibles page, or create documents in the{" "}
+              <code>collections</code> Firestore collection with <code>ownerUid</code>,{" "}
               <code>skuId</code>, and <code>quantity</code>.
             </span>
             <span>Entries update instantly once they are saved to Firestore.</span>

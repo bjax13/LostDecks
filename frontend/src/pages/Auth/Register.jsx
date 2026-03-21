@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import SocialLoginButtons from '../../components/Auth/SocialLoginButtons';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Register() {
   const { register, error, clearError } = useAuth();
-  const [formState, setFormState] = useState({ displayName: '', email: '', password: '' });
+  const [formState, setFormState] = useState({ displayName: "", email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -20,9 +20,9 @@ function Register() {
     clearError();
     try {
       await register(formState.email, formState.password, { displayName: formState.displayName });
-      navigate('/collections', { replace: true });
+      navigate("/collections", { replace: true });
     } catch (err) {
-      console.error('Registration failed', err);
+      console.error("Registration failed", err);
     } finally {
       setSubmitting(false);
     }
@@ -65,7 +65,7 @@ function Register() {
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? 'Creating account…' : 'Sign Up'}
+          {submitting ? "Creating account…" : "Sign Up"}
         </button>
       </form>
       <div className="auth-page__links">

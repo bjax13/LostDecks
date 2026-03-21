@@ -1,26 +1,22 @@
-import { useNavigate } from 'react-router-dom';
-import CategoryPill from './CategoryPill';
-import FinishPills from './FinishPills';
-import BinderInfo from './BinderInfo';
-import AddToCollectionButton from './AddToCollectionButton';
+import { Link } from "react-router-dom";
+import AddToCollectionButton from "./AddToCollectionButton";
+import BinderInfo from "./BinderInfo";
+import CategoryPill from "./CategoryPill";
+import FinishPills from "./FinishPills";
 
 export default function CollectibleGrid({ collectibles }) {
-  const navigate = useNavigate();
-
-  const handleCollectibleClick = (collectibleId, event) => {
-    if (event.target.closest('.card-actions')) {
-      return;
-    }
-    navigate(`/collectibles/${collectibleId}`);
-  };
-
   return (
     <div className="cards-grid">
       {collectibles.map((collectible) => (
-        <article
+        <Link
           key={collectible.id}
+          to={`/collectibles/${collectible.id}`}
           className="card-tile card-tile--clickable"
-          onClick={(e) => handleCollectibleClick(collectible.id, e)}
+          onClick={(e) => {
+            if (e.target.closest(".card-actions")) {
+              e.preventDefault();
+            }
+          }}
         >
           <header>
             <CategoryPill category={collectible.category} />
@@ -31,15 +27,15 @@ export default function CollectibleGrid({ collectibles }) {
           <dl className="card-stats">
             <div>
               <dt>Story</dt>
-              <dd>{collectible.storyTitle ?? '—'}</dd>
+              <dd>{collectible.storyTitle ?? "—"}</dd>
             </div>
             <div>
               <dt>Number</dt>
-              <dd>{collectible.number ?? '—'}</dd>
+              <dd>{collectible.number ?? "—"}</dd>
             </div>
             <div>
               <dt>Rarity</dt>
-              <dd>{collectible.rarity ?? '—'}</dd>
+              <dd>{collectible.rarity ?? "—"}</dd>
             </div>
           </dl>
           <div className="finishes">
@@ -56,7 +52,7 @@ export default function CollectibleGrid({ collectibles }) {
           <div className="card-actions">
             <AddToCollectionButton collectible={collectible} variant="card" />
           </div>
-        </article>
+        </Link>
       ))}
     </div>
   );
