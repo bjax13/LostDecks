@@ -1,0 +1,58 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
+import { describe, expect, it } from "vitest";
+import { AuthProvider } from "../../contexts/AuthContext";
+import { AuthModalProvider } from "../../contexts/AuthModalContext";
+import CollectiblesPage from "./index.jsx";
+
+function renderWithRouter(ui) {
+  return render(
+    <AuthProvider>
+      <AuthModalProvider>
+        <MemoryRouter>{ui}</MemoryRouter>
+      </AuthModalProvider>
+    </AuthProvider>,
+  );
+}
+
+describe("CollectiblesPage (integration)", () => {
+  it("renders header and collectibles content", () => {
+    renderWithRouter(<CollectiblesPage />);
+    expect(screen.getByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
+    expect(screen.getByText(/Browse the/)).toBeInTheDocument();
+  });
+
+  it(
+    "toggles between grid and table view",
+    async () => {
+      renderWithRouter(<CollectiblesPage />);
+      expect(screen.getByRole("button", { name: "Grid view" })).toHaveClass("active");
+      await userEvent.click(screen.getByRole("button", { name: "Table view" }));
+      expect(screen.getByRole("button", { name: "Table view" })).toHaveClass("active");
+    },
+    { timeout: 15000 },
+  );
+
+  it("renders collectible cards in grid by default", () => {
+    renderWithRouter(<CollectiblesPage />);
+    expect(document.querySelector(".cards-grid")).toBeInTheDocument();
+  });
+
+  it("toggles sort direction when sort button clicked", async () => {
+    renderWithRouter(<CollectiblesPage />);
+    const sortBtn = screen.getByRole("button", { name: /Sort ascending/i });
+    await userEvent.click(sortBtn);
+    expect(screen.getByRole("button", { name: /Sort descending/i })).toBeInTheDocument();
+  });
+
+  it(
+    "renders table when table view selected",
+    async () => {
+      renderWithRouter(<CollectiblesPage />);
+      await userEvent.click(screen.getByRole("button", { name: "Table view" }));
+      expect(document.querySelector("table")).toBeInTheDocument();
+    },
+    { timeout: 15000 },
+  );
+});
