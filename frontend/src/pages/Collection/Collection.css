@@ -415,8 +415,10 @@
   border-bottom: none;
 }
 
-.collection-table tbody tr:hover {
-  background: rgba(138, 43, 226, 0.15);
+@media (hover: hover) {
+  .collection-table tbody tr:hover {
+    background: rgba(138, 43, 226, 0.15);
+  }
 }
 
 .collection-table__row--clickable {
@@ -479,6 +481,7 @@
 .collection-table__sku {
   font-size: 0.8rem;
   color: rgba(207, 168, 255, 0.8);
+  overflow-wrap: anywhere;
 }
 
 .collection-table__quantity {
@@ -512,6 +515,7 @@
   flex-direction: column;
   gap: 0.75rem;
   color: rgba(224, 224, 224, 0.85);
+  overflow-wrap: anywhere;
 }
 
 .collection-page__empty strong {
@@ -520,15 +524,145 @@
 
 @media (max-width: 720px) {
   .collection-page {
-    padding: 1.5rem 1rem 2.5rem;
+    padding: 1.25rem 0.875rem 2rem;
+  }
+
+  .collection-page__header h1 {
+    font-size: 1.65rem;
+  }
+
+  .collection-page__loading,
+  .collection-page__empty {
+    padding: 2rem 1.25rem;
+  }
+
+  .collection-bulk {
+    padding: 1.15rem;
+    border-radius: 16px;
+  }
+
+  .collection-bulk__header h2 {
+    font-size: 1.25rem;
+  }
+
+  .collection-bulk__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collection-bulk__button,
+  .collection-bulk__upload {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .collection-bulk__upload span {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .collection-summary {
+    padding: 1.2rem;
+    border-radius: 16px;
+  }
+
+  .collection-summary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-summary__stat-value {
+    font-size: 1.45rem;
+  }
+
+  .collection-summary__subset-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .collection-summary__subset-meta {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    align-items: flex-start;
+  }
+
+  .collection-summary__breakdowns {
+    grid-template-columns: 1fr;
   }
 
   .collection-table__wrapper {
     border-radius: 16px;
-    overflow-x: auto;
+    overflow: visible;
+    background: transparent;
+    border: none;
   }
 
   .collection-table {
-    min-width: 640px;
+    border-collapse: separate;
+    border-spacing: 0 0.75rem;
+  }
+
+  .collection-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .collection-table tbody tr {
+    display: block;
+    background: rgba(24, 18, 45, 0.85);
+    border-radius: 16px;
+    border: 1px solid rgba(138, 43, 226, 0.25);
+    overflow: hidden;
+  }
+
+  .collection-table tbody tr.collection-table__row--clickable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(138, 43, 226, 0.2);
+  }
+
+  .collection-table tbody td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.15);
+  }
+
+  .collection-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(207, 168, 255, 0.9);
+  }
+
+  .collection-table tbody tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* Restore per-cell dividers inside the last stacked card (desktop rule clears them). */
+  .collection-table tbody tr:last-child td {
+    border-bottom: 1px solid rgba(138, 43, 226, 0.15);
+  }
+
+  .collection-table tbody tr:last-child td:last-child {
+    border-bottom: none;
+  }
+
+  @media (hover: hover) {
+    .collection-table tbody tr:hover {
+      background: rgba(24, 18, 45, 0.85);
+    }
+
+    .collection-table tbody tr.collection-table__row--clickable:hover {
+      border-color: rgba(207, 168, 255, 0.45);
+      background: rgba(138, 43, 226, 0.12);
+    }
   }
 }

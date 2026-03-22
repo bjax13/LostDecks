@@ -228,7 +228,7 @@ export function CollectionTable({ entries }) {
               className={entry.cardId || entry.skuId ? "collection-table__row--clickable" : ""}
               onClick={(e) => handleRowClick(entry, e)}
             >
-              <td>
+              <td data-label="Card">
                 <div className="collection-table__card">
                   <span className="collection-table__card-name">{entry.displayName}</span>
                   <div className="collection-table__card-meta">
@@ -241,10 +241,10 @@ export function CollectionTable({ entries }) {
                   ) : null}
                 </div>
               </td>
-              <td>
+              <td data-label="Category">
                 <span className="collection-table__badge">{entry.categoryLabel}</span>
               </td>
-              <td>
+              <td data-label="Finish">
                 <div className="collection-table__finish">
                   {entry.finish ? (
                     <span className="collection-table__finish-chip">{entry.finish}</span>
@@ -256,10 +256,10 @@ export function CollectionTable({ entries }) {
                   ) : null}
                 </div>
               </td>
-              <td>
+              <td data-label="Quantity">
                 <span className="collection-table__quantity">{entry.quantity}</span>
               </td>
-              <td>
+              <td data-label="Last updated">
                 <div className="collection-table__updated">
                   <span>{entry.updatedAtLabel ?? "—"}</span>
                   {entry.notes ? (
