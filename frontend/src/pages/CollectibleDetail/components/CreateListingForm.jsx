@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { createListing } from "../../../lib/marketplace/listings";
 
-function dollarsToCents(value) {
+/** Exported for unit tests; used by CreateListingForm for price validation. */
+export function dollarsToCents(value) {
   const normalized = String(value || "").trim();
   if (!normalized) return null;
   const parsed = Number(normalized);
@@ -58,7 +59,7 @@ export default function CreateListingForm({ collectibleId, cardId }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="create-listing">
+    <form noValidate onSubmit={handleSubmit} className="create-listing">
       <div className="create-listing__row">
         <label className="create-listing__label">
           Type
