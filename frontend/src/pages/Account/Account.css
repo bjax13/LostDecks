@@ -1,7 +1,9 @@
 .account-page {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 3rem clamp(1.5rem, 4vw, 3rem) 4rem;
+  padding: 3rem clamp(1rem, 4vw, 3rem) 4rem;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -61,12 +63,46 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: baseline;
   gap: 0.75rem;
+  min-width: 0;
   padding: 1rem 1.25rem;
   background: rgba(45, 31, 82, 0.65);
   border: 1px solid rgba(132, 105, 221, 0.35);
   border-radius: 16px;
   color: #dcd2ff;
+  overflow-wrap: anywhere;
+}
+
+.account-summary li > span:last-child {
+  min-width: 0;
+  text-align: right;
+}
+
+.trade-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.account-summary.trade-list > li.trade-item {
+  padding: 0.75rem 0;
+}
+
+.trade-item__body {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.trade-item__line,
+.trade-item__meta {
+  overflow-wrap: anywhere;
+}
+
+.trade-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .account-summary-label {
@@ -85,7 +121,8 @@
 .form-grid {
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  min-width: 0;
 }
 
 .form-field {
@@ -109,6 +146,10 @@
 
 .form-field input,
 .form-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   font: inherit;
   padding: 0.75rem 1rem;
   border-radius: 12px;
@@ -203,7 +244,7 @@
 
 .notification-option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   font-size: 0.95rem;
   color: #dcd2ff;
@@ -211,6 +252,8 @@
 }
 
 .notification-option input {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
   accent-color: #cfa8ff;
 }
 
@@ -227,11 +270,35 @@
 
 @media (max-width: 600px) {
   .account-page {
-    padding: 2.5rem 1.25rem 3rem;
+    padding: 1.75rem clamp(0.75rem, 3vw, 1.25rem) 2.5rem;
+    gap: 1.75rem;
+  }
+
+  .account-header h1 {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+    line-height: 1.2;
   }
 
   .account-section {
-    padding: 1.5rem;
+    padding: 1.25rem clamp(0.875rem, 3vw, 1.5rem);
+    border-radius: 16px;
+    gap: 1.25rem;
+  }
+
+  .account-section h2 {
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+  }
+
+  .account-summary li {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .account-summary li > span:last-child {
+    text-align: left;
   }
 
   .form-actions {
@@ -242,5 +309,23 @@
   .form-actions button {
     width: 100%;
     justify-content: center;
+  }
+
+  .form-feedback {
+    text-align: center;
+  }
+
+  .trade-item__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .trade-item__actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .notification-preview {
+    padding: 1rem;
   }
 }

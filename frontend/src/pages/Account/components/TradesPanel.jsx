@@ -36,24 +36,24 @@ export default function TradesPanel({ user }) {
       {!loading && trades.length === 0 ? <p className="muted">No trades yet.</p> : null}
 
       {!loading && trades.length > 0 ? (
-        <ul className="account-summary" style={{ listStyle: "none", paddingLeft: 0 }}>
+        <ul className="account-summary trade-list">
           {trades.map((t) => {
             const isBuyer = t.buyerUid === uid;
             const role = isBuyer ? "Buyer" : "Seller";
             const counterpartyName = isBuyer ? t.sellerDisplayName : t.buyerDisplayName;
             return (
-              <li key={t.id} style={{ padding: "0.75rem 0" }}>
-                <div style={{ display: "grid", gap: "0.35rem" }}>
-                  <div>
+              <li key={t.id} className="trade-item">
+                <div className="trade-item__body">
+                  <div className="trade-item__line">
                     <strong>{role}</strong> · {formatMoney(t.priceCents, t.currency)} · {t.type}
                   </div>
-                  <div className="muted">
+                  <div className="trade-item__meta muted">
                     Card: {t.cardDisplayName ? `${t.cardDisplayName} (${t.cardId})` : t.cardId} ·
                     With: {counterpartyName || "Anonymous"} · Status: {t.status}
                   </div>
 
                   {t.status === "PENDING" ? (
-                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                    <div className="trade-item__actions">
                       <button type="button" onClick={() => handleUpdateStatus(t, "COMPLETED")}>
                         Mark completed
                       </button>
