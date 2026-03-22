@@ -6,9 +6,15 @@
     "lint": "biome lint .",
     "check": "biome check --write .",
     "ci": "biome ci .",
-    "test": "npm run test --prefix frontend"
+    "test": "npm run test --prefix frontend",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.8"
+    "@biomejs/biome": "2.4.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  },
+  "lint-staged": {
+    "*": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   }
 }
