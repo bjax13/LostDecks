@@ -269,7 +269,7 @@ function MarketPage() {
   };
 
   return (
-    <section>
+    <section className="market-page">
       <div className="market-header">
         <div>
           <h1>Market</h1>
