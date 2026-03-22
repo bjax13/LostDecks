@@ -21,6 +21,8 @@ Lost Tales Marketplace is a single-product Vite + React 18 SPA (`frontend/`) bac
 2. **Frontend**: `cd frontend && npm install`
 3. **Functions** (if you change or debug callable code with the emulator): `cd functions && npm install`
 
+Before `git commit`, run `npm run check` from the repo root (same as `biome check --write .`). That mirrors the local pre-commit hook intent without relying on Husky in the VM.
+
 Default Firebase project id matches `.firebaserc`: `storydeck-16`.
 
 ### Running locally
