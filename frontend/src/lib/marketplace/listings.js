@@ -16,6 +16,13 @@ import { db, functions } from "../firebase";
 export const LISTINGS_PATH = "listings";
 
 export function subscribeOpenListings({ cardId } = {}, onNext, onError) {
+  if (!db) {
+    queueMicrotask(() => {
+      onNext({ docs: [] });
+    });
+    return () => {};
+  }
+
   const base = collection(db, LISTINGS_PATH);
   const constraints = [where("status", "==", "OPEN"), orderBy("createdAt", "desc")];
   if (cardId) {
