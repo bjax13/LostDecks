@@ -17,7 +17,7 @@ Lost Tales Marketplace is a single-product Vite + React 18 SPA (`frontend/`) bac
 
 ### Setup
 
-1. **Repo root** (Biome): `npm install`
+1. **Repo root** (Biome + Husky): `npm install` — installs Biome, Husky, and lint-staged; enables the pre-commit hook that runs Biome on staged files. Skipping root install means hooks and `npm run ci` are unavailable.
 2. **Frontend**: `cd frontend && npm install`
 3. **Functions** (if you change or debug callable code with the emulator): `cd functions && npm install`
 
@@ -57,7 +57,9 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
   - `npm run check` — format, lint, and organize imports (writes fixes)
   - `npm run ci` — read-only check for CI (`biome ci .`)
 - **Unit & integration tests**: Vitest + Testing Library (`cd frontend && npm run test`, or `npm run test` from the repo root). Tests live next to source as `*.test.{js,jsx}`; setup is `frontend/src/test/setup.js`. Prefer queries from [Testing Library priority](https://testing-library.com/docs/queries/about#priority) (role, label, placeholder, text) and `userEvent` over `fireEvent` where it reflects real interaction.
-- **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). The config builds and serves the production bundle on port 4173; smoke coverage lives under `frontend/e2e/`.
+- **Coverage**: `cd frontend && npm run test:coverage` enforces branch/function/line thresholds (90%) for files included in the coverage report; several Firebase-heavy and page-level modules are excluded in `frontend/vite.config.js` (see the comment there). GitHub Actions runs this after `npm run build`.
+- **Cloud Functions tests**: `cd functions && npm test` — Node’s built-in test runner (`*.test.js` next to source).
+- **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). Locally the config builds then previews the production bundle on port 4173. In CI, the workflow builds once and sets `PLAYWRIGHT_SKIP_BUILD=1` so Playwright only runs preview. Specs live under `frontend/e2e/`.
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
 
 ### Gotchas

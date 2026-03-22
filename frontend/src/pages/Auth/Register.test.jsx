@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import Register from "./Register.jsx";
 
 const mockRegister = vi.fn();
@@ -27,9 +27,9 @@ describe("Register (unit)", () => {
 
   it("renders registration form", () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <Register />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     expect(
       screen.getByRole("heading", { name: /Create your Lost Tales account/i }),
@@ -41,9 +41,9 @@ describe("Register (unit)", () => {
   it("calls register on submit", async () => {
     mockRegister.mockResolvedValue(undefined);
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <Register />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     await userEvent.type(screen.getByLabelText(/Display Name/i), "Test User");
     await userEvent.type(screen.getByLabelText(/Email/i), "new@example.com");

@@ -1,16 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { AuthProvider } from "../../contexts/AuthContext";
 import { AuthModalProvider } from "../../contexts/AuthModalContext";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import CollectiblesPage from "./index.jsx";
 
 function renderWithRouter(ui) {
   return render(
     <AuthProvider>
       <AuthModalProvider>
-        <MemoryRouter>{ui}</MemoryRouter>
+        <TestMemoryRouter>{ui}</TestMemoryRouter>
       </AuthModalProvider>
     </AuthProvider>,
   );

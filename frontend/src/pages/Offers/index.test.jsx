@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import OffersPage from "./index.jsx";
 
 vi.mock("../../components/Auth/AuthGuard", () => ({
@@ -15,9 +15,9 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
 describe("OffersPage (unit)", () => {
   it("renders Marketplace Offers heading when AuthGuard renders children", () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <OffersPage />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     expect(screen.getByRole("heading", { name: "Marketplace Offers" })).toBeInTheDocument();
     expect(screen.getByText(/View and manage your trade offers/)).toBeInTheDocument();
