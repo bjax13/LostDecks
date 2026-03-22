@@ -12,7 +12,7 @@ Lost Tales Marketplace is a single-product Vite + React 18 SPA (`frontend/`) bac
 |------|------|
 | `frontend/` | Vite + React app; run dev server and frontend tests here |
 | `functions/` | Cloud Functions (`firebase-functions` + `firebase-admin`); emulator loads this code |
-| `firebase.json`, `.firebaserc` | Emulator ports, Firestore rules path, default Firebase project (`storydeck-16`) |
+| `firebase.json`, `.firebaserc` | Hosting (`frontend/dist`), emulators, Firestore, Functions; default project `storydeck-16` |
 | `firestore.rules`, `firestore.indexes.json` | Firestore security rules and composite indexes |
 
 ### Setup
@@ -63,6 +63,34 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
 - **Cloud Functions tests**: `cd functions && npm test` — Node’s built-in test runner (`*.test.js` next to source).
 - **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). Locally the config builds then previews the production bundle on port 4173. In CI, the workflow builds once and sets `PLAYWRIGHT_SKIP_BUILD=1` so Playwright only runs preview. Specs live under `frontend/e2e/`.
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
+- **Production deploy (local CLI)**: `npm run deploy:firebase` from the repo root after `frontend/.env` is filled with production `VITE_FIREBASE_*` and `VITE_USE_EMULATORS=false`, and you are logged in (`firebase login` or `GOOGLE_APPLICATION_CREDENTIALS`).
+
+### Production deployment
+
+1. **Firebase console (one-time per project)**  
+   - Enable **Authentication** providers you ship (see `frontend/README.md`).  
+   - Under Auth → Settings, add your **Hosting domain** (and any custom domain) to **Authorized domains**.  
+   - Open **Hosting** in the console and complete the “Get started” flow if you have not deployed Hosting before.
+
+2. **GitHub Actions (optional automation)**  
+   Workflow: `.github/workflows/deploy-firebase.yml` (manual **Run workflow** only). Configure these **repository secrets**:
+
+   | Secret | Purpose |
+   |--------|---------|
+   | `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account that can deploy Hosting, Firestore rules/indexes, and Cloud Functions (Firebase recommends a dedicated CI account with the right IAM roles). |
+   | `VITE_FIREBASE_API_KEY` | Same values as `frontend/.env.example` — injected at **build** time for the production bundle. |
+   | `VITE_FIREBASE_AUTH_DOMAIN` | |
+   | `VITE_FIREBASE_PROJECT_ID` | |
+   | `VITE_FIREBASE_STORAGE_BUCKET` | |
+   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | |
+   | `VITE_FIREBASE_APP_ID` | |
+   | `VITE_FIREBASE_MEASUREMENT_ID` | |
+
+3. **What gets deployed**  
+   `firebase deploy --only hosting,firestore,functions` publishes the Vite build from `frontend/dist`, Firestore rules/indexes, and Cloud Functions. It does not deploy other Google Cloud resources.
+
+4. **After deploy**  
+   Consider **App Check**, error/monitoring dashboards, and Firestore **backup** policy for your risk tolerance.
 
 ### Gotchas
 
