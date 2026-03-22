@@ -72,7 +72,9 @@ describe("AddToCollectionButton", () => {
     expect(cardRoot.querySelector(".add-to-collection--card")).toBeInTheDocument();
     u1();
 
-    const { container: tableRoot } = render(<AddToCollectionButton collectible={baseCollectible} variant="table" />);
+    const { container: tableRoot } = render(
+      <AddToCollectionButton collectible={baseCollectible} variant="table" />,
+    );
     expect(tableRoot.querySelector(".add-to-collection--table")).toBeInTheDocument();
   });
 
