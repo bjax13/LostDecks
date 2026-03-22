@@ -1,4 +1,5 @@
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
 import AccountPage from "./pages/Account";
@@ -27,6 +28,7 @@ function App() {
 
   return (
     <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
+      <PostHogPageviews />
       <nav className="main-nav">
         <div className="main-nav__links">
           <Link to="/">Home</Link>
