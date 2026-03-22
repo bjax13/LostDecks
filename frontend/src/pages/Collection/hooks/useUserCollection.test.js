@@ -54,12 +54,24 @@ describe("useUserCollection", () => {
       expect(result.current.error).toBe(null);
     });
 
-    it("does not subscribe to Firestore", async () => {
+    it("does not subscribe to Firestore for undefined ownerUid", async () => {
       renderHook(() => useUserCollection(undefined));
 
       await waitFor(() => {
         expect(mockOnSnapshot).not.toHaveBeenCalled();
       });
+    });
+
+    it("does not subscribe for empty string ownerUid", async () => {
+      const { result } = renderHook(() => useUserCollection(""));
+
+      await waitFor(() => {
+        expect(mockOnSnapshot).not.toHaveBeenCalled();
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.entries).toEqual([]);
+      expect(result.current.error).toBe(null);
     });
   });
 
@@ -111,6 +123,17 @@ describe("useUserCollection", () => {
       expect(result.current.error).toBe(null);
     });
 
+    it("on success: empty snapshot docs maps to entries []", () => {
+      const { result } = renderHook(() => useUserCollection("user-abc"));
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() => onNext({ docs: [] }));
+
+      expect(result.current.entries).toEqual([]);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.error).toBe(null);
+    });
+
     it("on error: sets error, stops loading, and logs", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useUserCollection("user-abc"));
@@ -138,6 +161,91 @@ describe("useUserCollection", () => {
 
       unmount();
       expect(unsubscribe).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("cleanup and resubscription", () => {
+    it("resubscribes when ownerUid changes", () => {
+      const unsub1 = vi.fn();
+      const unsub2 = vi.fn();
+      mockOnSnapshot.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
+
+      const { rerender } = renderHook(({ ownerUid }) => useUserCollection(ownerUid), {
+        initialProps: { ownerUid: "user-A" },
+      });
+
+      expect(mockOnSnapshot).toHaveBeenCalledTimes(1);
+
+      rerender({ ownerUid: "user-B" });
+
+      expect(unsub1).toHaveBeenCalledTimes(1);
+      expect(mockOnSnapshot).toHaveBeenCalledTimes(2);
+      expect(mockWhere).toHaveBeenLastCalledWith("ownerUid", "==", "user-B");
+    });
+
+    it("unsubscribes and clears state when ownerUid becomes falsy", async () => {
+      const unsubscribe = vi.fn();
+      mockOnSnapshot.mockReturnValue(unsubscribe);
+
+      const { result, rerender } = renderHook(({ ownerUid }) => useUserCollection(ownerUid), {
+        initialProps: { ownerUid: "user-A" },
+      });
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNext({
+          docs: [
+            createFakeDoc("doc-1", {
+              ownerUid: "user-A",
+              skuId: "LT24-ELS-01-DUN",
+              quantity: 1,
+            }),
+          ],
+        }),
+      );
+      expect(result.current.entries).toHaveLength(1);
+
+      rerender({ ownerUid: null });
+
+      expect(unsubscribe).toHaveBeenCalled();
+
+      await waitFor(() => {
+        expect(result.current.entries).toEqual([]);
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBe(null);
+      });
+    });
+
+    it("sets loading true again when ownerUid changes after a completed load", () => {
+      const unsub1 = vi.fn();
+      const unsub2 = vi.fn();
+      mockOnSnapshot.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
+
+      const { rerender, result } = renderHook(({ ownerUid }) => useUserCollection(ownerUid), {
+        initialProps: { ownerUid: "user-A" },
+      });
+
+      const onNextA = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNextA({
+          docs: [createFakeDoc("doc-1", { ownerUid: "user-A", skuId: "x", quantity: 1 })],
+        }),
+      );
+      expect(result.current.loading).toBe(false);
+
+      rerender({ ownerUid: "user-B" });
+
+      expect(result.current.loading).toBe(true);
+    });
+
+    it("unmount with falsy ownerUid does not throw", async () => {
+      const { unmount } = renderHook(() => useUserCollection(null));
+
+      await waitFor(() => {
+        expect(mockOnSnapshot).not.toHaveBeenCalled();
+      });
+
+      expect(() => unmount()).not.toThrow();
     });
   });
 });
