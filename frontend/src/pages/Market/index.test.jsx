@@ -219,6 +219,17 @@ describe("MarketPage (integration)", () => {
     alertSpy.mockRestore();
   });
 
+  it("alerts with default message when acceptListing rejects without a message", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    mockAcceptListing.mockRejectedValueOnce({});
+    renderMarket();
+    await userEvent.click(screen.getByRole("button", { name: "Accept" }));
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("Failed to accept listing");
+    });
+    alertSpy.mockRestore();
+  });
+
   it("alerts when cancelListing fails", async () => {
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     mockUseAuth.mockReturnValue({ user: SELLER });
@@ -228,6 +239,19 @@ describe("MarketPage (integration)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     await waitFor(() => {
       expect(alertSpy).toHaveBeenCalledWith("cancel failed");
+    });
+    alertSpy.mockRestore();
+  });
+
+  it("alerts with default message when cancelListing rejects without a message", async () => {
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    mockUseAuth.mockReturnValue({ user: SELLER });
+    mockUseOpenListings.mockReturnValue({ listings: [listingAsk], loading: false, error: null });
+    mockCancelListing.mockRejectedValueOnce({});
+    renderMarket();
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("Failed to cancel listing");
     });
     alertSpy.mockRestore();
   });
@@ -328,6 +352,45 @@ describe("MarketPage (integration)", () => {
       );
     });
     expect(await screen.findByText("Listing created.")).toBeInTheDocument();
+  });
+
+  it("uses email as display name when creating a listing and displayName is missing", async () => {
+    mockUseAuth.mockReturnValue({
+      user: { uid: "u1", email: "only@example.com", displayName: null },
+    });
+    renderMarket();
+    await userEvent.click(screen.getAllByRole("button", { name: "Create listing" })[0]);
+    await userEvent.type(screen.getByPlaceholderText("Search by card name or id"), "LT24-ELS-01");
+    await userEvent.type(screen.getByPlaceholderText("10.00"), "1");
+    await userEvent.click(submitCreateInDialog());
+    await waitFor(() => {
+      expect(mockCreateListing).toHaveBeenCalledWith(
+        expect.objectContaining({ createdByDisplayName: "only@example.com" }),
+      );
+    });
+  });
+
+  it("shows Creating… on submit while createListing is in flight", async () => {
+    let releaseCreate;
+    mockCreateListing.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          releaseCreate = resolve;
+        }),
+    );
+    renderMarket();
+    await userEvent.click(screen.getAllByRole("button", { name: "Create listing" })[0]);
+    await userEvent.type(screen.getByPlaceholderText("Search by card name or id"), "LT24-ELS-01");
+    await userEvent.type(screen.getByPlaceholderText("10.00"), "9");
+    await userEvent.click(submitCreateInDialog());
+    expect(await screen.findByRole("button", { name: "Creating…" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(releaseCreate).toEqual(expect.any(Function));
+    });
+    releaseCreate({ id: "x" });
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Creating…" })).not.toBeInTheDocument();
+    });
   });
 
   it("navigates to login when submitting create form logged out", async () => {
