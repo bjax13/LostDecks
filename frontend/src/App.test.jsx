@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+// Avoid initializing the real Firebase client in this file (faster, no env required).
+// Auth/session behavior is still covered in App.hooks.test.jsx with mocked useAuth.
 vi.mock("./lib/firebase", () => ({
   app: null,
   auth: null,

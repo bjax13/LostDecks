@@ -3,14 +3,15 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { datasetMeta } from "../../data/collectibles";
 import { TestMemoryRouter } from "../../test/router.jsx";
-import CollectionPage, {
+import {
   CollectionSummary,
   CollectionTable,
   formatDate,
   normalizeQuantity,
   resolveTimestamp,
   SummaryStat,
-} from "./index.jsx";
+} from "./collectionPresentation.jsx";
+import CollectionPage from "./index.jsx";
 
 const mockUseAuth = vi.fn();
 const mockUseUserCollection = vi.fn();
