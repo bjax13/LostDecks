@@ -5,7 +5,7 @@ import { useAddToCollection } from "../hooks/useAddToCollection";
 const successMessage = "Added to your collection!";
 const errorMessage = "Couldn't add collectible. Please try again.";
 
-function formatFinishLabel(finish) {
+export function formatFinishLabel(finish) {
   if (!finish || typeof finish !== "string") {
     return "";
   }
