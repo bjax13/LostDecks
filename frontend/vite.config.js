@@ -14,11 +14,7 @@ export default defineConfig({
       reporter: ["text", "text-summary", "html"],
       include: ["src/**/*.{js,jsx}"],
       // Only exclude test files and test harness so they are not counted as production source.
-      exclude: [
-        "src/**/*.test.{js,jsx}",
-        "src/**/*.spec.{js,jsx}",
-        "src/test/**",
-      ],
+      exclude: ["src/**/*.test.{js,jsx}", "src/**/*.spec.{js,jsx}", "src/test/**"],
     },
   },
 });

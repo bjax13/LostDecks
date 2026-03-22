@@ -33,21 +33,15 @@ vi.mock("./hooks/useCollectibleCollectionEntry", () => ({
 }));
 
 vi.mock("../Collectibles/components/AddToCollectionButton", () => ({
-  default: ({ collectible }) => (
-    <div data-testid="add-to-collection">{collectible?.id}</div>
-  ),
+  default: ({ collectible }) => <div data-testid="add-to-collection">{collectible?.id}</div>,
 }));
 
 vi.mock("./components/CollectibleListingsPanel", () => ({
-  default: ({ collectibleId }) => (
-    <div data-testid="listings-panel">{collectibleId}</div>
-  ),
+  default: ({ collectibleId }) => <div data-testid="listings-panel">{collectibleId}</div>,
 }));
 
 vi.mock("./components/CreateListingForm", () => ({
-  default: ({ collectibleId }) => (
-    <div data-testid="create-listing-form">{collectibleId}</div>
-  ),
+  default: ({ collectibleId }) => <div data-testid="create-listing-form">{collectibleId}</div>,
 }));
 
 /* ------------------------------------------------------------------ */
@@ -197,12 +191,17 @@ describe("CollectibleDetailPage – detail view (no user)", () => {
 describe("CollectibleDetailPage – SKU route", () => {
   it("prefers skuRecord.card when both collectibleId and skuId are present", () => {
     const skuCard = { ...CARD, displayName: "SKU Variant" };
-    setDefaults({ skuRecord: { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN", card: skuCard } });
+    setDefaults({
+      skuRecord: { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN", card: skuCard },
+    });
 
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -211,12 +210,18 @@ describe("CollectibleDetailPage – SKU route", () => {
   });
 
   it("shows SKU ID in the detail stats when skuId param is present", () => {
-    setDefaults({ card: CARD, skuRecord: { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN", card: CARD } });
+    setDefaults({
+      card: CARD,
+      skuRecord: { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN", card: CARD },
+    });
 
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -235,7 +240,10 @@ describe("CollectibleDetailPage – SKU route", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -495,7 +503,10 @@ describe("resolveTimestamp + formatDate (via component)", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     renderWithRoute("/collectibles/LT24-ELS-01");
 
-    expect(warnSpy).toHaveBeenCalledWith("Failed to convert Firestore timestamp", expect.any(Error));
+    expect(warnSpy).toHaveBeenCalledWith(
+      "Failed to convert Firestore timestamp",
+      expect.any(Error),
+    );
     expect(screen.queryByText("Last Updated")).not.toBeInTheDocument();
     warnSpy.mockRestore();
   });
@@ -579,7 +590,11 @@ describe("useCollectibleCollectionEntry invocation", () => {
     setDefaults({ card: CARD, user: USER });
     renderWithRoute("/collectibles/LT24-ELS-01");
 
-    expect(useCollectibleCollectionEntry).toHaveBeenCalledWith("user-123", "LT24-ELS-01", undefined);
+    expect(useCollectibleCollectionEntry).toHaveBeenCalledWith(
+      "user-123",
+      "LT24-ELS-01",
+      undefined,
+    );
   });
 
   it("passes null ownerUid when user is not authenticated", () => {
@@ -599,7 +614,10 @@ describe("useCollectibleCollectionEntry invocation", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -631,7 +649,10 @@ describe("CollectibleDetailPage – data layer", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );
@@ -648,7 +669,10 @@ describe("CollectibleDetailPage – data layer", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles/LT24-ELS-01/sku/LT24-ELS-01-DUN"]}>
         <Routes>
-          <Route path="/collectibles/:collectibleId/sku/:skuId" element={<CollectibleDetailPage />} />
+          <Route
+            path="/collectibles/:collectibleId/sku/:skuId"
+            element={<CollectibleDetailPage />}
+          />
         </Routes>
       </MemoryRouter>,
     );

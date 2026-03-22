@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../../lib/firebase", () => ({ db: { _tag: "mock-firestore" } }));
@@ -130,8 +130,14 @@ describe("useMyTrades", () => {
       const onNext = mockOnSnapshot.mock.calls[0][1];
       const fakeSnap = {
         docs: [
-          { id: "trade-1", data: () => ({ status: "pending", participants: ["user-123", "user-456"] }) },
-          { id: "trade-2", data: () => ({ status: "complete", participants: ["user-123", "user-789"] }) },
+          {
+            id: "trade-1",
+            data: () => ({ status: "pending", participants: ["user-123", "user-456"] }),
+          },
+          {
+            id: "trade-2",
+            data: () => ({ status: "complete", participants: ["user-123", "user-789"] }),
+          },
         ],
       };
 
