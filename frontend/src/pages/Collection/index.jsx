@@ -410,7 +410,13 @@ function CollectionContent() {
       : 0;
 
     const storyBreakdowns = collectionProgressTargets.stories.map((story) => {
-      const owned = storyProgress[story.code];
+      const owned = storyProgress[story.code] ?? {
+        storyCards: new Set(),
+        storyDunSkus: new Set(),
+        storyFoilSkus: new Set(),
+        nonsenseDunSkus: new Set(),
+        nonsenseFoilSkus: new Set(),
+      };
       const totals = story.totals;
       const items = [
         {
