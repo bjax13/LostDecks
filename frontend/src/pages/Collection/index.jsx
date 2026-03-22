@@ -410,13 +410,7 @@ function CollectionContent() {
       : 0;
 
     const storyBreakdowns = collectionProgressTargets.stories.map((story) => {
-      const owned = storyProgress[story.code] ?? {
-        storyCards: new Set(),
-        storyDunSkus: new Set(),
-        storyFoilSkus: new Set(),
-        nonsenseDunSkus: new Set(),
-        nonsenseFoilSkus: new Set(),
-      };
+      const owned = storyProgress[story.code];
       const totals = story.totals;
       const items = [
         {
@@ -548,4 +542,11 @@ function CollectionPage() {
 
 export default CollectionPage;
 
-export { CollectionSummary, formatDate, normalizeQuantity, resolveTimestamp, SummaryStat };
+export {
+  CollectionSummary,
+  CollectionTable,
+  formatDate,
+  normalizeQuantity,
+  resolveTimestamp,
+  SummaryStat,
+};

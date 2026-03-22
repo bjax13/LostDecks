@@ -5,6 +5,7 @@ import { datasetMeta } from "../../data/collectibles";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import CollectionPage, {
   CollectionSummary,
+  CollectionTable,
   formatDate,
   normalizeQuantity,
   resolveTimestamp,
@@ -309,6 +310,139 @@ describe("CollectionSummary", () => {
     expect(within(region).getByText("DUN")).toBeInTheDocument();
     expect(within(region).getByText("Categories")).toBeInTheDocument();
   });
+
+  it("omits the herald subset card when herald breakdown is empty", () => {
+    const summary = {
+      uniqueCardCount: 1,
+      uniqueSkuCount: 1,
+      totalQuantity: 1,
+      completionRate: 0.01,
+      finishCounts: { DUN: 1 },
+      categoryCounts: {},
+      progressBreakdowns: {
+        stories: [
+          {
+            code: "Z",
+            title: "Z Story",
+            items: [
+              {
+                key: "storyCards",
+                label: "Story cards",
+                owned: 0,
+                total: 1,
+                percent: 0,
+              },
+            ],
+          },
+        ],
+        heralds: [],
+      },
+    };
+
+    render(<CollectionSummary summary={summary} />);
+    expect(screen.queryByRole("heading", { name: "Heralds" })).not.toBeInTheDocument();
+  });
+
+  it("falls back to raw category keys when a label is unknown", () => {
+    const summary = {
+      uniqueCardCount: 1,
+      uniqueSkuCount: 1,
+      totalQuantity: 1,
+      completionRate: 0.01,
+      finishCounts: {},
+      categoryCounts: { custom_unknown_category: 3 },
+      progressBreakdowns: {
+        stories: [],
+        heralds: [],
+      },
+    };
+
+    render(<CollectionSummary summary={summary} />);
+    const region = screen.getByRole("region", { name: "Collection summary" });
+    const categoriesList = within(region)
+      .getByText("Categories")
+      .closest(".collection-summary__list");
+    expect(categoriesList).toBeTruthy();
+    expect(within(categoriesList).getByText("custom_unknown_category")).toBeInTheDocument();
+    expect(within(categoriesList).getByText("3")).toBeInTheDocument();
+  });
+});
+
+describe("CollectionTable", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const baseEntry = {
+    displayName: "Row Card",
+    categoryLabel: "—",
+    quantity: 1,
+    updatedAtLabel: "—",
+    notes: null,
+    cardId: null,
+    skuId: null,
+    finish: null,
+    storyTitle: null,
+    binderLabel: null,
+    detail: null,
+  };
+
+  it("navigates to the card route when only cardId is set", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable
+          entries={[
+            {
+              ...baseEntry,
+              id: "r1",
+              cardId: "LT24-ELS-01",
+            },
+          ]}
+        />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Row Card").closest("tr");
+    expect(row).toBeTruthy();
+    await user.click(row);
+    expect(mockNavigate).toHaveBeenCalledWith("/collectibles/LT24-ELS-01");
+  });
+
+  it("does not navigate when the row has neither cardId nor skuId", async () => {
+    const user = userEvent.setup({ delay: null });
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable entries={[{ ...baseEntry, id: "r2" }]} />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Row Card").closest("tr");
+    expect(row).not.toHaveClass("collection-table__row--clickable");
+    await user.click(row);
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("omits the SKU line when skuId is missing", () => {
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable
+          entries={[
+            {
+              ...baseEntry,
+              id: "r3",
+              cardId: "LT24-ELS-01",
+              finish: "DUN",
+            },
+          ]}
+        />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Row Card").closest("tr");
+    expect(within(row).getByText("DUN")).toBeInTheDocument();
+    expect(within(row).queryByText("LT24-ELS-01-DUN")).not.toBeInTheDocument();
+  });
 });
 
 describe("CollectionPage (integration)", () => {
@@ -339,6 +473,22 @@ describe("CollectionPage (integration)", () => {
     renderCollectionPage();
     expect(screen.getByText(/Failed to load your collection/)).toBeInTheDocument();
     expect(screen.getByText(/Network down/)).toBeInTheDocument();
+  });
+
+  it("uses a generic error hint when the error has no message", () => {
+    mockUseUserCollection.mockReturnValue({
+      entries: [],
+      loading: false,
+      error: {},
+    });
+    renderCollectionPage();
+    expect(screen.getByText(/Please try again in a moment/)).toBeInTheDocument();
+  });
+
+  it("passes a null owner uid when the signed-in user has no uid", () => {
+    mockUseAuth.mockReturnValue({ user: {}, loading: false });
+    renderCollectionPage();
+    expect(mockUseUserCollection).toHaveBeenCalledWith(null);
   });
 
   it("renders summary and table rows for catalogued SKUs and navigates on row click", async () => {
