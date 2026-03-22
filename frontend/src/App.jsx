@@ -1,4 +1,5 @@
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
@@ -14,9 +15,29 @@ import MarketPage from "./pages/Market";
 import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
-function App() {
+function MainNav() {
   const { user, logout, loading } = useAuth();
   const { openAuthModal } = useAuthModal();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset menu when the route changes (body only calls stable setState)
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [menuOpen]);
 
   const handleSignOut = async () => {
     try {
@@ -26,10 +47,25 @@ function App() {
     }
   };
 
+  const panelClassName = menuOpen ? "main-nav__panel main-nav__panel--open" : "main-nav__panel";
+
   return (
-    <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
-      <PostHogPageviews />
-      <nav className="main-nav">
+    <nav className="main-nav" aria-label="Primary">
+      <button
+        type="button"
+        className="main-nav__menu-toggle"
+        aria-expanded={menuOpen}
+        aria-controls="main-nav-panel"
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        <span className="main-nav__menu-toggle-bars" aria-hidden="true">
+          <span className="main-nav__menu-toggle-bar" />
+          <span className="main-nav__menu-toggle-bar" />
+          <span className="main-nav__menu-toggle-bar" />
+        </span>
+        <span className="main-nav__menu-toggle-label">{menuOpen ? "Close" : "Menu"}</span>
+      </button>
+      <div className={panelClassName} id="main-nav-panel">
         <div className="main-nav__links">
           <Link to="/">Home</Link>
           <Link to="/collectibles">Collectibles</Link>
@@ -56,7 +92,16 @@ function App() {
             </>
           )}
         </div>
-      </nav>
+      </div>
+    </nav>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
+      <PostHogPageviews />
+      <MainNav />
       <hr />
       <Routes>
         <Route path="/" element={<Home />} />
