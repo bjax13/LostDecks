@@ -15,7 +15,57 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.main-nav__menu-toggle {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid rgba(138, 43, 226, 0.6);
+  background: rgba(13, 10, 26, 0.5);
+  color: #e0e0e0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.main-nav__menu-toggle:hover {
+  background: rgba(138, 43, 226, 0.2);
+  color: #ffffff;
+}
+
+.main-nav__menu-toggle-bars {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 1.25rem;
+}
+
+.main-nav__menu-toggle-bar {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 1px;
+  background: currentcolor;
+}
+
+.main-nav__panel {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: 1rem;
+  min-width: 0;
 }
 
 .main-nav__links,
@@ -23,6 +73,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 }
 
 .main-nav a,
@@ -51,6 +102,58 @@ body {
 
 .main-nav__welcome {
   padding: 0.5rem 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .main-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .main-nav__menu-toggle {
+    display: inline-flex;
+    align-self: flex-end;
+  }
+
+  .main-nav__panel {
+    display: none;
+    flex: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    gap: 1.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .main-nav__panel--open {
+    display: flex;
+  }
+
+  .main-nav__links,
+  .main-nav__auth {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .main-nav a,
+  .main-nav button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .main-nav__welcome {
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }
 
 .auth-page {
