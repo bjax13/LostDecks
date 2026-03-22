@@ -37,11 +37,13 @@ function renderModal(props = {}) {
 
 describe("AuthModal (unit)", () => {
   let consoleErrorSpy;
+  let user;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockError = null;
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    user = userEvent.setup({ delay: null });
   });
 
   afterEach(() => {
@@ -78,16 +80,15 @@ describe("AuthModal (unit)", () => {
   });
 
   it("close button resets state, clears error, and calls onClose", async () => {
-    const user = userEvent.setup();
     const { onClose } = renderModal();
-    await user.type(screen.getByLabelText(/^Email$/i), "a@b.com");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("a@b.com");
     await user.click(screen.getByRole("button", { name: "×" }));
     expect(mockClearError).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("switches to register mode and clears error", async () => {
-    const user = userEvent.setup();
     renderModal();
     mockClearError.mockClear();
     await user.click(screen.getByRole("button", { name: /Need an account/i }));
@@ -99,7 +100,6 @@ describe("AuthModal (unit)", () => {
   });
 
   it("switches from register back to login via switcher", async () => {
-    const user = userEvent.setup();
     renderModal();
     await user.click(screen.getByRole("button", { name: /Need an account/i }));
     await user.click(screen.getByRole("button", { name: /Already have an account/i }));
@@ -107,7 +107,6 @@ describe("AuthModal (unit)", () => {
   });
 
   it("switches to forgot password mode and hides password field", async () => {
-    const user = userEvent.setup();
     renderModal();
     await user.click(screen.getByText("Forgot password?"));
     expect(screen.getByRole("heading", { name: "Reset Password" })).toBeInTheDocument();
@@ -116,46 +115,52 @@ describe("AuthModal (unit)", () => {
   });
 
   it("updates controlled fields via handleChange", async () => {
-    const user = userEvent.setup();
     renderModal();
     await user.click(screen.getByRole("button", { name: /Need an account/i }));
-    await user.type(screen.getByLabelText(/^Display Name$/i), "Pat");
-    await user.type(screen.getByLabelText(/^Email$/i), "pat@example.com");
-    await user.type(screen.getByLabelText(/^Password$/i), "secret12");
+    await user.click(screen.getByLabelText(/^Display Name$/i));
+    await user.paste("Pat");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("pat@example.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("secret12");
     expect(screen.getByLabelText(/^Display Name$/i)).toHaveValue("Pat");
     expect(screen.getByLabelText(/^Email$/i)).toHaveValue("pat@example.com");
     expect(screen.getByLabelText(/^Password$/i)).toHaveValue("secret12");
   });
 
   it("submits login and closes on success", async () => {
-    const user = userEvent.setup();
     mockLogin.mockResolvedValueOnce(undefined);
     const { onClose } = renderModal();
-    await user.type(screen.getByLabelText(/^Email$/i), "u@x.com");
-    await user.type(screen.getByLabelText(/^Password$/i), "pw123456");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("u@x.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw123456");
     await user.click(screen.getByRole("button", { name: "Sign In" }));
     expect(mockLogin).toHaveBeenCalledWith("u@x.com", "pw123456");
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("logs when login rejects", async () => {
-    const user = userEvent.setup();
     mockLogin.mockRejectedValueOnce(new Error("nope"));
     renderModal();
-    await user.type(screen.getByLabelText(/^Email$/i), "u2@x.com");
-    await user.type(screen.getByLabelText(/^Password$/i), "pw222222");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("u2@x.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw222222");
     await user.click(screen.getByRole("button", { name: "Sign In" }));
     expect(consoleErrorSpy).toHaveBeenCalledWith("Login failed", expect.any(Error));
   });
 
   it("submits register with displayName and closes on success", async () => {
-    const user = userEvent.setup();
     const { onClose } = renderModal();
     await user.click(screen.getByRole("button", { name: /Need an account/i }));
     mockRegister.mockResolvedValueOnce(undefined);
-    await user.type(screen.getByLabelText(/^Display Name$/i), "Sam");
-    await user.type(screen.getByLabelText(/^Email$/i), "sam@example.com");
-    await user.type(screen.getByLabelText(/^Password$/i), "pw123456");
+    await user.click(screen.getByLabelText(/^Display Name$/i));
+    await user.paste("Sam");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("sam@example.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw123456");
     await user.click(screen.getByRole("button", { name: "Sign Up" }));
     expect(mockRegister).toHaveBeenCalledWith("sam@example.com", "pw123456", {
       displayName: "Sam",
@@ -164,36 +169,38 @@ describe("AuthModal (unit)", () => {
   });
 
   it("logs when registration rejects", async () => {
-    const user = userEvent.setup();
     renderModal();
     await user.click(screen.getByRole("button", { name: /Need an account/i }));
     mockRegister.mockRejectedValueOnce(new Error("reg fail"));
-    await user.type(screen.getByLabelText(/^Display Name$/i), "Other");
-    await user.type(screen.getByLabelText(/^Email$/i), "other@example.com");
-    await user.type(screen.getByLabelText(/^Password$/i), "pw123456");
+    await user.click(screen.getByLabelText(/^Display Name$/i));
+    await user.paste("Other");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("other@example.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw123456");
     await user.click(screen.getByRole("button", { name: "Sign Up" }));
     expect(consoleErrorSpy).toHaveBeenCalledWith("Registration failed", expect.any(Error));
   });
 
   it("submits forgot password, closes on success, and logs on failure", async () => {
-    const user = userEvent.setup();
     const { onClose } = renderModal();
     await user.click(screen.getByText("Forgot password?"));
     mockResetPassword.mockResolvedValueOnce(undefined);
-    await user.type(screen.getByLabelText(/^Email$/i), "reset@example.com");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("reset@example.com");
     await user.click(screen.getByRole("button", { name: "Send Reset Email" }));
     expect(mockResetPassword).toHaveBeenCalledWith("reset@example.com");
     expect(onClose).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByText("Forgot password?"));
     mockResetPassword.mockRejectedValueOnce(new Error("reset fail"));
-    await user.type(screen.getByLabelText(/^Email$/i), "bad@example.com");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("bad@example.com");
     await user.click(screen.getByRole("button", { name: "Send Reset Email" }));
     expect(consoleErrorSpy).toHaveBeenCalledWith("Reset password failed", expect.any(Error));
   });
 
   it("invokes onClose when mocked social login triggers onSuccess", async () => {
-    const user = userEvent.setup();
     const { onClose } = renderModal();
     await user.click(screen.getByTestId("social-mock-success"));
     expect(mockClearError).toHaveBeenCalled();

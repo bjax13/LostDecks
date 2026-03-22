@@ -20,9 +20,12 @@ vi.mock("../../components/Auth/SocialLoginButtons", () => ({
 }));
 
 describe("Register (unit)", () => {
+  let user;
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockError = null;
+    user = userEvent.setup({ delay: null });
   });
 
   it("renders registration form", () => {
@@ -45,10 +48,13 @@ describe("Register (unit)", () => {
         <Register />
       </TestMemoryRouter>,
     );
-    await userEvent.type(screen.getByLabelText(/Display Name/i), "Test User");
-    await userEvent.type(screen.getByLabelText(/Email/i), "new@example.com");
-    await userEvent.type(screen.getByLabelText(/Password/i), "secret123");
-    await userEvent.click(screen.getByRole("button", { name: "Sign Up" }));
+    await user.click(screen.getByLabelText(/Display Name/i));
+    await user.paste("Test User");
+    await user.click(screen.getByLabelText(/Email/i));
+    await user.paste("new@example.com");
+    await user.click(screen.getByLabelText(/Password/i));
+    await user.paste("secret123");
+    await user.click(screen.getByRole("button", { name: "Sign Up" }));
     expect(mockRegister).toHaveBeenCalledWith("new@example.com", "secret123", {
       displayName: "Test User",
     });

@@ -118,6 +118,12 @@ describe("AccountPage", () => {
   // ── Additional contact info form ────────────────────────────────────────
 
   describe("additional contact info form", () => {
+    let user;
+
+    beforeEach(() => {
+      user = userEvent.setup({ delay: null });
+    });
+
     it("renders the Additional contact information section heading", () => {
       renderAccountPage();
       expect(
@@ -142,7 +148,6 @@ describe("AccountPage", () => {
     });
 
     it("updates the phone number field on input", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const input = screen.getByLabelText("Phone number");
       await user.type(input, "555-1234");
@@ -150,7 +155,6 @@ describe("AccountPage", () => {
     });
 
     it("updates the mailing address field on input", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const textarea = screen.getByLabelText("Mailing address");
       await user.type(textarea, "123 Main St");
@@ -158,7 +162,6 @@ describe("AccountPage", () => {
     });
 
     it("updates the primary backup email field on input", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const input = screen.getByLabelText("Backup email (primary)");
       await user.type(input, "backup@example.com");
@@ -166,7 +169,6 @@ describe("AccountPage", () => {
     });
 
     it("updates the secondary backup email field on input", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const input = screen.getByLabelText("Backup email (secondary)");
       await user.type(input, "alt@example.com");
@@ -174,13 +176,16 @@ describe("AccountPage", () => {
     });
 
     it("preserves all field values when updating multiple fields (merge behavior)", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
 
-      await user.type(screen.getByLabelText("Phone number"), "555-1234");
-      await user.type(screen.getByLabelText("Mailing address"), "123 Main St");
-      await user.type(screen.getByLabelText("Backup email (primary)"), "backup@example.com");
-      await user.type(screen.getByLabelText("Backup email (secondary)"), "alt@example.com");
+      await user.click(screen.getByLabelText("Phone number"));
+      await user.paste("555-1234");
+      await user.click(screen.getByLabelText("Mailing address"));
+      await user.paste("123 Main St");
+      await user.click(screen.getByLabelText("Backup email (primary)"));
+      await user.paste("backup@example.com");
+      await user.click(screen.getByLabelText("Backup email (secondary)"));
+      await user.paste("alt@example.com");
 
       expect(screen.getByLabelText("Phone number")).toHaveValue("555-1234");
       expect(screen.getByLabelText("Mailing address")).toHaveValue("123 Main St");
@@ -189,14 +194,12 @@ describe("AccountPage", () => {
     });
 
     it('shows "Saved locally" feedback after form submission', async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
       expect(screen.getByText("Saved locally — sync options coming soon.")).toBeInTheDocument();
     });
 
     it("clears the saved feedback when a field is changed after submission", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
 
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
@@ -216,7 +219,6 @@ describe("AccountPage", () => {
     });
 
     it("form submit does not navigate away (default prevented)", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const form = screen.getByRole("button", { name: "Save contact info" }).closest("form");
       const submitSpy = vi.fn((e) => e.preventDefault());
@@ -227,7 +229,6 @@ describe("AccountPage", () => {
     });
 
     it("calls preventDefault on form submit event", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
       const form = screen.getByRole("button", { name: "Save contact info" }).closest("form");
       let submittedEvent;
@@ -242,10 +243,10 @@ describe("AccountPage", () => {
     });
 
     it("submits with prefilled data and shows feedback", async () => {
-      const user = userEvent.setup();
       renderAccountPage();
 
-      await user.type(screen.getByLabelText("Phone number"), "555-9999");
+      await user.click(screen.getByLabelText("Phone number"));
+      await user.paste("555-9999");
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
 
       expect(screen.getByText("Saved locally — sync options coming soon.")).toBeInTheDocument();

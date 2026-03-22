@@ -1,5 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("./lib/firebase", () => ({
+  app: null,
+  auth: null,
+  db: null,
+  functions: null,
+  githubProvider: null,
+  googleProvider: null,
+  hasFirebaseConfig: false,
+}));
+
 import App from "./App.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { AuthModalProvider } from "./contexts/AuthModalContext.jsx";
@@ -16,6 +27,8 @@ describe("App (integration)", () => {
   it("renders primary navigation for a signed-out user after auth finishes loading", async () => {
     renderWithAppProviders(<App />);
     expect(screen.getByRole("link", { name: "Collectibles" })).toBeInTheDocument();
-    expect(await screen.findByRole("link", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
+    ).toBeInTheDocument();
   });
 });

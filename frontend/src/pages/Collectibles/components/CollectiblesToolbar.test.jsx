@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { sortOptions } from "../constants.js";
@@ -245,20 +245,20 @@ describe("CollectiblesToolbar", () => {
       expect(props.onSortFieldChange).toHaveBeenCalledWith("story");
     });
 
-    it("calls onSortFieldChange for each sort option from constants", async () => {
-      const user = userEvent.setup();
-      for (let i = 0; i < sortOptions.length; i++) {
-        cleanup();
-        const option = sortOptions[i];
-        const prevOption = sortOptions[(i + 1) % sortOptions.length];
-        const onSortFieldChange = vi.fn();
-        renderToolbar({
-          onSortFieldChange,
-          sortField: prevOption.value,
-        });
-        await user.selectOptions(screen.getByLabelText("Sort by"), option.value);
-        expect(onSortFieldChange).toHaveBeenCalledWith(option.value);
-      }
+    it.each(
+      sortOptions.map((option, i) => ({
+        value: option.value,
+        prevValue: sortOptions[(i + 1) % sortOptions.length].value,
+      })),
+    )("calls onSortFieldChange when selecting $value", ({ value, prevValue }) => {
+      const onSortFieldChange = vi.fn();
+      renderToolbar({
+        onSortFieldChange,
+        sortField: prevValue,
+      });
+      const select = screen.getByLabelText("Sort by");
+      fireEvent.change(select, { target: { value } });
+      expect(onSortFieldChange).toHaveBeenCalledWith(value);
     });
 
     it("sort direction button has sort-direction class", () => {
