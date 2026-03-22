@@ -254,10 +254,7 @@ describe("TradesPanel", () => {
       await user.click(screen.getByRole("button", { name: "Mark completed" }));
 
       expect(alertSpy).toHaveBeenCalledWith("Network failure");
-      expect(errorSpy).toHaveBeenCalledWith(
-        "Failed to update trade status",
-        expect.any(Error),
-      );
+      expect(errorSpy).toHaveBeenCalledWith("Failed to update trade status", expect.any(Error));
     });
 
     it("alerts a generic message when the error has no message", async () => {
@@ -297,8 +294,12 @@ describe("TradesPanel", () => {
       expect(within(items[2]).getByText(/Card C/)).toBeInTheDocument();
 
       expect(within(items[0]).getByRole("button", { name: "Mark completed" })).toBeInTheDocument();
-      expect(within(items[1]).queryByRole("button", { name: "Mark completed" })).not.toBeInTheDocument();
-      expect(within(items[2]).queryByRole("button", { name: "Mark completed" })).not.toBeInTheDocument();
+      expect(
+        within(items[1]).queryByRole("button", { name: "Mark completed" }),
+      ).not.toBeInTheDocument();
+      expect(
+        within(items[2]).queryByRole("button", { name: "Mark completed" }),
+      ).not.toBeInTheDocument();
     });
   });
 
