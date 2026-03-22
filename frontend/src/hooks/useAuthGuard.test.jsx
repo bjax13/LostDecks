@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../test/router.jsx";
 import { useAuthGuard } from "./useAuthGuard.js";
 
 const mockUseAuth = vi.fn();
@@ -11,12 +12,12 @@ vi.mock("../contexts/AuthContext", () => ({
 
 function wrapper({ initialEntries = ["/test"] }) {
   return ({ children }) => (
-    <MemoryRouter initialEntries={initialEntries}>
+    <TestMemoryRouter initialEntries={initialEntries}>
       <Routes>
         <Route path="/test" element={children} />
         <Route path="/collection" element={children} />
       </Routes>
-    </MemoryRouter>
+    </TestMemoryRouter>
   );
 }
 

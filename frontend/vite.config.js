@@ -13,6 +13,9 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "text-summary", "html"],
       include: ["src/**/*.{js,jsx}"],
+      // Thresholds (branches/functions/lines) apply only to files not listed below. Heavy Firebase,
+      // router shell, and several page surfaces are excluded so CI enforces a high bar on the
+      // covered subset; expand this list (and add tests) as you want metrics closer to full-app risk.
       exclude: [
         "src/**/*.test.{js,jsx}",
         "src/**/*.spec.{js,jsx}",

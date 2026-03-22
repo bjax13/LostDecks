@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import Login from "./Login.jsx";
 
 const mockLogin = vi.fn();
@@ -22,9 +22,9 @@ vi.mock("../../components/Auth/SocialLoginButtons", () => ({
 
 function renderLogin() {
   return render(
-    <MemoryRouter>
+    <TestMemoryRouter>
       <Login />
-    </MemoryRouter>,
+    </TestMemoryRouter>,
   );
 }
 

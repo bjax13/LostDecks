@@ -11,6 +11,7 @@ import CollectionPage from "./pages/Collection";
 import Home from "./pages/Home";
 import MarketPage from "./pages/Market";
 import NotFound from "./pages/NotFound";
+import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -25,7 +26,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
       <nav className="main-nav">
         <div className="main-nav__links">
           <Link to="/">Home</Link>

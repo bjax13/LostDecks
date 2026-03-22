@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../../test/router.jsx";
 import CollectibleGrid from "./CollectibleGrid.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
@@ -28,9 +28,9 @@ const mockCollectible = {
 describe("CollectibleGrid (unit)", () => {
   it("renders collectible cards as links", () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <CollectibleGrid collectibles={[mockCollectible]} />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     const link = screen.getByRole("link", { name: /Story #01/i });
     expect(link).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
@@ -38,9 +38,9 @@ describe("CollectibleGrid (unit)", () => {
 
   it("prevents navigation when clicking add-to-collection button", async () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <CollectibleGrid collectibles={[mockCollectible]} />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     const addBtn = screen.getByTestId("add-btn");
     await userEvent.click(addBtn);

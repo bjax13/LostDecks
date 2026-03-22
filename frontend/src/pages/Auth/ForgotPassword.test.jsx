@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import ForgotPassword from "./ForgotPassword.jsx";
 
 const mockResetPassword = vi.fn();
@@ -23,9 +23,9 @@ describe("ForgotPassword (unit)", () => {
 
   it("renders reset form", () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <ForgotPassword />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     expect(screen.getByRole("heading", { name: /Reset your password/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -35,9 +35,9 @@ describe("ForgotPassword (unit)", () => {
   it("calls resetPassword on submit", async () => {
     mockResetPassword.mockResolvedValue(undefined);
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <ForgotPassword />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     await userEvent.type(screen.getByLabelText(/Email/i), "user@example.com");
     await userEvent.click(screen.getByRole("button", { name: "Send reset email" }));
@@ -47,9 +47,9 @@ describe("ForgotPassword (unit)", () => {
   it("shows success message after submit", async () => {
     mockResetPassword.mockResolvedValue(undefined);
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <ForgotPassword />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     await userEvent.type(screen.getByLabelText(/Email/i), "user@example.com");
     await userEvent.click(screen.getByRole("button", { name: "Send reset email" }));

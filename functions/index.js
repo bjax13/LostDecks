@@ -1,18 +1,12 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
+const { asInt } = require("./validation");
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
 const db = admin.firestore();
-
-function asInt(value, field) {
-  if (typeof value !== "number" || !Number.isFinite(value) || Math.floor(value) !== value) {
-    throw new HttpsError("invalid-argument", `${field} must be an integer`);
-  }
-  return value;
-}
 
 exports.acceptListing = onCall(async (request) => {
   const auth = request.auth;

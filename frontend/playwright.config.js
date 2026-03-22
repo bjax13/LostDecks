@@ -1,5 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const previewArgs = "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort";
+/** When set (e.g. in CI after a dedicated `npm run build`), skip rebuilding before preview. */
+const skipProdBuild = process.env.PLAYWRIGHT_SKIP_BUILD === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -13,7 +17,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
+    command: skipProdBuild ? previewArgs : `npm run build && ${previewArgs}`,
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

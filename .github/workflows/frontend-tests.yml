@@ -1,4 +1,4 @@
-name: Frontend tests
+name: CI
 
 on:
   push:
@@ -17,6 +17,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             frontend/package-lock.json
+            functions/package-lock.json
       - name: Install root dependencies (Biome)
         run: npm ci
       - name: Biome check
@@ -24,9 +25,18 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
-      - name: Unit & integration tests
+      - name: Production build
         working-directory: frontend
-        run: npm run test
+        run: npm run build
+      - name: Unit, integration & coverage thresholds
+        working-directory: frontend
+        run: npm run test:coverage
+      - name: Install functions dependencies
+        working-directory: functions
+        run: npm ci
+      - name: Cloud Functions unit tests
+        working-directory: functions
+        run: npm test
       - name: Install Playwright Chromium
         working-directory: frontend
         run: npx playwright install chromium --with-deps
@@ -35,3 +45,4 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
+          PLAYWRIGHT_SKIP_BUILD: "1"

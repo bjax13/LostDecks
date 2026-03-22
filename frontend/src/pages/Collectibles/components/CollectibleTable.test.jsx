@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../../test/router.jsx";
 import CollectibleTable from "./CollectibleTable.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
@@ -27,9 +28,9 @@ const mockCollectible = {
 describe("CollectibleTable (unit)", () => {
   it("renders table with collectible rows", () => {
     render(
-      <MemoryRouter>
+      <TestMemoryRouter>
         <CollectibleTable collectibles={[mockCollectible]} />
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     expect(screen.getByText("LT24-ELS-01")).toBeInTheDocument();
     expect(screen.getByText("Story #01")).toBeInTheDocument();
@@ -37,7 +38,7 @@ describe("CollectibleTable (unit)", () => {
 
   it("navigates when row is clicked", async () => {
     render(
-      <MemoryRouter initialEntries={["/collectibles"]}>
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
         <Routes>
           <Route
             path="/collectibles"
@@ -45,7 +46,7 @@ describe("CollectibleTable (unit)", () => {
           />
           <Route path="/collectibles/:id" element={<div data-testid="detail">Detail</div>} />
         </Routes>
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     const row = screen.getByText("LT24-ELS-01").closest("tr");
     await userEvent.click(row);
@@ -54,7 +55,7 @@ describe("CollectibleTable (unit)", () => {
 
   it("does not navigate when add-to-collection is clicked", async () => {
     render(
-      <MemoryRouter initialEntries={["/collectibles"]}>
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
         <Routes>
           <Route
             path="/collectibles"
@@ -62,7 +63,7 @@ describe("CollectibleTable (unit)", () => {
           />
           <Route path="/collectibles/:id" element={<div data-testid="detail">Detail</div>} />
         </Routes>
-      </MemoryRouter>,
+      </TestMemoryRouter>,
     );
     const addBtn = screen.getByTestId("add-btn");
     await userEvent.click(addBtn);

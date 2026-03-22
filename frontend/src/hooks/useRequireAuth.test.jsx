@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../test/router.jsx";
 import { useRequireAuth } from "./useRequireAuth.js";
 
 const mockUseAuth = vi.fn();
@@ -20,12 +21,12 @@ vi.mock("react-router-dom", async (importOriginal) => {
 
 function wrapper({ initialEntries = ["/protected"] }) {
   return ({ children }) => (
-    <MemoryRouter initialEntries={initialEntries}>
+    <TestMemoryRouter initialEntries={initialEntries}>
       <Routes>
         <Route path="/protected" element={children} />
         <Route path="/auth/login" element={<div>Login page</div>} />
       </Routes>
-    </MemoryRouter>
+    </TestMemoryRouter>
   );
 }
 
