@@ -61,9 +61,7 @@ describe("useCollectibleCollectionEntry", () => {
     });
 
     it("returns entry=null, loading=false, error=null for null ownerUid", () => {
-      const { result } = renderHook(() =>
-        useCollectibleCollectionEntry(null, "LT24-ELS-01", null),
-      );
+      const { result } = renderHook(() => useCollectibleCollectionEntry(null, "LT24-ELS-01", null));
 
       expect(result.current.entry).toBe(null);
       expect(result.current.loading).toBe(false);
@@ -71,9 +69,7 @@ describe("useCollectibleCollectionEntry", () => {
     });
 
     it("returns entry=null, loading=false, error=null for empty string ownerUid", () => {
-      const { result } = renderHook(() =>
-        useCollectibleCollectionEntry("", "LT24-ELS-01", null),
-      );
+      const { result } = renderHook(() => useCollectibleCollectionEntry("", "LT24-ELS-01", null));
 
       expect(result.current.entry).toBe(null);
       expect(result.current.loading).toBe(false);
@@ -88,9 +84,7 @@ describe("useCollectibleCollectionEntry", () => {
 
   describe("when neither collectibleId nor skuId is provided", () => {
     it("returns entry=null, loading=false when both are null/undefined", () => {
-      const { result } = renderHook(() =>
-        useCollectibleCollectionEntry("user-123", null, null),
-      );
+      const { result } = renderHook(() => useCollectibleCollectionEntry("user-123", null, null));
 
       expect(result.current.entry).toBe(null);
       expect(result.current.loading).toBe(false);
@@ -231,9 +225,7 @@ describe("useCollectibleCollectionEntry", () => {
         mockGetFinishesForCard.mockReturnValue(["DUN"]);
         mockToSkuId.mockReturnValue("LT24-ELS-01-DUN");
 
-        renderHook(() =>
-          useCollectibleCollectionEntry("user-123", "LT24-ELS-01", null),
-        );
+        renderHook(() => useCollectibleCollectionEntry("user-123", "LT24-ELS-01", null));
 
         expect(mockGetFinishesForCard).toHaveBeenCalledWith("LT24-ELS-01");
         expect(mockToSkuId).toHaveBeenCalledWith("LT24-ELS-01", "DUN");
@@ -274,13 +266,9 @@ describe("useCollectibleCollectionEntry", () => {
     describe("collectible has multiple finishes", () => {
       it("builds query with skuId 'in' array", () => {
         mockGetFinishesForCard.mockReturnValue(["DUN", "FOIL"]);
-        mockToSkuId
-          .mockReturnValueOnce("LT24-ELS-01-DUN")
-          .mockReturnValueOnce("LT24-ELS-01-FOIL");
+        mockToSkuId.mockReturnValueOnce("LT24-ELS-01-DUN").mockReturnValueOnce("LT24-ELS-01-FOIL");
 
-        renderHook(() =>
-          useCollectibleCollectionEntry("user-123", "LT24-ELS-01", null),
-        );
+        renderHook(() => useCollectibleCollectionEntry("user-123", "LT24-ELS-01", null));
 
         expect(mockToSkuId).toHaveBeenCalledWith("LT24-ELS-01", "DUN");
         expect(mockToSkuId).toHaveBeenCalledWith("LT24-ELS-01", "FOIL");
@@ -292,9 +280,7 @@ describe("useCollectibleCollectionEntry", () => {
 
       it("on success: sets entry from first doc", () => {
         mockGetFinishesForCard.mockReturnValue(["DUN", "FOIL"]);
-        mockToSkuId
-          .mockReturnValueOnce("LT24-ELS-01-DUN")
-          .mockReturnValueOnce("LT24-ELS-01-FOIL");
+        mockToSkuId.mockReturnValueOnce("LT24-ELS-01-DUN").mockReturnValueOnce("LT24-ELS-01-FOIL");
 
         const { result } = renderHook(() =>
           useCollectibleCollectionEntry("user-123", "LT24-ELS-01", null),
@@ -404,8 +390,7 @@ describe("useCollectibleCollectionEntry", () => {
       mockToSkuId.mockReturnValueOnce("LT24-ELS-01-DUN").mockReturnValueOnce("LT24-WOK-01-FOIL");
 
       const { rerender } = renderHook(
-        ({ collectibleId }) =>
-          useCollectibleCollectionEntry("user-123", collectibleId, null),
+        ({ collectibleId }) => useCollectibleCollectionEntry("user-123", collectibleId, null),
         { initialProps: { collectibleId: "LT24-ELS-01" } },
       );
 
@@ -459,9 +444,7 @@ describe("useCollectibleCollectionEntry", () => {
 
   describe("skuId takes precedence over collectibleId", () => {
     it("when both skuId and collectibleId are provided, uses skuId path", () => {
-      renderHook(() =>
-        useCollectibleCollectionEntry("user-123", "LT24-ELS-01", "LT24-ELS-01-DUN"),
-      );
+      renderHook(() => useCollectibleCollectionEntry("user-123", "LT24-ELS-01", "LT24-ELS-01-DUN"));
 
       expect(mockGetFinishesForCard).not.toHaveBeenCalled();
       expect(mockWhere).toHaveBeenCalledWith("skuId", "==", "LT24-ELS-01-DUN");
