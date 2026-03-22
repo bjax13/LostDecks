@@ -16,7 +16,7 @@ export default function CollectibleTable({ collectibles }) {
   };
 
   return (
-    <div className="cards-table-wrapper">
+    <section className="cards-table-wrapper" aria-label="Collectibles table">
       <table className="cards-table">
         <thead>
           <tr>
@@ -65,6 +65,6 @@ export default function CollectibleTable({ collectibles }) {
           ))}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }
