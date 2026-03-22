@@ -31,7 +31,9 @@ describe("Register (unit)", () => {
         <Register />
       </MemoryRouter>,
     );
-    expect(screen.getByRole("heading", { name: /Create your Lost Tales account/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Create your Lost Tales account/i }),
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
   });

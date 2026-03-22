@@ -14,9 +14,7 @@ describe("ListingRow (unit)", () => {
   };
 
   it("renders Ask label for ASK type", () => {
-    render(
-      <ListingRow listing={baseListing} canAccept onAccept={() => {}} onCancel={() => {}} />,
-    );
+    render(<ListingRow listing={baseListing} canAccept onAccept={() => {}} onCancel={() => {}} />);
     expect(screen.getByText("Ask")).toBeInTheDocument();
   });
 
@@ -33,9 +31,7 @@ describe("ListingRow (unit)", () => {
   });
 
   it("formats price as currency", () => {
-    render(
-      <ListingRow listing={baseListing} canAccept onAccept={() => {}} onCancel={() => {}} />,
-    );
+    render(<ListingRow listing={baseListing} canAccept onAccept={() => {}} onCancel={() => {}} />);
     expect(screen.getByText("$9.99")).toBeInTheDocument();
   });
 
@@ -66,33 +62,32 @@ describe("ListingRow (unit)", () => {
 
   it("calls onAccept when Accept clicked and canAccept", async () => {
     const onAccept = vi.fn();
-    render(
-      <ListingRow listing={baseListing} canAccept onAccept={onAccept} onCancel={() => {}} />,
-    );
+    render(<ListingRow listing={baseListing} canAccept onAccept={onAccept} onCancel={() => {}} />);
     await userEvent.click(screen.getByRole("button", { name: "Accept" }));
     expect(onAccept).toHaveBeenCalledWith(baseListing);
   });
 
   it("shows Cancel button when canCancel", () => {
     const onCancel = vi.fn();
-    render(
-      <ListingRow listing={baseListing} canCancel onAccept={() => {}} onCancel={onCancel} />,
-    );
+    render(<ListingRow listing={baseListing} canCancel onAccept={() => {}} onCancel={onCancel} />);
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
   it("calls onCancel when Cancel clicked", async () => {
     const onCancel = vi.fn();
-    render(
-      <ListingRow listing={baseListing} canCancel onAccept={() => {}} onCancel={onCancel} />,
-    );
+    render(<ListingRow listing={baseListing} canCancel onAccept={() => {}} onCancel={onCancel} />);
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalledWith(baseListing);
   });
 
   it("disables Accept when not canAccept", () => {
     const { container } = render(
-      <ListingRow listing={baseListing} canAccept={false} onAccept={() => {}} onCancel={() => {}} />,
+      <ListingRow
+        listing={baseListing}
+        canAccept={false}
+        onAccept={() => {}}
+        onCancel={() => {}}
+      />,
     );
     const acceptBtn = container.querySelector(".market-listing__actions button");
     expect(acceptBtn).toBeDisabled();
@@ -100,11 +95,16 @@ describe("ListingRow (unit)", () => {
 
   it("falls back to currency + amount when Intl fails", () => {
     const originalNumberFormat = Intl.NumberFormat;
-    Intl.NumberFormat = function () {
+    Intl.NumberFormat = () => {
       throw new Error("Intl not available");
     };
     render(
-      <ListingRow listing={{ ...baseListing, currency: "XYZ" }} canAccept onAccept={() => {}} onCancel={() => {}} />,
+      <ListingRow
+        listing={{ ...baseListing, currency: "XYZ" }}
+        canAccept
+        onAccept={() => {}}
+        onCancel={() => {}}
+      />,
     );
     expect(screen.getByText(/XYZ/)).toBeInTheDocument();
     Intl.NumberFormat = originalNumberFormat;

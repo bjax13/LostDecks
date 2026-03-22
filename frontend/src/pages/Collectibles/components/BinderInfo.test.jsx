@@ -14,18 +14,14 @@ describe("BinderInfo (unit)", () => {
   });
 
   it("renders binder details in grid layout", () => {
-    render(
-      <BinderInfo binder={{ page: 1, row: 2, col: 3, position: 4 }} layout="grid" />,
-    );
+    render(<BinderInfo binder={{ page: 1, row: 2, col: 3, position: 4 }} layout="grid" />);
     expect(screen.getByText("Page 1")).toBeInTheDocument();
     expect(screen.getByText(/Row 2 · Col 3/)).toBeInTheDocument();
     expect(screen.getByText("Slot 4")).toBeInTheDocument();
   });
 
   it("renders binder details in table layout", () => {
-    render(
-      <BinderInfo binder={{ page: 1, row: 2, col: 3, position: 4 }} layout="table" />,
-    );
+    render(<BinderInfo binder={{ page: 1, row: 2, col: 3, position: 4 }} layout="table" />);
     expect(screen.getByText("Page 1")).toBeInTheDocument();
     expect(screen.getByText(/Row 2, Col 3/)).toBeInTheDocument();
   });

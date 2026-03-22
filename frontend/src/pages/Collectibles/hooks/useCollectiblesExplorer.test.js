@@ -15,11 +15,13 @@ describe("useCollectiblesExplorer (unit)", () => {
   it("filters by search term", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     act(() => result.current.setSearchTerm("ELS"));
-    expect(result.current.collectibles.length).toBeLessThanOrEqual(result.current.totalCollectibles);
+    expect(result.current.collectibles.length).toBeLessThanOrEqual(
+      result.current.totalCollectibles,
+    );
     if (result.current.collectibles.length > 0) {
       expect(
-        result.current.collectibles.some((c) =>
-          c.searchTokens?.includes("els") || c.id?.includes("ELS"),
+        result.current.collectibles.some(
+          (c) => c.searchTokens?.includes("els") || c.id?.includes("ELS"),
         ),
       ).toBe(true);
     }
@@ -37,7 +39,9 @@ describe("useCollectiblesExplorer (unit)", () => {
     if (stories.length > 0) {
       act(() => result.current.setStoryFilter(stories[0].code));
       expect(
-        result.current.collectibles.every((c) => c.story === stories[0].code || c.category === "herald"),
+        result.current.collectibles.every(
+          (c) => c.story === stories[0].code || c.category === "herald",
+        ),
       ).toBe(true);
     }
   });

@@ -5,7 +5,11 @@ import { describe, expect, it, vi } from "vitest";
 import CollectibleTable from "./CollectibleTable.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
-  default: () => <button type="button" className="add-to-collection" data-testid="add-btn">Add</button>,
+  default: () => (
+    <button type="button" className="add-to-collection" data-testid="add-btn">
+      Add
+    </button>
+  ),
 }));
 
 const mockCollectible = {
@@ -35,7 +39,10 @@ describe("CollectibleTable (unit)", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles"]}>
         <Routes>
-          <Route path="/collectibles" element={<CollectibleTable collectibles={[mockCollectible]} />} />
+          <Route
+            path="/collectibles"
+            element={<CollectibleTable collectibles={[mockCollectible]} />}
+          />
           <Route path="/collectibles/:id" element={<div data-testid="detail">Detail</div>} />
         </Routes>
       </MemoryRouter>,
@@ -49,7 +56,10 @@ describe("CollectibleTable (unit)", () => {
     render(
       <MemoryRouter initialEntries={["/collectibles"]}>
         <Routes>
-          <Route path="/collectibles" element={<CollectibleTable collectibles={[mockCollectible]} />} />
+          <Route
+            path="/collectibles"
+            element={<CollectibleTable collectibles={[mockCollectible]} />}
+          />
           <Route path="/collectibles/:id" element={<div data-testid="detail">Detail</div>} />
         </Routes>
       </MemoryRouter>,

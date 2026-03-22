@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { acceptListing, cancelListing, createListing, LISTINGS_PATH, subscribeOpenListings } from "./listings.js";
+import {
+  acceptListing,
+  cancelListing,
+  createListing,
+  LISTINGS_PATH,
+  subscribeOpenListings,
+} from "./listings.js";
 
 const mockOnSnapshot = vi.fn();
 const mockRunTransaction = vi.fn();
@@ -8,12 +14,12 @@ const mockHttpsCallable = vi.fn();
 
 vi.mock("firebase/firestore", () => ({
   addDoc: (...args) => mockAddDoc(...args),
-  collection: (db, path) => ({ _type: "collection", path }),
-  doc: (db, path, id) => ({ _type: "doc", path, id }),
+  collection: (_db, path) => ({ _type: "collection", path }),
+  doc: (_db, path, id) => ({ _type: "doc", path, id }),
   onSnapshot: (...args) => mockOnSnapshot(...args),
   orderBy: (field, dir) => ({ _type: "orderBy", field, dir }),
   query: (...args) => args,
-  runTransaction: (db, fn) => mockRunTransaction(fn),
+  runTransaction: (_db, fn) => mockRunTransaction(fn),
   serverTimestamp: () => ({ _type: "serverTimestamp" }),
   where: (field, op, val) => ({ _type: "where", field, op, val }),
 }));
@@ -53,17 +59,23 @@ describe("listings (unit)", () => {
       subscribeOpenListings({ cardId: "LT24-ELS-01" }, onNext);
       expect(mockOnSnapshot).toHaveBeenCalled();
       const [q] = mockOnSnapshot.mock.calls[0];
-      expect(q.some((c) => c._type === "where" && c.field === "cardId" && c.val === "LT24-ELS-01")).toBe(true);
+      expect(
+        q.some((c) => c._type === "where" && c.field === "cardId" && c.val === "LT24-ELS-01"),
+      ).toBe(true);
     });
   });
 
   describe("cancelListing", () => {
     it("throws when listingId missing", async () => {
-      await expect(cancelListing({ cancelledByUid: "u1" })).rejects.toThrow("Missing required cancel fields");
+      await expect(cancelListing({ cancelledByUid: "u1" })).rejects.toThrow(
+        "Missing required cancel fields",
+      );
     });
 
     it("throws when cancelledByUid missing", async () => {
-      await expect(cancelListing({ listingId: "l1" })).rejects.toThrow("Missing required cancel fields");
+      await expect(cancelListing({ listingId: "l1" })).rejects.toThrow(
+        "Missing required cancel fields",
+      );
     });
 
     it("throws when listing not found", async () => {

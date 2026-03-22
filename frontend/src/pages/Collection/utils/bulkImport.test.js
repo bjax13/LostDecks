@@ -62,9 +62,9 @@ describe("bulkImport (unit)", () => {
 
   describe("applyBulkCollectionUpdate", () => {
     it("throws when ownerUid is missing", async () => {
-      await expect(
-        applyBulkCollectionUpdate({ rows: [], existingEntries: [] }),
-      ).rejects.toThrow("You need to be signed in to update your collection.");
+      await expect(applyBulkCollectionUpdate({ rows: [], existingEntries: [] })).rejects.toThrow(
+        "You need to be signed in to update your collection.",
+      );
     });
 
     it("returns issues when skuId and cardId+finish are missing", async () => {
@@ -145,9 +145,7 @@ describe("bulkImport (unit)", () => {
     it("uses cardId+finish when skuId not provided", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
-        rows: [
-          { __lineNumber: 2, cardId: "LT24-ELS-01", finish: "DUN", quantity: "1" },
-        ],
+        rows: [{ __lineNumber: 2, cardId: "LT24-ELS-01", finish: "DUN", quantity: "1" }],
         existingEntries: [],
       });
       expect(result.created).toBe(1);

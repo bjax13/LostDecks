@@ -43,7 +43,6 @@ describe("CollectibleGrid (unit)", () => {
       </MemoryRouter>,
     );
     const addBtn = screen.getByTestId("add-btn");
-    const link = screen.getByRole("link", { name: /Story #01/i });
     await userEvent.click(addBtn);
     expect(window.location.pathname).toBe("/");
   });
