@@ -82,9 +82,7 @@ describe("useAddToCollection", () => {
       const { result } = renderHook(() => useAddToCollection());
 
       await expect(
-        act(() =>
-          result.current.addToCollection({ card: { id: "LT24-ELS-01" }, finish: null }),
-        ),
+        act(() => result.current.addToCollection({ card: { id: "LT24-ELS-01" }, finish: null })),
       ).rejects.toThrow("A finish is required");
     });
 
@@ -122,11 +120,14 @@ describe("useAddToCollection", () => {
       expect(result.current.error).toBeNull();
 
       expect(mockCollection).toHaveBeenCalledWith({ type: "mock-firestore" }, "collections");
-      expect(mockAddDoc).toHaveBeenCalledWith("collections-ref", expect.objectContaining({
-        ownerUid: "user-123",
-        skuId: "LT24-ELS-01-DUN",
-        quantity: 1,
-      }));
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        "collections-ref",
+        expect.objectContaining({
+          ownerUid: "user-123",
+          skuId: "LT24-ELS-01-DUN",
+          quantity: 1,
+        }),
+      );
 
       expect(payload.ownerUid).toBe("user-123");
       expect(payload.skuId).toBe("LT24-ELS-01-DUN");
@@ -237,7 +238,6 @@ describe("useAddToCollection", () => {
     });
 
     it("sets status to loading before the Firestore call", async () => {
-      let statusDuringCall;
       mockAddDoc.mockImplementationOnce(() => {
         return new Promise(() => {});
       });
@@ -251,7 +251,7 @@ describe("useAddToCollection", () => {
         });
       });
 
-      statusDuringCall = result.current.status;
+      const statusDuringCall = result.current.status;
       expect(statusDuringCall).toBe("loading");
     });
   });
