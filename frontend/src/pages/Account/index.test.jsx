@@ -16,9 +16,7 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
 }));
 
 vi.mock("./components/TradesPanel", () => ({
-  default: ({ user }) => (
-    <div data-testid="trades-panel">TradesPanel:{user?.uid}</div>
-  ),
+  default: ({ user }) => <div data-testid="trades-panel">TradesPanel:{user?.uid}</div>,
 }));
 
 import AccountPage from "./index.jsx";
@@ -49,12 +47,8 @@ describe("AccountPage", () => {
 
   it("renders the page header and hint when authenticated", () => {
     renderAccountPage();
-    expect(
-      screen.getByRole("heading", { name: "Account Settings" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/keep your contact details up to date/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Account Settings" })).toBeInTheDocument();
+    expect(screen.getByText(/keep your contact details up to date/i)).toBeInTheDocument();
   });
 
   it("renders within an account-page section", () => {
@@ -74,9 +68,7 @@ describe("AccountPage", () => {
 
   it("renders the Profile overview heading when user exists", () => {
     renderAccountPage();
-    expect(
-      screen.getByRole("heading", { name: "Profile overview" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Profile overview" })).toBeInTheDocument();
   });
 
   it("renders profile summary with Display name and Primary email labels", () => {
@@ -135,18 +127,10 @@ describe("AccountPage", () => {
 
     it("renders all form fields with correct placeholders", () => {
       renderAccountPage();
-      expect(
-        screen.getByPlaceholderText("Add a phone number"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("Street, city, state, ZIP"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("Add a backup email"),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("Optional additional backup email"),
-      ).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Add a phone number")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Street, city, state, ZIP")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Add a backup email")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Optional additional backup email")).toBeInTheDocument();
     });
 
     it("renders form fields with correct labels", () => {
@@ -154,9 +138,7 @@ describe("AccountPage", () => {
       expect(screen.getByLabelText("Phone number")).toBeInTheDocument();
       expect(screen.getByLabelText("Mailing address")).toBeInTheDocument();
       expect(screen.getByLabelText("Backup email (primary)")).toBeInTheDocument();
-      expect(
-        screen.getByLabelText("Backup email (secondary)"),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText("Backup email (secondary)")).toBeInTheDocument();
     });
 
     it("updates the phone number field on input", async () => {
@@ -197,32 +179,20 @@ describe("AccountPage", () => {
 
       await user.type(screen.getByLabelText("Phone number"), "555-1234");
       await user.type(screen.getByLabelText("Mailing address"), "123 Main St");
-      await user.type(
-        screen.getByLabelText("Backup email (primary)"),
-        "backup@example.com",
-      );
-      await user.type(
-        screen.getByLabelText("Backup email (secondary)"),
-        "alt@example.com",
-      );
+      await user.type(screen.getByLabelText("Backup email (primary)"), "backup@example.com");
+      await user.type(screen.getByLabelText("Backup email (secondary)"), "alt@example.com");
 
       expect(screen.getByLabelText("Phone number")).toHaveValue("555-1234");
       expect(screen.getByLabelText("Mailing address")).toHaveValue("123 Main St");
-      expect(screen.getByLabelText("Backup email (primary)")).toHaveValue(
-        "backup@example.com",
-      );
-      expect(screen.getByLabelText("Backup email (secondary)")).toHaveValue(
-        "alt@example.com",
-      );
+      expect(screen.getByLabelText("Backup email (primary)")).toHaveValue("backup@example.com");
+      expect(screen.getByLabelText("Backup email (secondary)")).toHaveValue("alt@example.com");
     });
 
     it('shows "Saved locally" feedback after form submission', async () => {
       const user = userEvent.setup();
       renderAccountPage();
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
-      expect(
-        screen.getByText("Saved locally — sync options coming soon."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Saved locally — sync options coming soon.")).toBeInTheDocument();
     });
 
     it("clears the saved feedback when a field is changed after submission", async () => {
@@ -230,9 +200,7 @@ describe("AccountPage", () => {
       renderAccountPage();
 
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
-      expect(
-        screen.getByText("Saved locally — sync options coming soon."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Saved locally — sync options coming soon.")).toBeInTheDocument();
 
       await user.type(screen.getByLabelText("Phone number"), "x");
       expect(
@@ -250,8 +218,7 @@ describe("AccountPage", () => {
     it("form submit does not navigate away (default prevented)", async () => {
       const user = userEvent.setup();
       renderAccountPage();
-      const form = screen.getByRole("button", { name: "Save contact info" })
-        .closest("form");
+      const form = screen.getByRole("button", { name: "Save contact info" }).closest("form");
       const submitSpy = vi.fn((e) => e.preventDefault());
       form.addEventListener("submit", submitSpy);
 
@@ -262,9 +229,7 @@ describe("AccountPage", () => {
     it("calls preventDefault on form submit event", async () => {
       const user = userEvent.setup();
       renderAccountPage();
-      const form = screen
-        .getByRole("button", { name: "Save contact info" })
-        .closest("form");
+      const form = screen.getByRole("button", { name: "Save contact info" }).closest("form");
       let submittedEvent;
       form.addEventListener("submit", (e) => {
         submittedEvent = e;
@@ -283,9 +248,7 @@ describe("AccountPage", () => {
       await user.type(screen.getByLabelText("Phone number"), "555-9999");
       await user.click(screen.getByRole("button", { name: "Save contact info" }));
 
-      expect(
-        screen.getByText("Saved locally — sync options coming soon."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Saved locally — sync options coming soon.")).toBeInTheDocument();
       expect(screen.getByLabelText("Phone number")).toHaveValue("555-9999");
     });
   });
@@ -295,22 +258,14 @@ describe("AccountPage", () => {
   describe("notification preferences", () => {
     it("renders the notification preferences heading", () => {
       renderAccountPage();
-      expect(
-        screen.getByRole("heading", { name: "Notification preferences" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Notification preferences" })).toBeInTheDocument();
     });
 
     it("renders all notification option labels", () => {
       renderAccountPage();
-      expect(
-        screen.getByText(/email me when cards I need are offered/i),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/notify me about upcoming community events/i),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/alerts for direct trade messages/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/email me when cards I need are offered/i)).toBeInTheDocument();
+      expect(screen.getByText(/notify me about upcoming community events/i)).toBeInTheDocument();
+      expect(screen.getByText(/alerts for direct trade messages/i)).toBeInTheDocument();
     });
 
     it("has all notification checkboxes in a disabled fieldset", () => {
