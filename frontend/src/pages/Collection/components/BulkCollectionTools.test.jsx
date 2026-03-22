@@ -341,4 +341,199 @@ describe("BulkCollectionTools", () => {
 
     expect(bulkImportMocks.parseBulkCollectionCsv).not.toHaveBeenCalled();
   });
+
+  it("shows two-part summary when only two change types are present", async () => {
+    bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
+      { skuId: "S1", quantity: "1", __lineNumber: 2 },
+    ]);
+    bulkImportMocks.applyBulkCollectionUpdate.mockResolvedValue({
+      created: 2,
+      updated: 1,
+      deleted: 0,
+      issues: [],
+    });
+
+    const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    uploadCsv(container, "two-part.csv", "a");
+
+    expect(await screen.findByText(/2 new entries and 1 update/i)).toBeInTheDocument();
+  });
+
+  it("shows generic error when import rejects without a message", async () => {
+    bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
+      { skuId: "S1", quantity: "1", __lineNumber: 2 },
+    ]);
+    bulkImportMocks.applyBulkCollectionUpdate.mockRejectedValue("bad");
+
+    const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    uploadCsv(container, "nomsg.csv", "a");
+
+    expect(await screen.findByText(/failed to process the uploaded file/i)).toBeInTheDocument();
+  });
+
+  it("does not create template CSV while a CSV upload is still processing", async () => {
+    let finishImport;
+    bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
+      { skuId: "S1", quantity: "1", __lineNumber: 2 },
+    ]);
+    bulkImportMocks.applyBulkCollectionUpdate.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishImport = resolve;
+        }),
+    );
+
+    const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    uploadCsv(container, "busy.csv", "x");
+    expect(await screen.findByText(/uploading/i)).toBeInTheDocument();
+
+    bulkImportMocks.createCollectionTemplateCsv.mockClear();
+    const downloadBtn = screen.getByRole("button", { name: /download template/i });
+    expect(downloadBtn).toBeDisabled();
+    fireEvent.click(downloadBtn);
+    expect(bulkImportMocks.createCollectionTemplateCsv).not.toHaveBeenCalled();
+
+    finishImport({ created: 0, updated: 0, deleted: 0, issues: [] });
+    await waitFor(() => {
+      expect(screen.queryByText(/uploading/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it("copies ISO/UFT text built from collection entries and SKU metadata", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    collectiblesState.stories = [{ title: "Zeta" }, { title: "Alpha" }];
+    collectiblesState.skus = [
+      { skuId: "iso-story-foil", cardId: "c-iso-sf", finish: "FOIL" },
+      { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
+      { skuId: "iso-herald-dun", cardId: "c-iso-hd", finish: "DUN" },
+      { skuId: "uft-nonsense-variant", cardId: "c-uft-ns", finish: "FOIL" },
+      { skuId: "uft-nonsense-plain", cardId: "c-uft-ns2", finish: "DUN" },
+    ];
+    collectiblesState.cardById = {
+      "c-iso-sf": { category: "story", number: 9, storyTitle: "Alpha" },
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+      "c-iso-hd": {
+        category: "herald",
+        number: Number.NaN,
+        displayName: "Test Herald",
+        storyTitle: "Alpha",
+      },
+      "c-uft-ns": {
+        category: "nonsense",
+        number: 7,
+        detail: "variant:  Sparkle ",
+        storyTitle: "Zeta",
+      },
+      "c-uft-ns2": {
+        category: "nonsense",
+        number: 8,
+        detail: "  standard variant  ",
+        storyTitle: "Alpha",
+      },
+    };
+
+    const entries = [
+      { skuId: "uft-story-foil", quantity: 3 },
+      { skuId: "uft-nonsense-variant", count: 2 },
+      { skuId: "uft-nonsense-plain", total: 4 },
+      { skuId: "", quantity: 1 },
+      { quantity: 2 },
+      { skuId: "skip-zero", quantity: 0 },
+    ];
+
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={entries} />);
+    await user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).toContain("ISO:");
+    expect(copied).toContain("Story Foils:");
+    expect(copied).toMatch(/9\b/);
+    expect(copied).toContain("UFT:");
+    expect(copied).toContain("10");
+    expect(copied).toMatch(/7\s+Sparkle/);
+    expect(copied).toMatch(/\b8\b/);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      /entries without a valid sku were skipped/i,
+    );
+  });
+
+  it("does not copy ISO/UFT post while a CSV upload is still processing", async () => {
+    let finishImport;
+    bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
+      { skuId: "S1", quantity: "1", __lineNumber: 2 },
+    ]);
+    bulkImportMocks.applyBulkCollectionUpdate.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishImport = resolve;
+        }),
+    );
+
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    uploadCsv(container, "busy-copy.csv", "x");
+    expect(await screen.findByText(/uploading/i)).toBeInTheDocument();
+
+    const copyBtn = screen.getByRole("button", { name: /copy iso\/uft post/i });
+    expect(copyBtn).toBeDisabled();
+    fireEvent.click(copyBtn);
+    expect(writeText).not.toHaveBeenCalled();
+
+    finishImport({ created: 0, updated: 0, deleted: 0, issues: [] });
+    await waitFor(() => {
+      expect(screen.queryByText(/uploading/i)).not.toBeInTheDocument();
+    });
+  });
+
+  it("does not copy ISO/UFT post when disabled", () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} disabled />);
+    const copyBtn = screen.getByRole("button", { name: /copy iso\/uft post/i });
+    expect(copyBtn).toBeDisabled();
+    fireEvent.click(copyBtn);
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it("does not download template or copy post when signed out", () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    render(<BulkCollectionTools ownerUid={null} entries={[]} />);
+    const downloadBtn = screen.getByRole("button", { name: /download template/i });
+    const copyBtn = screen.getByRole("button", { name: /copy iso\/uft post/i });
+    expect(downloadBtn).toBeDisabled();
+    expect(copyBtn).toBeDisabled();
+    fireEvent.click(downloadBtn);
+    fireEvent.click(copyBtn);
+    expect(bulkImportMocks.createCollectionTemplateCsv).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
+  });
 });
