@@ -1,8 +1,10 @@
 .cards-page {
-  padding: 2.5rem clamp(1.5rem, 4vw, 3rem);
+  padding: 2.5rem clamp(1rem, 4vw, 3rem);
   max-width: 1200px;
   margin: 0 auto 4rem;
   color: #f4f1ff;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .cards-header {
@@ -26,6 +28,12 @@
   max-width: 48rem;
   color: #cfc6ff;
   line-height: 1.6;
+}
+
+.cards-header h1 {
+  font-size: clamp(1.65rem, 4vw + 0.5rem, 2.25rem);
+  line-height: 1.15;
+  margin: 0.15rem 0 0;
 }
 
 .view-toggle {
@@ -142,6 +150,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+}
+
+.filter-control .sort-wrapper select {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
 }
 
 .sort-direction {
@@ -199,7 +214,10 @@
   background: rgba(18, 12, 33, 0.95);
   border-radius: 20px;
   border: 1px solid rgba(121, 97, 208, 0.45);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
 }
 
@@ -310,8 +328,9 @@
 .cards-grid {
   margin-top: 2.5rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 1.75rem;
+  min-width: 0;
 }
 
 .card-tile {
@@ -344,7 +363,16 @@
 .card-tile header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+
+.card-tile h2 {
+  font-size: clamp(1.05rem, 2.5vw + 0.65rem, 1.35rem);
+  line-height: 1.25;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .card-id {
@@ -399,10 +427,44 @@
 @media (max-width: 720px) {
   .cards-header {
     flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+
+  .view-toggle {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+  }
+
+  .view-toggle button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.65rem;
   }
 
   .card-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cards-table th,
+  .cards-table td {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.875rem;
+  }
+
+  .cards-page {
+    margin-bottom: 2.5rem;
+  }
+
+  .add-to-collection--table {
+    min-width: 0;
+  }
+
+  .add-to-collection__button {
+    min-height: 2.75rem;
   }
 }
 
@@ -413,6 +475,35 @@
 
   .cards-toolbar {
     padding: 1.25rem;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .toolbar-footer .reset-button {
+    align-self: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 1.5rem;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .card-tile {
+    padding: 1.35rem;
+  }
+
+  .cards-page {
+    padding-top: 1.5rem;
   }
 }
 
@@ -485,10 +576,4 @@
 .add-to-collection__feedback--details {
   font-size: 0.65rem;
   opacity: 0.75;
-}
-
-@media (max-width: 720px) {
-  .add-to-collection--table {
-    min-width: 0;
-  }
 }
