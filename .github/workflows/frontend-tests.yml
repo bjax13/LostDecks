@@ -3,13 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   pull_request:
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
 
 # Free-tier friendly: drop redundant runs when new commits land on the same branch.
 concurrency:
