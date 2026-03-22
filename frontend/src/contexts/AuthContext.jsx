@@ -8,6 +8,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { syncPostHogUser } from "../analytics/posthog.js";
 import { auth, githubProvider, googleProvider, hasFirebaseConfig } from "../lib/firebase";
 
 const AuthContext = createContext(null);
@@ -31,6 +32,10 @@ export function AuthProvider({ children }) {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    syncPostHogUser(user);
+  }, [user]);
 
   const handleError = useCallback((err) => {
     console.error("Firebase auth error", err);

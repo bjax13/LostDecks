@@ -82,6 +82,10 @@ jobs:
       - name: Production build
         working-directory: frontend
         run: npm run build
+        env:
+          # Optional: add VITE_POSTHOG_KEY / VITE_POSTHOG_HOST as repository secrets so CI builds match production analytics config.
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
