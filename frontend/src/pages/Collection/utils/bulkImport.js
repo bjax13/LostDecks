@@ -284,7 +284,6 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
           batch.set(operation.ref, operation.data, { merge: operation.merge });
         }
       });
-      // eslint-disable-next-line no-await-in-loop
       await batch.commit();
     }
   }
