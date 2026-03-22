@@ -548,4 +548,11 @@ function CollectionPage() {
 
 export default CollectionPage;
 
-export { CollectionSummary, formatDate, normalizeQuantity, resolveTimestamp, SummaryStat };
+export {
+  CollectionSummary,
+  CollectionTable,
+  formatDate,
+  normalizeQuantity,
+  resolveTimestamp,
+  SummaryStat,
+};
