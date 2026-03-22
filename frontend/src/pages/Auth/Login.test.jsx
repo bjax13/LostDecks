@@ -29,9 +29,12 @@ function renderLogin() {
 }
 
 describe("Login (unit)", () => {
+  let user;
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockError = null;
+    user = userEvent.setup({ delay: null });
   });
 
   it("renders sign in form", () => {
@@ -45,9 +48,11 @@ describe("Login (unit)", () => {
   it("calls login on submit with email and password", async () => {
     mockLogin.mockResolvedValue(undefined);
     renderLogin();
-    await userEvent.type(screen.getByLabelText(/Email/i), "test@example.com");
-    await userEvent.type(screen.getByLabelText(/Password/i), "password123");
-    await userEvent.click(screen.getByRole("button", { name: "Sign In" }));
+    await user.click(screen.getByLabelText(/Email/i));
+    await user.paste("test@example.com");
+    await user.click(screen.getByLabelText(/Password/i));
+    await user.paste("password123");
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
     expect(mockLogin).toHaveBeenCalledWith("test@example.com", "password123");
   });
 

@@ -1,10 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { AuthProvider } from "../../contexts/AuthContext";
-import { AuthModalProvider } from "../../contexts/AuthModalContext";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import CollectiblesPage from "./index.jsx";
+
+const mockOpenAuthModal = vi.hoisted(() => vi.fn());
+
+vi.mock("../../contexts/AuthContext", () => ({
+  AuthProvider: ({ children }) => children,
+  useAuth: () => ({ user: null, loading: false }),
+}));
+
+vi.mock("../../contexts/AuthModalContext", () => ({
+  AuthModalProvider: ({ children }) => children,
+  useAuthModal: () => ({
+    isOpen: false,
+    openAuthModal: mockOpenAuthModal,
+    closeAuthModal: vi.fn(),
+    context: null,
+  }),
+}));
 
 const { testCollectibles, testDatasetMeta, testDatasetStories } = vi.hoisted(() => {
   const collectibles = [
@@ -67,13 +82,7 @@ vi.mock("../../data/collectibles", () => ({
 }));
 
 function renderWithRouter(ui) {
-  return render(
-    <AuthProvider>
-      <AuthModalProvider>
-        <TestMemoryRouter>{ui}</TestMemoryRouter>
-      </AuthModalProvider>
-    </AuthProvider>,
-  );
+  return render(<TestMemoryRouter>{ui}</TestMemoryRouter>);
 }
 
 function setupUser() {
