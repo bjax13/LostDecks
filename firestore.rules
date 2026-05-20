@@ -52,8 +52,13 @@ service cloud.firestore {
     }
 
     // Trades are created by a callable Cloud Function so clients cannot spoof them.
+    // List queries use participants array-contains; rule must match that constraint.
     match /trades/{tradeId} {
-      allow read: if signedIn() && (request.auth.uid == resource.data.buyerUid || request.auth.uid == resource.data.sellerUid);
+      allow read: if signedIn() && (
+        request.auth.uid in resource.data.participants
+        || request.auth.uid == resource.data.buyerUid
+        || request.auth.uid == resource.data.sellerUid
+      );
       allow create, update, delete: if false;
     }
 
