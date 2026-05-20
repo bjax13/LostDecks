@@ -1,0 +1,37 @@
+.not-found-page {
+  max-width: 32rem;
+  margin: 3rem auto;
+  padding: 2.5rem 2rem;
+  background: rgba(24, 18, 45, 0.9);
+  border-radius: 16px;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.not-found-page h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  color: #ffffff;
+}
+
+.not-found-page p {
+  margin: 0;
+  color: rgba(224, 224, 224, 0.85);
+  line-height: 1.6;
+}
+
+.not-found-page__link {
+  align-self: center;
+  margin-top: 0.5rem;
+  color: #cfa8ff;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.not-found-page__link:hover {
+  color: #ffffff;
+}
