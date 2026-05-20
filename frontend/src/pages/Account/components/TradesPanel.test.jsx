@@ -67,6 +67,16 @@ describe("TradesPanel", () => {
       render(<TradesPanel user={USER} />);
       expect(screen.getByText("Failed to load trades.")).toBeInTheDocument();
     });
+
+    it("does not show the empty state when the hook returns an error", () => {
+      useMyTrades.mockReturnValue({
+        trades: [],
+        loading: false,
+        error: new Error("boom"),
+      });
+      render(<TradesPanel user={USER} />);
+      expect(screen.queryByText("No trades yet.")).not.toBeInTheDocument();
+    });
   });
 
   describe("empty state", () => {

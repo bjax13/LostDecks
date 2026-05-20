@@ -33,7 +33,7 @@ export default function TradesPanel({ user }) {
       {error ? <p className="muted">Failed to load trades.</p> : null}
       {loading ? <p>Loading trades…</p> : null}
 
-      {!loading && trades.length === 0 ? <p className="muted">No trades yet.</p> : null}
+      {!loading && !error && trades.length === 0 ? <p className="muted">No trades yet.</p> : null}
 
       {!loading && trades.length > 0 ? (
         <ul className="account-summary trade-list">
