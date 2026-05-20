@@ -15,4 +15,16 @@ describe("NotFound (integration)", () => {
     );
     expect(screen.getByRole("heading", { name: /page not found/i })).toBeInTheDocument();
   });
+
+  it("links back to the home page", () => {
+    render(
+      <TestMemoryRouter initialEntries={["/this-route-does-not-exist"]}>
+        <Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </TestMemoryRouter>,
+    );
+    const homeLink = screen.getByRole("link", { name: /back to home/i });
+    expect(homeLink).toHaveAttribute("href", "/");
+  });
 });
