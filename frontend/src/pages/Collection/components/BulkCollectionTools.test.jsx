@@ -35,6 +35,7 @@ describe("BulkCollectionTools", () => {
   const ownerUid = "user-abc";
 
   beforeEach(() => {
+    vi.clearAllMocks();
     bulkImportMocks.createCollectionTemplateCsv.mockReturnValue("skuId,quantity,notes\n");
     bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([]);
     bulkImportMocks.applyBulkCollectionUpdate.mockResolvedValue({
