@@ -39,3 +39,4 @@ firestore-debug.log
 ui-debug.log
 
 .vs/slnx.sqlite
+.gstack/
