@@ -8,8 +8,9 @@
     "ci": "biome ci .",
     "test": "npm run test --prefix frontend",
     "build:frontend": "npm run build --prefix frontend",
-    "deploy:hosting": "npm run build:frontend && npx --yes firebase-tools@15 deploy --only hosting --project storydeck-16 --non-interactive",
-    "deploy:firebase": "npm run build:frontend && npx --yes firebase-tools@15 deploy --only hosting,firestore,functions --project storydeck-16 --non-interactive",
+    "build:frontend:production": "VITE_USE_EMULATORS=false npm run build --prefix frontend",
+    "deploy:hosting": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting --project storydeck-16 --non-interactive",
+    "deploy:firebase": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting,firestore,functions --project storydeck-16 --non-interactive",
     "prepare": "husky"
   },
   "devDependencies": {
