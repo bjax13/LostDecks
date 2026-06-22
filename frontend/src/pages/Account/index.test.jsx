@@ -1,7 +1,10 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
+const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
+const mockUpdateUserPreferences = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
@@ -12,6 +15,12 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
     const { loading } = mockUseAuth();
     return loading ? fallback : children;
   },
+}));
+
+vi.mock("../../lib/userPreferences", () => ({
+  DEFAULT_USER_PREFERENCES: { matchingOptOut: false },
+  subscribeUserPreferences: mockSubscribeUserPreferences,
+  updateUserPreferences: mockUpdateUserPreferences,
 }));
 
 import AccountPage from "./index.jsx";
@@ -30,6 +39,11 @@ describe("AccountPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue({ user: MOCK_USER, loading: false });
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({ matchingOptOut: false });
+      return () => {};
+    });
+    mockUpdateUserPreferences.mockResolvedValue(undefined);
   });
 
   // ── Rendering / AuthGuard integration ──────────────────────────────────
@@ -94,5 +108,21 @@ describe("AccountPage", () => {
     mockUseAuth.mockReturnValue({ user: null, loading: false });
     renderAccountPage();
     expect(screen.queryByText("Profile overview")).not.toBeInTheDocument();
+  });
+
+  it("renders the match preferences toggle", () => {
+    renderAccountPage();
+    expect(screen.getByRole("heading", { name: "Match preferences" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Include me in Matches" })).toBeChecked();
+  });
+
+  it("persists the toggle when changed", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("checkbox", { name: "Include me in Matches" }));
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledTimes(1);
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", { matchingOptOut: true });
   });
 });

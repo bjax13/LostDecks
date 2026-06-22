@@ -28,6 +28,7 @@ describe("App (integration)", () => {
   it("renders primary navigation for a signed-out user after auth finishes loading", async () => {
     renderWithAppProviders(<App />);
     expect(screen.getByRole("link", { name: "Collectibles" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Matches" })).toBeInTheDocument();
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
     ).toBeInTheDocument();

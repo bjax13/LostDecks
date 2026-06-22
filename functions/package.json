@@ -7,7 +7,9 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "seed:local": "node seed-local.js",
+    "seed:local:wipe": "node seed-local.js --wipe"
   },
   "dependencies": {
     "firebase-admin": "13.10.0",

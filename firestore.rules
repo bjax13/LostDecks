@@ -15,6 +15,19 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
+    function validUserPreferences(data) {
+      return !("matchingOptOut" in data) || data.matchingOptOut is bool;
+    }
+
+    // User preferences (single per-user doc)
+    match /userPreferences/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create, update: if signedIn()
+        && request.auth.uid == userId
+        && validUserPreferences(request.resource.data);
+      allow delete: if signedIn() && request.auth.uid == userId;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

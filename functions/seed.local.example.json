@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "email": "collector.one@example.com",
+      "password": "replace-me-local-only",
+      "displayName": "Collector One",
+      "matchingOptOut": false,
+      "collection": [
+        { "skuId": "LT24-ELS-01-DUN", "quantity": 2 },
+        { "skuId": "LT24-ELS-03-DUN", "quantity": 1 }
+      ]
+    },
+    {
+      "email": "collector.two@example.com",
+      "password": "replace-me-local-only",
+      "displayName": "Collector Two",
+      "matchingOptOut": false,
+      "collection": [
+        { "skuId": "LT24-ELS-02-DUN", "quantity": 2 },
+        { "skuId": "LT24-ELS-04-DUN", "quantity": 1 }
+      ]
+    }
+  ]
+}

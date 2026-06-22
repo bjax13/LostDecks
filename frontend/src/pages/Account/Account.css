@@ -86,6 +86,31 @@
   color: #b2a4ff;
 }
 
+.account-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: #e6dcff;
+  font-weight: 600;
+}
+
+.account-toggle input {
+  width: 1rem;
+  height: 1rem;
+}
+
+.account-status {
+  margin: 0;
+  color: #c7bbff;
+  font-size: 0.9rem;
+}
+
+.account-error {
+  margin: 0;
+  color: #ffc0d4;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 600px) {
   .account-page {
     padding: 1.75rem clamp(0.75rem, 3vw, 1.25rem) 2.5rem;
