@@ -7,10 +7,7 @@ import BinderInfo from "../Collectibles/components/BinderInfo";
 import CategoryPill from "../Collectibles/components/CategoryPill";
 import FinishPills from "../Collectibles/components/FinishPills";
 import { categoryLabels } from "../Collectibles/constants";
-import CollectibleListingsPanel from "./components/CollectibleListingsPanel";
-import CreateListingForm from "./components/CreateListingForm";
 import { useCollectibleCollectionEntry } from "./hooks/useCollectibleCollectionEntry";
-import "../Market/Market.css";
 import "./CollectibleDetail.css";
 
 function normalizeQuantity(entry) {
@@ -231,17 +228,6 @@ export default function CollectibleDetailPage() {
             </div>
           </section>
         )}
-
-        <section className="card-detail__offers">
-          <h2 className="card-detail__section-title">Market</h2>
-          <p className="muted" style={{ marginTop: 0 }}>
-            Create a buy (bid) or sell (ask) listing for this collectible.
-          </p>
-          <CreateListingForm collectibleId={collectibleId} />
-
-          <h3 style={{ marginTop: "1.5rem" }}>Open listings</h3>
-          <CollectibleListingsPanel collectibleId={collectibleId} />
-        </section>
       </div>
     </div>
   );

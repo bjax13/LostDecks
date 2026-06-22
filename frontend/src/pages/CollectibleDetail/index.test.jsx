@@ -36,14 +36,6 @@ vi.mock("../Collectibles/components/AddToCollectionButton", () => ({
   default: ({ collectible }) => <div data-testid="add-to-collection">{collectible?.id}</div>,
 }));
 
-vi.mock("./components/CollectibleListingsPanel", () => ({
-  default: ({ collectibleId }) => <div data-testid="listings-panel">{collectibleId}</div>,
-}));
-
-vi.mock("./components/CreateListingForm", () => ({
-  default: ({ collectibleId }) => <div data-testid="create-listing-form">{collectibleId}</div>,
-}));
-
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
@@ -139,7 +131,6 @@ describe("CollectibleDetailPage – detail view (no user)", () => {
 
   it("renders the card ID", () => {
     renderWithRoute("/collectibles/LT24-ELS-01");
-    // CARD.id also appears in mocked CreateListingForm / listings; scope to header
     expect(document.querySelector(".card-detail__id")).toHaveTextContent(CARD.id);
   });
 
@@ -168,13 +159,6 @@ describe("CollectibleDetailPage – detail view (no user)", () => {
   it("does not render the collection section when logged out", () => {
     renderWithRoute("/collectibles/LT24-ELS-01");
     expect(screen.queryByText(/your collection/i)).not.toBeInTheDocument();
-  });
-
-  it("renders market section with listing form and listings panel", () => {
-    renderWithRoute("/collectibles/LT24-ELS-01");
-    expect(screen.getByText("Market")).toBeInTheDocument();
-    expect(screen.getByTestId("create-listing-form")).toBeInTheDocument();
-    expect(screen.getByTestId("listings-panel")).toBeInTheDocument();
   });
 
   it("renders a back button that calls navigate(-1)", async () => {
@@ -718,14 +702,6 @@ describe("CollectibleDetailPage – edge cases", () => {
     renderWithRoute("/collectibles/LT24-ELS-01");
 
     expect(screen.getByText("Binder Location")).toBeInTheDocument();
-  });
-
-  it("passes collectibleId to CreateListingForm and CollectibleListingsPanel", () => {
-    setDefaults({ card: CARD });
-    renderWithRoute("/collectibles/LT24-ELS-01");
-
-    expect(screen.getByTestId("create-listing-form")).toHaveTextContent("LT24-ELS-01");
-    expect(screen.getByTestId("listings-panel")).toHaveTextContent("LT24-ELS-01");
   });
 });
 

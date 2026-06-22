@@ -15,10 +15,6 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
   },
 }));
 
-vi.mock("./components/TradesPanel", () => ({
-  default: ({ user }) => <div data-testid="trades-panel">TradesPanel:{user?.uid}</div>,
-}));
-
 import AccountPage from "./index.jsx";
 
 const MOCK_USER = {
@@ -99,20 +95,6 @@ describe("AccountPage", () => {
     mockUseAuth.mockReturnValue({ user: null, loading: false });
     renderAccountPage();
     expect(screen.queryByText("Profile overview")).not.toBeInTheDocument();
-  });
-
-  // ── TradesPanel ─────────────────────────────────────────────────────────
-
-  it("renders TradesPanel with the current user", () => {
-    renderAccountPage();
-    const panel = screen.getByTestId("trades-panel");
-    expect(panel).toHaveTextContent("TradesPanel:abc-123");
-  });
-
-  it("does not render TradesPanel when user is null", () => {
-    mockUseAuth.mockReturnValue({ user: null, loading: false });
-    renderAccountPage();
-    expect(screen.queryByTestId("trades-panel")).not.toBeInTheDocument();
   });
 
   // ── Additional contact info form ────────────────────────────────────────
@@ -264,9 +246,8 @@ describe("AccountPage", () => {
 
     it("renders all notification option labels", () => {
       renderAccountPage();
-      expect(screen.getByText(/email me when cards I need are offered/i)).toBeInTheDocument();
+      expect(screen.getByText(/email me when my collection sync completes/i)).toBeInTheDocument();
       expect(screen.getByText(/notify me about upcoming community events/i)).toBeInTheDocument();
-      expect(screen.getByText(/alerts for direct trade messages/i)).toBeInTheDocument();
     });
 
     it("has all notification checkboxes in a disabled fieldset", () => {
@@ -277,7 +258,7 @@ describe("AccountPage", () => {
       expect(fieldset).toBeDisabled();
 
       const checkboxes = within(fieldset).getAllByRole("checkbox");
-      expect(checkboxes).toHaveLength(3);
+      expect(checkboxes).toHaveLength(2);
     });
 
     it("has the first notification checkbox checked by default", () => {
@@ -288,7 +269,6 @@ describe("AccountPage", () => {
       const checkboxes = within(fieldset).getAllByRole("checkbox");
       expect(checkboxes[0]).toBeChecked();
       expect(checkboxes[1]).not.toBeChecked();
-      expect(checkboxes[2]).not.toBeChecked();
     });
   });
 });

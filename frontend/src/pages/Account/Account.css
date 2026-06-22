@@ -79,32 +79,6 @@
   text-align: right;
 }
 
-.trade-list {
-  list-style: none;
-  padding-left: 0;
-}
-
-.account-summary.trade-list > li.trade-item {
-  padding: 0.75rem 0;
-}
-
-.trade-item__body {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.trade-item__line,
-.trade-item__meta {
-  overflow-wrap: anywhere;
-}
-
-.trade-item__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
 .account-summary-label {
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -185,7 +159,7 @@
   gap: 0.75rem;
 }
 
-/* Base button styling for the account page (used by Trades + forms) */
+/* Base button styling for the account page (used by forms) */
 .account-page button {
   display: inline-flex;
   align-items: center;
@@ -313,16 +287,6 @@
 
   .form-feedback {
     text-align: center;
-  }
-
-  .trade-item__actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .trade-item__actions button {
-    width: 100%;
-    justify-content: center;
   }
 
   .notification-preview {
