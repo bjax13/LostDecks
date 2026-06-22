@@ -1,7 +1,6 @@
 import { useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
-import TradesPanel from "./components/TradesPanel";
 import "./Account.css";
 
 function AccountPage() {
@@ -32,7 +31,7 @@ function AccountPage() {
         <header className="account-header">
           <h1>Account Settings</h1>
           <p className="account-hint">
-            Keep your contact details up to date so trading partners can reach you.
+            Keep your contact details up to date so we can reach you about your account.
           </p>
         </header>
 
@@ -51,8 +50,6 @@ function AccountPage() {
             </ul>
           </section>
         ) : null}
-
-        {user ? <TradesPanel user={user} /> : null}
 
         <section className="account-section">
           <h2>Additional contact information</h2>
@@ -119,22 +116,17 @@ function AccountPage() {
         <section className="account-section">
           <h2>Notification preferences</h2>
           <p className="account-hint">
-            We are designing notification controls for trade activity alerts. Expect options like
-            the ones below in an upcoming release.
+            Notification controls for collection updates and account alerts are coming soon.
           </p>
           <fieldset className="notification-preview" disabled>
             <legend className="sr-only">Notification controls preview</legend>
             <label className="notification-option">
               <input type="checkbox" checked readOnly />
-              Email me when cards I need are offered for trade
+              Email me when my collection sync completes
             </label>
             <label className="notification-option">
               <input type="checkbox" readOnly />
               Notify me about upcoming community events
-            </label>
-            <label className="notification-option">
-              <input type="checkbox" readOnly />
-              Alerts for direct trade messages
             </label>
           </fieldset>
         </section>
