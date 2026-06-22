@@ -54,7 +54,7 @@ To discover existing env usage: search for `import.meta.env` and `VITE_` under `
 
 ## Sign-in and session testing
 
-1. Configure a Firebase project with **Email/Password**, **Google**, and **GitHub** providers (see `frontend/README.md`).
+1. Configure a Firebase project with **Email/Password** and **Google** providers (see `frontend/README.md`).
 2. Routes: **`/auth/login`**, **`/auth/register`**, **`/auth/forgot`**.
 3. **Quick sign-in** modal is available from the nav when logged out (`AuthModalContext`).
 4. With **Auth emulator**, create users from the Emulator UI (port **4000**) or sign up through the app; sessions use `browserLocalPersistence` (`firebase.js`).

@@ -17,7 +17,6 @@ vi.mock("firebase/auth", () => authFns);
 vi.mock("../lib/firebase", () => ({
   auth: null,
   googleProvider: null,
-  githubProvider: null,
   hasFirebaseConfig: false,
 }));
 

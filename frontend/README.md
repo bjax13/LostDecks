@@ -6,7 +6,7 @@ This Vite-powered React application implements the Lost Tales Marketplace experi
 
 - Node.js 18+
 - npm 9+
-- A Firebase project with Email/Password, Google, and GitHub authentication providers configured.
+- A Firebase project with Email/Password and Google authentication providers configured.
 
 ## Setup
 

@@ -25,9 +25,6 @@ const m = vi.hoisted(() => {
     GoogleAuthProvider: vi.fn(function GoogleAuthProvider() {
       this.setCustomParameters = vi.fn();
     }),
-    GithubAuthProvider: vi.fn(function GithubAuthProvider() {
-      this.setCustomParameters = vi.fn();
-    }),
   };
 });
 
@@ -38,7 +35,6 @@ vi.mock("firebase/app", () => ({
 }));
 
 vi.mock("firebase/auth", () => ({
-  GithubAuthProvider: m.GithubAuthProvider,
   GoogleAuthProvider: m.GoogleAuthProvider,
   browserLocalPersistence: m.browserLocalPersistence,
   connectAuthEmulator: m.connectAuthEmulator,
@@ -114,7 +110,6 @@ describe("firebase module", () => {
     m.getFunctions.mockClear().mockImplementation(() => m.mockFunctions);
     m.setPersistence.mockClear().mockImplementation(() => Promise.resolve());
     m.GoogleAuthProvider.mockClear();
-    m.GithubAuthProvider.mockClear();
   });
 
   afterEach(() => {
@@ -134,7 +129,6 @@ describe("firebase module", () => {
     expect(mod.db).toBeNull();
     expect(mod.functions).toBeNull();
     expect(mod.googleProvider).toBeNull();
-    expect(mod.githubProvider).toBeNull();
     expect(m.initializeApp).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Firebase is not configured"));
     expect(m.connectAuthEmulator).not.toHaveBeenCalled();
@@ -170,7 +164,6 @@ describe("firebase module", () => {
     expect(mod.app).toBe(m.mockApp);
     expect(m.getAuth).toHaveBeenCalledWith(m.mockApp);
     expect(m.GoogleAuthProvider).toHaveBeenCalled();
-    expect(m.GithubAuthProvider).toHaveBeenCalled();
   });
 
   it("reuses an existing app via getApp when getApps is non-empty", async () => {
@@ -287,8 +280,6 @@ describe("firebase module", () => {
     await import("./firebase.js");
 
     const googleInstance = m.GoogleAuthProvider.mock.results[0]?.value;
-    const githubInstance = m.GithubAuthProvider.mock.results[0]?.value;
     expect(googleInstance?.setCustomParameters).toHaveBeenCalledWith({ prompt: "select_account" });
-    expect(githubInstance?.setCustomParameters).toHaveBeenCalledWith({ allow_signup: "false" });
   });
 });

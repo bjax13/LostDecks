@@ -22,7 +22,6 @@ vi.mock("firebase/auth", () => authFns);
 const fb = vi.hoisted(() => ({
   auth: { __tag: "auth" },
   googleProvider: { __tag: "google" },
-  githubProvider: { __tag: "github" },
   hasFirebaseConfig: true,
 }));
 
@@ -46,7 +45,6 @@ afterEach(() => {
   mockUnsubscribe.mockClear();
   fb.auth = { __tag: "auth" };
   fb.googleProvider = { __tag: "google" };
-  fb.githubProvider = { __tag: "github" };
   fb.hasFirebaseConfig = true;
 });
 
@@ -86,9 +84,6 @@ function Harness() {
       </button>
       <button type="button" onClick={() => void ctx.loginWithGoogle().catch(() => {})}>
         login-google
-      </button>
-      <button type="button" onClick={() => void ctx.loginWithGithub().catch(() => {})}>
-        login-github
       </button>
       <button type="button" onClick={() => ctx.clearError()}>
         clear-error
@@ -240,16 +235,6 @@ describe("AuthProvider", () => {
     await user.click(screen.getByRole("button", { name: "login-google" }));
     await waitFor(() => {
       expect(authFns.signInWithPopup).toHaveBeenCalledWith(fb.auth, fb.googleProvider);
-    });
-  });
-
-  it("loginWithGithub uses signInWithPopup with github provider", async () => {
-    authFns.signInWithPopup.mockResolvedValue(undefined);
-    const user = userEvent.setup();
-    renderAuth();
-    await user.click(screen.getByRole("button", { name: "login-github" }));
-    await waitFor(() => {
-      expect(authFns.signInWithPopup).toHaveBeenCalledWith(fb.auth, fb.githubProvider);
     });
   });
 

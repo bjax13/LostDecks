@@ -2,7 +2,6 @@ import { getApp, getApps, initializeApp } from "firebase/app";
 import {
   browserLocalPersistence,
   connectAuthEmulator,
-  GithubAuthProvider,
   GoogleAuthProvider,
   getAuth,
   setPersistence,
@@ -75,14 +74,9 @@ if (auth) {
 }
 
 const googleProvider = auth ? new GoogleAuthProvider() : null;
-const githubProvider = auth ? new GithubAuthProvider() : null;
 
 if (googleProvider) {
   googleProvider.setCustomParameters({ prompt: "select_account" });
 }
 
-if (githubProvider) {
-  githubProvider.setCustomParameters({ allow_signup: "false" });
-}
-
-export { app, auth, db, functions, githubProvider, googleProvider, hasFirebaseConfig };
+export { app, auth, db, functions, googleProvider, hasFirebaseConfig };

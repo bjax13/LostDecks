@@ -20,7 +20,6 @@ vi.mock("firebase/auth", () => authFns);
 vi.mock("../lib/firebase", () => ({
   auth: { __tag: "auth" },
   googleProvider: null,
-  githubProvider: null,
   hasFirebaseConfig: true,
 }));
 
@@ -50,30 +49,6 @@ describe("AuthProvider with auth but no OAuth providers", () => {
       </AuthProvider>,
     );
     await user.click(screen.getByRole("button", { name: "login-google" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable social sign-in/i);
-    });
-  });
-
-  it("loginWithGithub errors on missing provider while auth exists", async () => {
-    function Harness() {
-      const ctx = useAuth();
-      return (
-        <div>
-          <span data-testid="error-msg">{ctx.error?.message ?? ""}</span>
-          <button type="button" onClick={() => void ctx.loginWithGithub().catch(() => {})}>
-            login-github
-          </button>
-        </div>
-      );
-    }
-    const user = userEvent.setup();
-    render(
-      <AuthProvider>
-        <Harness />
-      </AuthProvider>,
-    );
-    await user.click(screen.getByRole("button", { name: "login-github" }));
     await waitFor(() => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable social sign-in/i);
     });

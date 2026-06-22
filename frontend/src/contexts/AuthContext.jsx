@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { syncPostHogUser } from "../analytics/posthog.js";
-import { auth, githubProvider, googleProvider, hasFirebaseConfig } from "../lib/firebase";
+import { auth, googleProvider, hasFirebaseConfig } from "../lib/firebase";
 
 const AuthContext = createContext(null);
 
@@ -145,10 +145,6 @@ export function AuthProvider({ children }) {
     () => signInWithProvider(googleProvider),
     [signInWithProvider],
   );
-  const loginWithGithub = useCallback(
-    () => signInWithProvider(githubProvider),
-    [signInWithProvider],
-  );
 
   const value = useMemo(
     () => ({
@@ -161,21 +157,9 @@ export function AuthProvider({ children }) {
       logout,
       resetPassword,
       loginWithGoogle,
-      loginWithGithub,
       hasFirebaseConfig,
     }),
-    [
-      user,
-      loading,
-      error,
-      clearError,
-      login,
-      register,
-      logout,
-      resetPassword,
-      loginWithGoogle,
-      loginWithGithub,
-    ],
+    [user, loading, error, clearError, login, register, logout, resetPassword, loginWithGoogle],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
