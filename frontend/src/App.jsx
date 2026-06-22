@@ -11,7 +11,6 @@ import CollectibleDetailPage from "./pages/CollectibleDetail";
 import CollectiblesPage from "./pages/Collectibles";
 import CollectionPage from "./pages/Collection";
 import Home from "./pages/Home";
-import MarketPage from "./pages/Market";
 import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
@@ -70,7 +69,6 @@ function MainNav() {
           <Link to="/">Home</Link>
           <Link to="/collectibles">Collectibles</Link>
           <Link to="/collections">Collection</Link>
-          <Link to="/market">Market</Link>
           <Link to="/account">Account</Link>
         </div>
         <div className="main-nav__auth">
@@ -109,7 +107,6 @@ function App() {
         <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
         <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
         <Route path="/collections" element={<CollectionPage />} />
-        <Route path="/market" element={<MarketPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
