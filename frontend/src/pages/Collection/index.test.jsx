@@ -462,7 +462,9 @@ describe("CollectionPage (integration)", () => {
   it("shows empty state when there are no entries", () => {
     renderCollectionPage();
     expect(screen.getByText("No collectibles catalogued yet")).toBeInTheDocument();
-    expect(screen.getByText(/Add items from the Collectibles page/)).toBeInTheDocument();
+    expect(screen.getByText(/Browse the Collectibles page/)).toBeInTheDocument();
+    expect(screen.getByText(/Your additions will show up here right away/)).toBeInTheDocument();
+    expect(screen.queryByText(/Firestore/)).not.toBeInTheDocument();
   });
 
   it("shows error message when the collection hook reports an error", () => {

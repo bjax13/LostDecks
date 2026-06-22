@@ -50,11 +50,9 @@ function CollectionContent() {
           <div className="collection-page__empty">
             <strong>No collectibles catalogued yet</strong>
             <span>
-              Add items from the Collectibles page, or create documents in the{" "}
-              <code>collections</code> Firestore collection with <code>ownerUid</code>,{" "}
-              <code>skuId</code>, and <code>quantity</code>.
+              Browse the Collectibles page and add cards you own to start building your collection.
             </span>
-            <span>Entries update instantly once they are saved to Firestore.</span>
+            <span>Your additions will show up here right away.</span>
           </div>
         ) : (
           <>
