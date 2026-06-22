@@ -266,6 +266,134 @@ describe("BulkCollectionTools", () => {
     expect(console.error).toHaveBeenCalled();
   });
 
+  function openPostModal(user) {
+    return user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+  }
+
+  function getPostDialog() {
+    return screen.getByRole("dialog", { name: /iso\/uft post preview/i });
+  }
+
+  it("opens ISO/UFT post modal without copying until modal copy is used", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    await openPostModal(user);
+
+    expect(getPostDialog()).toBeInTheDocument();
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it("updates preview when a section is unchecked", async () => {
+    const user = userEvent.setup();
+    collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
+    collectiblesState.cardById = {
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[{ skuId: "uft-story-foil", quantity: 3 }]}
+      />,
+    );
+    await openPostModal(user);
+
+    const preview = getPostDialog().querySelector(".collection-bulk-post-modal__preview");
+    expect(preview).toHaveTextContent(/Zeta Foils: 10/);
+
+    await user.click(screen.getByRole("checkbox", { name: /^story foils$/i }));
+
+    expect(preview).not.toHaveTextContent(/Zeta Foils:/);
+    expect(preview).toHaveTextContent(/None available yet\./);
+  });
+
+  it("hides story leaf checkboxes when section groups are collapsed by default", async () => {
+    const user = userEvent.setup();
+    collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
+    collectiblesState.cardById = {
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[{ skuId: "uft-story-foil", quantity: 3 }]}
+      />,
+    );
+    await openPostModal(user);
+
+    expect(screen.getByRole("checkbox", { name: /^story foils$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox", { name: /^zeta$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /expand story foils/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  it("expands and collapses section groups without affecting checkboxes", async () => {
+    const user = userEvent.setup();
+    collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
+    collectiblesState.cardById = {
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[{ skuId: "uft-story-foil", quantity: 3 }]}
+      />,
+    );
+    await openPostModal(user);
+
+    await user.click(screen.getByRole("button", { name: /expand story foils/i }));
+    expect(screen.getByRole("checkbox", { name: /^zeta$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /collapse story foils/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: /collapse story foils/i }));
+    expect(screen.queryByRole("checkbox", { name: /^zeta$/i })).not.toBeInTheDocument();
+  });
+
+  it("resets tree expand state when the modal reopens", async () => {
+    const user = userEvent.setup();
+    collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
+    collectiblesState.cardById = {
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[{ skuId: "uft-story-foil", quantity: 3 }]}
+      />,
+    );
+    await openPostModal(user);
+    await user.click(screen.getByRole("button", { name: /expand story foils/i }));
+    expect(screen.getByRole("checkbox", { name: /^zeta$/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+    expect(
+      screen.queryByRole("dialog", { name: /iso\/uft post preview/i }),
+    ).not.toBeInTheDocument();
+
+    await openPostModal(user);
+    expect(screen.queryByRole("checkbox", { name: /^zeta$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /expand story foils/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
   it("uses execCommand fallback when clipboard has no writeText", async () => {
     const user = userEvent.setup();
     Reflect.deleteProperty(globalThis.navigator, "clipboard");
@@ -279,18 +407,20 @@ describe("BulkCollectionTools", () => {
     collectiblesState.skus = [];
 
     render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
-    await user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+    await openPostModal(user);
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     expect(execCommand).toHaveBeenCalledWith("copy");
     expect(await screen.findByText(/copied iso\/uft post to your clipboard/i)).toBeInTheDocument();
   });
 
-  it("shows success status after copy ISO/UFT post", async () => {
+  it("shows success status after copy ISO/UFT post from modal", async () => {
     const user = userEvent.setup();
     collectiblesState.skus = [];
 
     render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
-    await user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+    await openPostModal(user);
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(/copied iso\/uft post/i);
   });
@@ -307,7 +437,8 @@ describe("BulkCollectionTools", () => {
     collectiblesState.skus = [];
 
     render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
-    await user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+    await openPostModal(user);
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     expect(await screen.findByText(/unable to copy the post/i)).toBeInTheDocument();
     expect(console.error).toHaveBeenCalled();
@@ -451,7 +582,8 @@ describe("BulkCollectionTools", () => {
     ];
 
     render(<BulkCollectionTools ownerUid={ownerUid} entries={entries} />);
-    await user.click(screen.getByRole("button", { name: /copy iso\/uft post/i }));
+    await openPostModal(user);
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     expect(writeText).toHaveBeenCalledTimes(1);
     const copied = writeText.mock.calls[0][0];
@@ -467,7 +599,113 @@ describe("BulkCollectionTools", () => {
     );
   });
 
-  it("does not copy ISO/UFT post while a CSV upload is still processing", async () => {
+  it("excludes UFT Story Dun from preview and copy by default", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    collectiblesState.skus = [
+      { skuId: "uft-story-dun", cardId: "c-uft-sd", finish: "DUN" },
+      { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
+    ];
+    collectiblesState.cardById = {
+      "c-uft-sd": { category: "story", number: 3, storyTitle: "Alpha" },
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[
+          { skuId: "uft-story-dun", quantity: 2 },
+          { skuId: "uft-story-foil", quantity: 3 },
+        ]}
+      />,
+    );
+    await openPostModal(user);
+
+    const preview = getPostDialog().querySelector(".collection-bulk-post-modal__preview");
+    expect(preview).not.toHaveTextContent(/Story Dun:/);
+    expect(preview).not.toHaveTextContent(/Alpha Dun:/);
+    expect(preview).toHaveTextContent(/Zeta Foils: 10/);
+    expect(screen.getByRole("checkbox", { name: /^story dun$/i })).not.toBeChecked();
+
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
+
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).not.toContain("Story Dun:");
+    expect(copied).not.toMatch(/Alpha Dun:/);
+    expect(copied).toMatch(/Zeta Foils: 10/);
+  });
+
+  it("includes UFT Story Dun in preview after user re-checks it", async () => {
+    const user = userEvent.setup();
+
+    collectiblesState.skus = [{ skuId: "uft-story-dun", cardId: "c-uft-sd", finish: "DUN" }];
+    collectiblesState.cardById = {
+      "c-uft-sd": { category: "story", number: 3, storyTitle: "Alpha" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[{ skuId: "uft-story-dun", quantity: 2 }]}
+      />,
+    );
+    await openPostModal(user);
+
+    const preview = getPostDialog().querySelector(".collection-bulk-post-modal__preview");
+    expect(preview).not.toHaveTextContent(/Alpha Dun:/);
+
+    await user.click(screen.getByRole("checkbox", { name: /^story dun$/i }));
+
+    expect(preview).toHaveTextContent(/Alpha Dun: 3/);
+  });
+
+  it("copies filtered ISO/UFT text when a section is excluded in the modal", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    collectiblesState.skus = [
+      { skuId: "iso-story-foil", cardId: "c-iso-sf", finish: "FOIL" },
+      { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
+    ];
+    collectiblesState.cardById = {
+      "c-iso-sf": { category: "story", number: 9, storyTitle: "Alpha" },
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    render(
+      <BulkCollectionTools
+        ownerUid={ownerUid}
+        entries={[
+          { skuId: "iso-story-foil", quantity: 2 },
+          { skuId: "uft-story-foil", quantity: 3 },
+        ]}
+      />,
+    );
+    await openPostModal(user);
+    await user.click(screen.getByRole("checkbox", { name: /^iso$/i }));
+    await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
+
+    const copied = writeText.mock.calls[0][0];
+    expect(copied).not.toContain("ISO:");
+    expect(copied).toContain("UFT:");
+    expect(copied).toMatch(/Zeta Foils: 10/);
+  });
+
+  it("does not open ISO/UFT post modal while a CSV upload is still processing", async () => {
     let finishImport;
     bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
       { skuId: "S1", quantity: "1", __lineNumber: 2 },
@@ -495,6 +733,7 @@ describe("BulkCollectionTools", () => {
     expect(copyBtn).toBeDisabled();
     fireEvent.click(copyBtn);
     expect(writeText).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     finishImport({ created: 0, updated: 0, deleted: 0, issues: [] });
     await waitFor(() => {
@@ -502,7 +741,7 @@ describe("BulkCollectionTools", () => {
     });
   });
 
-  it("does not copy ISO/UFT post when disabled", () => {
+  it("does not open ISO/UFT post modal when disabled", () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Reflect.deleteProperty(globalThis.navigator, "clipboard");
     Object.defineProperty(globalThis.navigator, "clipboard", {
@@ -516,9 +755,10 @@ describe("BulkCollectionTools", () => {
     expect(copyBtn).toBeDisabled();
     fireEvent.click(copyBtn);
     expect(writeText).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("does not download template or copy post when signed out", () => {
+  it("does not download template or open post modal when signed out", () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Reflect.deleteProperty(globalThis.navigator, "clipboard");
     Object.defineProperty(globalThis.navigator, "clipboard", {
@@ -536,5 +776,6 @@ describe("BulkCollectionTools", () => {
     fireEvent.click(copyBtn);
     expect(bulkImportMocks.createCollectionTemplateCsv).not.toHaveBeenCalled();
     expect(writeText).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
