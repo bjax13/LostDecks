@@ -1,7 +1,10 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import AddToCollectionButton, { formatFinishLabel } from "./AddToCollectionButton.jsx";
+import AddToCollectionButton, {
+  formatFinishLabel,
+  formatOwnedAddLabel,
+} from "./AddToCollectionButton.jsx";
 
 vi.mock("firebase/firestore", () => ({
   addDoc: vi.fn(),
@@ -29,6 +32,16 @@ vi.mock("../hooks/useAddToCollection", () => ({
   useAddToCollection: () => hookState,
 }));
 
+vi.mock("../utils/ownedQuantities", () => ({
+  getOwnedQuantity: (ownedBySkuId, collectible, finish) => {
+    if (!ownedBySkuId || !collectible?.id) return 0;
+    if (collectible.collectibleType === "pin" || collectible.category === "pin") {
+      return ownedBySkuId[collectible.id] ?? 0;
+    }
+    if (!finish) return 0;
+    return ownedBySkuId[`${collectible.id}-${String(finish).toUpperCase()}`] ?? 0;
+  },
+}));
 const baseCollectible = {
   id: "LT24-ELS-01",
   finishes: ["DUN", "FOIL"],
@@ -50,6 +63,22 @@ describe("formatFinishLabel", () => {
     expect(formatFinishLabel("dun")).toBe("Dun");
     expect(formatFinishLabel("FOIL")).toBe("Foil");
     expect(formatFinishLabel("MiXeD")).toBe("Mixed");
+  });
+});
+
+describe("formatOwnedAddLabel", () => {
+  it("returns default add labels when nothing is owned", () => {
+    expect(formatOwnedAddLabel({ label: "Dun", ownedQuantity: 0 })).toBe("Add Dun");
+    expect(formatOwnedAddLabel({ label: "Add to collection", ownedQuantity: 0, isPin: true })).toBe(
+      "Add to collection",
+    );
+  });
+
+  it("returns compact owned labels when quantity is positive", () => {
+    expect(formatOwnedAddLabel({ label: "Dun", ownedQuantity: 2 })).toBe("Dun · x2");
+    expect(formatOwnedAddLabel({ label: "Add to collection", ownedQuantity: 3, isPin: true })).toBe(
+      "Owned · x3",
+    );
   });
 });
 
@@ -105,6 +134,40 @@ describe("AddToCollectionButton", () => {
       finish: null,
       quantity: 1,
     });
+  });
+
+  it("shows owned quantity on finish buttons without changing click behavior", async () => {
+    const user = userEvent.setup();
+    renderButton({
+      ownedBySkuId: {
+        "LT24-ELS-01-DUN": 2,
+        "LT24-ELS-01-FOIL": 1,
+      },
+    });
+
+    expect(screen.getByRole("button", { name: "Dun · x2" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Foil · x1" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Dun · x2" }));
+    expect(hookState.addToCollection).toHaveBeenCalledWith({
+      card: baseCollectible,
+      finish: "DUN",
+      quantity: 1,
+    });
+  });
+
+  it("shows owned quantity on pin buttons", () => {
+    renderButton({
+      collectible: {
+        id: "PIN-CF-01",
+        collectibleType: "pin",
+        category: "pin",
+        finishes: [],
+      },
+      ownedBySkuId: { "PIN-CF-01": 4 },
+    });
+
+    expect(screen.getByRole("button", { name: "Owned · x4" })).toBeInTheDocument();
   });
 
   it("renders empty state when neither collectible nor card is provided", () => {

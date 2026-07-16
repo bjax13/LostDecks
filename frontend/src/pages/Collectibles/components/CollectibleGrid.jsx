@@ -4,7 +4,7 @@ import BinderInfo from "./BinderInfo";
 import CategoryPill from "./CategoryPill";
 import FinishPills from "./FinishPills";
 
-export default function CollectibleGrid({ collectibles }) {
+export default function CollectibleGrid({ collectibles, ownedBySkuId = {} }) {
   return (
     <div className="cards-grid">
       {collectibles.map((collectible) => (
@@ -50,7 +50,11 @@ export default function CollectibleGrid({ collectibles }) {
             <BinderInfo binder={collectible.binder} layout="grid" />
           </div>
           <div className="card-actions">
-            <AddToCollectionButton collectible={collectible} variant="card" />
+            <AddToCollectionButton
+              collectible={collectible}
+              variant="card"
+              ownedBySkuId={ownedBySkuId}
+            />
           </div>
         </Link>
       ))}

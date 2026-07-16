@@ -6,9 +6,9 @@ import { TestMemoryRouter } from "../../../test/router.jsx";
 import CollectibleTable from "./CollectibleTable.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
-  default: () => (
+  default: ({ ownedBySkuId }) => (
     <button type="button" className="add-to-collection" data-testid="add-btn">
-      Add
+      {ownedBySkuId?.["LT24-ELS-01-DUN"] ? `Dun · x${ownedBySkuId["LT24-ELS-01-DUN"]}` : "Add"}
     </button>
   ),
 }));
@@ -68,5 +68,17 @@ describe("CollectibleTable (unit)", () => {
     const addBtn = screen.getByTestId("add-btn");
     await userEvent.click(addBtn);
     expect(screen.queryByTestId("detail")).not.toBeInTheDocument();
+  });
+
+  it("forwards ownedBySkuId to the add button", () => {
+    render(
+      <TestMemoryRouter>
+        <CollectibleTable
+          collectibles={[mockCollectible]}
+          ownedBySkuId={{ "LT24-ELS-01-DUN": 2 }}
+        />
+      </TestMemoryRouter>,
+    );
+    expect(screen.getByTestId("add-btn")).toHaveTextContent("Dun · x2");
   });
 });
