@@ -16,10 +16,34 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
+function formatFreshnessMessage(cacheAgeSeconds, refreshAvailableInSeconds) {
+  if (cacheAgeSeconds == null) {
+    return null;
+  }
+
+  const ageLabel = cacheAgeSeconds === 1 ? "1 second" : `${cacheAgeSeconds} seconds`;
+  if (refreshAvailableInSeconds > 0) {
+    const refreshLabel =
+      refreshAvailableInSeconds === 1 ? "1 second" : `${refreshAvailableInSeconds} seconds`;
+    return `As of ${ageLabel} ago. Can refresh in ${refreshLabel}.`;
+  }
+
+  return `As of ${ageLabel} ago.`;
+}
+
 function MatchesContent() {
   const { user } = useAuth();
   const [activeRow, setActiveRow] = useState("");
-  const { callerOptedOut, error, loading, matches, reload } = useTradeMatches(Boolean(user));
+  const {
+    cacheAgeSeconds,
+    callerOptedOut,
+    error,
+    isUsingCachedResult,
+    loading,
+    matches,
+    refreshAvailableInSeconds,
+    reload,
+  } = useTradeMatches(user?.uid);
 
   const matchRows = useMemo(
     () =>
@@ -35,6 +59,9 @@ function MatchesContent() {
     [matches],
   );
 
+  const freshnessMessage = formatFreshnessMessage(cacheAgeSeconds, refreshAvailableInSeconds);
+  const refreshDisabled = refreshAvailableInSeconds > 0;
+
   return (
     <section className="matches-page">
       <header className="matches-header">
@@ -48,10 +75,19 @@ function MatchesContent() {
       {error ? (
         <section className="matches-panel">
           <p className="matches-error">Could not load matches right now.</p>
-          <button type="button" onClick={reload}>
+          <button type="button" onClick={reload} disabled={refreshDisabled}>
             Retry
           </button>
         </section>
+      ) : null}
+
+      {!loading && !error && freshnessMessage ? (
+        <div className="matches-freshness" data-cached={isUsingCachedResult ? "true" : "false"}>
+          <p className="matches-freshness-text">{freshnessMessage}</p>
+          <button type="button" onClick={reload} disabled={refreshDisabled}>
+            Refresh
+          </button>
+        </div>
       ) : null}
 
       {!loading && !error && callerOptedOut ? (

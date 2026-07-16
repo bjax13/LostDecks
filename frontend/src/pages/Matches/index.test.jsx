@@ -41,8 +41,10 @@ describe("MatchesPage", () => {
       card: { displayName: skuId },
     }));
     mockUseTradeMatches.mockReturnValue({
+      cacheAgeSeconds: null,
       callerOptedOut: false,
       error: null,
+      isUsingCachedResult: false,
       loading: false,
       matches: [
         {
@@ -51,6 +53,7 @@ describe("MatchesPage", () => {
           pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
         },
       ],
+      refreshAvailableInSeconds: 0,
       reload: vi.fn(),
     });
   });
@@ -78,14 +81,76 @@ describe("MatchesPage", () => {
 
   it("shows opted-out message from backend response", () => {
     mockUseTradeMatches.mockReturnValue({
+      cacheAgeSeconds: null,
       callerOptedOut: true,
       error: null,
+      isUsingCachedResult: false,
       loading: false,
       matches: [],
+      refreshAvailableInSeconds: 0,
       reload: vi.fn(),
     });
 
     render(<MatchesPage />);
     expect(screen.getByText("Matching is disabled for your account")).toBeInTheDocument();
+  });
+
+  it("shows freshness countdown and disables refresh during cooldown", () => {
+    const reload = vi.fn();
+    mockUseTradeMatches.mockReturnValue({
+      cacheAgeSeconds: 8,
+      callerOptedOut: false,
+      error: null,
+      isUsingCachedResult: true,
+      loading: false,
+      matches: [
+        {
+          userId: "user-2",
+          displayName: "Collector Two",
+          pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+        },
+      ],
+      refreshAvailableInSeconds: 22,
+      reload,
+    });
+
+    render(<MatchesPage />);
+
+    expect(screen.getByText("As of 8 seconds ago. Can refresh in 22 seconds.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeDisabled();
+  });
+
+  it("enables refresh when cooldown has expired", async () => {
+    const user = userEvent.setup();
+    const reload = vi.fn();
+    mockUseTradeMatches.mockReturnValue({
+      cacheAgeSeconds: 30,
+      callerOptedOut: false,
+      error: null,
+      isUsingCachedResult: true,
+      loading: false,
+      matches: [
+        {
+          userId: "user-2",
+          displayName: "Collector Two",
+          pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+        },
+      ],
+      refreshAvailableInSeconds: 0,
+      reload,
+    });
+
+    render(<MatchesPage />);
+
+    expect(screen.getByText("As of 30 seconds ago.")).toBeInTheDocument();
+    const refreshButton = screen.getByRole("button", { name: "Refresh" });
+    expect(refreshButton).toBeEnabled();
+    await user.click(refreshButton);
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the signed-in user id into the matches hook", () => {
+    render(<MatchesPage />);
+    expect(mockUseTradeMatches).toHaveBeenCalledWith("me");
   });
 });
