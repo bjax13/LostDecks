@@ -4,6 +4,83 @@ import { db } from "../../../lib/firebase";
 
 const csvHeaders = ["skuId", "quantity", "notes"];
 
+export function isPinSkuId(skuId) {
+  if (!skuId) {
+    return false;
+  }
+  const record = getSkuRecord(String(skuId).trim());
+  if (!record?.card) {
+    return false;
+  }
+  return record.card.collectibleType === "pin" || record.card.category === "pin";
+}
+
+export function getStoryDeckCatalogSkus() {
+  return datasetSkus.filter((sku) => !isPinSkuId(sku.skuId));
+}
+
+function normalizeQuantityValue(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.floor(parsed));
+    }
+  }
+  return 0;
+}
+
+/**
+ * Group collection docs by uppercased skuId.
+ * @returns {Map<string, { skuId: string, quantity: number, docs: Array<{id: string, notes?: string}> }>}
+ */
+export function groupCollectionEntriesBySku(entries) {
+  const grouped = new Map();
+
+  for (const entry of entries ?? []) {
+    const rawSkuId = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
+    if (!rawSkuId) {
+      continue;
+    }
+    const key = rawSkuId.toUpperCase();
+    const quantity = normalizeQuantityValue(
+      entry.quantity ?? entry.count ?? entry.copies ?? entry.total,
+    );
+    const existing = grouped.get(key);
+    if (!existing) {
+      grouped.set(key, {
+        skuId: key,
+        quantity,
+        docs: [{ id: entry.id, notes: entry.notes }],
+      });
+      continue;
+    }
+    existing.quantity += quantity;
+    existing.docs.push({ id: entry.id, notes: entry.notes });
+  }
+
+  return grouped;
+}
+
+function sortStoryDeckSkus(skus) {
+  return [...skus].sort((a, b) => {
+    const finishA = a.finish ? a.finish.toUpperCase() : "";
+    const finishB = b.finish ? b.finish.toUpperCase() : "";
+
+    if (finishA !== finishB) {
+      if (!finishA) return 1;
+      if (!finishB) return -1;
+      if (finishA === "DUN") return -1;
+      if (finishB === "DUN") return 1;
+      return finishA.localeCompare(finishB);
+    }
+
+    return a.cardId.localeCompare(b.cardId);
+  });
+}
+
 function escapeCsvValue(value) {
   if (value == null) {
     return "";
@@ -15,28 +92,36 @@ function escapeCsvValue(value) {
   return stringValue;
 }
 
-export function createCollectionTemplateCsv() {
-  const sortedSkus = [...datasetSkus].sort((a, b) => {
-    const finishA = a.finish ? a.finish.toUpperCase() : "";
-    const finishB = b.finish ? b.finish.toUpperCase() : "";
+/**
+ * @param {"zeros" | "ones" | "current"} mode
+ * @param {Array} [entries] required for mode "current"
+ */
+export function createStoryDeckCollectionCsv({ mode, entries = [] } = {}) {
+  if (mode !== "zeros" && mode !== "ones" && mode !== "current") {
+    throw new Error(`Unknown Story Deck CSV mode: ${mode}`);
+  }
 
-    // Sort by finish: DUN comes before FOIL; finish-less pins last
-    if (finishA !== finishB) {
-      if (!finishA) return 1;
-      if (!finishB) return -1;
-      if (finishA === "DUN") return -1;
-      if (finishB === "DUN") return 1;
-      return finishA.localeCompare(finishB);
+  const ownedBySku = mode === "current" ? groupCollectionEntriesBySku(entries) : null;
+  const sortedSkus = sortStoryDeckSkus(getStoryDeckCatalogSkus());
+
+  const rows = sortedSkus.map((sku) => {
+    const skuId = String(sku.skuId).toUpperCase();
+    let quantity = 0;
+    if (mode === "ones") {
+      quantity = 1;
+    } else if (mode === "current") {
+      quantity = ownedBySku.get(skuId)?.quantity ?? 0;
     }
-
-    // Secondary sort by cardId within each finish group
-    return a.cardId.localeCompare(b.cardId);
+    return [sku.skuId, String(quantity), ""];
   });
-
-  const rows = sortedSkus.map((sku) => [sku.skuId, "1", ""]);
 
   const csvLines = [csvHeaders, ...rows].map((row) => row.map(escapeCsvValue).join(","));
   return csvLines.join("\n");
+}
+
+/** @deprecated Prefer createStoryDeckCollectionCsv({ mode: "ones" }) */
+export function createCollectionTemplateCsv() {
+  return createStoryDeckCollectionCsv({ mode: "ones" });
 }
 
 const headerAliases = {
@@ -189,13 +274,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     throw new Error("You need to be signed in to update your collection.");
   }
 
-  const existingBySku = new Map();
-  (existingEntries ?? []).forEach((entry) => {
-    if (entry.skuId) {
-      existingBySku.set(String(entry.skuId).toUpperCase(), entry);
-    }
-  });
-
+  const existingBySku = groupCollectionEntriesBySku(existingEntries);
   const seenKeys = new Set();
   const operations = [];
   const issues = [];
@@ -228,6 +307,14 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
       return;
     }
 
+    if (isPinSkuId(skuId)) {
+      issues.push({
+        line,
+        message: "Pins are not included in Story Deck bulk import.",
+      });
+      return;
+    }
+
     const uniqueKey = toUniqueKey(skuId);
     if (uniqueKey && seenKeys.has(uniqueKey)) {
       issues.push({ line, message: "Duplicate row for the same SKU." });
@@ -244,18 +331,22 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     }
 
     const normalizedQuantity = Math.max(0, Math.round(quantityNumber));
-
-    const existing = existingBySku.get(skuId);
+    const existingGroup = existingBySku.get(skuId);
+    const existingDocs = existingGroup?.docs ?? [];
 
     if (normalizedQuantity === 0) {
-      if (existing) {
-        operations.push({ type: "delete", ref: doc(collectionRef, existing.id) });
+      existingDocs.forEach((existingDoc) => {
+        if (!existingDoc.id) {
+          return;
+        }
+        operations.push({ type: "delete", ref: doc(collectionRef, existingDoc.id) });
         deleted += 1;
-      }
+      });
       return;
     }
 
-    const docRef = existing ? doc(collectionRef, existing.id) : doc(collectionRef);
+    const keeper = existingDocs[0];
+    const docRef = keeper?.id ? doc(collectionRef, keeper.id) : doc(collectionRef);
     const payload = {
       ownerUid,
       skuId,
@@ -267,10 +358,20 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
     }
 
     operations.push({ type: "set", ref: docRef, data: payload, merge: true });
-    if (existing) {
+    if (keeper?.id) {
       updated += 1;
     } else {
       created += 1;
+    }
+
+    // Consolidate duplicates: keep one doc, delete the rest.
+    for (let index = 1; index < existingDocs.length; index += 1) {
+      const extra = existingDocs[index];
+      if (!extra?.id) {
+        continue;
+      }
+      operations.push({ type: "delete", ref: doc(collectionRef, extra.id) });
+      deleted += 1;
     }
   });
 

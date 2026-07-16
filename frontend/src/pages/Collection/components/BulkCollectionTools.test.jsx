@@ -4,13 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BulkCollectionTools from "./BulkCollectionTools.jsx";
 
 const bulkImportMocks = vi.hoisted(() => ({
-  createCollectionTemplateCsv: vi.fn(() => "skuId,quantity,notes\n"),
+  createStoryDeckCollectionCsv: vi.fn(() => "skuId,quantity,notes\n"),
   parseBulkCollectionCsv: vi.fn(),
   applyBulkCollectionUpdate: vi.fn(),
 }));
 
 vi.mock("../utils/bulkImport", () => ({
-  createCollectionTemplateCsv: bulkImportMocks.createCollectionTemplateCsv,
+  createStoryDeckCollectionCsv: bulkImportMocks.createStoryDeckCollectionCsv,
   parseBulkCollectionCsv: bulkImportMocks.parseBulkCollectionCsv,
   applyBulkCollectionUpdate: bulkImportMocks.applyBulkCollectionUpdate,
 }));
@@ -36,7 +36,7 @@ describe("BulkCollectionTools", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    bulkImportMocks.createCollectionTemplateCsv.mockReturnValue("skuId,quantity,notes\n");
+    bulkImportMocks.createStoryDeckCollectionCsv.mockReturnValue("skuId,quantity,notes\n");
     bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([]);
     bulkImportMocks.applyBulkCollectionUpdate.mockResolvedValue({
       created: 0,
@@ -89,23 +89,23 @@ describe("BulkCollectionTools", () => {
     return file;
   }
 
-  it("renders bulk tools section and instructions", () => {
+  it("renders bulk tools section and absolute-quantity guidance", () => {
     render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
     expect(screen.getByRole("region", { name: /bulk update tools/i })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /bulk update your collection/i }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/download the csv template, fill in your card counts/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/quantity in the csv is the new total/i)).toBeInTheDocument();
+    expect(screen.getByText(/pins are not included/i)).toBeInTheDocument();
+    expect(screen.getByText(/use 0 to remove that card sku/i)).toBeInTheDocument();
   });
 
   it("shows sign-in hint and disables actions when ownerUid is missing", () => {
     const { container } = render(<BulkCollectionTools ownerUid={null} entries={[]} />);
-    expect(
-      screen.getByText(/sign in to download the template or upload updates/i),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /download template/i })).toBeDisabled();
+    expect(screen.getByText(/sign in to download a csv or upload updates/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /empty template \(all 0s\)/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /full-set template \(all 1s\)/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /my collection \(current\)/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /copy iso\/uft post/i })).toBeDisabled();
     expect(getFileInput(container)).toBeDisabled();
   });
@@ -113,29 +113,47 @@ describe("BulkCollectionTools", () => {
   it("enables actions when signed in and not disabled", () => {
     const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
     expect(screen.queryByText(/sign in to download/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /download template/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /empty template \(all 0s\)/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /full-set template \(all 1s\)/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /my collection \(current\)/i })).toBeEnabled();
     expect(screen.getByRole("button", { name: /copy iso\/uft post/i })).toBeEnabled();
     expect(getFileInput(container)).toBeEnabled();
   });
 
   it("disables actions when disabled prop is true", () => {
     const { container } = render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} disabled />);
-    expect(screen.getByRole("button", { name: /download template/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /empty template \(all 0s\)/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /copy iso\/uft post/i })).toBeDisabled();
     expect(getFileInput(container)).toBeDisabled();
   });
 
-  it("downloads CSV template via blob URL when template button is used", async () => {
+  it("downloads all three CSV modes via blob URL", async () => {
     const user = userEvent.setup();
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const entries = [{ id: "e1", skuId: "LT24-ELS-01-DUN", quantity: 2 }];
 
-    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
-    await user.click(screen.getByRole("button", { name: /download template/i }));
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={entries} />);
 
-    expect(bulkImportMocks.createCollectionTemplateCsv).toHaveBeenCalledTimes(1);
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(clickSpy).toHaveBeenCalled();
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock-url");
+    await user.click(screen.getByRole("button", { name: /empty template \(all 0s\)/i }));
+    expect(bulkImportMocks.createStoryDeckCollectionCsv).toHaveBeenCalledWith({
+      mode: "zeros",
+      entries,
+    });
+
+    await user.click(screen.getByRole("button", { name: /full-set template \(all 1s\)/i }));
+    expect(bulkImportMocks.createStoryDeckCollectionCsv).toHaveBeenCalledWith({
+      mode: "ones",
+      entries,
+    });
+
+    await user.click(screen.getByRole("button", { name: /my collection \(current\)/i }));
+    expect(bulkImportMocks.createStoryDeckCollectionCsv).toHaveBeenCalledWith({
+      mode: "current",
+      entries,
+    });
+
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(3);
+    expect(clickSpy).toHaveBeenCalledTimes(3);
     clickSpy.mockRestore();
   });
 
@@ -503,7 +521,7 @@ describe("BulkCollectionTools", () => {
     expect(await screen.findByText(/failed to process the uploaded file/i)).toBeInTheDocument();
   });
 
-  it("does not create template CSV while a CSV upload is still processing", async () => {
+  it("does not create CSV downloads while a CSV upload is still processing", async () => {
     let finishImport;
     bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([
       { skuId: "S1", quantity: "1", __lineNumber: 2 },
@@ -519,11 +537,11 @@ describe("BulkCollectionTools", () => {
     uploadCsv(container, "busy.csv", "x");
     expect(await screen.findByText(/uploading/i)).toBeInTheDocument();
 
-    bulkImportMocks.createCollectionTemplateCsv.mockClear();
-    const downloadBtn = screen.getByRole("button", { name: /download template/i });
+    bulkImportMocks.createStoryDeckCollectionCsv.mockClear();
+    const downloadBtn = screen.getByRole("button", { name: /empty template \(all 0s\)/i });
     expect(downloadBtn).toBeDisabled();
     fireEvent.click(downloadBtn);
-    expect(bulkImportMocks.createCollectionTemplateCsv).not.toHaveBeenCalled();
+    expect(bulkImportMocks.createStoryDeckCollectionCsv).not.toHaveBeenCalled();
 
     finishImport({ created: 0, updated: 0, deleted: 0, issues: [] });
     await waitFor(() => {
@@ -758,7 +776,7 @@ describe("BulkCollectionTools", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("does not download template or open post modal when signed out", () => {
+  it("does not download CSV or open post modal when signed out", () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Reflect.deleteProperty(globalThis.navigator, "clipboard");
     Object.defineProperty(globalThis.navigator, "clipboard", {
@@ -768,13 +786,13 @@ describe("BulkCollectionTools", () => {
     });
 
     render(<BulkCollectionTools ownerUid={null} entries={[]} />);
-    const downloadBtn = screen.getByRole("button", { name: /download template/i });
+    const downloadBtn = screen.getByRole("button", { name: /my collection \(current\)/i });
     const copyBtn = screen.getByRole("button", { name: /copy iso\/uft post/i });
     expect(downloadBtn).toBeDisabled();
     expect(copyBtn).toBeDisabled();
     fireEvent.click(downloadBtn);
     fireEvent.click(copyBtn);
-    expect(bulkImportMocks.createCollectionTemplateCsv).not.toHaveBeenCalled();
+    expect(bulkImportMocks.createStoryDeckCollectionCsv).not.toHaveBeenCalled();
     expect(writeText).not.toHaveBeenCalled();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

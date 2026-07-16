@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   applyBulkCollectionUpdate,
-  createCollectionTemplateCsv,
+  createStoryDeckCollectionCsv,
   parseBulkCollectionCsv,
 } from "../utils/bulkImport";
 import IsoUftPostModal from "./IsoUftPostModal.jsx";
@@ -32,6 +32,36 @@ function combineSummary(report) {
   return `${segments.slice(0, -1).join(", ")} and ${segments.at(-1)}`;
 }
 
+const CSV_DOWNLOADS = [
+  {
+    mode: "zeros",
+    label: "Empty template (all 0s)",
+    filename: "lost-tales-collection-empty.csv",
+  },
+  {
+    mode: "ones",
+    label: "Full-set template (all 1s)",
+    filename: "lost-tales-collection-full-set.csv",
+  },
+  {
+    mode: "current",
+    label: "My collection (current)",
+    filename: "lost-tales-collection-current.csv",
+  },
+];
+
+function downloadCsv(filename, csv) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [processing, setProcessing] = useState(false);
   const [report, setReport] = useState(null);
@@ -44,22 +74,16 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
   const existingEntries = useMemo(() => entries ?? [], [entries]);
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadCsv = (mode, filename) => {
     if (!ownerUid || processing) {
       return;
     }
 
-    const csv = createCollectionTemplateCsv();
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "lost-tales-collection-template.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const csv = createStoryDeckCollectionCsv({
+      mode,
+      entries: existingEntries,
+    });
+    downloadCsv(filename, csv);
   };
 
   const handleFileChange = async (event) => {
@@ -125,35 +149,44 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   };
 
   const summaryText = report ? combineSummary(report) : null;
+  const actionsDisabled = !ownerUid || disabled || processing;
 
   return (
     <section className="collection-bulk" aria-label="Bulk update tools">
       <div className="collection-bulk__header">
         <h2>Bulk update your collection</h2>
         <p>
-          Download the CSV template, fill in your card counts, then upload it here to sync your
-          Stormlight Lost Tales collection in one go.
+          Sync your Stormlight Lost Tales / Story Deck card collection with a CSV. Pins are not
+          included and will not be changed by import. Quantity in the CSV is the new total for each
+          SKU (not an increment). Use 0 to remove that card SKU from your Story Deck collection.
+        </p>
+        <p>
+          Downloads: empty template (all 0s), full-set template (all 1s), or your current Story Deck
+          quantities for editing and re-upload.
         </p>
       </div>
 
       {!ownerUid ? (
-        <p className="collection-bulk__hint">Sign in to download the template or upload updates.</p>
+        <p className="collection-bulk__hint">Sign in to download a CSV or upload updates.</p>
       ) : null}
 
       <div className="collection-bulk__actions">
-        <button
-          type="button"
-          className="collection-bulk__button"
-          onClick={handleDownloadTemplate}
-          disabled={!ownerUid || disabled || processing}
-        >
-          Download template
-        </button>
+        {CSV_DOWNLOADS.map((download) => (
+          <button
+            key={download.mode}
+            type="button"
+            className="collection-bulk__button"
+            onClick={() => handleDownloadCsv(download.mode, download.filename)}
+            disabled={actionsDisabled}
+          >
+            {download.label}
+          </button>
+        ))}
         <button
           type="button"
           className="collection-bulk__button"
           onClick={handleOpenPostModal}
-          disabled={!ownerUid || disabled || processing}
+          disabled={actionsDisabled}
         >
           Copy ISO/UFT post
         </button>
@@ -162,7 +195,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
             type="file"
             accept=".csv,text/csv"
             onChange={handleFileChange}
-            disabled={!ownerUid || disabled || processing}
+            disabled={actionsDisabled}
           />
           <span>{processing ? "Uploading…" : "Upload filled template"}</span>
         </label>
