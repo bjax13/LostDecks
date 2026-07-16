@@ -5,7 +5,7 @@ import BinderInfo from "./BinderInfo";
 import CategoryPill from "./CategoryPill";
 import FinishPills from "./FinishPills";
 
-export default function CollectibleTable({ collectibles }) {
+export default function CollectibleTable({ collectibles, ownedBySkuId = {} }) {
   const navigate = useNavigate();
 
   const handleRowClick = (collectibleId, event) => {
@@ -59,7 +59,11 @@ export default function CollectibleTable({ collectibles }) {
                 <BinderInfo binder={collectible.binder} layout="table" />
               </td>
               <td>
-                <AddToCollectionButton collectible={collectible} variant="table" />
+                <AddToCollectionButton
+                  collectible={collectible}
+                  variant="table"
+                  ownedBySkuId={ownedBySkuId}
+                />
               </td>
             </tr>
           ))}

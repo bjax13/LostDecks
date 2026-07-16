@@ -5,9 +5,10 @@ import { TestMemoryRouter } from "../../../test/router.jsx";
 import CollectibleGrid from "./CollectibleGrid.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
-  default: ({ collectible }) => (
+  default: ({ collectible, ownedBySkuId }) => (
     <button type="button" className="card-actions add-to-collection" data-testid="add-btn">
       Add {collectible.id}
+      {ownedBySkuId?.["LT24-ELS-01-DUN"] ? ` · x${ownedBySkuId["LT24-ELS-01-DUN"]}` : ""}
     </button>
   ),
 }));
@@ -45,5 +46,14 @@ describe("CollectibleGrid (unit)", () => {
     const addBtn = screen.getByTestId("add-btn");
     await userEvent.click(addBtn);
     expect(window.location.pathname).toBe("/");
+  });
+
+  it("forwards ownedBySkuId to the add button", () => {
+    render(
+      <TestMemoryRouter>
+        <CollectibleGrid collectibles={[mockCollectible]} ownedBySkuId={{ "LT24-ELS-01-DUN": 3 }} />
+      </TestMemoryRouter>,
+    );
+    expect(screen.getByTestId("add-btn")).toHaveTextContent("Add LT24-ELS-01 · x3");
   });
 });

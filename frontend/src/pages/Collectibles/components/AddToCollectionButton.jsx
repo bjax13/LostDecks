@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthModal } from "../../../contexts/AuthModalContext.jsx";
 import { useAddToCollection } from "../hooks/useAddToCollection";
+import { getOwnedQuantity } from "../utils/ownedQuantities";
 
 const successMessage = "Added to your collection!";
 const errorMessage = "Couldn't add collectible. Please try again.";
@@ -17,7 +18,19 @@ function isPinCollectible(item) {
   return item?.collectibleType === "pin" || item?.category === "pin";
 }
 
-export default function AddToCollectionButton({ collectible, card, variant = "card" }) {
+export function formatOwnedAddLabel({ label, ownedQuantity, isPin = false }) {
+  if (ownedQuantity > 0) {
+    return isPin ? `Owned · x${ownedQuantity}` : `${label} · x${ownedQuantity}`;
+  }
+  return isPin ? "Add to collection" : `Add ${label}`;
+}
+
+export default function AddToCollectionButton({
+  collectible,
+  card,
+  variant = "card",
+  ownedBySkuId = {},
+}) {
   const item = collectible ?? card;
   const { addToCollection, status, error, user, reset } = useAddToCollection();
   const { openAuthModal } = useAuthModal();
@@ -35,6 +48,10 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
         return acc;
       }, {}),
     [finishes],
+  );
+  const pinOwnedQuantity = useMemo(
+    () => (isPin ? getOwnedQuantity(ownedBySkuId, item, null) : 0),
+    [isPin, item, ownedBySkuId],
   );
 
   useEffect(() => {
@@ -112,12 +129,24 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
     () =>
       ["DUN", "FOIL"]
         .filter((finish) => availableFinishes[finish])
-        .map((finish) => ({
-          finish,
-          label: formatFinishLabel(finish),
-        })),
-    [availableFinishes],
+        .map((finish) => {
+          const label = formatFinishLabel(finish);
+          const ownedQuantity = getOwnedQuantity(ownedBySkuId, item, finish);
+          return {
+            finish,
+            label,
+            ownedQuantity,
+            buttonLabel: formatOwnedAddLabel({ label, ownedQuantity }),
+          };
+        }),
+    [availableFinishes, item, ownedBySkuId],
   );
+
+  const pinButtonLabel = formatOwnedAddLabel({
+    label: "Add to collection",
+    ownedQuantity: pinOwnedQuantity,
+    isPin: true,
+  });
 
   return (
     <div className={`add-to-collection add-to-collection--${variant}`}>
@@ -129,12 +158,12 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
             onClick={() => handleAdd(null)}
             disabled={isLoading}
           >
-            {isLoading && pendingPinAdd ? "Adding…" : "Add to collection"}
+            {isLoading && pendingPinAdd ? "Adding…" : pinButtonLabel}
           </button>
         </div>
       ) : finishButtons.length > 0 ? (
         <div className="add-to-collection__buttons">
-          {finishButtons.map(({ finish, label }) => (
+          {finishButtons.map(({ finish, label, buttonLabel }) => (
             <button
               key={finish}
               type="button"
@@ -142,7 +171,7 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
               onClick={() => handleAdd(finish)}
               disabled={isLoading}
             >
-              {isLoading && pendingFinish === finish ? `Adding ${label}…` : `Add ${label}`}
+              {isLoading && pendingFinish === finish ? `Adding ${label}…` : buttonLabel}
             </button>
           ))}
         </div>
