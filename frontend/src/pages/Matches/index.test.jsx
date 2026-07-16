@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseTradeMatches = vi.hoisted(() => vi.fn());
@@ -27,9 +27,31 @@ vi.mock("./hooks/useTradeMatches", () => ({
 
 import MatchesPage from "./index.jsx";
 
+function defaultMatchesHook(overrides = {}) {
+  return {
+    cacheAgeSeconds: null,
+    callerOptedOut: false,
+    error: null,
+    isUsingCachedResult: false,
+    loading: false,
+    matches: [
+      {
+        userId: "user-2",
+        displayName: "Collector Two",
+        pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+      },
+    ],
+    refreshAvailableInSeconds: 0,
+    reload: vi.fn(),
+    showRefreshCountdown: false,
+    ...overrides,
+  };
+}
+
 describe("MatchesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockUseAuth.mockReturnValue({
       user: { uid: "me", displayName: "Me", email: "me@example.com" },
       loading: false,
@@ -40,22 +62,11 @@ describe("MatchesPage", () => {
       cardId: skuId,
       card: { displayName: skuId },
     }));
-    mockUseTradeMatches.mockReturnValue({
-      cacheAgeSeconds: null,
-      callerOptedOut: false,
-      error: null,
-      isUsingCachedResult: false,
-      loading: false,
-      matches: [
-        {
-          userId: "user-2",
-          displayName: "Collector Two",
-          pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
-        },
-      ],
-      refreshAvailableInSeconds: 0,
-      reload: vi.fn(),
-    });
+    mockUseTradeMatches.mockReturnValue(defaultMatchesHook());
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("renders grouped matches by counterparty", () => {
@@ -67,7 +78,7 @@ describe("MatchesPage", () => {
   });
 
   it("shows contact placeholder text when a row is clicked", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<MatchesPage />);
 
     await user.click(
@@ -80,39 +91,43 @@ describe("MatchesPage", () => {
   });
 
   it("shows opted-out message from backend response", () => {
-    mockUseTradeMatches.mockReturnValue({
-      cacheAgeSeconds: null,
-      callerOptedOut: true,
-      error: null,
-      isUsingCachedResult: false,
-      loading: false,
-      matches: [],
-      refreshAvailableInSeconds: 0,
-      reload: vi.fn(),
-    });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        callerOptedOut: true,
+        matches: [],
+      }),
+    );
 
     render(<MatchesPage />);
     expect(screen.getByText("Matching is disabled for your account")).toBeInTheDocument();
   });
 
-  it("shows freshness countdown and disables refresh during cooldown", () => {
+  it("hides freshness controls on initial fetch while cooldown remains", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        cacheAgeSeconds: 2,
+        refreshAvailableInSeconds: 28,
+        showRefreshCountdown: false,
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.queryByText(/Can refresh in/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument();
+  });
+
+  it("shows freshness countdown and disables refresh for cached arrivals", () => {
     const reload = vi.fn();
-    mockUseTradeMatches.mockReturnValue({
-      cacheAgeSeconds: 8,
-      callerOptedOut: false,
-      error: null,
-      isUsingCachedResult: true,
-      loading: false,
-      matches: [
-        {
-          userId: "user-2",
-          displayName: "Collector Two",
-          pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
-        },
-      ],
-      refreshAvailableInSeconds: 22,
-      reload,
-    });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        cacheAgeSeconds: 8,
+        isUsingCachedResult: true,
+        refreshAvailableInSeconds: 22,
+        reload,
+        showRefreshCountdown: true,
+      }),
+    );
 
     render(<MatchesPage />);
 
@@ -120,33 +135,57 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("button", { name: "Refresh" })).toBeDisabled();
   });
 
-  it("enables refresh when cooldown has expired", async () => {
-    const user = userEvent.setup();
+  it("shows you may now refresh briefly then keeps the button without text", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     const reload = vi.fn();
-    mockUseTradeMatches.mockReturnValue({
-      cacheAgeSeconds: 30,
-      callerOptedOut: false,
-      error: null,
-      isUsingCachedResult: true,
-      loading: false,
-      matches: [
-        {
-          userId: "user-2",
-          displayName: "Collector Two",
-          pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
-        },
-      ],
-      refreshAvailableInSeconds: 0,
-      reload,
-    });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        cacheAgeSeconds: 30,
+        isUsingCachedResult: true,
+        refreshAvailableInSeconds: 0,
+        reload,
+        showRefreshCountdown: true,
+      }),
+    );
 
     render(<MatchesPage />);
 
-    expect(screen.getByText("As of 30 seconds ago.")).toBeInTheDocument();
+    expect(screen.getByText("You may now refresh.")).toBeInTheDocument();
     const refreshButton = screen.getByRole("button", { name: "Refresh" });
     expect(refreshButton).toBeEnabled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(3_000);
+    });
+
+    expect(screen.queryByText("You may now refresh.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/As of/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
+
     await user.click(refreshButton);
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows refresh after cooldown ends even when countdown was hidden", async () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        cacheAgeSeconds: 30,
+        refreshAvailableInSeconds: 0,
+        showRefreshCountdown: false,
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.getByText("You may now refresh.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
+
+    await act(async () => {
+      vi.advanceTimersByTime(3_000);
+    });
+
+    expect(screen.queryByText("You may now refresh.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
   });
 
   it("passes the signed-in user id into the matches hook", () => {
