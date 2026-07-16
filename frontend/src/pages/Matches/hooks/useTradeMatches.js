@@ -33,12 +33,12 @@ export function getMatchesCacheKey(userId) {
 }
 
 export function readMatchesCache(userId) {
-  if (!userId || typeof window === "undefined" || !window.sessionStorage) {
+  if (!userId || typeof window === "undefined" || !window.localStorage) {
     return null;
   }
 
   try {
-    const raw = window.sessionStorage.getItem(getMatchesCacheKey(userId));
+    const raw = window.localStorage.getItem(getMatchesCacheKey(userId));
     if (!raw) {
       return null;
     }
@@ -64,12 +64,12 @@ export function readMatchesCache(userId) {
 }
 
 export function writeMatchesCache(userId, payload) {
-  if (!userId || typeof window === "undefined" || !window.sessionStorage) {
+  if (!userId || typeof window === "undefined" || !window.localStorage) {
     return;
   }
 
   try {
-    window.sessionStorage.setItem(
+    window.localStorage.setItem(
       getMatchesCacheKey(userId),
       JSON.stringify({
         cachedAtMs: payload.cachedAtMs,
@@ -108,6 +108,7 @@ export function useTradeMatches(userId) {
   const [matches, setMatches] = useState([]);
   const [cachedAtMs, setCachedAtMs] = useState(null);
   const [isUsingCachedResult, setIsUsingCachedResult] = useState(false);
+  const [showRefreshCountdown, setShowRefreshCountdown] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -147,10 +148,58 @@ export function useTradeMatches(userId) {
 
   useEffect(() => {
     if (!enabled || !userId) {
+      return undefined;
+    }
+
+    const cacheKey = getMatchesCacheKey(userId);
+
+    const applyCachedPayload = (cached, { showCountdown }) => {
+      setCallerOptedOut(cached.callerOptedOut);
+      setMatches(cached.matches);
+      setCachedAtMs(cached.cachedAtMs);
+      setIsUsingCachedResult(true);
+      setShowRefreshCountdown(showCountdown);
+      setNowMs(Date.now());
+      setLoading(false);
+      setError(null);
+    };
+
+    const onStorage = (event) => {
+      if (event.key !== cacheKey) {
+        return;
+      }
+      // Ignore events from other storage areas when the browser identifies them.
+      if (event.storageArea && event.storageArea !== window.localStorage) {
+        return;
+      }
+
+      const cached = readMatchesCache(userId);
+      if (!cached) {
+        return;
+      }
+
+      const now = Date.now();
+      const cacheIsFresh = now - cached.cachedAtMs < MATCHES_CACHE_TTL_MS;
+      if (!cacheIsFresh) {
+        return;
+      }
+
+      applyCachedPayload(cached, { showCountdown: true });
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [enabled, userId]);
+
+  useEffect(() => {
+    if (!enabled || !userId) {
       setMatches([]);
       setCallerOptedOut(false);
       setCachedAtMs(null);
       setIsUsingCachedResult(false);
+      setShowRefreshCountdown(false);
       setLoading(false);
       setError(null);
       return;
@@ -172,6 +221,7 @@ export function useTradeMatches(userId) {
       setMatches(cached.matches);
       setCachedAtMs(cached.cachedAtMs);
       setIsUsingCachedResult(true);
+      setShowRefreshCountdown(true);
       setNowMs(now);
       setLoading(false);
       setError(null);
@@ -183,6 +233,7 @@ export function useTradeMatches(userId) {
       setCallerOptedOut(false);
       setCachedAtMs(null);
       setIsUsingCachedResult(false);
+      setShowRefreshCountdown(false);
       setLoading(false);
       setError(new Error("Cloud Functions is not configured."));
       return;
@@ -192,6 +243,7 @@ export function useTradeMatches(userId) {
     setLoading(true);
     setError(null);
     setIsUsingCachedResult(false);
+    setShowRefreshCountdown(false);
 
     fetchMatches({})
       .then((response) => {
@@ -207,6 +259,7 @@ export function useTradeMatches(userId) {
         setMatches(nextMatches);
         setCachedAtMs(fetchedAt);
         setIsUsingCachedResult(false);
+        setShowRefreshCountdown(false);
         setNowMs(fetchedAt);
         setLoading(false);
 
@@ -225,6 +278,7 @@ export function useTradeMatches(userId) {
         setMatches([]);
         setCachedAtMs(null);
         setIsUsingCachedResult(false);
+        setShowRefreshCountdown(false);
         setError(err);
         setLoading(false);
       });
@@ -243,5 +297,6 @@ export function useTradeMatches(userId) {
     matches,
     refreshAvailableInSeconds,
     reload,
+    showRefreshCountdown,
   };
 }

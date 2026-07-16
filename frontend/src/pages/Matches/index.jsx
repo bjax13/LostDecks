@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { useTradeMatches } from "./hooks/useTradeMatches";
 import "./Matches.css";
+
+const MAY_REFRESH_MESSAGE_MS = 3_000;
 
 function formatSkuLabel(skuId) {
   const sku = getSkuRecord(skuId);
@@ -16,24 +18,38 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
-function formatFreshnessMessage(cacheAgeSeconds, refreshAvailableInSeconds) {
+function formatFreshnessMessage({
+  cacheAgeSeconds,
+  refreshAvailableInSeconds,
+  showMayRefreshMessage,
+  showRefreshCountdown,
+}) {
   if (cacheAgeSeconds == null) {
     return null;
   }
 
-  const ageLabel = cacheAgeSeconds === 1 ? "1 second" : `${cacheAgeSeconds} seconds`;
   if (refreshAvailableInSeconds > 0) {
+    if (!showRefreshCountdown) {
+      return null;
+    }
+
+    const ageLabel = cacheAgeSeconds === 1 ? "1 second" : `${cacheAgeSeconds} seconds`;
     const refreshLabel =
       refreshAvailableInSeconds === 1 ? "1 second" : `${refreshAvailableInSeconds} seconds`;
     return `As of ${ageLabel} ago. Can refresh in ${refreshLabel}.`;
   }
 
-  return `As of ${ageLabel} ago.`;
+  if (showMayRefreshMessage) {
+    return "You may now refresh.";
+  }
+
+  return null;
 }
 
 function MatchesContent() {
   const { user } = useAuth();
   const [activeRow, setActiveRow] = useState("");
+  const [showMayRefreshMessage, setShowMayRefreshMessage] = useState(false);
   const {
     cacheAgeSeconds,
     callerOptedOut,
@@ -43,6 +59,7 @@ function MatchesContent() {
     matches,
     refreshAvailableInSeconds,
     reload,
+    showRefreshCountdown,
   } = useTradeMatches(user?.uid);
 
   const matchRows = useMemo(
@@ -59,8 +76,34 @@ function MatchesContent() {
     [matches],
   );
 
-  const freshnessMessage = formatFreshnessMessage(cacheAgeSeconds, refreshAvailableInSeconds);
+  useEffect(() => {
+    if (loading || error || cacheAgeSeconds == null || refreshAvailableInSeconds > 0) {
+      setShowMayRefreshMessage(false);
+      return undefined;
+    }
+
+    setShowMayRefreshMessage(true);
+    const timeoutId = window.setTimeout(() => {
+      setShowMayRefreshMessage(false);
+    }, MAY_REFRESH_MESSAGE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [cacheAgeSeconds, error, loading, refreshAvailableInSeconds]);
+
+  const freshnessMessage = formatFreshnessMessage({
+    cacheAgeSeconds,
+    refreshAvailableInSeconds,
+    showMayRefreshMessage,
+    showRefreshCountdown,
+  });
   const refreshDisabled = refreshAvailableInSeconds > 0;
+  const showFreshnessBar =
+    !loading &&
+    !error &&
+    cacheAgeSeconds != null &&
+    (refreshAvailableInSeconds === 0 || showRefreshCountdown);
 
   return (
     <section className="matches-page">
@@ -81,9 +124,9 @@ function MatchesContent() {
         </section>
       ) : null}
 
-      {!loading && !error && freshnessMessage ? (
+      {showFreshnessBar ? (
         <div className="matches-freshness" data-cached={isUsingCachedResult ? "true" : "false"}>
-          <p className="matches-freshness-text">{freshnessMessage}</p>
+          {freshnessMessage ? <p className="matches-freshness-text">{freshnessMessage}</p> : null}
           <button type="button" onClick={reload} disabled={refreshDisabled}>
             Refresh
           </button>
