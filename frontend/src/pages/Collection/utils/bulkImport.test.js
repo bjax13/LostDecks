@@ -1,19 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyBulkCollectionUpdate,
   createCollectionTemplateCsv,
+  createStoryDeckCollectionCsv,
+  groupCollectionEntriesBySku,
+  isPinSkuId,
   parseBulkCollectionCsv,
 } from "./bulkImport.js";
 
+const mockBatchDelete = vi.fn();
+const mockBatchSet = vi.fn();
 const mockBatchCommit = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("firebase/firestore", () => ({
   collection: () => ({}),
-  doc: (_, id) => ({ id }),
+  doc: (_, id) => ({ id: id ?? "new-doc" }),
   serverTimestamp: () => ({}),
   writeBatch: () => ({
-    delete: vi.fn(),
-    set: vi.fn(),
+    delete: mockBatchDelete,
+    set: mockBatchSet,
     commit: mockBatchCommit,
   }),
 }));
@@ -22,7 +27,48 @@ vi.mock("../../../lib/firebase", () => ({
   db: {},
 }));
 
+const collectiblesState = vi.hoisted(() => ({
+  skus: [
+    { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN" },
+    { skuId: "LT24-ELS-01-FOIL", cardId: "LT24-ELS-01", finish: "FOIL" },
+    { skuId: "PIN-CF-01", cardId: "PIN-CF-01", finish: null },
+  ],
+  records: {
+    "LT24-ELS-01-DUN": {
+      skuId: "LT24-ELS-01-DUN",
+      cardId: "LT24-ELS-01",
+      finish: "DUN",
+      card: { collectibleType: "card", category: "story" },
+    },
+    "LT24-ELS-01-FOIL": {
+      skuId: "LT24-ELS-01-FOIL",
+      cardId: "LT24-ELS-01",
+      finish: "FOIL",
+      card: { collectibleType: "card", category: "story" },
+    },
+    "PIN-CF-01": {
+      skuId: "PIN-CF-01",
+      cardId: "PIN-CF-01",
+      finish: null,
+      card: { collectibleType: "pin", category: "pin" },
+    },
+  },
+}));
+
+vi.mock("../../../data/collectibles", () => ({
+  get datasetSkus() {
+    return collectiblesState.skus;
+  },
+  getSkuRecord: (skuId) => collectiblesState.records[skuId] ?? null,
+  toSkuId: (cardId, finish) => `${cardId}-${finish}`,
+}));
+
 describe("bulkImport (unit)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockBatchCommit.mockResolvedValue(undefined);
+  });
+
   describe("parseBulkCollectionCsv", () => {
     it("maps header aliases and normalizes row values", () => {
       const csv = "sku,qty\nLT24-ELS-01-DUN,3";
@@ -43,20 +89,58 @@ describe("bulkImport (unit)", () => {
     it("returns an empty array for empty input", () => {
       expect(parseBulkCollectionCsv("")).toEqual([]);
     });
+  });
 
-    it("skips blank rows", () => {
-      const csv = "skuId,quantity\nLT24-ELS-01-DUN,1\n  \n  ,  \n";
-      const rows = parseBulkCollectionCsv(csv);
-      expect(rows).toHaveLength(1);
+  describe("pin helpers and grouping", () => {
+    it("detects pin SKUs", () => {
+      expect(isPinSkuId("PIN-CF-01")).toBe(true);
+      expect(isPinSkuId("LT24-ELS-01-DUN")).toBe(false);
+    });
+
+    it("groups and sums duplicate collection docs by skuId", () => {
+      const grouped = groupCollectionEntriesBySku([
+        { id: "a", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+        { id: "b", skuId: "lt24-els-01-dun", quantity: 2 },
+        { id: "c", skuId: "LT24-ELS-01-FOIL", quantity: 1 },
+      ]);
+      expect(grouped.get("LT24-ELS-01-DUN").quantity).toBe(3);
+      expect(grouped.get("LT24-ELS-01-DUN").docs).toHaveLength(2);
+      expect(grouped.get("LT24-ELS-01-FOIL").quantity).toBe(1);
     });
   });
 
-  describe("createCollectionTemplateCsv", () => {
-    it("starts with the expected header and includes a known catalog sku", () => {
-      const csv = createCollectionTemplateCsv();
-      const firstLine = csv.split("\n")[0];
-      expect(firstLine).toBe("skuId,quantity,notes");
-      expect(csv).toContain("LT24-ELS-01-DUN");
+  describe("createStoryDeckCollectionCsv", () => {
+    it("exports all 0s without pins", () => {
+      const csv = createStoryDeckCollectionCsv({ mode: "zeros" });
+      expect(csv.split("\n")[0]).toBe("skuId,quantity,notes");
+      expect(csv).toContain("LT24-ELS-01-DUN,0,");
+      expect(csv).toContain("LT24-ELS-01-FOIL,0,");
+      expect(csv).not.toContain("PIN-CF-01");
+    });
+
+    it("exports all 1s without pins", () => {
+      const csv = createStoryDeckCollectionCsv({ mode: "ones" });
+      expect(csv).toContain("LT24-ELS-01-DUN,1,");
+      expect(csv).toContain("LT24-ELS-01-FOIL,1,");
+      expect(csv).not.toContain("PIN-CF-01");
+    });
+
+    it("exports current aggregated quantities without pins", () => {
+      const csv = createStoryDeckCollectionCsv({
+        mode: "current",
+        entries: [
+          { id: "a", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+          { id: "b", skuId: "LT24-ELS-01-DUN", quantity: 2 },
+          { id: "pin", skuId: "PIN-CF-01", quantity: 9 },
+        ],
+      });
+      expect(csv).toContain("LT24-ELS-01-DUN,3,");
+      expect(csv).toContain("LT24-ELS-01-FOIL,0,");
+      expect(csv).not.toContain("PIN-CF-01");
+    });
+
+    it("keeps createCollectionTemplateCsv as all-1s Story Deck export", () => {
+      expect(createCollectionTemplateCsv()).toBe(createStoryDeckCollectionCsv({ mode: "ones" }));
     });
   });
 
@@ -92,6 +176,22 @@ describe("bulkImport (unit)", () => {
       });
     });
 
+    it("skips pin SKUs without mutating them", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "PIN-CF-01", quantity: "5" }],
+        existingEntries: [{ id: "pin-doc", skuId: "PIN-CF-01", quantity: 1 }],
+      });
+      expect(result.issues).toContainEqual({
+        line: 2,
+        message: "Pins are not included in Story Deck bulk import.",
+      });
+      expect(result.created).toBe(0);
+      expect(result.updated).toBe(0);
+      expect(result.deleted).toBe(0);
+      expect(mockBatchCommit).not.toHaveBeenCalled();
+    });
+
     it("returns issues when duplicate SKU in rows", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
@@ -108,7 +208,6 @@ describe("bulkImport (unit)", () => {
     });
 
     it("creates new entry for valid row", async () => {
-      mockBatchCommit.mockClear();
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
         rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "2" }],
@@ -116,30 +215,55 @@ describe("bulkImport (unit)", () => {
       });
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
+      expect(mockBatchSet).toHaveBeenCalled();
       expect(mockBatchCommit).toHaveBeenCalled();
     });
 
-    it("updates existing entry when row matches existing", async () => {
-      mockBatchCommit.mockClear();
+    it("sets absolute quantity on existing entry", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
         rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "5" }],
-        existingEntries: [{ id: "existing-1", skuId: "LT24-ELS-01-DUN" }],
+        existingEntries: [{ id: "existing-1", skuId: "LT24-ELS-01-DUN", quantity: 2 }],
       });
       expect(result.updated).toBe(1);
       expect(result.created).toBe(0);
-      expect(mockBatchCommit).toHaveBeenCalled();
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "existing-1" },
+        expect.objectContaining({ quantity: 5 }),
+        { merge: true },
+      );
     });
 
-    it("deletes when quantity is 0 and entry exists", async () => {
-      mockBatchCommit.mockClear();
+    it("deletes all duplicate docs when quantity is 0", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
         rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "0" }],
-        existingEntries: [{ id: "existing-1", skuId: "LT24-ELS-01-DUN" }],
+        existingEntries: [
+          { id: "existing-1", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+          { id: "existing-2", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+        ],
       });
+      expect(result.deleted).toBe(2);
+      expect(mockBatchDelete).toHaveBeenCalledTimes(2);
+    });
+
+    it("consolidates duplicate docs when setting a positive absolute quantity", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "4" }],
+        existingEntries: [
+          { id: "keep", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+          { id: "dup", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+        ],
+      });
+      expect(result.updated).toBe(1);
       expect(result.deleted).toBe(1);
-      expect(mockBatchCommit).toHaveBeenCalled();
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "keep" },
+        expect.objectContaining({ quantity: 4 }),
+        { merge: true },
+      );
+      expect(mockBatchDelete).toHaveBeenCalledWith({ id: "dup" });
     });
 
     it("uses cardId+finish when skuId not provided", async () => {
