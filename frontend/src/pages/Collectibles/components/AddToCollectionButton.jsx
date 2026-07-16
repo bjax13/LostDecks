@@ -13,6 +13,10 @@ export function formatFinishLabel(finish) {
   return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
 }
 
+function isPinCollectible(item) {
+  return item?.collectibleType === "pin" || item?.category === "pin";
+}
+
 export default function AddToCollectionButton({ collectible, card, variant = "card" }) {
   const item = collectible ?? card;
   const { addToCollection, status, error, user, reset } = useAddToCollection();
@@ -20,7 +24,9 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
   const [feedback, setFeedback] = useState(null);
   const [pendingFinish, setPendingFinish] = useState(null);
   const [lastFinish, setLastFinish] = useState(null);
+  const [pendingPinAdd, setPendingPinAdd] = useState(false);
 
+  const isPin = isPinCollectible(item);
   const finishes = useMemo(() => item?.finishes ?? [], [item]);
   const availableFinishes = useMemo(
     () =>
@@ -36,6 +42,7 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
     setFeedback(null);
     setPendingFinish(null);
     setLastFinish(null);
+    setPendingPinAdd(false);
     reset();
   }, [item, reset]);
 
@@ -65,6 +72,7 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
   useEffect(() => {
     if (status !== "loading") {
       setPendingFinish(null);
+      setPendingPinAdd(false);
     }
   }, [status]);
 
@@ -77,8 +85,13 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
     }
 
     try {
-      setPendingFinish(finish);
-      setLastFinish(finish);
+      if (finish) {
+        setPendingFinish(finish);
+        setLastFinish(finish);
+      } else {
+        setPendingPinAdd(true);
+        setLastFinish(null);
+      }
       setFeedback(null);
       await addToCollection({
         card: item,
@@ -108,7 +121,18 @@ export default function AddToCollectionButton({ collectible, card, variant = "ca
 
   return (
     <div className={`add-to-collection add-to-collection--${variant}`}>
-      {finishButtons.length > 0 ? (
+      {isPin ? (
+        <div className="add-to-collection__buttons">
+          <button
+            type="button"
+            className="add-to-collection__button"
+            onClick={() => handleAdd(null)}
+            disabled={isLoading}
+          >
+            {isLoading && pendingPinAdd ? "Adding…" : "Add to collection"}
+          </button>
+        </div>
+      ) : finishButtons.length > 0 ? (
         <div className="add-to-collection__buttons">
           {finishButtons.map(({ finish, label }) => (
             <button

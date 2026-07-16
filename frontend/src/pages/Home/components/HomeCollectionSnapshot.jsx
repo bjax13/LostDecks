@@ -22,7 +22,7 @@ function SnapshotStat({ label, value, hint }) {
 }
 
 export default function HomeCollectionSnapshot({ stats, loading }) {
-  const { isSignedIn, catalogTotal, foilCatalogTotal } = stats;
+  const { isSignedIn, catalogTotal, foilCatalogTotal, pinCatalogTotal } = stats;
 
   return (
     <section className="home-snapshot" aria-labelledby="home-snapshot-heading">
@@ -50,7 +50,11 @@ export default function HomeCollectionSnapshot({ stats, loading }) {
             value={formatStatValue(stats.foilOwned, foilCatalogTotal, isSignedIn)}
             hint={!isSignedIn ? "Sign in" : null}
           />
-          <SnapshotStat label="Chasm Friend Pins" value="Coming soon" />
+          <SnapshotStat
+            label="Chasm Friend Pins"
+            value={formatStatValue(stats.uniquePinCount, pinCatalogTotal, isSignedIn)}
+            hint={!isSignedIn ? "Sign in" : null}
+          />
           <SnapshotStat
             label="Missing Items"
             value={isSignedIn ? String(stats.missingItems ?? "—") : "—"}

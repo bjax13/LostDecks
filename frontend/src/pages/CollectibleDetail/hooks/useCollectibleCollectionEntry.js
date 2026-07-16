@@ -1,6 +1,6 @@
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { getFinishesForCard, toSkuId } from "../../../data/collectibles";
+import { getSkuIdsForCollectible } from "../../../data/collectibles";
 import { db } from "../../../lib/firebase";
 
 const initialState = {
@@ -36,8 +36,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
         where("skuId", "==", skuId),
       );
     } else if (collectibleId) {
-      const finishes = getFinishesForCard(collectibleId);
-      const skuIds = finishes.map((f) => toSkuId(collectibleId, f));
+      const skuIds = getSkuIdsForCollectible(collectibleId);
       if (skuIds.length === 0) {
         setEntry(null);
         setLoading(false);

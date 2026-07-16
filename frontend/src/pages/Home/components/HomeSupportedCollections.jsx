@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { datasetMeta } from "../../../data/collectibles";
+import { datasetMeta, pinDatasetMeta } from "../../../data/collectibles";
 
 export default function HomeSupportedCollections() {
   return (
@@ -11,11 +11,15 @@ export default function HomeSupportedCollections() {
           <span className="home-supported__tile-meta">{datasetMeta.setName}</span>
           <span className="home-supported__tile-action">Browse catalog</span>
         </Link>
-        <div className="home-supported__tile home-supported__tile--disabled" aria-disabled="true">
-          <span className="home-supported__badge">Coming soon</span>
+        <Link
+          to="/collectibles"
+          className="home-supported__tile home-supported__tile--active"
+          state={{ categoryFilter: "pin" }}
+        >
           <span className="home-supported__tile-label">Chasm Friend Pins</span>
-          <span className="home-supported__tile-meta">Pin series tracking</span>
-        </div>
+          <span className="home-supported__tile-meta">{pinDatasetMeta.setName}</span>
+          <span className="home-supported__tile-action">Browse pins</span>
+        </Link>
       </div>
     </section>
   );

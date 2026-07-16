@@ -6,6 +6,7 @@ describe("collectibles constants", () => {
     expect(categoryLabels.story).toBe("Story");
     expect(categoryLabels.herald).toBe("Herald");
     expect(categoryLabels.nonsense).toBe("Nonsense");
+    expect(categoryLabels.pin).toBe("Pin");
   });
 
   it("lists sort options with value and label", () => {

@@ -44,6 +44,7 @@ export default function CollectiblesToolbar({
             <option value="story">Story cards</option>
             <option value="herald">Heralds</option>
             <option value="nonsense">Nonsense variants</option>
+            <option value="pin">Pins</option>
           </select>
         </div>
 

@@ -2,6 +2,7 @@ export const categoryLabels = {
   story: "Story",
   herald: "Herald",
   nonsense: "Nonsense",
+  pin: "Pin",
 };
 
 export const sortOptions = [

@@ -103,7 +103,7 @@ describe("CollectiblesToolbar", () => {
       const select = screen.getByLabelText("Category");
       const options = within(select).getAllByRole("option");
 
-      expect(options.map((o) => o.value)).toEqual(["all", "story", "herald", "nonsense"]);
+      expect(options.map((o) => o.value)).toEqual(["all", "story", "herald", "nonsense", "pin"]);
     });
 
     it("reflects the current category", () => {
@@ -119,6 +119,7 @@ describe("CollectiblesToolbar", () => {
       expect(options[1]).toHaveTextContent("Story cards");
       expect(options[2]).toHaveTextContent("Heralds");
       expect(options[3]).toHaveTextContent("Nonsense variants");
+      expect(options[4]).toHaveTextContent("Pins");
     });
 
     it("calls onCategoryChange when selection changes", async () => {

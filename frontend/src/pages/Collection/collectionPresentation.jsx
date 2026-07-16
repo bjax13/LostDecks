@@ -65,6 +65,7 @@ export function CollectionSummary({ summary }) {
   );
   const storyProgress = summary.progressBreakdowns?.stories ?? [];
   const heraldProgress = summary.progressBreakdowns?.heralds ?? [];
+  const pinProgress = summary.progressBreakdowns?.pins ?? [];
 
   return (
     <section className="collection-summary" aria-label="Collection summary">
@@ -98,7 +99,7 @@ export function CollectionSummary({ summary }) {
         </span>
       </div>
 
-      {(storyProgress.length > 0 || heraldProgress.length > 0) && (
+      {(storyProgress.length > 0 || heraldProgress.length > 0 || pinProgress.length > 0) && (
         <div className="collection-summary__subset-progress">
           {storyProgress.map((story) => (
             <div key={story.code} className="collection-summary__subset-card">
@@ -135,6 +136,36 @@ export function CollectionSummary({ summary }) {
               <h3 className="collection-summary__subset-heading">Heralds</h3>
               <ul className="collection-summary__subset-list">
                 {heraldProgress.map((item) => (
+                  <li key={item.key} className="collection-summary__subset-item">
+                    <div className="collection-summary__subset-meta">
+                      <span>{item.label}</span>
+                      <span>
+                        {item.owned} / {item.total}
+                      </span>
+                    </div>
+                    <div
+                      className="collection-summary__subset-track"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={item.percent}
+                    >
+                      <div
+                        className="collection-summary__subset-bar"
+                        style={{ width: `${item.percent}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {pinProgress.length > 0 ? (
+            <div className="collection-summary__subset-card">
+              <h3 className="collection-summary__subset-heading">Chasmfriends Pins</h3>
+              <ul className="collection-summary__subset-list">
+                {pinProgress.map((item) => (
                   <li key={item.key} className="collection-summary__subset-item">
                     <div className="collection-summary__subset-meta">
                       <span>{item.label}</span>

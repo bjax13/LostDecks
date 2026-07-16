@@ -17,11 +17,13 @@ function escapeCsvValue(value) {
 
 export function createCollectionTemplateCsv() {
   const sortedSkus = [...datasetSkus].sort((a, b) => {
-    const finishA = a.finish.toUpperCase();
-    const finishB = b.finish.toUpperCase();
+    const finishA = a.finish ? a.finish.toUpperCase() : "";
+    const finishB = b.finish ? b.finish.toUpperCase() : "";
 
-    // Sort by finish: DUN comes before FOIL
+    // Sort by finish: DUN comes before FOIL; finish-less pins last
     if (finishA !== finishB) {
+      if (!finishA) return 1;
+      if (!finishB) return -1;
       if (finishA === "DUN") return -1;
       if (finishB === "DUN") return 1;
       return finishA.localeCompare(finishB);

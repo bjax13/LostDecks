@@ -20,12 +20,14 @@ vi.mock("../../../contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-const mockToSkuId = vi.fn((cardId, finish) => {
-  if (!cardId || !finish) return null;
-  return `${cardId}-${finish.toUpperCase()}`;
+const mockResolveSkuId = vi.fn((card, finish) => {
+  if (!card?.id) return null;
+  if (card.collectibleType === "pin" || card.category === "pin") return card.id;
+  if (!finish) return null;
+  return `${card.id}-${finish.toUpperCase()}`;
 });
 vi.mock("../../../data/collectibles", () => ({
-  toSkuId: (...args) => mockToSkuId(...args),
+  resolveSkuId: (...args) => mockResolveSkuId(...args),
 }));
 
 const { useAddToCollection } = await import("./useAddToCollection.js");
@@ -70,7 +72,7 @@ describe("useAddToCollection", () => {
       ).rejects.toThrow("A valid collectible is required");
     });
 
-    it("throws when finish is missing", async () => {
+    it("throws when finish is missing for cards", async () => {
       const { result } = renderHook(() => useAddToCollection());
 
       await expect(
@@ -78,12 +80,30 @@ describe("useAddToCollection", () => {
       ).rejects.toThrow("A finish is required");
     });
 
-    it("throws when finish is explicitly null", async () => {
+    it("throws when finish is explicitly null for cards", async () => {
       const { result } = renderHook(() => useAddToCollection());
 
       await expect(
         act(() => result.current.addToCollection({ card: { id: "LT24-ELS-01" }, finish: null })),
       ).rejects.toThrow("A finish is required");
+    });
+
+    it("allows pins to be added without a finish", async () => {
+      const { result } = renderHook(() => useAddToCollection());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.addToCollection({
+          card: { id: "PIN-CF-01", collectibleType: "pin", category: "pin" },
+        });
+      });
+
+      expect(result.current.status).toBe("success");
+      expect(payload.skuId).toBe("PIN-CF-01");
+      expect(mockResolveSkuId).toHaveBeenCalledWith(
+        { id: "PIN-CF-01", collectibleType: "pin", category: "pin" },
+        null,
+      );
     });
 
     it("throws with auth-required code when user is not logged in", async () => {
@@ -257,8 +277,8 @@ describe("useAddToCollection", () => {
   });
 
   describe("invalid SKU", () => {
-    it("throws when toSkuId returns null", async () => {
-      mockToSkuId.mockReturnValueOnce(null);
+    it("throws when resolveSkuId returns null", async () => {
+      mockResolveSkuId.mockReturnValueOnce(null);
       const { result } = renderHook(() => useAddToCollection());
 
       await expect(

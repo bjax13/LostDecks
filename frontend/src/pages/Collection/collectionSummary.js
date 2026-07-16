@@ -25,6 +25,7 @@ export function decorateCollectionEntries(entries, dateFormatter) {
         finish: skuInfo?.finish ?? null,
         skuId: entry.skuId,
         cardId: cardInfo?.id ?? skuInfo?.cardId ?? null,
+        collectibleType: cardInfo?.collectibleType ?? null,
         displayName: cardInfo?.displayName ?? entry.skuId ?? "Uncatalogued",
         detail: cardInfo?.detail ?? null,
         category: cardInfo?.category ?? null,
@@ -48,6 +49,7 @@ export function decorateCollectionEntries(entries, dateFormatter) {
 
 export function buildCollectionSummary(decoratedEntries) {
   const uniqueCardIds = new Set();
+  const uniquePinIds = new Set();
   const uniqueSkuIds = new Set();
   const finishCounts = {};
   const categoryCounts = {};
@@ -69,6 +71,10 @@ export function buildCollectionSummary(decoratedEntries) {
     foilSkus: new Set(),
   };
 
+  const pinProgress = {
+    skus: new Set(),
+  };
+
   decoratedEntries.forEach((entry) => {
     if (entry.quantity <= 0) {
       return;
@@ -76,8 +82,13 @@ export function buildCollectionSummary(decoratedEntries) {
 
     totalQuantity += entry.quantity;
 
-    if (entry.cardId) {
+    const isPin = entry.collectibleType === "pin" || entry.category === "pin";
+
+    if (entry.cardId && !isPin) {
       uniqueCardIds.add(entry.cardId);
+    }
+    if (entry.cardId && isPin) {
+      uniquePinIds.add(entry.cardId);
     }
     if (entry.skuId) {
       uniqueSkuIds.add(entry.skuId);
@@ -93,7 +104,9 @@ export function buildCollectionSummary(decoratedEntries) {
     const storySet = entry.storyCode ? storyProgress[entry.storyCode] : null;
     const finishIdentifier = entry.skuId ?? null;
 
-    if (entry.category === "story" && storySet) {
+    if (isPin && finishIdentifier) {
+      pinProgress.skus.add(finishIdentifier);
+    } else if (entry.category === "story" && storySet) {
       if (entry.cardId) {
         storySet.storyCards.add(entry.cardId);
       }
@@ -192,8 +205,22 @@ export function buildCollectionSummary(decoratedEntries) {
     percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0,
   }));
 
+  const pinTotals = collectionProgressTargets.pins?.totals ?? { skus: 0 };
+  const pinBreakdown = [
+    {
+      key: "skus",
+      label: "Pins owned",
+      owned: pinProgress.skus.size,
+      total: pinTotals.skus,
+    },
+  ].map((item) => ({
+    ...item,
+    percent: item.total > 0 ? Math.min(100, Math.round((item.owned / item.total) * 100)) : 0,
+  }));
+
   return {
     uniqueCardCount: uniqueCardIds.size,
+    uniquePinCount: uniquePinIds.size,
     uniqueSkuCount: uniqueSkuIds.size,
     totalQuantity,
     finishCounts,
@@ -202,6 +229,7 @@ export function buildCollectionSummary(decoratedEntries) {
     progressBreakdowns: {
       stories: storyBreakdowns,
       heralds: heraldBreakdown,
+      pins: pinBreakdown,
     },
   };
 }

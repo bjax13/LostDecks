@@ -1,13 +1,16 @@
 import { useMemo } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { datasetMeta, datasetSkus } from "../../../data/collectibles";
+import { datasetMeta, datasetSkus, pinDatasetMeta } from "../../../data/collectibles";
 import {
   buildCollectionSummary,
   decorateCollectionEntries,
 } from "../../Collection/collectionSummary";
 import { useUserCollection } from "../../Collection/hooks/useUserCollection";
 
-const foilCatalogTotal = datasetSkus.filter((sku) => sku.finish.toUpperCase() === "FOIL").length;
+const foilCatalogTotal = datasetSkus.filter(
+  (sku) => sku.finish && sku.finish.toUpperCase() === "FOIL",
+).length;
+const pinCatalogTotal = pinDatasetMeta?.totalUniquePins ?? 0;
 
 function countOwnedFoilSkus(decoratedEntries) {
   const foilSkuIds = new Set();
@@ -40,6 +43,7 @@ export function useHomeCollectionStats() {
   const stats = useMemo(() => {
     const catalogTotal = datasetMeta?.totalUniqueCards ?? 0;
     const uniqueCardCount = isSignedIn ? summary.uniqueCardCount : null;
+    const uniquePinCount = isSignedIn ? summary.uniquePinCount : null;
     const foilOwned = isSignedIn ? countOwnedFoilSkus(decoratedEntries) : null;
     const missingItems =
       isSignedIn && catalogTotal > 0 ? Math.max(0, catalogTotal - summary.uniqueCardCount) : null;
@@ -48,7 +52,9 @@ export function useHomeCollectionStats() {
     return {
       catalogTotal,
       foilCatalogTotal,
+      pinCatalogTotal,
       uniqueCardCount,
+      uniquePinCount,
       foilOwned,
       missingItems,
       extras,

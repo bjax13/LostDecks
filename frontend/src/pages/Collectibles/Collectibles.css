@@ -286,6 +286,12 @@
   color: #ffcae7;
 }
 
+.category-pill.pin {
+  background: rgba(120, 200, 160, 0.2);
+  border-color: rgba(120, 200, 160, 0.45);
+  color: #b8ebd0;
+}
+
 .cell-title {
   font-weight: 600;
   color: #f9f7ff;

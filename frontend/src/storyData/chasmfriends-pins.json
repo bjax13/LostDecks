@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "setId": "CF-PINS",
+    "setName": "Chasmfriends Pins",
+    "totalUniquePins": 5,
+    "totalSkus": 5,
+    "notes": [
+      "Blind-bag enamel pins of the five Chasmfriends from The Chasmfriends Get a Pet!",
+      "Each pin has a single SKU with no DUN/FOIL finish variants."
+    ]
+  },
+  "pins": [
+    {
+      "id": "PIN-CF-01",
+      "name": "Shreadad",
+      "series": "Chasmfriends",
+      "number": 1,
+      "detail": "Chasmfriends enamel pin"
+    },
+    {
+      "id": "PIN-CF-02",
+      "name": "Howlerina",
+      "series": "Chasmfriends",
+      "number": 2,
+      "detail": "Chasmfriends enamel pin"
+    },
+    {
+      "id": "PIN-CF-03",
+      "name": "Burp Slurper",
+      "series": "Chasmfriends",
+      "number": 3,
+      "detail": "Chasmfriends enamel pin"
+    },
+    {
+      "id": "PIN-CF-04",
+      "name": "Darren",
+      "series": "Chasmfriends",
+      "number": 4,
+      "detail": "Chasmfriends enamel pin"
+    },
+    {
+      "id": "PIN-CF-05",
+      "name": "Cleverclaws",
+      "series": "Chasmfriends",
+      "number": 5,
+      "detail": "Chasmfriends enamel pin"
+    }
+  ],
+  "skus": [
+    {
+      "skuId": "PIN-CF-01",
+      "cardId": "PIN-CF-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-02",
+      "cardId": "PIN-CF-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-03",
+      "cardId": "PIN-CF-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-04",
+      "cardId": "PIN-CF-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-05",
+      "cardId": "PIN-CF-05",
+      "finish": null
+    }
+  ]
+}

@@ -78,12 +78,33 @@ describe("AddToCollectionButton", () => {
     expect(tableRoot.querySelector(".add-to-collection--table")).toBeInTheDocument();
   });
 
-  it("shows no finishes message when finishes are missing or empty", () => {
-    renderButton({ collectible: { id: "x", finishes: [] } });
+  it("shows no finishes message when finishes are missing or empty for cards", () => {
+    renderButton({ collectible: { id: "x", finishes: [], collectibleType: "card" } });
     expect(screen.getByText("No finishes available")).toBeInTheDocument();
 
-    renderButton({ collectible: { id: "y" } });
+    renderButton({ collectible: { id: "y", collectibleType: "card" } });
     expect(screen.getAllByText("No finishes available")).toHaveLength(2);
+  });
+
+  it("renders a single add button for pins", async () => {
+    const user = userEvent.setup();
+    renderButton({
+      collectible: {
+        id: "PIN-CF-01",
+        collectibleType: "pin",
+        category: "pin",
+        finishes: [],
+      },
+    });
+
+    expect(screen.queryByText("No finishes available")).not.toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "Add to collection" });
+    await user.click(button);
+    expect(hookState.addToCollection).toHaveBeenCalledWith({
+      card: expect.objectContaining({ id: "PIN-CF-01", collectibleType: "pin" }),
+      finish: null,
+      quantity: 1,
+    });
   });
 
   it("renders empty state when neither collectible nor card is provided", () => {

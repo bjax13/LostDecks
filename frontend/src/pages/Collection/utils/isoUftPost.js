@@ -37,6 +37,12 @@ const SECTIONS = [
     groupSuffix: "Nonsense",
     predicate: ({ card, finish }) => card.category === "nonsense" && finish === "FOIL",
   },
+  {
+    title: "Chasmfriends Pins",
+    slug: "pins",
+    groupSuffix: "Pins",
+    predicate: ({ card }) => card.collectibleType === "pin" || card.category === "pin",
+  },
 ];
 
 /** Section node IDs excluded from the post preview when the modal first opens. */
@@ -88,6 +94,11 @@ function formatTradeItem(card) {
       text: variant ? `${card.number} ${variant}` : `${card.number}`,
       sortKey: [card.number, variant ?? ""],
     };
+  }
+  if (card.category === "pin" || card.collectibleType === "pin") {
+    const label = card.displayName ?? card.id ?? "Unknown Pin";
+    const number = Number.isFinite(card.number) ? card.number : 0;
+    return { text: label, sortKey: [number, label] };
   }
   return { text: card.displayName ?? card.id ?? "Unknown", sortKey: [card.displayName ?? "", ""] };
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import CollectibleGrid from "./components/CollectibleGrid";
 import CollectiblesHeader from "./components/CollectiblesHeader";
 import CollectiblesToolbar from "./components/CollectiblesToolbar";
@@ -7,6 +8,9 @@ import { useCollectiblesExplorer } from "./hooks/useCollectiblesExplorer";
 import "./Collectibles.css";
 
 export default function CollectiblesPage() {
+  const location = useLocation();
+  const initialCategoryFilter =
+    typeof location.state?.categoryFilter === "string" ? location.state.categoryFilter : "all";
   const [viewMode, setViewMode] = useState("grid");
   const {
     collectibles,
@@ -27,7 +31,7 @@ export default function CollectiblesPage() {
     sortDirection,
     setSortDirection,
     resetFilters,
-  } = useCollectiblesExplorer();
+  } = useCollectiblesExplorer({ initialCategoryFilter });
 
   const handleViewChange = (mode) => {
     setViewMode(mode);

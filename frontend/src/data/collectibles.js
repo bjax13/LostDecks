@@ -1,3 +1,4 @@
+import pinDataset from "../storyData/chasmfriends-pins.json";
 import dataset from "../storyData/storydeck-lt24-with-skus.json";
 
 const storyTitleByCode = dataset.stories.reduce((acc, story) => {
@@ -5,12 +6,25 @@ const storyTitleByCode = dataset.stories.reduce((acc, story) => {
   return acc;
 }, {});
 
-const finishesByCardId = dataset.skus.reduce((acc, sku) => {
+const allRawSkus = [...dataset.skus, ...pinDataset.skus];
+
+const finishesByCardId = allRawSkus.reduce((acc, sku) => {
+  if (!sku.finish) {
+    return acc;
+  }
   const normalizedFinish = sku.finish.toUpperCase();
   if (!acc[sku.cardId]) {
     acc[sku.cardId] = new Set();
   }
   acc[sku.cardId].add(normalizedFinish);
+  return acc;
+}, {});
+
+const skuIdsByCollectibleId = allRawSkus.reduce((acc, sku) => {
+  if (!acc[sku.cardId]) {
+    acc[sku.cardId] = [];
+  }
+  acc[sku.cardId].push(sku.skuId);
   return acc;
 }, {});
 
@@ -41,11 +55,25 @@ export function toSkuId(cardId, finish) {
   return `${cardId}-${finishUpper}`;
 }
 
+/**
+ * Resolve the catalog SKU for a collectible + optional finish.
+ * Pins have a single SKU equal to the collectible id (no finish).
+ */
+export function resolveSkuId(collectible, finish = null) {
+  if (!collectible?.id) return null;
+  if (collectible.collectibleType === "pin" || collectible.category === "pin") {
+    const skuIds = skuIdsByCollectibleId[collectible.id];
+    return skuIds?.[0] ?? collectible.id;
+  }
+  return toSkuId(collectible.id, finish);
+}
+
 function formatStoryCard(card) {
   const storyTitle = storyTitleByCode[card.story] ?? card.story;
   const displayName = `${storyTitle} #${card.number.toString().padStart(2, "0")}`;
   return {
     id: card.id,
+    collectibleType: "card",
     category: card.category,
     story: card.story,
     storyTitle,
@@ -64,6 +92,7 @@ function formatHeraldCard(card) {
   const storyTitle = "Heraldic Order";
   return {
     id: card.id,
+    collectibleType: "card",
     category: card.category,
     story: null,
     storyTitle,
@@ -83,6 +112,7 @@ function formatNonsenseCard(card) {
   const displayName = `${storyTitle} Nonsense #${card.baseNumber.toString().padStart(2, "0")}`;
   return {
     id: card.id,
+    collectibleType: "card",
     category: card.category,
     story: card.story,
     storyTitle,
@@ -98,10 +128,30 @@ function formatNonsenseCard(card) {
   };
 }
 
+function formatPinCollectible(pin) {
+  const seriesTitle = pin.series ?? "Pins";
+  const displayName = pin.name;
+  return {
+    id: pin.id,
+    collectibleType: "pin",
+    category: "pin",
+    story: null,
+    storyTitle: seriesTitle,
+    number: pin.number ?? null,
+    rarity: null,
+    binder: null,
+    displayName,
+    detail: pin.detail ?? "Enamel pin",
+    finishes: toFinishList(pin.id),
+    searchTokens: [pin.id, displayName, seriesTitle, "pin", "chasmfriends"].join(" ").toLowerCase(),
+  };
+}
+
 const collectibleRecords = [
   ...dataset.storyCards.map(formatStoryCard),
   ...dataset.heralds.map(formatHeraldCard),
   ...dataset.nonsense.knownCards.map(formatNonsenseCard),
+  ...pinDataset.pins.map(formatPinCollectible),
 ];
 
 const collectiblesById = collectibleRecords.reduce((acc, rec) => {
@@ -127,17 +177,29 @@ const heraldProgressSets = {
   foilSkus: new Set(),
 };
 
+const pinProgressSets = {
+  title: pinDataset.meta.setName,
+  skus: new Set(),
+};
+
 collectibleRecords.forEach((rec) => {
+  if (rec.collectibleType === "pin") {
+    const skuIds = skuIdsByCollectibleId[rec.id] ?? [];
+    for (const skuId of skuIds) {
+      pinProgressSets.skus.add(skuId);
+    }
+    return;
+  }
   if (!rec.story || !storyProgressSets[rec.story]) return;
   if (rec.category === "story") {
     storyProgressSets[rec.story].storyCards.add(rec.id);
   }
 });
 
-dataset.skus.forEach((sku) => {
-  const normalizedFinish = sku.finish.toUpperCase();
+allRawSkus.forEach((sku) => {
+  const normalizedFinish = sku.finish ? sku.finish.toUpperCase() : null;
   const rec = collectiblesById[sku.cardId];
-  if (!rec) return;
+  if (!rec || rec.collectibleType === "pin") return;
 
   if (rec.category === "story" && rec.story && storyProgressSets[rec.story]) {
     if (normalizedFinish === "DUN") storyProgressSets[rec.story].storyDunSkus.add(sku.skuId);
@@ -173,11 +235,11 @@ const storyProgressByCode = storyProgressTargets.reduce((acc, entry) => {
   return acc;
 }, {});
 
-const skusById = dataset.skus.reduce((acc, sku) => {
+const skusById = allRawSkus.reduce((acc, sku) => {
   acc[sku.skuId] = {
     skuId: sku.skuId,
     cardId: sku.cardId,
-    finish: sku.finish.toUpperCase(),
+    finish: sku.finish ? sku.finish.toUpperCase() : null,
   };
   return acc;
 }, {});
@@ -185,8 +247,9 @@ const skusById = dataset.skus.reduce((acc, sku) => {
 const storiesByCode = { ...storyTitleByCode };
 
 export const datasetMeta = dataset.meta;
+export const pinDatasetMeta = pinDataset.meta;
 export const datasetStories = dataset.stories;
-export const datasetSkus = dataset.skus;
+export const datasetSkus = allRawSkus;
 export const collectiblesIndex = collectibleRecords;
 export const collectionProgressTargets = {
   stories: storyProgressTargets,
@@ -195,6 +258,12 @@ export const collectionProgressTargets = {
     totals: {
       dunSkus: heraldProgressSets.dunSkus.size,
       foilSkus: heraldProgressSets.foilSkus.size,
+    },
+  },
+  pins: {
+    title: pinProgressSets.title,
+    totals: {
+      skus: pinProgressSets.skus.size,
     },
   },
 };
@@ -210,6 +279,10 @@ export function getSkuRecord(skuId) {
     ...sku,
     card: getCollectibleRecord(sku.cardId) ?? null,
   };
+}
+
+export function getSkuIdsForCollectible(collectibleId) {
+  return skuIdsByCollectibleId[collectibleId] ? [...skuIdsByCollectibleId[collectibleId]] : [];
 }
 
 export function getStoryTitle(storyCode) {

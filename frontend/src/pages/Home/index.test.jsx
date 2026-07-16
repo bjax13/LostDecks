@@ -142,6 +142,7 @@ describe("Home page", () => {
       expect(snapshot).toBeTruthy();
       expect(within(snapshot).getByText("2 / 215")).toBeInTheDocument();
       expect(within(snapshot).getByText("1 / 215")).toBeInTheDocument();
+      expect(within(snapshot).getByText("0 / 5")).toBeInTheDocument();
     });
 
     it("shows Get Started as View Collection link", () => {
@@ -158,17 +159,16 @@ describe("Home page", () => {
     });
   });
 
-  it("renders pins tile as disabled with coming soon badge", () => {
+  it("renders pins tile as an active link to collectibles", () => {
     renderHome();
     const section = screen
       .getByRole("heading", { name: "Supported Collections" })
       .closest("section");
     expect(section).toBeTruthy();
-    const pinsTile = within(section)
-      .getByText("Chasm Friend Pins")
-      .closest("[aria-disabled='true']");
-    expect(pinsTile).toBeTruthy();
-    expect(within(pinsTile).getByText("Coming soon")).toBeInTheDocument();
+    const pinsTile = within(section).getByRole("link", { name: /Chasm Friend Pins/i });
+    expect(pinsTile).toHaveAttribute("href", "/collectibles");
+    expect(within(pinsTile).getByText("Browse pins")).toBeInTheDocument();
+    expect(within(pinsTile).queryByText("Coming soon")).not.toBeInTheDocument();
   });
 
   it("links feature tiles to expected routes", () => {

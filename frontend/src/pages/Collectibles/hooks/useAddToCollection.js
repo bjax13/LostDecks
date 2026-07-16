@@ -1,10 +1,14 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useCallback, useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
-import { toSkuId } from "../../../data/collectibles";
+import { resolveSkuId } from "../../../data/collectibles";
 import { db } from "../../../lib/firebase";
 
 const COLLECTIONS_PATH = "collections";
+
+function isPinCollectible(collectible) {
+  return collectible?.collectibleType === "pin" || collectible?.category === "pin";
+}
 
 export function useAddToCollection() {
   const { user } = useAuth();
@@ -13,11 +17,12 @@ export function useAddToCollection() {
 
   const addToCollection = useCallback(
     async ({ card, finish = null, quantity = 1, notes }) => {
-      if (!card || !card.id) {
+      if (!card?.id) {
         throw new Error("A valid collectible is required to add to the collection.");
       }
 
-      if (!finish) {
+      const pin = isPinCollectible(card);
+      if (!pin && !finish) {
         throw new Error("A finish is required (e.g. DUN or FOIL).");
       }
 
@@ -27,9 +32,9 @@ export function useAddToCollection() {
         throw authError;
       }
 
-      const skuId = toSkuId(card.id, finish);
+      const skuId = resolveSkuId(card, finish);
       if (!skuId) {
-        throw new Error("Invalid card or finish.");
+        throw new Error(pin ? "Invalid pin collectible." : "Invalid card or finish.");
       }
 
       setStatus("loading");

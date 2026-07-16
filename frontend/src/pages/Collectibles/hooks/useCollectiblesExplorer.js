@@ -9,9 +9,9 @@ const defaultSortState = {
   direction: "asc",
 };
 
-export function useCollectiblesExplorer() {
+export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState(initialCategoryFilter);
   const [storyFilter, setStoryFilter] = useState("all");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [sortField, setSortField] = useState(defaultSortState.field);

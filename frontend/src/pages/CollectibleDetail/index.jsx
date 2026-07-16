@@ -143,32 +143,36 @@ export default function CollectibleDetailPage() {
               </dd>
             </div>
             <div>
-              <dt>Story</dt>
+              <dt>{card.collectibleType === "pin" ? "Series" : "Story"}</dt>
               <dd>{card.storyTitle ?? "—"}</dd>
             </div>
             <div>
               <dt>Number</dt>
               <dd>{card.number ?? "—"}</dd>
             </div>
-            <div>
-              <dt>Rarity</dt>
-              <dd>{card.rarity ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>Finishes</dt>
-              <dd>
-                <FinishPills
-                  finishes={card.finishes}
-                  empty={<span className="muted">No finishes recorded</span>}
-                />
-              </dd>
-            </div>
-            <div>
-              <dt>Binder Location</dt>
-              <dd>
-                <BinderInfo binder={card.binder} layout="grid" />
-              </dd>
-            </div>
+            {card.collectibleType !== "pin" ? (
+              <>
+                <div>
+                  <dt>Rarity</dt>
+                  <dd>{card.rarity ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Finishes</dt>
+                  <dd>
+                    <FinishPills
+                      finishes={card.finishes}
+                      empty={<span className="muted">No finishes recorded</span>}
+                    />
+                  </dd>
+                </div>
+                <div>
+                  <dt>Binder Location</dt>
+                  <dd>
+                    <BinderInfo binder={card.binder} layout="grid" />
+                  </dd>
+                </div>
+              </>
+            ) : null}
             {skuId && (
               <div>
                 <dt>SKU</dt>
