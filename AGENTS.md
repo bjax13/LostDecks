@@ -63,7 +63,8 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
 - **Cloud Functions tests**: `cd functions && npm test` — Node’s built-in test runner (`*.test.js` next to source).
 - **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). Locally the config builds then previews the production bundle on port 4173. In CI, the workflow builds once and sets `PLAYWRIGHT_SKIP_BUILD=1` so Playwright only runs preview. Specs live under `frontend/e2e/`.
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
-- **Production deploy (local CLI)**: `npm run deploy:firebase` (or `deploy:hosting`) from the repo root after `frontend/.env` is filled with production `VITE_FIREBASE_*`. Deploy scripts run `build:frontend:production`, which forces `VITE_USE_EMULATORS=false` at build time so a local `.env` with emulators enabled is not shipped. Requires `firebase login` or `GOOGLE_APPLICATION_CREDENTIALS`.
+- **Production deploy (local CLI)**: `npm run deploy:firebase` (or `deploy:hosting`) from the repo root. These commands now run `scripts/deploy-production.js`, which fetches live Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` and injects `VITE_FIREBASE_*` at build time. This avoids stale/local placeholder keys. Requires `firebase login` or `GOOGLE_APPLICATION_CREDENTIALS`.
+- **Raw deploy scripts** (only for controlled CI/debug): `npm run deploy:firebase:raw` and `npm run deploy:hosting:raw` use whatever `VITE_FIREBASE_*` values are already present in the environment; prefer the safe commands above for normal use.
 
 ### Production deployment
 
