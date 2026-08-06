@@ -7,6 +7,7 @@ import CollectiblesHeader from "./components/CollectiblesHeader";
 import CollectiblesToolbar from "./components/CollectiblesToolbar";
 import CollectibleTable from "./components/CollectibleTable";
 import { useCollectiblesExplorer } from "./hooks/useCollectiblesExplorer";
+import { usePurgeSoftZeroEntriesOnMount } from "./hooks/usePurgeSoftZeroEntriesOnMount";
 import { buildOwnedQuantityBySkuId } from "./utils/ownedQuantities";
 import "./Collectibles.css";
 
@@ -14,8 +15,28 @@ export default function CollectiblesPage() {
   const location = useLocation();
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
-  const { entries } = useUserCollection(ownerUid);
-  const ownedBySkuId = useMemo(() => buildOwnedQuantityBySkuId(entries), [entries]);
+  const { entries, loading } = useUserCollection(ownerUid);
+  const [quantityOverrides, setQuantityOverrides] = useState({});
+
+  usePurgeSoftZeroEntriesOnMount(ownerUid, entries, loading);
+
+  const ownedBySkuId = useMemo(() => {
+    const base = buildOwnedQuantityBySkuId(entries);
+    return { ...base, ...quantityOverrides };
+  }, [entries, quantityOverrides]);
+
+  const handleQuantityChange = ({ skuId, quantity }) => {
+    if (!skuId) return;
+    setQuantityOverrides((prev) => {
+      const next = { ...prev };
+      if (quantity > 0) {
+        delete next[skuId];
+      } else {
+        next[skuId] = 0;
+      }
+      return next;
+    });
+  };
 
   const initialCategoryFilter =
     typeof location.state?.categoryFilter === "string" ? location.state.categoryFilter : "all";
@@ -79,9 +100,19 @@ export default function CollectiblesPage() {
       />
 
       {viewMode === "table" ? (
-        <CollectibleTable collectibles={collectibles} ownedBySkuId={ownedBySkuId} />
+        <CollectibleTable
+          collectibles={collectibles}
+          ownedBySkuId={ownedBySkuId}
+          deleteWhenZero={false}
+          onQuantityChange={handleQuantityChange}
+        />
       ) : (
-        <CollectibleGrid collectibles={collectibles} ownedBySkuId={ownedBySkuId} />
+        <CollectibleGrid
+          collectibles={collectibles}
+          ownedBySkuId={ownedBySkuId}
+          deleteWhenZero={false}
+          onQuantityChange={handleQuantityChange}
+        />
       )}
     </div>
   );

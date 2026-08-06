@@ -5,7 +5,12 @@ import BinderInfo from "./BinderInfo";
 import CategoryPill from "./CategoryPill";
 import FinishPills from "./FinishPills";
 
-export default function CollectibleTable({ collectibles, ownedBySkuId = {} }) {
+export default function CollectibleTable({
+  collectibles,
+  ownedBySkuId = {},
+  deleteWhenZero = true,
+  onQuantityChange,
+}) {
   const navigate = useNavigate();
 
   const handleRowClick = (collectibleId, event) => {
@@ -63,6 +68,8 @@ export default function CollectibleTable({ collectibles, ownedBySkuId = {} }) {
                   collectible={collectible}
                   variant="table"
                   ownedBySkuId={ownedBySkuId}
+                  deleteWhenZero={deleteWhenZero}
+                  onQuantityChange={onQuantityChange}
                 />
               </td>
             </tr>

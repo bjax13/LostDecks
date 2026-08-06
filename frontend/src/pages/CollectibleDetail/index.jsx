@@ -7,6 +7,7 @@ import BinderInfo from "../Collectibles/components/BinderInfo";
 import CategoryPill from "../Collectibles/components/CategoryPill";
 import FinishPills from "../Collectibles/components/FinishPills";
 import { categoryLabels } from "../Collectibles/constants";
+import { usePurgeSoftZeroEntriesOnMount } from "../Collectibles/hooks/usePurgeSoftZeroEntriesOnMount";
 import { useCollectibleCollectionEntry } from "./hooks/useCollectibleCollectionEntry";
 import "./CollectibleDetail.css";
 
@@ -78,6 +79,12 @@ export default function CollectibleDetailPage() {
     skuId,
   );
 
+  const softZeroEntries = useMemo(
+    () => (collectionEntry ? [collectionEntry] : []),
+    [collectionEntry],
+  );
+  usePurgeSoftZeroEntriesOnMount(ownerUid, softZeroEntries, collectionLoading);
+
   const quantity = useMemo(() => normalizeQuantity(collectionEntry), [collectionEntry]);
   const notes = useMemo(() => {
     if (!collectionEntry) return null;
@@ -95,6 +102,13 @@ export default function CollectibleDetailPage() {
       (collectionEntry?.finish ? String(collectionEntry.finish).toUpperCase() : null),
     [collectionEntry, skuRecord],
   );
+
+  const ownedBySkuId = useMemo(() => {
+    if (!collectionEntry?.skuId) {
+      return {};
+    }
+    return { [collectionEntry.skuId]: Math.max(0, quantity) };
+  }, [collectionEntry, quantity]);
 
   if (!card) {
     return (
@@ -228,7 +242,12 @@ export default function CollectibleDetailPage() {
             )}
 
             <div className="card-detail__collection-actions">
-              <AddToCollectionButton collectible={card} variant="card" />
+              <AddToCollectionButton
+                collectible={card}
+                variant="card"
+                ownedBySkuId={ownedBySkuId}
+                deleteWhenZero={false}
+              />
             </div>
           </section>
         )}
