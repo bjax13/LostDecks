@@ -4,7 +4,12 @@ import BinderInfo from "./BinderInfo";
 import CategoryPill from "./CategoryPill";
 import FinishPills from "./FinishPills";
 
-export default function CollectibleGrid({ collectibles, ownedBySkuId = {} }) {
+export default function CollectibleGrid({
+  collectibles,
+  ownedBySkuId = {},
+  deleteWhenZero = true,
+  onQuantityChange,
+}) {
   return (
     <div className="cards-grid">
       {collectibles.map((collectible) => (
@@ -54,6 +59,8 @@ export default function CollectibleGrid({ collectibles, ownedBySkuId = {} }) {
               collectible={collectible}
               variant="card"
               ownedBySkuId={ownedBySkuId}
+              deleteWhenZero={deleteWhenZero}
+              onQuantityChange={onQuantityChange}
             />
           </div>
         </Link>

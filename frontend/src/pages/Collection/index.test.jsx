@@ -16,6 +16,16 @@ import CollectionPage from "./index.jsx";
 const mockUseAuth = vi.fn();
 const mockUseUserCollection = vi.fn();
 const mockNavigate = vi.fn();
+const mutationsState = vi.hoisted(() => ({
+  addToCollection: vi.fn(),
+  decrementFromCollection: vi.fn(),
+  removeFromCollection: vi.fn(),
+  purgeZeroQuantityEntries: vi.fn(),
+  status: "idle",
+  error: null,
+  user: { uid: "test-user" },
+  reset: vi.fn(),
+}));
 
 vi.mock("../../contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
@@ -23,6 +33,10 @@ vi.mock("../../contexts/AuthContext", () => ({
 
 vi.mock("./hooks/useUserCollection", () => ({
   useUserCollection: (ownerUid) => mockUseUserCollection(ownerUid),
+}));
+
+vi.mock("../Collectibles/hooks/useCollectionQuantityMutations", () => ({
+  useCollectionQuantityMutations: () => mutationsState,
 }));
 
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -63,6 +77,26 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockUseAuth.mockReturnValue({ user: { uid: "test-user" }, loading: false });
   mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mutationsState.addToCollection = vi.fn().mockResolvedValue({
+    skuId: "LT24-ELS-01-DUN",
+    quantity: 2,
+    deleted: false,
+  });
+  mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+    skuId: "LT24-ELS-01-DUN",
+    quantity: 1,
+    deleted: false,
+  });
+  mutationsState.removeFromCollection = vi.fn().mockResolvedValue({
+    skuId: "LT24-ELS-01-DUN",
+    quantity: 0,
+    deleted: true,
+  });
+  mutationsState.purgeZeroQuantityEntries = vi.fn().mockResolvedValue({ deleted: 0 });
+  mutationsState.status = "idle";
+  mutationsState.error = null;
+  mutationsState.user = { uid: "test-user" };
+  mutationsState.reset = vi.fn();
 });
 
 describe("normalizeQuantity", () => {
@@ -410,6 +444,60 @@ describe("CollectionTable", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/collectibles/LT24-ELS-01");
   });
 
+  it("invokes row action callbacks and does not navigate", async () => {
+    const user = userEvent.setup({ delay: null });
+    const onIncrement = vi.fn();
+    const onDecrement = vi.fn();
+    const entry = {
+      ...baseEntry,
+      id: "r-actions",
+      cardId: "LT24-ELS-01",
+      skuId: "LT24-ELS-01-DUN",
+      finish: "DUN",
+      quantity: 2,
+    };
+
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable entries={[entry]} onIncrement={onIncrement} onDecrement={onDecrement} />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Row Card").closest("tr");
+    await user.click(within(row).getByRole("button", { name: /Increase quantity/i }));
+    expect(onIncrement).toHaveBeenCalledWith(entry);
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    await user.click(within(row).getByRole("button", { name: /Decrease quantity/i }));
+    expect(onDecrement).toHaveBeenCalledWith(entry);
+    expect(
+      within(row).queryByRole("button", { name: /Remove .* from collection/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("disables actions while busySkuId matches the row", () => {
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable
+          entries={[
+            {
+              ...baseEntry,
+              id: "r-busy",
+              cardId: "LT24-ELS-01",
+              skuId: "LT24-ELS-01-DUN",
+              quantity: 2,
+            },
+          ]}
+          busySkuId="LT24-ELS-01-DUN"
+        />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Row Card").closest("tr");
+    expect(within(row).getByRole("button", { name: /Increase quantity/i })).toBeDisabled();
+    expect(within(row).getByRole("button", { name: /Decrease quantity/i })).toBeDisabled();
+  });
+
   it("does not navigate when the row has neither cardId nor skuId", async () => {
     const user = userEvent.setup({ delay: null });
     render(
@@ -594,6 +682,69 @@ describe("CollectionPage (integration)", () => {
 
     await user.click(link);
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("wires row actions to quantity mutations without navigating", async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        {
+          id: "e1",
+          skuId: "LT24-ELS-01-DUN",
+          quantity: 2,
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    renderCollectionPage();
+    const row = screen.getByText("LT24-ELS-01-DUN").closest("tr");
+    expect(screen.getByRole("columnheader", { name: "Actions" })).toBeInTheDocument();
+
+    await user.click(within(row).getByRole("button", { name: /Increase quantity/i }));
+    expect(mutationsState.addToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        card: expect.objectContaining({ id: "LT24-ELS-01" }),
+        finish: "DUN",
+        quantity: 1,
+      }),
+    );
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    await user.click(within(row).getByRole("button", { name: /Decrease quantity/i }));
+    expect(mutationsState.decrementFromCollection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        card: expect.objectContaining({ id: "LT24-ELS-01" }),
+        finish: "DUN",
+        quantity: 1,
+        deleteWhenZero: false,
+      }),
+    );
+    expect(mutationsState.removeFromCollection).not.toHaveBeenCalled();
+  });
+
+  it("keeps zero-quantity rows visible and only disables decrement", () => {
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        {
+          id: "e1",
+          skuId: "LT24-ELS-01-DUN",
+          quantity: 0,
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    renderCollectionPage();
+    const row = screen.getByText("LT24-ELS-01-DUN").closest("tr");
+    expect(within(row).getByText("0")).toBeInTheDocument();
+    expect(within(row).getByRole("button", { name: /Decrease quantity/i })).toBeDisabled();
+    expect(within(row).getByRole("button", { name: /Increase quantity/i })).toBeEnabled();
+    expect(
+      within(row).queryByRole("button", { name: /Remove .* from collection/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows 0% catalogue progress when the dataset reports no unique card total", () => {

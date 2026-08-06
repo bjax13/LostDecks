@@ -719,6 +719,39 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.collection-table__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.collection-table__action-button {
+  border: 1px solid rgba(201, 182, 255, 0.55);
+  background: rgba(96, 66, 178, 0.4);
+  color: #ffffff;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.collection-table__action-button:hover:not(:disabled) {
+  background: rgba(143, 111, 230, 0.55);
+  transform: translateY(-1px);
+}
+
+.collection-table__action-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .collection-page__empty {
   padding: 3rem 2rem;
   background: rgba(24, 18, 45, 0.85);

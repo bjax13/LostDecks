@@ -1,20 +1,36 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
+import { useCollectionQuantityMutations } from "../Collectibles/hooks/useCollectionQuantityMutations";
+import { usePurgeSoftZeroEntriesOnMount } from "../Collectibles/hooks/usePurgeSoftZeroEntriesOnMount";
 import { CollectionSummary, CollectionTable } from "./collectionPresentation.jsx";
 import { buildCollectionSummary, decorateCollectionEntries } from "./collectionSummary";
 import BulkCollectionTools from "./components/BulkCollectionTools";
 import { useUserCollection } from "./hooks/useUserCollection";
 import "./Collection.css";
 
+function entryToCard(entry) {
+  if (!entry?.cardId) return null;
+  return {
+    id: entry.cardId,
+    collectibleType: entry.collectibleType ?? null,
+    category: entry.category ?? null,
+  };
+}
+
 function CollectionContent() {
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
   const { entries, loading, error } = useUserCollection(ownerUid);
+  const { addToCollection, decrementFromCollection } = useCollectionQuantityMutations();
+  const [busySkuId, setBusySkuId] = useState(null);
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }),
     [],
   );
+
+  // Soft-zero rows linger for this visit; purge quantity-0 docs once on remount/refresh.
+  usePurgeSoftZeroEntriesOnMount(ownerUid, entries, loading);
 
   const decoratedEntries = useMemo(
     () => decorateCollectionEntries(entries, dateFormatter),
@@ -22,6 +38,41 @@ function CollectionContent() {
   );
 
   const summary = useMemo(() => buildCollectionSummary(decoratedEntries), [decoratedEntries]);
+
+  const runRowMutation = async (entry, mutate) => {
+    const card = entryToCard(entry);
+    if (!card || !entry.skuId || busySkuId) {
+      return;
+    }
+
+    setBusySkuId(entry.skuId);
+    try {
+      await mutate(card);
+    } catch (err) {
+      console.error("Failed to update collection quantity", err);
+    } finally {
+      setBusySkuId(null);
+    }
+  };
+
+  const handleIncrement = (entry) =>
+    runRowMutation(entry, (card) =>
+      addToCollection({
+        card,
+        finish: entry.finish ?? null,
+        quantity: 1,
+      }),
+    );
+
+  const handleDecrement = (entry) =>
+    runRowMutation(entry, (card) =>
+      decrementFromCollection({
+        card,
+        finish: entry.finish ?? null,
+        quantity: 1,
+        deleteWhenZero: false,
+      }),
+    );
 
   return (
     <section className="collection-page">
@@ -57,7 +108,12 @@ function CollectionContent() {
         ) : (
           <>
             <CollectionSummary summary={summary} />
-            <CollectionTable entries={decoratedEntries} />
+            <CollectionTable
+              entries={decoratedEntries}
+              onIncrement={handleIncrement}
+              onDecrement={handleDecrement}
+              busySkuId={busySkuId}
+            />
           </>
         )}
       </div>
