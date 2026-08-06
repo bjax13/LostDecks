@@ -1,6 +1,14 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
-const { buildMatchesForCaller, buildUserSkuTotals, resolveMatchContact } = require("./matches");
+const {
+  buildMatchesForCaller,
+  buildUserSkuTotals,
+  DEFAULT_MATCH_PAGE_SIZE,
+  normalizeMatchCursor,
+  normalizeMatchPageSize,
+  paginateMatches,
+  resolveMatchContact,
+} = require("./matches");
 
 const MATCH_PAIR_LIMIT = 100;
 
@@ -56,6 +64,11 @@ exports.getTradeMatches = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "You must be signed in to view trade matches.");
   }
 
+  const pageSize = normalizeMatchPageSize(request.data?.pageSize, {
+    defaultSize: DEFAULT_MATCH_PAGE_SIZE,
+  });
+  const cursor = normalizeMatchCursor(request.data?.cursor);
+
   const db = admin.firestore();
   const [collectionsSnapshot, optedOutSnapshot] = await Promise.all([
     db.collection("collections").get(),
@@ -79,38 +92,45 @@ exports.getTradeMatches = onCall(async (request) => {
     return {
       callerOptedOut: true,
       matches: [],
+      pageSize,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 0,
     };
   }
 
-  const counterpartyIds = matches.map((match) => match.userId);
+  const page = paginateMatches(matches, { pageSize, cursor });
+  const counterpartyIds = page.matches.map((match) => match.userId);
   const [profilesByUserId, preferencesByUserId] = await Promise.all([
     resolveAuthProfiles(counterpartyIds),
     loadPreferencesByUserId(db, counterpartyIds),
   ]);
 
-  const payload = matches
-    .map((match) => {
-      const profile = profilesByUserId.get(match.userId) || {
-        displayName: match.userId,
-        email: "",
-      };
-      const contact = resolveMatchContact({
-        preferences: preferencesByUserId.get(match.userId) || {},
-        trueEmail: profile.email,
-      });
+  const payload = page.matches.map((match) => {
+    const profile = profilesByUserId.get(match.userId) || {
+      displayName: match.userId,
+      email: "",
+    };
+    const contact = resolveMatchContact({
+      preferences: preferencesByUserId.get(match.userId) || {},
+      trueEmail: profile.email,
+    });
 
-      return {
-        userId: match.userId,
-        displayName: profile.displayName,
-        pairs: match.pairs,
-        contact,
-      };
-    })
-    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+    return {
+      userId: match.userId,
+      displayName: profile.displayName,
+      pairs: match.pairs,
+      contact,
+    };
+  });
 
   return {
     callerOptedOut: false,
     matches: payload,
+    pageSize: page.pageSize,
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore,
+    totalOnPage: page.totalOnPage,
   };
 });
 

@@ -29,6 +29,146 @@
   line-height: 1.6;
 }
 
+.matches-toolbar.cards-toolbar {
+  margin-top: 0;
+  padding: 1.75rem;
+  background: rgba(32, 20, 62, 0.85);
+  border: 1px solid rgba(132, 105, 221, 0.5);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+}
+
+.matches-page .search-control label,
+.matches-page .filter-control label {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b8aaff;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.matches-page .search-control input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(176, 148, 255, 0.35);
+  background: rgba(16, 11, 33, 0.9);
+  color: #f8f6ff;
+  font-size: 0.95rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.matches-page .filter-control select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(176, 148, 255, 0.35);
+  background: rgba(16, 11, 33, 0.9);
+  color: #f8f6ff;
+  font-size: 0.95rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path fill='none' stroke='%23f8f6ff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M9 1 5 5 1 1'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.6rem;
+  cursor: pointer;
+}
+
+.matches-page .filter-control select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.matches-page .search-control input:focus,
+.matches-page .filter-control select:focus {
+  outline: none;
+  border-color: rgba(208, 187, 255, 0.8);
+  box-shadow: 0 0 0 2px rgba(168, 139, 255, 0.35);
+}
+
+.matches-page .filter-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.matches-page .sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.matches-page .filter-control .sort-wrapper select {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.matches-page .sort-direction {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 139, 255, 0.5);
+  background: rgba(20, 14, 40, 0.9);
+  color: #f8f6ff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.matches-page .sort-direction:hover {
+  background: rgba(168, 139, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.matches-page .toolbar-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #d2c9ff;
+}
+
+.matches-page .toolbar-footer p {
+  margin: 0;
+}
+
+.matches-page .reset-button {
+  border: 1px solid rgba(201, 182, 255, 0.7);
+  background: transparent;
+  color: #f4f1ff;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.matches-page .reset-button:hover {
+  background: rgba(201, 182, 255, 0.25);
+  color: #ffffff;
+}
+
 .matches-panel {
   background: rgba(24, 18, 45, 0.88);
   border: 1px solid rgba(132, 105, 221, 0.45);
@@ -85,7 +225,7 @@
   gap: 0.35rem;
 }
 
-.matches-contact p {
+.matches-page .matches-contact p {
   margin: 0;
 }
 
@@ -121,8 +261,57 @@
   cursor: not-allowed;
 }
 
+.matches-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(132, 105, 221, 0.35);
+  border-radius: 12px;
+  background: rgba(45, 31, 82, 0.45);
+}
+
+.matches-pagination-status {
+  margin: 0;
+  color: #c7bbff;
+  font-size: 0.92rem;
+  text-align: center;
+  flex: 1 1 auto;
+}
+
+.matches-pagination button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .matches-page {
     padding: 1.75rem clamp(0.75rem, 3vw, 1.25rem) 2.5rem;
+  }
+
+  .matches-toolbar.cards-toolbar {
+    padding: 1.25rem;
+  }
+
+  .matches-page .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .matches-page .toolbar-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .matches-page .toolbar-footer .reset-button {
+    align-self: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 1.5rem;
+  }
+
+  .matches-pagination {
+    flex-direction: column;
   }
 }
