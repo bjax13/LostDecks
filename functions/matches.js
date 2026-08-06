@@ -1,5 +1,13 @@
 "use strict";
 
+const MATCH_CONTACT_SHARING = Object.freeze({
+  TRUE_EMAIL: "trueEmail",
+  TRADING_EMAIL: "tradingEmail",
+  DISCORD: "discord",
+});
+
+const DEFAULT_DISCORD_CHANNEL = "Sanderson Collectors Guild";
+
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -115,10 +123,82 @@ function buildMatchesForCaller({
   return { isCallerOptedOut: false, matches };
 }
 
+function normalizeMatchContactSharing(value) {
+  if (
+    value === MATCH_CONTACT_SHARING.TRUE_EMAIL ||
+    value === MATCH_CONTACT_SHARING.TRADING_EMAIL ||
+    value === MATCH_CONTACT_SHARING.DISCORD
+  ) {
+    return value;
+  }
+  return MATCH_CONTACT_SHARING.TRUE_EMAIL;
+}
+
+function trimOptionalString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function resolveMatchContact({ preferences, trueEmail }) {
+  const sharing = normalizeMatchContactSharing(preferences?.matchContactSharing);
+  const tradingEmail = trimOptionalString(preferences?.tradingEmail);
+  const discordHandle = trimOptionalString(preferences?.discordHandle);
+  const discordChannel = trimOptionalString(preferences?.discordChannel) || DEFAULT_DISCORD_CHANNEL;
+  const email = trimOptionalString(trueEmail);
+
+  if (sharing === MATCH_CONTACT_SHARING.TRADING_EMAIL) {
+    if (tradingEmail) {
+      return {
+        method: MATCH_CONTACT_SHARING.TRADING_EMAIL,
+        email: tradingEmail,
+        usedFallback: false,
+        fallbackReason: null,
+      };
+    }
+
+    return {
+      method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+      email,
+      usedFallback: true,
+      fallbackReason: "Trading email was not set, so their account email was shared instead.",
+    };
+  }
+
+  if (sharing === MATCH_CONTACT_SHARING.DISCORD) {
+    if (discordHandle) {
+      return {
+        method: MATCH_CONTACT_SHARING.DISCORD,
+        discordHandle,
+        discordChannel,
+        usedFallback: false,
+        fallbackReason: null,
+      };
+    }
+
+    return {
+      method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+      email,
+      usedFallback: true,
+      fallbackReason:
+        "Discord information was incomplete, so their account email was shared instead.",
+    };
+  }
+
+  return {
+    method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+    email,
+    usedFallback: false,
+    fallbackReason: null,
+  };
+}
+
 module.exports = {
+  DEFAULT_DISCORD_CHANNEL,
+  MATCH_CONTACT_SHARING,
   buildMatchesForCaller,
   buildPairRows,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  normalizeMatchContactSharing,
   normalizeQuantity,
+  resolveMatchContact,
 };

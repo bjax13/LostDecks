@@ -18,7 +18,24 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
 }));
 
 vi.mock("../../lib/userPreferences", () => ({
-  DEFAULT_USER_PREFERENCES: { matchingOptOut: false },
+  DEFAULT_DISCORD_CHANNEL: "Sanderson Collectors Guild",
+  DEFAULT_USER_PREFERENCES: {
+    matchingOptOut: false,
+    matchContactSharing: "trueEmail",
+    tradingEmail: "",
+    discordHandle: "",
+    discordChannel: "Sanderson Collectors Guild",
+  },
+  MATCH_CONTACT_SHARING: {
+    TRUE_EMAIL: "trueEmail",
+    TRADING_EMAIL: "tradingEmail",
+    DISCORD: "discord",
+  },
+  MAX_TRADING_EMAIL_LENGTH: 320,
+  MAX_DISCORD_HANDLE_LENGTH: 100,
+  MAX_DISCORD_CHANNEL_LENGTH: 100,
+  isValidTradingEmail: (value) =>
+    typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
   subscribeUserPreferences: mockSubscribeUserPreferences,
   updateUserPreferences: mockUpdateUserPreferences,
 }));
@@ -47,7 +64,13 @@ describe("AccountPage", () => {
       updateDisplayName: mockUpdateDisplayName,
     });
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
-      onNext({ matchingOptOut: false });
+      onNext({
+        matchingOptOut: false,
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
       return () => {};
     });
     mockUpdateUserPreferences.mockResolvedValue(undefined);
@@ -79,7 +102,7 @@ describe("AccountPage", () => {
   it("displays the user display name and email", () => {
     renderAccountPage();
     expect(screen.getByText("Jane Doe")).toBeInTheDocument();
-    expect(screen.getByText("jane@example.com")).toBeInTheDocument();
+    expect(screen.getAllByText("jane@example.com").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders the Profile overview heading when user exists", () => {
@@ -238,5 +261,91 @@ describe("AccountPage", () => {
     expect(mockUpdateDisplayName).toHaveBeenCalledWith("Collector");
     expect(screen.getByText("Collector")).toBeInTheDocument();
     expect(screen.getByText("Display name updated.")).toBeInTheDocument();
+  });
+
+  it("renders contact sharing radios with inline trading and discord fields", () => {
+    renderAccountPage();
+
+    expect(
+      screen.getByText(/When something I have matches someone else, share with them/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "My true email" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "My trading email" })).not.toBeChecked();
+    expect(screen.getByRole("radio", { name: "My Discord information" })).not.toBeChecked();
+    expect(screen.getByLabelText("Trading email")).toBeInTheDocument();
+    expect(screen.getByLabelText("Discord name")).toBeInTheDocument();
+    expect(screen.getByLabelText("Discord channel")).toHaveValue("Sanderson Collectors Guild");
+    expect(
+      screen.getByLabelText(
+        "When a match is found this private email is displayed instead of your true email",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("blocks selecting trading email or discord when those fields are empty", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("radio", { name: "My trading email" }));
+
+    expect(screen.getByRole("radio", { name: "My true email" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "My trading email" })).not.toBeChecked();
+    expect(
+      screen.getByText("Trading email is empty. Fill it in, then choose this option again."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Enter a trading email before selecting this option."),
+    ).toBeInTheDocument();
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalledWith("abc-123", {
+      matchContactSharing: "tradingEmail",
+    });
+
+    await user.click(screen.getByRole("radio", { name: "My Discord information" }));
+
+    expect(screen.getByRole("radio", { name: "My true email" })).toBeChecked();
+    expect(
+      screen.getByText(
+        "Discord information is incomplete. Add a Discord name, then choose this option again.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Enter a Discord name before selecting this option."),
+    ).toBeInTheDocument();
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalledWith("abc-123", {
+      matchContactSharing: "discord",
+    });
+  });
+
+  it("persists contact sharing preference and inline field values", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    const tradingEmailInput = screen.getByLabelText("Trading email");
+    await user.clear(tradingEmailInput);
+    await user.type(tradingEmailInput, "trade@example.com");
+    await user.tab();
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      tradingEmail: "trade@example.com",
+    });
+
+    await user.click(screen.getByRole("radio", { name: "My trading email" }));
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchContactSharing: "tradingEmail",
+    });
+
+    const discordNameInput = screen.getByLabelText("Discord name");
+    await user.clear(discordNameInput);
+    await user.type(discordNameInput, "kaladin");
+    await user.tab();
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      discordHandle: "kaladin",
+    });
+
+    await user.click(screen.getByRole("radio", { name: "My Discord information" }));
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchContactSharing: "discord",
+    });
   });
 });

@@ -38,6 +38,12 @@ function defaultMatchesHook(overrides = {}) {
       {
         userId: "user-2",
         displayName: "Collector Two",
+        contact: {
+          method: "trueEmail",
+          email: "two@example.com",
+          usedFallback: false,
+          fallbackReason: null,
+        },
         pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
       },
     ],
@@ -79,7 +85,7 @@ describe("MatchesPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows contact placeholder text when a row is clicked", async () => {
+  it("shows resolved contact details when a row is clicked", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<MatchesPage />);
 
@@ -87,8 +93,69 @@ describe("MatchesPage", () => {
       screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
     );
 
+    expect(screen.getByText("Contact Collector Two. Email: two@example.com")).toBeInTheDocument();
+  });
+
+  it("shows discord contact details and fallback reasons", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Collector Two",
+            contact: {
+              method: "discord",
+              discordHandle: "kaladin",
+              discordChannel: "Sanderson Collectors Guild",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+          },
+        ],
+      }),
+    );
+
+    render(<MatchesPage />);
+    await user.click(
+      screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
+    );
+
     expect(
-      screen.getByText("Contact Collector Two. Direct messaging is coming soon."),
+      screen.getByText("Contact Collector Two. Discord: kaladin in Sanderson Collectors Guild"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows fallback explanation when contact fell back to true email", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Collector Two",
+            contact: {
+              method: "trueEmail",
+              email: "two@example.com",
+              usedFallback: true,
+              fallbackReason:
+                "Trading email was not set, so their account email was shared instead.",
+            },
+            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+          },
+        ],
+      }),
+    );
+
+    render(<MatchesPage />);
+    await user.click(
+      screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
+    );
+
+    expect(screen.getByText("Contact Collector Two. Email: two@example.com")).toBeInTheDocument();
+    expect(
+      screen.getByText("Trading email was not set, so their account email was shared instead."),
     ).toBeInTheDocument();
   });
 

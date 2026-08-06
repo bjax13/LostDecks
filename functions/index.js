@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
-const { buildMatchesForCaller, buildUserSkuTotals } = require("./matches");
+const { buildMatchesForCaller, buildUserSkuTotals, resolveMatchContact } = require("./matches");
 
 const MATCH_PAIR_LIMIT = 100;
 
@@ -8,23 +8,42 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-async function resolveDisplayNames(userIds) {
+async function resolveAuthProfiles(userIds) {
   if (!userIds.length) {
     return new Map();
   }
 
   const auth = admin.auth();
-  const namesByUserId = new Map();
+  const profilesByUserId = new Map();
 
   for (let index = 0; index < userIds.length; index += 100) {
     const batchIds = userIds.slice(index, index + 100);
     const result = await auth.getUsers(batchIds.map((uid) => ({ uid })));
     for (const user of result.users) {
-      namesByUserId.set(uidOrEmpty(user.uid), user.displayName || user.email || user.uid);
+      const uid = uidOrEmpty(user.uid);
+      profilesByUserId.set(uid, {
+        displayName: user.displayName || user.email || user.uid,
+        email: typeof user.email === "string" ? user.email : "",
+      });
     }
   }
 
-  return namesByUserId;
+  return profilesByUserId;
+}
+
+async function loadPreferencesByUserId(db, userIds) {
+  const preferencesByUserId = new Map();
+  if (!userIds.length) {
+    return preferencesByUserId;
+  }
+
+  const refs = userIds.map((userId) => db.collection("userPreferences").doc(userId));
+  const snapshots = await db.getAll(...refs);
+  for (const snapshot of snapshots) {
+    preferencesByUserId.set(snapshot.id, snapshot.exists ? snapshot.data() : {});
+  }
+
+  return preferencesByUserId;
 }
 
 function uidOrEmpty(value) {
@@ -64,14 +83,29 @@ exports.getTradeMatches = onCall(async (request) => {
   }
 
   const counterpartyIds = matches.map((match) => match.userId);
-  const namesByUserId = await resolveDisplayNames(counterpartyIds);
+  const [profilesByUserId, preferencesByUserId] = await Promise.all([
+    resolveAuthProfiles(counterpartyIds),
+    loadPreferencesByUserId(db, counterpartyIds),
+  ]);
 
   const payload = matches
-    .map((match) => ({
-      userId: match.userId,
-      displayName: namesByUserId.get(match.userId) || match.userId,
-      pairs: match.pairs,
-    }))
+    .map((match) => {
+      const profile = profilesByUserId.get(match.userId) || {
+        displayName: match.userId,
+        email: "",
+      };
+      const contact = resolveMatchContact({
+        preferences: preferencesByUserId.get(match.userId) || {},
+        trueEmail: profile.email,
+      });
+
+      return {
+        userId: match.userId,
+        displayName: profile.displayName,
+        pairs: match.pairs,
+        contact,
+      };
+    })
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
   return {
@@ -82,4 +116,7 @@ exports.getTradeMatches = onCall(async (request) => {
 
 exports.__test = {
   MATCH_PAIR_LIMIT,
+  loadPreferencesByUserId,
+  resolveAuthProfiles,
+  resolveMatchContact,
 };

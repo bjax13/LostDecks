@@ -1,8 +1,58 @@
 import { httpsCallable } from "firebase/functions";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { functions } from "../../../lib/firebase";
+import {
+  DEFAULT_DISCORD_CHANNEL,
+  MATCH_CONTACT_SHARING,
+  normalizeMatchContactSharing,
+} from "../../../lib/userPreferences";
 
 export const MATCHES_CACHE_TTL_MS = 30_000;
+
+function normalizeOptionalString(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export function normalizeMatchContact(rawContact) {
+  if (!rawContact || typeof rawContact !== "object") {
+    return {
+      method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+      email: "",
+      discordHandle: "",
+      discordChannel: DEFAULT_DISCORD_CHANNEL,
+      usedFallback: false,
+      fallbackReason: null,
+    };
+  }
+
+  const method = normalizeMatchContactSharing(rawContact.method);
+  const email = normalizeOptionalString(rawContact.email);
+  const discordHandle = normalizeOptionalString(rawContact.discordHandle);
+  const discordChannel =
+    normalizeOptionalString(rawContact.discordChannel) || DEFAULT_DISCORD_CHANNEL;
+  const usedFallback = Boolean(rawContact.usedFallback);
+  const fallbackReason = normalizeOptionalString(rawContact.fallbackReason) || null;
+
+  if (method === MATCH_CONTACT_SHARING.DISCORD) {
+    return {
+      method,
+      email: "",
+      discordHandle,
+      discordChannel,
+      usedFallback,
+      fallbackReason,
+    };
+  }
+
+  return {
+    method,
+    email,
+    discordHandle: "",
+    discordChannel: DEFAULT_DISCORD_CHANNEL,
+    usedFallback,
+    fallbackReason,
+  };
+}
 
 function normalizeMatchRows(rawMatches) {
   if (!Array.isArray(rawMatches)) {
@@ -16,6 +66,7 @@ function normalizeMatchRows(rawMatches) {
         typeof entry?.displayName === "string" && entry.displayName.trim()
           ? entry.displayName.trim()
           : "Unknown collector",
+      contact: normalizeMatchContact(entry?.contact),
       pairs: Array.isArray(entry?.pairs)
         ? entry.pairs
             .map((pair) => ({

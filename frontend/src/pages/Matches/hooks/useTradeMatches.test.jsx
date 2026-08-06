@@ -26,6 +26,14 @@ const MATCH_PAYLOAD = {
     {
       userId: "user-2",
       displayName: "Collector Two",
+      contact: {
+        method: "tradingEmail",
+        email: "trade@example.com",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+        usedFallback: false,
+        fallbackReason: null,
+      },
       pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
     },
   ],
@@ -96,6 +104,7 @@ describe("useTradeMatches cache + cooldown", () => {
     expect(result.current.cacheAgeSeconds).toBeGreaterThanOrEqual(5);
     expect(result.current.refreshAvailableInSeconds).toBeGreaterThan(0);
     expect(result.current.matches[0].displayName).toBe("Collector Two");
+    expect(result.current.matches[0].contact.email).toBe("trade@example.com");
   });
 
   it("refetches after the TTL expires", async () => {
