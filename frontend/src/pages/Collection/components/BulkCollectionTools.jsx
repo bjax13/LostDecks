@@ -127,7 +127,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const summaryText = report ? combineSummary(report) : null;
 
   return (
-    <section className="collection-bulk" aria-label="Bulk update tools">
+    <section id="bulk-import" className="collection-bulk" aria-label="Bulk update tools">
       <div className="collection-bulk__header">
         <h2>Bulk update your collection</h2>
         <p>

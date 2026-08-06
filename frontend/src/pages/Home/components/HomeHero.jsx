@@ -15,10 +15,13 @@ export default function HomeHero() {
           Organize your collection, spot what is missing, and keep track of extras you own.
         </p>
         <div className="home-hero__actions">
+          <Link to="/getting-started" className="home-cta home-cta--primary">
+            Getting Started
+          </Link>
           {!isSignedIn ? (
             <button
               type="button"
-              className="home-cta home-cta--primary"
+              className="home-cta home-cta--secondary"
               onClick={() => openAuthModal({ reason: "home-sign-in" })}
             >
               Sign In

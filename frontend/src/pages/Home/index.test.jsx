@@ -80,12 +80,13 @@ describe("Home page", () => {
       expect(mockOpenAuthModal).toHaveBeenCalledWith({ reason: "home-sign-in" });
     });
 
-    it("calls openAuthModal when Get Started is clicked", async () => {
-      const user = userEvent.setup({ delay: null });
+    it("links Getting Started to the dedicated setup page", () => {
       renderHome();
 
-      await user.click(screen.getByRole("button", { name: "Get Started" }));
-      expect(mockOpenAuthModal).toHaveBeenCalledWith({ reason: "home-get-started" });
+      expect(screen.getAllByRole("link", { name: "Getting Started" })[0]).toHaveAttribute(
+        "href",
+        "/getting-started",
+      );
     });
 
     it("links View Collectibles in hero to /collectibles", () => {

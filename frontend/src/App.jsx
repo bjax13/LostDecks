@@ -10,6 +10,7 @@ import Register from "./pages/Auth/Register";
 import CollectibleDetailPage from "./pages/CollectibleDetail";
 import CollectiblesPage from "./pages/Collectibles";
 import CollectionPage from "./pages/Collection";
+import GettingStartedPage from "./pages/GettingStarted";
 import Home from "./pages/Home";
 import MatchesPage from "./pages/Matches";
 import NotFound from "./pages/NotFound";
@@ -109,6 +110,7 @@ function App() {
         <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
         <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
         <Route path="/collections" element={<CollectionPage />} />
+        <Route path="/getting-started" element={<GettingStartedPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/account" element={<AccountPage />} />
         <Route path="/auth/login" element={<Login />} />

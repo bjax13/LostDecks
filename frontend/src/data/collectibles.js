@@ -117,6 +117,7 @@ function formatNonsenseCard(card) {
     story: card.story,
     storyTitle,
     number: card.baseNumber,
+    variantName: card.variantName ?? null,
     rarity: null,
     binder: null,
     displayName,

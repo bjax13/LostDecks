@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { CollectionSummary, CollectionTable } from "./collectionPresentation.jsx";
@@ -9,6 +10,7 @@ import "./Collection.css";
 
 function CollectionContent() {
   const { user } = useAuth();
+  const location = useLocation();
   const ownerUid = user?.uid ?? null;
   const { entries, loading, error } = useUserCollection(ownerUid);
   const dateFormatter = useMemo(
@@ -32,6 +34,12 @@ function CollectionContent() {
           real-time as you add collectibles from Firebase.
         </p>
       </header>
+
+      {location.state?.onboardingComplete ? (
+        <div className="collection-page__success" role="status">
+          Collection setup complete. Your updated quantities are shown below.
+        </div>
+      ) : null}
 
       {error ? (
         <div className="collection-page__error">

@@ -26,6 +26,14 @@
   line-height: 1.6;
 }
 
+.collection-page__success {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(76, 217, 100, 0.42);
+  border-radius: 6px;
+  background: rgba(76, 217, 100, 0.13);
+  color: rgba(220, 255, 230, 0.95);
+}
+
 .collection-page__body {
   display: flex;
   flex-direction: column;
