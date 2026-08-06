@@ -37,6 +37,52 @@ const MATCH_PAYLOAD = {
       pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
     },
   ],
+  pageSize: 20,
+  nextCursor: null,
+  hasMore: false,
+  totalOnPage: 1,
+};
+
+const PAGE_ONE_PAYLOAD = {
+  callerOptedOut: false,
+  matches: [
+    {
+      userId: "user-a",
+      displayName: "Collector A",
+      contact: {
+        method: "trueEmail",
+        email: "a@example.com",
+        usedFallback: false,
+        fallbackReason: null,
+      },
+      pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+    },
+  ],
+  pageSize: 1,
+  nextCursor: "user-a",
+  hasMore: true,
+  totalOnPage: 1,
+};
+
+const PAGE_TWO_PAYLOAD = {
+  callerOptedOut: false,
+  matches: [
+    {
+      userId: "user-b",
+      displayName: "Collector B",
+      contact: {
+        method: "trueEmail",
+        email: "b@example.com",
+        usedFallback: false,
+        fallbackReason: null,
+      },
+      pairs: [{ theirSkuId: "SKU-3", yourSkuId: "SKU-1" }],
+    },
+  ],
+  pageSize: 1,
+  nextCursor: null,
+  hasMore: false,
+  totalOnPage: 1,
 };
 
 describe("useTradeMatches cache + cooldown", () => {
@@ -58,6 +104,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs: 1_000,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
 
     expect(window.localStorage.getItem(getMatchesCacheKey("uid-1"))).toBeTruthy();
@@ -65,6 +115,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs: 1_000,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
     expect(readMatchesCache("uid-2")).toBeNull();
   });
@@ -77,10 +131,13 @@ describe("useTradeMatches cache + cooldown", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 20, cursor: null });
     expect(result.current.matches).toHaveLength(1);
     expect(result.current.isUsingCachedResult).toBe(false);
     expect(result.current.showRefreshCountdown).toBe(false);
     expect(result.current.refreshAvailableInSeconds).toBeGreaterThan(0);
+    expect(result.current.pageIndex).toBe(1);
+    expect(result.current.hasMore).toBe(false);
     expect(readMatchesCache("uid-1")?.matches).toHaveLength(1);
   });
 
@@ -90,6 +147,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
 
     const { result } = renderHook(() => useTradeMatches("uid-1"));
@@ -112,6 +173,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs: Date.now() - MATCHES_CACHE_TTL_MS - 1_000,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
 
     const { result } = renderHook(() => useTradeMatches("uid-1"));
@@ -130,6 +195,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs: Date.now() - 1_000,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
 
     const first = renderHook(() => useTradeMatches("uid-1"));
@@ -149,6 +218,10 @@ describe("useTradeMatches cache + cooldown", () => {
       cachedAtMs: Date.now() - MATCHES_CACHE_TTL_MS - 500,
       callerOptedOut: false,
       matches: MATCH_PAYLOAD.matches,
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     });
 
     const second = renderHook(() => useTradeMatches("uid-1"));
@@ -216,6 +289,10 @@ describe("useTradeMatches cache + cooldown", () => {
           pairs: [{ theirSkuId: "SKU-9", yourSkuId: "SKU-1" }],
         },
       ],
+      pageSize: 20,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 1,
     };
 
     act(() => {
@@ -234,5 +311,46 @@ describe("useTradeMatches cache + cooldown", () => {
     expect(result.current.isUsingCachedResult).toBe(true);
     expect(result.current.showRefreshCountdown).toBe(true);
     expect(result.current.refreshAvailableInSeconds).toBeGreaterThan(0);
+  });
+
+  it("pages through callable results with cursor stack navigation", async () => {
+    fetchMock
+      .mockResolvedValueOnce({ data: PAGE_ONE_PAYLOAD })
+      .mockResolvedValueOnce({ data: PAGE_TWO_PAYLOAD })
+      .mockResolvedValueOnce({ data: PAGE_ONE_PAYLOAD });
+
+    const { result } = renderHook(() => useTradeMatches("uid-1", { pageSize: 1 }));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 1, cursor: null });
+    expect(result.current.matches[0].displayName).toBe("Collector A");
+    expect(result.current.canGoNext).toBe(true);
+    expect(result.current.canGoPrevious).toBe(false);
+    expect(result.current.pageIndex).toBe(1);
+
+    act(() => {
+      result.current.goToNextPage();
+    });
+
+    await waitFor(() => {
+      expect(result.current.matches[0]?.displayName).toBe("Collector B");
+    });
+    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 1, cursor: "user-a" });
+    expect(result.current.pageIndex).toBe(2);
+    expect(result.current.canGoPrevious).toBe(true);
+    expect(result.current.canGoNext).toBe(false);
+
+    act(() => {
+      result.current.goToPreviousPage();
+    });
+
+    await waitFor(() => {
+      expect(result.current.matches[0]?.displayName).toBe("Collector A");
+    });
+    expect(result.current.pageIndex).toBe(1);
+    expect(result.current.canGoPrevious).toBe(false);
   });
 });
