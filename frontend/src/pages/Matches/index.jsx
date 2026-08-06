@@ -3,6 +3,8 @@ import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
+import MatchesToolbar from "./components/MatchesToolbar";
+import { useMatchesExplorer } from "./hooks/useMatchesExplorer";
 import { useTradeMatches } from "./hooks/useTradeMatches";
 import "./Matches.css";
 
@@ -76,18 +78,45 @@ function MatchesContent() {
   const {
     cacheAgeSeconds,
     callerOptedOut,
+    canGoNext,
+    canGoPrevious,
     error,
+    goToNextPage,
+    goToPreviousPage,
     isUsingCachedResult,
     loading,
     matches,
+    pageIndex,
+    pageSize,
     refreshAvailableInSeconds,
     reload,
     showRefreshCountdown,
+    totalOnPage,
   } = useTradeMatches(user?.uid);
+
+  const {
+    matches: filteredMatches,
+    totalMatches,
+    rarityOptions,
+    stories,
+    searchTerm,
+    setSearchTerm,
+    categoryFilter,
+    setCategoryFilter,
+    storyFilter,
+    setStoryFilter,
+    rarityFilter,
+    setRarityFilter,
+    sortField,
+    setSortField,
+    sortDirection,
+    setSortDirection,
+    resetFilters,
+  } = useMatchesExplorer({ matches });
 
   const matchRows = useMemo(
     () =>
-      matches.map((counterparty) => ({
+      filteredMatches.map((counterparty) => ({
         ...counterparty,
         pairs: counterparty.pairs.map((pair) => ({
           ...pair,
@@ -96,7 +125,7 @@ function MatchesContent() {
           yourLabel: formatSkuLabel(pair.yourSkuId),
         })),
       })),
-    [matches],
+    [filteredMatches],
   );
 
   useEffect(() => {
@@ -127,6 +156,10 @@ function MatchesContent() {
     !error &&
     cacheAgeSeconds != null &&
     (refreshAvailableInSeconds === 0 || showRefreshCountdown);
+  const showMatchesChrome = !loading && !error && !callerOptedOut;
+  const showEmptyMatches = showMatchesChrome && matches.length === 0;
+  const showFilteredEmpty = showMatchesChrome && matches.length > 0 && matchRows.length === 0;
+  const showPagination = showMatchesChrome && (canGoPrevious || canGoNext || pageIndex > 1);
 
   return (
     <section className="matches-page">
@@ -163,14 +196,45 @@ function MatchesContent() {
         </section>
       ) : null}
 
-      {!loading && !error && !callerOptedOut && matchRows.length === 0 ? (
+      {showMatchesChrome ? (
+        <MatchesToolbar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          categoryFilter={categoryFilter}
+          onCategoryChange={setCategoryFilter}
+          storyFilter={storyFilter}
+          onStoryChange={setStoryFilter}
+          rarityFilter={rarityFilter}
+          onRarityChange={setRarityFilter}
+          sortField={sortField}
+          onSortFieldChange={setSortField}
+          sortDirection={sortDirection}
+          onToggleSortDirection={() =>
+            setSortDirection((current) => (current === "asc" ? "desc" : "asc"))
+          }
+          rarityOptions={rarityOptions}
+          stories={stories}
+          resultCount={matchRows.length}
+          totalCount={totalMatches}
+          onReset={resetFilters}
+        />
+      ) : null}
+
+      {showEmptyMatches ? (
         <section className="matches-panel">
           <h2>No reciprocal matches yet</h2>
           <p>Keep collecting duplicates and check back as more collectors join.</p>
         </section>
       ) : null}
 
-      {!loading && !error && !callerOptedOut
+      {showFilteredEmpty ? (
+        <section className="matches-panel">
+          <h2>No matches on this page for these filters</h2>
+          <p>Try clearing filters or browsing another page of collectors.</p>
+        </section>
+      ) : null}
+
+      {showMatchesChrome
         ? matchRows.map((counterparty) => (
             <section className="matches-panel" key={counterparty.userId}>
               <h2>{counterparty.displayName}</h2>
@@ -206,6 +270,27 @@ function MatchesContent() {
             </section>
           ))
         : null}
+
+      {showPagination ? (
+        <nav className="matches-pagination" aria-label="Matches pagination">
+          <button type="button" onClick={goToPreviousPage} disabled={!canGoPrevious || loading}>
+            Previous
+          </button>
+          <p className="matches-pagination-status">
+            Page <strong>{pageIndex}</strong>
+            {totalOnPage > 0 ? (
+              <>
+                {" "}
+                · <strong>{totalOnPage}</strong> collector{totalOnPage === 1 ? "" : "s"} (up to{" "}
+                {pageSize}/page)
+              </>
+            ) : null}
+          </p>
+          <button type="button" onClick={goToNextPage} disabled={!canGoNext || loading}>
+            Next
+          </button>
+        </nav>
+      ) : null}
     </section>
   );
 }

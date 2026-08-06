@@ -7,6 +7,8 @@ const MATCH_CONTACT_SHARING = Object.freeze({
 });
 
 const DEFAULT_DISCORD_CHANNEL = "Sanderson Collectors Guild";
+const DEFAULT_MATCH_PAGE_SIZE = 20;
+const MAX_MATCH_PAGE_SIZE = 50;
 
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -120,7 +122,47 @@ function buildMatchesForCaller({
     }
   }
 
+  matches.sort((a, b) => a.userId.localeCompare(b.userId));
   return { isCallerOptedOut: false, matches };
+}
+
+function normalizeMatchPageSize(value, { defaultSize = DEFAULT_MATCH_PAGE_SIZE } = {}) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return defaultSize;
+  }
+  return Math.min(MAX_MATCH_PAGE_SIZE, Math.max(1, Math.floor(value)));
+}
+
+function normalizeMatchCursor(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+/**
+ * Cursor-based pagination over counterparty match rows sorted by userId.
+ * `cursor` is the last userId from the previous page (exclusive start).
+ */
+function paginateMatches(matches, { pageSize, cursor } = {}) {
+  const normalizedPageSize = normalizeMatchPageSize(pageSize);
+  const normalizedCursor = normalizeMatchCursor(cursor);
+  const ordered = Array.isArray(matches) ? matches : [];
+
+  let startIndex = 0;
+  if (normalizedCursor) {
+    const cursorIndex = ordered.findIndex((match) => match.userId === normalizedCursor);
+    startIndex = cursorIndex >= 0 ? cursorIndex + 1 : ordered.length;
+  }
+
+  const page = ordered.slice(startIndex, startIndex + normalizedPageSize);
+  const hasMore = startIndex + normalizedPageSize < ordered.length;
+  const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].userId : null;
+
+  return {
+    matches: page,
+    pageSize: normalizedPageSize,
+    nextCursor,
+    hasMore,
+    totalOnPage: page.length,
+  };
 }
 
 function normalizeMatchContactSharing(value) {
@@ -193,12 +235,17 @@ function resolveMatchContact({ preferences, trueEmail }) {
 
 module.exports = {
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_PAGE_SIZE,
   MATCH_CONTACT_SHARING,
+  MAX_MATCH_PAGE_SIZE,
   buildMatchesForCaller,
   buildPairRows,
   buildUserMatchProfile,
   buildUserSkuTotals,
   normalizeMatchContactSharing,
+  normalizeMatchCursor,
+  normalizeMatchPageSize,
   normalizeQuantity,
+  paginateMatches,
   resolveMatchContact,
 };

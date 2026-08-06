@@ -7,7 +7,12 @@ const {
   buildUserMatchProfile,
   buildUserSkuTotals,
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_PAGE_SIZE,
+  MAX_MATCH_PAGE_SIZE,
+  normalizeMatchCursor,
+  normalizeMatchPageSize,
   normalizeQuantity,
+  paginateMatches,
   resolveMatchContact,
 } = require("./matches");
 
@@ -60,6 +65,72 @@ test("buildMatchesForCaller builds reciprocal pairs with pair limit", () => {
     userId: "other",
     pairs: [{ theirSkuId: "B", yourSkuId: "A" }],
   });
+});
+
+test("buildMatchesForCaller sorts counterparties by userId for stable pagination", () => {
+  const userSkuTotals = new Map([
+    ["me", new Map([["A", 2]])],
+    ["zeta", new Map([["B", 2]])],
+    ["alpha", new Map([["C", 2]])],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    pairLimit: 10,
+  });
+
+  assert.deepEqual(
+    result.matches.map((match) => match.userId),
+    ["alpha", "zeta"],
+  );
+});
+
+test("paginateMatches returns first page and next cursor", () => {
+  const matches = [
+    { userId: "a", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+    { userId: "b", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+    { userId: "c", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+  ];
+
+  const firstPage = paginateMatches(matches, { pageSize: 2, cursor: null });
+  assert.deepEqual(
+    firstPage.matches.map((match) => match.userId),
+    ["a", "b"],
+  );
+  assert.equal(firstPage.pageSize, 2);
+  assert.equal(firstPage.nextCursor, "b");
+  assert.equal(firstPage.hasMore, true);
+  assert.equal(firstPage.totalOnPage, 2);
+
+  const secondPage = paginateMatches(matches, { pageSize: 2, cursor: "b" });
+  assert.deepEqual(
+    secondPage.matches.map((match) => match.userId),
+    ["c"],
+  );
+  assert.equal(secondPage.nextCursor, null);
+  assert.equal(secondPage.hasMore, false);
+  assert.equal(secondPage.totalOnPage, 1);
+});
+
+test("paginateMatches clamps page size and ignores unknown cursors", () => {
+  const matches = [
+    { userId: "a", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+    { userId: "b", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+  ];
+
+  assert.equal(normalizeMatchPageSize(0), 1);
+  assert.equal(normalizeMatchPageSize(999), MAX_MATCH_PAGE_SIZE);
+  assert.equal(normalizeMatchPageSize(undefined), DEFAULT_MATCH_PAGE_SIZE);
+  assert.equal(normalizeMatchCursor("  uid-1  "), "uid-1");
+  assert.equal(normalizeMatchCursor(""), null);
+
+  const page = paginateMatches(matches, { pageSize: 20, cursor: "missing" });
+  assert.deepEqual(page.matches, []);
+  assert.equal(page.hasMore, false);
+  assert.equal(page.nextCursor, null);
+  assert.equal(page.totalOnPage, 0);
 });
 
 test("buildMatchesForCaller excludes opted-out counterparties and caller", () => {
