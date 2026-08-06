@@ -99,6 +99,127 @@
   height: 1rem;
 }
 
+.account-contact-sharing {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.account-contact-sharing legend {
+  margin: 0 0 0.35rem;
+  padding: 0;
+  color: #e6dcff;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.account-radio-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(132, 105, 221, 0.35);
+  border-radius: 14px;
+  background: rgba(45, 31, 82, 0.55);
+  color: #e6dcff;
+  cursor: pointer;
+}
+
+.account-radio-option:has(input:checked) {
+  border-color: rgba(177, 157, 255, 0.9);
+  background: rgba(58, 40, 104, 0.75);
+}
+
+.account-radio-option input[type="radio"] {
+  margin-top: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+.account-radio-option__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.account-radio-option__label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.account-radio-option__label {
+  font-weight: 600;
+}
+
+.account-radio-option__detail {
+  color: #c7bbff;
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.account-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(177, 157, 255, 0.7);
+  background: transparent;
+  color: #d8ccff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.account-help:focus-visible {
+  outline: 2px solid rgba(177, 157, 255, 0.95);
+  outline-offset: 2px;
+}
+
+.account-inline-input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid rgba(132, 105, 221, 0.55);
+  background: rgba(24, 18, 45, 0.85);
+  color: #f4f1ff;
+  font: inherit;
+}
+
+.account-inline-input:focus-visible {
+  outline: 2px solid rgba(177, 157, 255, 0.95);
+  outline-offset: 1px;
+}
+
+.account-discord-fields {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.account-discord-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #c7bbff;
+  font-size: 0.88rem;
+}
+
+.account-field-error {
+  color: #ffc0d4;
+  font-size: 0.85rem;
+}
+
 .account-status {
   margin: 0;
   color: #c7bbff;

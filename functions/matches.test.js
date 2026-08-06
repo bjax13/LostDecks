@@ -6,7 +6,9 @@ const {
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  DEFAULT_DISCORD_CHANNEL,
   normalizeQuantity,
+  resolveMatchContact,
 } = require("./matches");
 
 test("normalizeQuantity clamps invalid values to zero", () => {
@@ -83,4 +85,92 @@ test("buildMatchesForCaller excludes opted-out counterparties and caller", () =>
   });
   assert.equal(counterpartyOptedOut.isCallerOptedOut, false);
   assert.deepEqual(counterpartyOptedOut.matches, []);
+});
+
+test("resolveMatchContact shares true email by default", () => {
+  assert.deepEqual(
+    resolveMatchContact({
+      preferences: {},
+      trueEmail: "true@example.com",
+    }),
+    {
+      method: "trueEmail",
+      email: "true@example.com",
+      usedFallback: false,
+      fallbackReason: null,
+    },
+  );
+});
+
+test("resolveMatchContact uses trading email when configured", () => {
+  assert.deepEqual(
+    resolveMatchContact({
+      preferences: {
+        matchContactSharing: "tradingEmail",
+        tradingEmail: " trade@example.com ",
+      },
+      trueEmail: "true@example.com",
+    }),
+    {
+      method: "tradingEmail",
+      email: "trade@example.com",
+      usedFallback: false,
+      fallbackReason: null,
+    },
+  );
+});
+
+test("resolveMatchContact falls back to true email when trading email is missing", () => {
+  assert.deepEqual(
+    resolveMatchContact({
+      preferences: {
+        matchContactSharing: "tradingEmail",
+        tradingEmail: "   ",
+      },
+      trueEmail: "true@example.com",
+    }),
+    {
+      method: "trueEmail",
+      email: "true@example.com",
+      usedFallback: true,
+      fallbackReason: "Trading email was not set, so their account email was shared instead.",
+    },
+  );
+});
+
+test("resolveMatchContact uses discord details and falls back when incomplete", () => {
+  assert.deepEqual(
+    resolveMatchContact({
+      preferences: {
+        matchContactSharing: "discord",
+        discordHandle: "kaladin",
+        discordChannel: "",
+      },
+      trueEmail: "true@example.com",
+    }),
+    {
+      method: "discord",
+      discordHandle: "kaladin",
+      discordChannel: DEFAULT_DISCORD_CHANNEL,
+      usedFallback: false,
+      fallbackReason: null,
+    },
+  );
+
+  assert.deepEqual(
+    resolveMatchContact({
+      preferences: {
+        matchContactSharing: "discord",
+        discordHandle: "",
+      },
+      trueEmail: "true@example.com",
+    }),
+    {
+      method: "trueEmail",
+      email: "true@example.com",
+      usedFallback: true,
+      fallbackReason:
+        "Discord information was incomplete, so their account email was shared instead.",
+    },
+  );
 });
