@@ -584,6 +584,23 @@
   font-size: 0.68rem;
 }
 
+.add-to-collection--card .add-to-collection__stepper {
+  flex-wrap: nowrap;
+  gap: 0.2rem;
+}
+
+.add-to-collection--card .add-to-collection__quantity {
+  min-width: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+
+.add-to-collection--card .add-to-collection__button--step {
+  padding: 0.4rem 0.55rem;
+  min-width: 1.75rem;
+  font-size: 0.68rem;
+}
+
 .add-to-collection {
   display: flex;
   flex-direction: column;
@@ -598,6 +615,27 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.add-to-collection__stepper {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.add-to-collection__quantity {
+  min-width: 4.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: #d2c9ff;
+  white-space: nowrap;
+}
+
+.add-to-collection__button--step {
+  padding: 0.45rem 0.85rem;
+  min-width: 2.4rem;
 }
 
 .add-to-collection__button {

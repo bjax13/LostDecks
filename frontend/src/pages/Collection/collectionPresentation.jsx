@@ -223,7 +223,7 @@ export function CollectionSummary({ summary }) {
   );
 }
 
-export function CollectionTable({ entries }) {
+export function CollectionTable({ entries, onIncrement, onDecrement, busySkuId = null }) {
   const navigate = useNavigate();
 
   const handleRowClick = (entry, event) => {
@@ -240,6 +240,9 @@ export function CollectionTable({ entries }) {
     // If neither exists, don't navigate
   };
 
+  const isBusy = (entry) => Boolean(busySkuId && entry.skuId && busySkuId === entry.skuId);
+  const canMutate = (entry) => Boolean(entry.cardId);
+
   return (
     <div className="collection-table__wrapper">
       <table className="collection-table">
@@ -250,6 +253,7 @@ export function CollectionTable({ entries }) {
             <th scope="col">Finish</th>
             <th scope="col">Quantity</th>
             <th scope="col">Last Updated</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -296,6 +300,28 @@ export function CollectionTable({ entries }) {
                   {entry.notes ? (
                     <span className="collection-table__notes">{entry.notes}</span>
                   ) : null}
+                </div>
+              </td>
+              <td data-label="Actions">
+                <div className="collection-table__actions">
+                  <button
+                    type="button"
+                    className="collection-table__action-button"
+                    disabled={!canMutate(entry) || isBusy(entry) || entry.quantity <= 0}
+                    onClick={() => onDecrement?.(entry)}
+                    aria-label={`Decrease quantity for ${entry.displayName}`}
+                  >
+                    −1
+                  </button>
+                  <button
+                    type="button"
+                    className="collection-table__action-button"
+                    disabled={!canMutate(entry) || isBusy(entry)}
+                    onClick={() => onIncrement?.(entry)}
+                    aria-label={`Increase quantity for ${entry.displayName}`}
+                  >
+                    +1
+                  </button>
                 </div>
               </td>
             </tr>
