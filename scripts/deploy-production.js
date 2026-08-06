@@ -10,11 +10,13 @@ const projectId = process.env.FIREBASE_PROJECT_ID || "storydeck-16";
 const requestedAppId = process.env.FIREBASE_WEB_APP_ID?.trim() || "";
 
 function runCapture(command, args, options = {}) {
+  // On Windows, `.cmd` shims need a shell or stdout from npx/firebase-tools can be empty.
   const result = spawnSync(command, args, {
     cwd: repoRoot,
     env: process.env,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    shell: isWindows,
     ...options,
   });
 
@@ -30,6 +32,7 @@ function runInherit(command, args, env) {
     cwd: repoRoot,
     env,
     stdio: "inherit",
+    shell: isWindows,
   });
 
   if (result.status !== 0) {
