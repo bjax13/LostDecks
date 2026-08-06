@@ -74,7 +74,9 @@ describe("MatchesPage", () => {
 
     expect(screen.getByRole("heading", { name: "Matches" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Collector Two" })).toBeInTheDocument();
-    expect(screen.getByText("is available for trade for your")).toBeInTheDocument();
+    expect(
+      screen.getByText("SKU-2 (DUN) is available for trade for your SKU-1 (DUN)."),
+    ).toBeInTheDocument();
   });
 
   it("shows contact placeholder text when a row is clicked", async () => {
