@@ -10,11 +10,15 @@ const MAY_REFRESH_MESSAGE_MS = 3_000;
 function formatSkuLabel(skuId) {
   const sku = getSkuRecord(skuId);
   if (!sku) {
-    return skuId;
+    return skuId.trim();
   }
 
-  const cardName = sku.card?.displayName || sku.cardId;
-  const finishLabel = sku.finish ? ` (${sku.finish})` : "";
+  const displayName = sku.card?.displayName?.trim();
+  const cardId = sku.cardId?.trim();
+  const fallbackSkuId = sku.skuId?.trim() || skuId.trim();
+  const cardName = displayName || cardId || fallbackSkuId;
+  const finish = sku.finish?.trim();
+  const finishLabel = finish ? ` (${finish})` : "";
   return `${cardName}${finishLabel}`;
 }
 
@@ -161,9 +165,7 @@ function MatchesContent() {
                         setActiveRow((current) => (current === pair.rowId ? "" : pair.rowId))
                       }
                     >
-                      <span>{pair.theirLabel}</span>
-                      <span>is available for trade for your</span>
-                      <span>{pair.yourLabel}.</span>
+                      <span>{`${pair.theirLabel} is available for trade for your ${pair.yourLabel}.`}</span>
                     </button>
                     {activeRow === pair.rowId ? (
                       <p className="matches-contact">
