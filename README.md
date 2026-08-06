@@ -43,7 +43,7 @@ npm run seed:local:wipe
 This runs `functions/seed-local.js`, which:
 - upserts local emulator auth users
 - writes `collections` entries
-- writes `userPreferences/{uid}.matchingOptOut`
+- writes `userPreferences/{uid}` match settings (`matchingOptOut`, contact sharing fields)
 
 Local seed credentials are read from `functions/seed.local.json` (gitignored).
 If that file is missing, the script falls back to `functions/seed.local.example.json`.

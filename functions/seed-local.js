@@ -87,7 +87,29 @@ async function wipeCollectionsForUser(db, uid) {
 
 async function seedUserData(db, uid, userConfig) {
   const matchingOptOut = Boolean(userConfig.matchingOptOut);
-  await db.collection(PREFERENCES_NAME).doc(uid).set({ matchingOptOut }, { merge: true });
+  const matchContactSharing =
+    typeof userConfig.matchContactSharing === "string"
+      ? userConfig.matchContactSharing
+      : "trueEmail";
+  const tradingEmail =
+    typeof userConfig.tradingEmail === "string" ? userConfig.tradingEmail.trim() : "";
+  const discordHandle =
+    typeof userConfig.discordHandle === "string" ? userConfig.discordHandle.trim() : "";
+  const discordChannel =
+    typeof userConfig.discordChannel === "string" && userConfig.discordChannel.trim()
+      ? userConfig.discordChannel.trim()
+      : "Sanderson Collectors Guild";
+
+  await db.collection(PREFERENCES_NAME).doc(uid).set(
+    {
+      matchingOptOut,
+      matchContactSharing,
+      tradingEmail,
+      discordHandle,
+      discordChannel,
+    },
+    { merge: true },
+  );
 
   const entries = Array.isArray(userConfig.collection) ? userConfig.collection : [];
   let createdEntries = 0;

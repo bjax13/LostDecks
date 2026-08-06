@@ -2,10 +2,29 @@ import { useEffect, useMemo, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
+import { MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
 import { useTradeMatches } from "./hooks/useTradeMatches";
 import "./Matches.css";
 
 const MAY_REFRESH_MESSAGE_MS = 3_000;
+
+function formatContactDetails(contact) {
+  if (!contact) {
+    return "Contact details are unavailable.";
+  }
+
+  if (contact.method === MATCH_CONTACT_SHARING.DISCORD && contact.discordHandle) {
+    return `Discord: ${contact.discordHandle} in ${contact.discordChannel || "Sanderson Collectors Guild"}`;
+  }
+
+  if (contact.email) {
+    const emailLabel =
+      contact.method === MATCH_CONTACT_SHARING.TRADING_EMAIL ? "Trading email" : "Email";
+    return `${emailLabel}: ${contact.email}`;
+  }
+
+  return "Contact details are unavailable.";
+}
 
 function formatSkuLabel(skuId) {
   const sku = getSkuRecord(skuId);
@@ -168,9 +187,18 @@ function MatchesContent() {
                       <span>{`${pair.theirLabel} is available for trade for your ${pair.yourLabel}.`}</span>
                     </button>
                     {activeRow === pair.rowId ? (
-                      <p className="matches-contact">
-                        Contact {counterparty.displayName}. Direct messaging is coming soon.
-                      </p>
+                      <div className="matches-contact">
+                        <p>
+                          Contact {counterparty.displayName}.{" "}
+                          {formatContactDetails(counterparty.contact)}
+                        </p>
+                        {counterparty.contact?.usedFallback &&
+                        counterparty.contact?.fallbackReason ? (
+                          <p className="matches-contact-fallback">
+                            {counterparty.contact.fallbackReason}
+                          </p>
+                        ) : null}
+                      </div>
                     ) : null}
                   </li>
                 ))}
