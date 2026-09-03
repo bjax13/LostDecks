@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
 import { useAuth } from "./contexts/AuthContext";
-import { useAuthModal } from "./contexts/AuthModalContext.jsx";
 import AccountPage from "./pages/Account";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Login from "./pages/Auth/Login";
@@ -16,16 +15,35 @@ import MatchesPage from "./pages/Matches";
 import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
+function sessionLabel(user) {
+  if (user.displayName) {
+    return user.displayName;
+  }
+  if (user.email) {
+    return user.email;
+  }
+  if (user.isAnonymous) {
+    return "Guest";
+  }
+  return "Signed in";
+}
+
 function MainNav() {
-  const { user, logout, loading } = useAuth();
-  const { openAuthModal } = useAuthModal();
+  const { user, logout, loading, loginAsGuest } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [guestSigningIn, setGuestSigningIn] = useState(false);
+  const [guestError, setGuestError] = useState(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset menu when the route changes (body only calls stable setState)
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clear stale guest errors when the route or session changes
+  useEffect(() => {
+    setGuestError(null);
+  }, [location.pathname, user]);
 
   useEffect(() => {
     if (!menuOpen) {
@@ -45,6 +63,19 @@ function MainNav() {
       await logout();
     } catch (err) {
       console.error("Sign out failed", err);
+    }
+  };
+
+  const handleQuickSignIn = async () => {
+    setGuestError(null);
+    setGuestSigningIn(true);
+    try {
+      await loginAsGuest();
+    } catch (err) {
+      console.error("Quick sign in failed", err);
+      setGuestError(err);
+    } finally {
+      setGuestSigningIn(false);
     }
   };
 
@@ -79,7 +110,7 @@ function MainNav() {
             <span className="main-nav__welcome">Checking session…</span>
           ) : user ? (
             <>
-              <span className="main-nav__welcome">Hi, {user.displayName || user.email}</span>
+              <span className="main-nav__welcome">Hi, {sessionLabel(user)}</span>
               <button type="button" onClick={handleSignOut}>
                 Sign out
               </button>
@@ -87,9 +118,14 @@ function MainNav() {
           ) : (
             <>
               <Link to="/auth/login">Sign in</Link>
-              <button type="button" onClick={() => openAuthModal()}>
-                Quick sign in
+              <button type="button" onClick={handleQuickSignIn} disabled={guestSigningIn}>
+                {guestSigningIn ? "Signing in…" : "Quick sign in"}
               </button>
+              {guestError ? (
+                <span className="main-nav__error" role="alert">
+                  {guestError.message || "Guest sign-in failed."}
+                </span>
+              ) : null}
             </>
           )}
         </div>

@@ -43,7 +43,8 @@ This Vite-powered React application implements the Lost Tales Marketplace experi
 - Centralized `AuthProvider` context wraps the app and exposes helpers for login, registration, password reset, and social sign-in.
 - Dedicated pages for login, registration, and password resets with graceful error handling.
 - `AuthGuard` component and utility hooks (`useRequireAuth`, `useAuthGuard`) for protecting authenticated routes.
-- Modal-based quick sign-in experience with email/password and social login shortcuts.
+- Modal-based sign-in experience with email/password and social login shortcuts.
+- Header **Quick sign in** starts a Firebase anonymous guest session (no email/password) so protected routes can be explored without registering. Enable the Anonymous provider in Firebase Console → Authentication → Sign-in method. The Auth emulator enables this by default.
 
 ## Protected Routes
 

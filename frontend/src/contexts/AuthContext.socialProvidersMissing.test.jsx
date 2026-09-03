@@ -9,6 +9,7 @@ const authFns = vi.hoisted(() => ({
     return vi.fn();
   }),
   sendPasswordResetEmail: vi.fn(),
+  signInAnonymously: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
@@ -21,6 +22,10 @@ vi.mock("../lib/firebase", () => ({
   auth: { __tag: "auth" },
   googleProvider: null,
   hasFirebaseConfig: true,
+}));
+
+vi.mock("../lib/userPreferences", () => ({
+  updateUserPreferences: vi.fn(),
 }));
 
 import { AuthProvider, useAuth } from "./AuthContext.jsx";

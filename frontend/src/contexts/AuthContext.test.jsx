@@ -11,6 +11,7 @@ const authFns = vi.hoisted(() => ({
     return mockUnsubscribe;
   }),
   sendPasswordResetEmail: vi.fn(),
+  signInAnonymously: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
@@ -27,6 +28,12 @@ const fb = vi.hoisted(() => ({
 
 vi.mock("../lib/firebase", () => fb);
 
+const prefs = vi.hoisted(() => ({
+  updateUserPreferences: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../lib/userPreferences", () => prefs);
+
 import { AuthProvider, useAuth } from "./AuthContext.jsx";
 
 afterEach(() => {
@@ -38,10 +45,13 @@ afterEach(() => {
     return mockUnsubscribe;
   });
   authFns.sendPasswordResetEmail.mockReset();
+  authFns.signInAnonymously.mockReset();
   authFns.signInWithEmailAndPassword.mockReset();
   authFns.signInWithPopup.mockReset();
   authFns.signOut.mockReset();
   authFns.updateProfile.mockReset();
+  prefs.updateUserPreferences.mockReset();
+  prefs.updateUserPreferences.mockResolvedValue(undefined);
   mockUnsubscribe.mockClear();
   fb.auth = { __tag: "auth" };
   fb.googleProvider = { __tag: "google" };
@@ -85,6 +95,9 @@ function Harness() {
       </button>
       <button type="button" onClick={() => void ctx.loginWithGoogle().catch(() => {})}>
         login-google
+      </button>
+      <button type="button" onClick={() => void ctx.loginAsGuest().catch(() => {})}>
+        login-guest
       </button>
       <button type="button" onClick={() => ctx.clearError()}>
         clear-error
@@ -254,6 +267,43 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent("popup blocked");
     });
+  });
+
+  it("loginAsGuest calls signInAnonymously and opts the guest out of matching", async () => {
+    authFns.signInAnonymously.mockResolvedValue({ user: { uid: "guest-1" } });
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(authFns.signInAnonymously).toHaveBeenCalledWith(fb.auth);
+    });
+    expect(prefs.updateUserPreferences).toHaveBeenCalledWith("guest-1", { matchingOptOut: true });
+  });
+
+  it("loginAsGuest still succeeds when matching opt-out write fails", async () => {
+    authFns.signInAnonymously.mockResolvedValue({ user: { uid: "guest-2" } });
+    const prefErr = new Error("firestore down");
+    prefs.updateUserPreferences.mockRejectedValue(prefErr);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(prefs.updateUserPreferences).toHaveBeenCalled();
+    });
+    expect(console.error).toHaveBeenCalledWith("Failed to opt guest out of matching", prefErr);
+    expect(screen.getByTestId("error-msg")).toHaveTextContent("");
+  });
+
+  it("loginAsGuest sets error when signInAnonymously fails", async () => {
+    const err = new Error("anonymous disabled");
+    authFns.signInAnonymously.mockRejectedValue(err);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent("anonymous disabled");
+    });
+    expect(console.error).toHaveBeenCalledWith("Firebase auth error", err);
   });
 
   it("clearError removes error state", async () => {

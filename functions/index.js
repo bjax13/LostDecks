@@ -1,6 +1,6 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
-const { buildMatchesForCaller, buildUserSkuTotals } = require("./matches");
+const { buildMatchesForCaller, buildUserSkuTotals, isAnonymousAuthUser } = require("./matches");
 
 const MATCH_PAIR_LIMIT = 100;
 
@@ -31,6 +31,28 @@ function uidOrEmpty(value) {
   return typeof value === "string" ? value : "";
 }
 
+async function collectAnonymousUserIds(userIds) {
+  const ids = [...new Set((userIds || []).map(uidOrEmpty).filter(Boolean))];
+  const anonymousIds = new Set();
+  if (!ids.length) {
+    return anonymousIds;
+  }
+
+  const auth = admin.auth();
+  for (let index = 0; index < ids.length; index += 100) {
+    const batchIds = ids.slice(index, index + 100);
+    const result = await auth.getUsers(batchIds.map((uid) => ({ uid })));
+    for (const user of result.users) {
+      if (isAnonymousAuthUser(user)) {
+        anonymousIds.add(uidOrEmpty(user.uid));
+      }
+    }
+  }
+
+  anonymousIds.delete("");
+  return anonymousIds;
+}
+
 exports.getTradeMatches = onCall(async (request) => {
   const callerUid = uidOrEmpty(request.auth?.uid);
   if (!callerUid) {
@@ -48,6 +70,10 @@ exports.getTradeMatches = onCall(async (request) => {
   const optedOutUserIds = new Set(
     optedOutSnapshot.docs.map((snapshot) => uidOrEmpty(snapshot.id)).filter(Boolean),
   );
+  const anonymousUserIds = await collectAnonymousUserIds([callerUid, ...userSkuTotals.keys()]);
+  for (const anonymousUid of anonymousUserIds) {
+    optedOutUserIds.add(anonymousUid);
+  }
 
   const { isCallerOptedOut, matches } = buildMatchesForCaller({
     callerUid,
@@ -82,4 +108,6 @@ exports.getTradeMatches = onCall(async (request) => {
 
 exports.__test = {
   MATCH_PAIR_LIMIT,
+  collectAnonymousUserIds,
+  isAnonymousAuthUser,
 };

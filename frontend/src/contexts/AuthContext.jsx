@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -10,6 +11,7 @@ import {
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { syncPostHogUser } from "../analytics/posthog.js";
 import { auth, googleProvider, hasFirebaseConfig } from "../lib/firebase";
+import { updateUserPreferences } from "../lib/userPreferences";
 
 const AuthContext = createContext(null);
 
@@ -64,6 +66,32 @@ export function AuthProvider({ children }) {
     },
     [clearError, handleError],
   );
+
+  const loginAsGuest = useCallback(async () => {
+    if (!auth) {
+      const err = new Error(
+        "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-in.",
+      );
+      handleError(err);
+      throw err;
+    }
+
+    clearError();
+    try {
+      const credentials = await signInAnonymously(auth);
+      const guestUid = credentials?.user?.uid;
+      if (guestUid) {
+        try {
+          await updateUserPreferences(guestUid, { matchingOptOut: true });
+        } catch (prefErr) {
+          console.error("Failed to opt guest out of matching", prefErr);
+        }
+      }
+    } catch (err) {
+      handleError(err);
+      throw err;
+    }
+  }, [clearError, handleError]);
 
   const register = useCallback(
     async (email, password, profile = {}) => {
@@ -194,6 +222,7 @@ export function AuthProvider({ children }) {
       error,
       clearError,
       login,
+      loginAsGuest,
       register,
       logout,
       resetPassword,
@@ -207,6 +236,7 @@ export function AuthProvider({ children }) {
       error,
       clearError,
       login,
+      loginAsGuest,
       register,
       logout,
       resetPassword,
