@@ -180,6 +180,15 @@ function trimOptionalString(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function resolvePublicDisplayName(user) {
+  const displayName = typeof user?.displayName === "string" ? user.displayName.trim() : "";
+  if (displayName) {
+    return displayName;
+  }
+  const uid = typeof user?.uid === "string" ? user.uid.trim() : "";
+  return uid || "Collector";
+}
+
 function resolveMatchContact({ preferences, trueEmail }) {
   const sharing = normalizeMatchContactSharing(preferences?.matchContactSharing);
   const tradingEmail = trimOptionalString(preferences?.tradingEmail);
@@ -198,10 +207,9 @@ function resolveMatchContact({ preferences, trueEmail }) {
     }
 
     return {
-      method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
-      email,
-      usedFallback: true,
-      fallbackReason: "Trading email was not set, so their account email was shared instead.",
+      method: MATCH_CONTACT_SHARING.TRADING_EMAIL,
+      usedFallback: false,
+      fallbackReason: "Trading email is not set, so no contact details were shared.",
     };
   }
 
@@ -217,11 +225,9 @@ function resolveMatchContact({ preferences, trueEmail }) {
     }
 
     return {
-      method: MATCH_CONTACT_SHARING.TRUE_EMAIL,
-      email,
-      usedFallback: true,
-      fallbackReason:
-        "Discord information was incomplete, so their account email was shared instead.",
+      method: MATCH_CONTACT_SHARING.DISCORD,
+      usedFallback: false,
+      fallbackReason: "Discord information is incomplete, so no contact details were shared.",
     };
   }
 
@@ -248,4 +254,5 @@ module.exports = {
   normalizeQuantity,
   paginateMatches,
   resolveMatchContact,
+  resolvePublicDisplayName,
 };
