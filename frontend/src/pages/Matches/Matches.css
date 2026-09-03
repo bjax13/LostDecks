@@ -187,6 +187,45 @@
   font-size: 1.15rem;
 }
 
+.matches-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+  list-style: none;
+  color: inherit;
+}
+
+.matches-group-heading::-webkit-details-marker {
+  display: none;
+}
+
+.matches-group-heading::marker {
+  content: "";
+}
+
+.matches-group-heading::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-left: auto;
+  flex: 0 0 auto;
+  border-right: 2px solid #bfb2ff;
+  border-bottom: 2px solid #bfb2ff;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.matches-panel[open] > .matches-group-heading::after {
+  transform: rotate(-135deg);
+}
+
+.matches-group-heading:focus-visible {
+  outline: 2px solid rgba(168, 139, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
 .matches-list {
   list-style: none;
   margin: 0;

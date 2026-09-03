@@ -106,6 +106,70 @@ describe("MatchesPage", () => {
     expect(
       screen.getByText("SKU-2 (DUN) is available for trade for your SKU-1 (DUN)."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Collector Two" }).closest("details"),
+    ).toHaveAttribute("open");
+  });
+
+  it("collapses one counterparty group without affecting another", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Collector Two",
+            contact: {
+              method: "trueEmail",
+              email: "two@example.com",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+          },
+          {
+            userId: "user-3",
+            displayName: "Collector Three",
+            contact: {
+              method: "trueEmail",
+              email: "three@example.com",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            pairs: [{ theirSkuId: "SKU-1", yourSkuId: "SKU-2" }],
+          },
+        ],
+        totalOnPage: 2,
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    const collectorTwoHeading = screen.getByRole("heading", { name: "Collector Two" });
+    const collectorThreeHeading = screen.getByRole("heading", { name: "Collector Three" });
+    const collectorTwoGroup = collectorTwoHeading.closest("details");
+    const collectorThreeGroup = collectorThreeHeading.closest("details");
+    const collectorTwoTrade = "SKU-2 (DUN) is available for trade for your SKU-1 (DUN).";
+    const collectorThreeTrade = "SKU-1 (DUN) is available for trade for your SKU-2 (DUN).";
+
+    expect(collectorTwoGroup).toHaveAttribute("open");
+    expect(collectorThreeGroup).toHaveAttribute("open");
+    expect(screen.getByText(collectorTwoTrade)).toBeVisible();
+    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
+
+    await user.click(collectorTwoHeading);
+
+    expect(collectorTwoGroup).not.toHaveAttribute("open");
+    expect(collectorThreeGroup).toHaveAttribute("open");
+    expect(screen.getByRole("heading", { name: "Collector Two" })).toBeVisible();
+    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
+
+    await user.click(collectorTwoHeading);
+
+    expect(collectorTwoGroup).toHaveAttribute("open");
+    expect(collectorThreeGroup).toHaveAttribute("open");
+    expect(screen.getByText(collectorTwoTrade)).toBeVisible();
+    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
   });
 
   it("shows resolved contact details when a row is clicked", async () => {
