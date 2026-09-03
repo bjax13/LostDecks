@@ -188,10 +188,20 @@
   justify-content: center;
   padding: 1.5rem;
   background: rgba(8, 6, 18, 0.72);
+}
+
+.collection-bulk-post-modal__backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   backdrop-filter: blur(4px);
 }
 
 .collection-bulk-post-modal {
+  position: relative;
+  z-index: 1;
   width: min(960px, 100%);
   max-height: min(90vh, 720px);
   display: flex;
@@ -224,6 +234,7 @@
   gap: 1rem;
   min-height: 0;
   flex: 1;
+  overflow: hidden;
 }
 
 .collection-bulk-post-modal__pane-title {
@@ -240,6 +251,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   padding: 0.85rem;
   border-radius: 14px;
   border: 1px solid rgba(138, 43, 226, 0.25);
@@ -249,6 +261,7 @@
 .collection-bulk-post-modal__tree {
   margin: 0;
   padding: 0;
+  min-height: 0;
   overflow: auto;
   max-height: 320px;
 }
@@ -256,6 +269,7 @@
 .collection-bulk-post-modal__tree-children {
   margin: 0.25rem 0 0;
   padding: 0 0 0 1.1rem;
+  pointer-events: none;
 }
 
 .collection-bulk-post-modal__tree-node + .collection-bulk-post-modal__tree-node {
@@ -266,6 +280,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.25rem;
+  pointer-events: auto;
 }
 
 .collection-bulk-post-modal__tree-toggle {
@@ -348,6 +363,9 @@
 }
 
 .collection-bulk-post-modal__actions {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;

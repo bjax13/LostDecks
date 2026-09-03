@@ -14,12 +14,14 @@
     "seed:local:wipe": "npm run seed:local:wipe --prefix functions",
     "build:frontend": "npm run build --prefix frontend",
     "build:frontend:production": "cross-env VITE_USE_EMULATORS=false npm run build --prefix frontend",
-    "deploy:hosting": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting --project storydeck-16 --non-interactive",
-    "deploy:firebase": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting,firestore,functions --project storydeck-16 --non-interactive",
+    "deploy:hosting:raw": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting --project storydeck-16 --non-interactive",
+    "deploy:firebase:raw": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting,firestore,functions --project storydeck-16 --non-interactive",
+    "deploy:hosting": "node scripts/deploy-production.js --only=hosting",
+    "deploy:firebase": "node scripts/deploy-production.js --only=hosting,firestore,functions",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.15",
+    "@biomejs/biome": "2.4.16",
     "cross-env": "^10.1.0",
     "husky": "9.1.7",
     "lint-staged": "17.0.5"

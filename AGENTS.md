@@ -63,7 +63,8 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
 - **Cloud Functions tests**: `cd functions && npm test` — Node’s built-in test runner (`*.test.js` next to source).
 - **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). Locally the config builds then previews the production bundle on port 4173. In CI, the workflow builds once and sets `PLAYWRIGHT_SKIP_BUILD=1` so Playwright only runs preview. Specs live under `frontend/e2e/`.
 - **Build**: `cd frontend && npm run build` — runs `vite build`.
-- **Production deploy (local CLI)**: `npm run deploy:firebase` (or `deploy:hosting`) from the repo root after `frontend/.env` is filled with production `VITE_FIREBASE_*`. Deploy scripts run `build:frontend:production`, which forces `VITE_USE_EMULATORS=false` at build time so a local `.env` with emulators enabled is not shipped. Requires `firebase login` or `GOOGLE_APPLICATION_CREDENTIALS`.
+- **Production deploy (local CLI)**: `npm run deploy:firebase` (or `deploy:hosting`) from the repo root. These commands now run `scripts/deploy-production.js`, which fetches live Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` and injects `VITE_FIREBASE_*` at build time. This avoids stale/local placeholder keys. Requires `firebase login` or `GOOGLE_APPLICATION_CREDENTIALS`.
+- **Raw deploy scripts** (only for controlled CI/debug): `npm run deploy:firebase:raw` and `npm run deploy:hosting:raw` use whatever `VITE_FIREBASE_*` values are already present in the environment; prefer the safe commands above for normal use.
 
 ### Production deployment
 
@@ -73,18 +74,17 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
    - Open **Hosting** in the console and complete the “Get started” flow if you have not deployed Hosting before.
 
 2. **GitHub Actions (optional automation)**  
-   Workflow: `.github/workflows/deploy-firebase.yml` (manual **Run workflow** only). Configure these **repository secrets**:
+   Workflows (manual **Run workflow** only):
+   - `Full project deploy` (`.github/workflows/deploy-firebase.yml`) — deploys Hosting + Firestore + Functions
+   - `Front end only deploy` (`.github/workflows/deploy-frontend.yml`) — deploys Hosting only
+
+   Configure these **repository secrets**:
 
    | Secret | Purpose |
    |--------|---------|
    | `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account that can deploy Hosting, Firestore rules/indexes, and Cloud Functions (Firebase recommends a dedicated CI account with the right IAM roles). |
-   | `VITE_FIREBASE_API_KEY` | Same values as `frontend/.env.example` — injected at **build** time for the production bundle. |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | |
-   | `VITE_FIREBASE_PROJECT_ID` | |
-   | `VITE_FIREBASE_STORAGE_BUCKET` | |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | |
-   | `VITE_FIREBASE_APP_ID` | |
-   | `VITE_FIREBASE_MEASUREMENT_ID` | |
+
+   Both workflows use the safe repo scripts (`npm run deploy:firebase` / `npm run deploy:hosting`), which fetch Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` at deploy time. `VITE_FIREBASE_*` repo secrets are no longer required.
 
 3. **What gets deployed**  
    `firebase deploy --only hosting,firestore,functions` publishes the Vite build from `frontend/dist`, Firestore rules/indexes, and Cloud Functions. It does not deploy other Google Cloud resources.

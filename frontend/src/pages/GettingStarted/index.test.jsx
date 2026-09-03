@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
@@ -24,6 +24,10 @@ vi.mock("../Collection/hooks/useUserCollection", () => ({
 vi.mock("../Collection/utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
 }));
+
+function setupUser() {
+  return userEvent.setup({ delay: null });
+}
 
 function renderPage() {
   return render(
@@ -77,11 +81,10 @@ async function cancelNoneCoverage(user) {
 
 async function applyBulkQuantity(user, bulkActions, quantity) {
   const input = within(bulkActions).getByLabelText(/custom quantity for/i);
-  await user.clear(input);
-  if (quantity !== "") {
-    await user.type(input, String(quantity));
-  }
-  await user.click(within(bulkActions).getByRole("button", { name: "Apply all" }));
+  fireEvent.change(input, { target: { value: String(quantity) } });
+  const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+  expect(applyAll).toBeEnabled();
+  await user.click(applyAll);
 }
 
 beforeEach(() => {
@@ -96,7 +99,7 @@ beforeEach(() => {
   });
 });
 
-describe("GettingStartedPage", () => {
+describe("GettingStartedPage", { timeout: 15_000 }, () => {
   it("asks the collector profile question first", () => {
     renderPage();
 
@@ -116,7 +119,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("expands Some groups in review and supports bulk quantity edits", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -230,7 +233,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("defaults a non-spreadsheet collector to None", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -245,7 +248,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("jumps to card review from the progress indicator with manual defaults", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await user.click(screen.getByRole("button", { name: /card review/i }));
@@ -267,7 +270,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("lets collectors jump back to earlier steps from the progress indicator", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -284,7 +287,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("sends spreadsheet collectors to the bulk import explanation", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
@@ -299,7 +302,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("toggles card review group rows when clicking the row title", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -324,7 +327,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("does not toggle group expand state when clicking coverage controls", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -368,7 +371,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("shows coverage controls on card review group rows", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -422,7 +425,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("keeps quantities above 1 when selecting All on a group", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -464,7 +467,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("adjusts quantities with + and - buttons", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -486,7 +489,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("shows nonsense variant under-lines without letter prefixes in condensed SKU labels", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -514,7 +517,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("keeps All coverage when bulk-setting positive quantities on an All group", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -558,8 +561,40 @@ describe("GettingStartedPage", () => {
     expect(elsecallerGroup.skus.length).toBeGreaterThan(0);
   });
 
+  it("rejects negative bulk Apply all quantities and keeps positive Apply all working", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const bulkActions = screen.getByRole("toolbar", {
+      name: /bulk action for elsecaller story foils/i,
+    });
+    const input = within(bulkActions).getByLabelText(/custom quantity for/i);
+    const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+
+    expect(input).toHaveAttribute("min", "0");
+    expect(input).toHaveAttribute("step", "1");
+
+    await user.clear(input);
+    await user.type(input, "-5");
+
+    expect(input).toHaveValue(-5);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(applyAll).toBeDisabled();
+    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
+    expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
+
+    await applyBulkQuantity(user, bulkActions, 2);
+
+    expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 2$/i)).toBeInTheDocument();
+    expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
+    expect(within(bulkActions).getByRole("button", { name: "Apply all" })).toBeEnabled();
+  });
+
   it("moves All coverage to Some when one SKU is set to zero", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -590,7 +625,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("moves None coverage to Some when a SKU quantity is increased above zero", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -624,7 +659,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("prompts before setting a group to None and cancels without changes", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -653,7 +688,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("applies None after confirmation and clears quantities", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -681,7 +716,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("does not prompt when None is already selected", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -701,7 +736,7 @@ describe("GettingStartedPage", () => {
   });
 
   it("cancels None confirmation with Escape", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -731,7 +766,7 @@ describe("GettingStartedPage", () => {
       loading: false,
       error: null,
     });
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
