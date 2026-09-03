@@ -174,6 +174,10 @@ export function AuthProvider({ children }) {
       try {
         await updateProfile(currentUser, { displayName: trimmed });
         // updateProfile mutates the Firebase user in place; clone so React re-renders.
+        // Skip if the signed-in session changed while the write was in flight.
+        if (auth.currentUser !== currentUser) {
+          return;
+        }
         setUser({ ...currentUser, displayName: trimmed });
       } catch (err) {
         handleError(err);

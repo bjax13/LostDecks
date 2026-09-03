@@ -311,6 +311,35 @@ describe("AuthProvider", () => {
     expect(screen.getByTestId("display-name")).toHaveTextContent("River Tam");
   });
 
+  it("updateDisplayName does not restore a user after the auth session changes", async () => {
+    const originalUser = { uid: "user-1", displayName: "Old Name", email: "a@example.com" };
+    const nextUser = { uid: "user-2", displayName: "Other" };
+    let authCallback = () => {};
+    fb.auth = { currentUser: originalUser };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      authCallback = callback;
+      callback(originalUser);
+      return mockUnsubscribe;
+    });
+    authFns.updateProfile.mockImplementation(async () => {
+      fb.auth.currentUser = nextUser;
+      authCallback(nextUser);
+    });
+    const user = userEvent.setup();
+    renderAuth();
+    await waitFor(() => {
+      expect(screen.getByTestId("user-id")).toHaveTextContent("user-1");
+    });
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(authFns.updateProfile).toHaveBeenCalledWith(originalUser, {
+        displayName: "River Tam",
+      });
+    });
+    expect(screen.getByTestId("user-id")).toHaveTextContent("user-2");
+    expect(screen.getByTestId("display-name")).toHaveTextContent("Other");
+  });
+
   it("updateDisplayName rejects a blank name without calling updateProfile", async () => {
     const currentUser = { uid: "user-1", displayName: "Old Name" };
     fb.auth = { currentUser };
