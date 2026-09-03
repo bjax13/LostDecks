@@ -103,6 +103,19 @@ function formatTradeItem(card) {
   return { text: card.displayName ?? card.id ?? "Unknown", sortKey: [card.displayName ?? "", ""] };
 }
 
+function getStoryTitle(card) {
+  return card.storyTitle ?? "Other";
+}
+
+function matchSectionSku(sku, predicate) {
+  const finish = sku.finish ? sku.finish.toUpperCase() : null;
+  const card = getCollectibleRecord(sku.cardId);
+  if (!card || !predicate({ card, finish })) {
+    return null;
+  }
+  return card;
+}
+
 function buildOwnedSkuCounts(entries) {
   const ownedSkuCounts = new Map();
   let skippedEntries = 0;
@@ -122,8 +135,26 @@ function buildOwnedSkuCounts(entries) {
   return { ownedSkuCounts, skippedEntries };
 }
 
+/** ISO only completes story groups the collector has already started in this finish/section. */
+function buildStartedStoryTitles(predicate, ownedSkuCounts) {
+  const started = new Set();
+  datasetSkus.forEach((sku) => {
+    const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
+    if (ownedCount <= 0) {
+      return;
+    }
+    const card = matchSectionSku(sku, predicate);
+    if (!card) {
+      return;
+    }
+    started.add(getStoryTitle(card));
+  });
+  return started;
+}
+
 function buildSectionStories({ predicate, groupSuffix }, mode, ownedSkuCounts, storyRank) {
   const groups = new Map();
+  const startedStories = mode === "iso" ? buildStartedStoryTitles(predicate, ownedSkuCounts) : null;
 
   datasetSkus.forEach((sku) => {
     const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
@@ -131,9 +162,13 @@ function buildSectionStories({ predicate, groupSuffix }, mode, ownedSkuCounts, s
       return;
     }
 
-    const finish = sku.finish ? sku.finish.toUpperCase() : null;
-    const card = getCollectibleRecord(sku.cardId);
-    if (!card || !predicate({ card, finish })) {
+    const card = matchSectionSku(sku, predicate);
+    if (!card) {
+      return;
+    }
+
+    const storyTitle = getStoryTitle(card);
+    if (mode === "iso" && !startedStories.has(storyTitle)) {
       return;
     }
 
@@ -142,7 +177,6 @@ function buildSectionStories({ predicate, groupSuffix }, mode, ownedSkuCounts, s
       return;
     }
 
-    const storyTitle = card.storyTitle ?? "Other";
     if (!groups.has(storyTitle)) {
       groups.set(storyTitle, []);
     }
