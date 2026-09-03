@@ -238,7 +238,7 @@ describe("MatchesPage", () => {
             displayName: "Lost Tester 2",
             contact: {
               method: "tradingEmail",
-              email: "trade@example.com?subject=phish",
+              email: "collector;cc=attacker@example.com",
               usedFallback: false,
               fallbackReason: null,
             },

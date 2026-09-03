@@ -52,6 +52,10 @@ describe("userPreferences normalization", () => {
     expect(isValidTradingEmail("trade@example.com")).toBe(true);
     expect(isValidTradingEmail(" not-an-email ")).toBe(false);
     expect(isValidTradingEmail("")).toBe(false);
+    expect(isValidTradingEmail("trade@example.com?subject=phish")).toBe(false);
+    expect(isValidTradingEmail("collector;cc=attacker@example.com")).toBe(false);
+    expect(isValidTradingEmail("a,b@example.com")).toBe(false);
+    expect(isValidTradingEmail("name:alias@example.com")).toBe(false);
     expect(normalizeMatchContactSharing("discord")).toBe(MATCH_CONTACT_SHARING.DISCORD);
   });
 });

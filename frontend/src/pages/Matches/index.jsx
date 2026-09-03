@@ -68,7 +68,7 @@ function TradeLane({ lane }) {
 
 function mailtoHref(email) {
   const trimmed = typeof email === "string" ? email.trim() : "";
-  if (!isValidTradingEmail(trimmed) || /[/?#&\\]/.test(trimmed)) {
+  if (!isValidTradingEmail(trimmed)) {
     return null;
   }
   return `mailto:${encodeURIComponent(trimmed)}`;
