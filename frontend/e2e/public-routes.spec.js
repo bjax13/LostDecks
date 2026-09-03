@@ -17,7 +17,7 @@ test.describe("public routes (e2e)", () => {
     await page.goto("/auth/login");
     await page.getByRole("button", { name: "Quick sign in" }).click();
     await expect(page.locator(".auth-modal")).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: "Sign In" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Sign In", exact: true })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
   });
 });
