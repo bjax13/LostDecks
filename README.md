@@ -31,6 +31,18 @@ cp .env.example .env
 > Note: The app can still render without Firebase configured, but auth-related
 > features will be unavailable.
 
+### Production deploy (safe default)
+
+Use repo-root deploy scripts so production builds always use live Firebase Web
+SDK config from project `storydeck-16`:
+
+```bash
+npm run deploy:firebase
+```
+
+This command fetches `apps:sdkconfig` and injects `VITE_FIREBASE_*` for the
+build before deploy, which prevents emulator/dummy keys from being shipped.
+
 ### Local emulator seed data (Matches testing)
 
 You can seed local Auth + Firestore data for manual Matches testing.
