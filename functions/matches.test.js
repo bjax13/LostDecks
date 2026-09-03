@@ -3,14 +3,17 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  buildLanePrefsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_LANES,
   DEFAULT_MATCH_PAGE_SIZE,
   laneForSkuId,
   MAX_MATCH_PAGE_SIZE,
   normalizeMatchCursor,
+  normalizeMatchLanes,
   normalizeMatchPageSize,
   normalizeQuantity,
   paginateMatches,
@@ -305,6 +308,110 @@ test("buildMatchesForCaller excludes opted-out counterparties and caller", () =>
   });
   assert.equal(counterpartyOptedOut.isCallerOptedOut, false);
   assert.deepEqual(counterpartyOptedOut.matches, []);
+});
+
+test("normalizeMatchLanes defaults missing prefs to all lanes enabled", () => {
+  assert.deepEqual(normalizeMatchLanes(undefined), { ...DEFAULT_MATCH_LANES });
+  assert.deepEqual(normalizeMatchLanes({ dun: false }), {
+    dun: false,
+    foil: true,
+    pins: true,
+  });
+  assert.deepEqual(
+    buildLanePrefsByUserId(
+      new Map([
+        ["me", {}],
+        ["other", { matchLanes: { pins: false } }],
+      ]),
+    ).get("me"),
+    { dun: true, foil: true, pins: true },
+  );
+});
+
+test("buildMatchesForCaller omits lanes neither collector has enabled", () => {
+  const userSkuTotals = new Map([
+    [
+      "me",
+      new Map([
+        ["LT24-ELS-01-DUN", 2],
+        ["LT24-ELS-01-FOIL", 2],
+        ["PIN-CF-01", 2],
+      ]),
+    ],
+    [
+      "other",
+      new Map([
+        ["LT24-HLD-01-DUN", 2],
+        ["LT24-HLD-01-FOIL", 2],
+        ["PIN-CF-02", 2],
+      ]),
+    ],
+  ]);
+
+  const pinsOnlyCaller = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    lanePrefsByUserId: new Map([
+      ["me", { dun: false, foil: false, pins: true }],
+      ["other", { dun: true, foil: true, pins: true }],
+    ]),
+  });
+
+  assert.equal(pinsOnlyCaller.matches.length, 1);
+  assert.deepEqual(
+    pinsOnlyCaller.matches[0].lanes.map((lane) => lane.id),
+    ["pins"],
+  );
+  assert.deepEqual(pinsOnlyCaller.matches[0].lanes[0].theyCanSend, [
+    { skuId: "PIN-CF-02", owned: 2, extras: 1 },
+  ]);
+  assert.deepEqual(pinsOnlyCaller.matches[0].lanes[0].youCanSend, [
+    { skuId: "PIN-CF-01", owned: 2, extras: 1 },
+  ]);
+
+  const pinsOnlyOther = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    lanePrefsByUserId: new Map([
+      ["me", { dun: true, foil: true, pins: true }],
+      ["other", { dun: false, foil: false, pins: true }],
+    ]),
+  });
+
+  assert.deepEqual(
+    pinsOnlyOther.matches[0].lanes.map((lane) => lane.id),
+    ["pins"],
+  );
+
+  const noSharedLane = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    lanePrefsByUserId: new Map([
+      ["me", { dun: false, foil: false, pins: true }],
+      ["other", { dun: true, foil: true, pins: false }],
+    ]),
+  });
+  assert.deepEqual(noSharedLane.matches, []);
+});
+
+test("buildMatchesForCaller ignores lane prefs when the caller is fully opted out", () => {
+  const userSkuTotals = new Map([
+    ["me", new Map([["PIN-CF-01", 2]])],
+    ["other", new Map([["PIN-CF-02", 2]])],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(["me"]),
+    lanePrefsByUserId: new Map([["me", { dun: true, foil: true, pins: true }]]),
+  });
+
+  assert.equal(result.isCallerOptedOut, true);
+  assert.deepEqual(result.matches, []);
 });
 
 test("resolveMatchContact shares true email by default", () => {

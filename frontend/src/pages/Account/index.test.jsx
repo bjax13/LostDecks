@@ -21,6 +21,7 @@ vi.mock("../../lib/userPreferences", () => ({
   DEFAULT_DISCORD_CHANNEL: "Sanderson Collectors Guild",
   DEFAULT_USER_PREFERENCES: {
     matchingOptOut: false,
+    matchLanes: { dun: true, foil: true, pins: true },
     matchContactSharing: "trueEmail",
     tradingEmail: "",
     discordHandle: "",
@@ -31,6 +32,7 @@ vi.mock("../../lib/userPreferences", () => ({
     TRADING_EMAIL: "tradingEmail",
     DISCORD: "discord",
   },
+  MATCH_LANE_IDS: ["dun", "foil", "pins"],
   MAX_TRADING_EMAIL_LENGTH: 320,
   MAX_DISCORD_HANDLE_LENGTH: 100,
   MAX_DISCORD_CHANNEL_LENGTH: 100,
@@ -66,6 +68,7 @@ describe("AccountPage", () => {
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
       onNext({
         matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
         matchContactSharing: "trueEmail",
         tradingEmail: "",
         discordHandle: "",
@@ -144,6 +147,74 @@ describe("AccountPage", () => {
     renderAccountPage();
     expect(screen.getByRole("heading", { name: "Match preferences" })).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Include me in Matches" })).toBeChecked();
+  });
+
+  it("defaults match lane checkboxes to checked when participating", () => {
+    renderAccountPage();
+
+    expect(screen.getByRole("checkbox", { name: "Dun cards" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Pins" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Dun cards" })).toBeEnabled();
+    expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeEnabled();
+    expect(screen.getByRole("checkbox", { name: "Pins" })).toBeEnabled();
+  });
+
+  it("disables lane checkboxes when the collector is excluded from matching", () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: true,
+        matchLanes: { dun: true, foil: false, pins: true },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(screen.getByRole("checkbox", { name: "Include me in Matches" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Dun cards" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Pins" })).toBeDisabled();
+    expect(screen.getByRole("checkbox", { name: "Foil cards" })).not.toBeChecked();
+  });
+
+  it("persists a lane toggle when participating", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("checkbox", { name: "Dun cards" }));
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchLanes: { dun: false, foil: true, pins: true },
+    });
+    expect(screen.getByRole("checkbox", { name: "Dun cards" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Pins" })).toBeChecked();
+  });
+
+  it("does not persist lane changes while excluded from matching", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: true,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+    await user.click(screen.getByRole("checkbox", { name: "Pins" }));
+
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalled();
+    expect(screen.getByRole("checkbox", { name: "Pins" })).toBeChecked();
   });
 
   it("persists the toggle when changed", async () => {
@@ -354,6 +425,7 @@ describe("AccountPage", () => {
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
       onNext({
         matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
         matchContactSharing: "tradingEmail",
         tradingEmail: "trade@example.com",
         discordHandle: "kaladin",
@@ -386,6 +458,7 @@ describe("AccountPage", () => {
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
       onNext({
         matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
         matchContactSharing: "discord",
         tradingEmail: "",
         discordHandle: "kaladin",

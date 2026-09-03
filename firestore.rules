@@ -26,8 +26,18 @@ service cloud.firestore {
           && data.discordHandle.size() > 0);
     }
 
+    function validMatchLanes(data) {
+      return !("matchLanes" in data)
+        || (data.matchLanes is map
+          && data.matchLanes.keys().hasOnly(["dun", "foil", "pins"])
+          && (!("dun" in data.matchLanes) || data.matchLanes.dun is bool)
+          && (!("foil" in data.matchLanes) || data.matchLanes.foil is bool)
+          && (!("pins" in data.matchLanes) || data.matchLanes.pins is bool));
+    }
+
     function validUserPreferences(data) {
       return (!("matchingOptOut" in data) || data.matchingOptOut is bool)
+        && validMatchLanes(data)
         && (!("matchContactSharing" in data)
           || data.matchContactSharing in ["trueEmail", "tradingEmail", "discord"])
         && (!("tradingEmail" in data)

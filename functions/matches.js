@@ -11,6 +11,11 @@ const DEFAULT_MATCH_PAGE_SIZE = 20;
 const MAX_MATCH_PAGE_SIZE = 50;
 
 const MATCH_LANE_IDS = Object.freeze(["dun", "foil", "pins"]);
+const DEFAULT_MATCH_LANES = Object.freeze({
+  dun: true,
+  foil: true,
+  pins: true,
+});
 const DEFAULT_PILE_ITEM_LIMIT = 100;
 
 function normalizeQuantity(value) {
@@ -105,16 +110,51 @@ function buildPileItems(extras, ownerTotals, recipientTotals, lane, itemLimit) {
   return items.slice(0, limit);
 }
 
+function normalizeMatchLanes(value) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    dun: typeof source.dun === "boolean" ? source.dun : DEFAULT_MATCH_LANES.dun,
+    foil: typeof source.foil === "boolean" ? source.foil : DEFAULT_MATCH_LANES.foil,
+    pins: typeof source.pins === "boolean" ? source.pins : DEFAULT_MATCH_LANES.pins,
+  };
+}
+
+function isMatchLaneEnabled(lanePrefs, lane) {
+  return Boolean(normalizeMatchLanes(lanePrefs)[lane]);
+}
+
+function buildLanePrefsByUserId(preferencesByUserId) {
+  const lanePrefsByUserId = new Map();
+  if (!preferencesByUserId) {
+    return lanePrefsByUserId;
+  }
+
+  for (const [userId, preferences] of preferencesByUserId.entries()) {
+    if (!userId) {
+      continue;
+    }
+    lanePrefsByUserId.set(userId, normalizeMatchLanes(preferences?.matchLanes));
+  }
+
+  return lanePrefsByUserId;
+}
+
 function buildLanesForCounterparty({
   callerTotals,
   callerExtras,
   otherTotals,
   otherExtras,
+  callerLanePrefs,
+  otherLanePrefs,
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   const lanes = [];
 
   for (const lane of MATCH_LANE_IDS) {
+    if (!isMatchLaneEnabled(callerLanePrefs, lane) || !isMatchLaneEnabled(otherLanePrefs, lane)) {
+      continue;
+    }
+
     const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane, itemLimit);
     const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane, itemLimit);
     if (!theyCanSend.length || !youCanSend.length) {
@@ -135,6 +175,7 @@ function buildMatchesForCaller({
   callerUid,
   userSkuTotals,
   optedOutUserIds = new Set(),
+  lanePrefsByUserId = new Map(),
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   if (optedOutUserIds.has(callerUid)) {
@@ -143,6 +184,7 @@ function buildMatchesForCaller({
 
   const callerTotals = userSkuTotals.get(callerUid) || new Map();
   const callerProfile = buildUserMatchProfile(callerTotals);
+  const callerLanePrefs = lanePrefsByUserId.get(callerUid);
   const matches = [];
 
   for (const [otherUid, otherTotals] of userSkuTotals.entries()) {
@@ -156,6 +198,8 @@ function buildMatchesForCaller({
       callerExtras: callerProfile.extras,
       otherTotals,
       otherExtras: otherProfile.extras,
+      callerLanePrefs,
+      otherLanePrefs: lanePrefsByUserId.get(otherUid),
       itemLimit,
     });
 
@@ -283,18 +327,22 @@ function resolveMatchContact({ preferences, trueEmail }) {
 
 module.exports = {
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_LANES,
   DEFAULT_MATCH_PAGE_SIZE,
   DEFAULT_PILE_ITEM_LIMIT,
   MATCH_CONTACT_SHARING,
   MATCH_LANE_IDS,
   MAX_MATCH_PAGE_SIZE,
+  buildLanePrefsByUserId,
   buildLanesForCounterparty,
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  isMatchLaneEnabled,
   laneForSkuId,
   normalizeMatchContactSharing,
   normalizeMatchCursor,
+  normalizeMatchLanes,
   normalizeMatchPageSize,
   normalizeQuantity,
   paginateMatches,

@@ -13,8 +13,17 @@ export const MAX_TRADING_EMAIL_LENGTH = 320;
 export const MAX_DISCORD_HANDLE_LENGTH = 100;
 export const MAX_DISCORD_CHANNEL_LENGTH = 100;
 
+export const MATCH_LANE_IDS = Object.freeze(["dun", "foil", "pins"]);
+
+export const DEFAULT_MATCH_LANES = Object.freeze({
+  dun: true,
+  foil: true,
+  pins: true,
+});
+
 export const DEFAULT_USER_PREFERENCES = Object.freeze({
   matchingOptOut: false,
+  matchLanes: DEFAULT_MATCH_LANES,
   matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
   tradingEmail: "",
   discordHandle: "",
@@ -26,6 +35,15 @@ function normalizeOptionalString(value, maxLength) {
     return "";
   }
   return value.trim().slice(0, maxLength);
+}
+
+export function normalizeMatchLanes(value) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    dun: typeof source.dun === "boolean" ? source.dun : DEFAULT_MATCH_LANES.dun,
+    foil: typeof source.foil === "boolean" ? source.foil : DEFAULT_MATCH_LANES.foil,
+    pins: typeof source.pins === "boolean" ? source.pins : DEFAULT_MATCH_LANES.pins,
+  };
 }
 
 export function normalizeMatchContactSharing(value) {
@@ -41,7 +59,10 @@ export function normalizeMatchContactSharing(value) {
 
 export function normalizeUserPreferences(data) {
   if (!data || typeof data !== "object") {
-    return { ...DEFAULT_USER_PREFERENCES };
+    return {
+      ...DEFAULT_USER_PREFERENCES,
+      matchLanes: { ...DEFAULT_MATCH_LANES },
+    };
   }
 
   const discordChannel = normalizeOptionalString(data.discordChannel, MAX_DISCORD_CHANNEL_LENGTH);
@@ -51,6 +72,7 @@ export function normalizeUserPreferences(data) {
       typeof data.matchingOptOut === "boolean"
         ? data.matchingOptOut
         : DEFAULT_USER_PREFERENCES.matchingOptOut,
+    matchLanes: normalizeMatchLanes(data.matchLanes),
     matchContactSharing: normalizeMatchContactSharing(data.matchContactSharing),
     tradingEmail: normalizeOptionalString(data.tradingEmail, MAX_TRADING_EMAIL_LENGTH),
     discordHandle: normalizeOptionalString(data.discordHandle, MAX_DISCORD_HANDLE_LENGTH),
