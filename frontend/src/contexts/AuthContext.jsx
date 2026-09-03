@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -64,6 +65,24 @@ export function AuthProvider({ children }) {
     },
     [clearError, handleError],
   );
+
+  const loginAsGuest = useCallback(async () => {
+    if (!auth) {
+      const err = new Error(
+        "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable sign-in.",
+      );
+      handleError(err);
+      throw err;
+    }
+
+    clearError();
+    try {
+      await signInAnonymously(auth);
+    } catch (err) {
+      handleError(err);
+      throw err;
+    }
+  }, [clearError, handleError]);
 
   const register = useCallback(
     async (email, password, profile = {}) => {
@@ -194,6 +213,7 @@ export function AuthProvider({ children }) {
       error,
       clearError,
       login,
+      loginAsGuest,
       register,
       logout,
       resetPassword,
@@ -207,6 +227,7 @@ export function AuthProvider({ children }) {
       error,
       clearError,
       login,
+      loginAsGuest,
       register,
       logout,
       resetPassword,

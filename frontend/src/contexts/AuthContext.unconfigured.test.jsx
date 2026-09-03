@@ -6,6 +6,7 @@ const authFns = vi.hoisted(() => ({
   createUserWithEmailAndPassword: vi.fn(),
   onAuthStateChanged: vi.fn(),
   sendPasswordResetEmail: vi.fn(),
+  signInAnonymously: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
@@ -58,6 +59,9 @@ function Harness() {
       </button>
       <button type="button" onClick={() => void ctx.updateDisplayName("River").catch(() => {})}>
         update-display-name
+      </button>
+      <button type="button" onClick={() => void ctx.loginAsGuest().catch(() => {})}>
+        login-guest
       </button>
     </div>
   );
@@ -145,6 +149,20 @@ describe("AuthProvider without Firebase auth", () => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable profile updates/i);
     });
     expect(authFns.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it("loginAsGuest throws a configuration error", async () => {
+    const user = userEvent.setup();
+    render(
+      <AuthProvider>
+        <Harness />
+      </AuthProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable sign-in/i);
+    });
+    expect(authFns.signInAnonymously).not.toHaveBeenCalled();
   });
 
   it("logout still invokes signOut with null auth", async () => {

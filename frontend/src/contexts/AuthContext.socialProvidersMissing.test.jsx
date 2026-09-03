@@ -9,6 +9,7 @@ const authFns = vi.hoisted(() => ({
     return vi.fn();
   }),
   sendPasswordResetEmail: vi.fn(),
+  signInAnonymously: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),

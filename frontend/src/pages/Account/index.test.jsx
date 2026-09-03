@@ -111,6 +111,24 @@ describe("AccountPage", () => {
     expect(screen.getByText("Not set")).toBeInTheDocument();
   });
 
+  it("labels an anonymous guest session when email is missing", () => {
+    mockUseAuth.mockReturnValue({
+      user: { uid: "anon-1", isAnonymous: true, displayName: null, email: null },
+      loading: false,
+    });
+    renderAccountPage();
+    expect(screen.getByText("Guest session")).toBeInTheDocument();
+  });
+
+  it('shows "Not set" for a non-guest user with no email', () => {
+    mockUseAuth.mockReturnValue({
+      user: { uid: "abc-123", displayName: "Jane Doe", email: null, isAnonymous: false },
+      loading: false,
+    });
+    renderAccountPage();
+    expect(screen.getByText("Not set")).toBeInTheDocument();
+  });
+
   it("hides profile overview when user is null", () => {
     mockUseAuth.mockReturnValue({ user: null, loading: false });
     renderAccountPage();

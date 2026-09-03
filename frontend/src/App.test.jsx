@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 // Avoid initializing the real Firebase client in this file (faster, no env required).
@@ -32,5 +33,16 @@ describe("App (integration)", () => {
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
     ).toBeInTheDocument();
+  });
+
+  it("does not open the Sign In modal when Quick sign in is clicked", async () => {
+    const user = userEvent.setup();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    renderWithAppProviders(<App />);
+    await user.click(await screen.findByRole("button", { name: "Quick sign in" }));
+    expect(screen.queryByRole("heading", { name: "Sign In" })).not.toBeInTheDocument();
+    expect(document.querySelector(".auth-modal")).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(/not configured/i);
+    errSpy.mockRestore();
   });
 });

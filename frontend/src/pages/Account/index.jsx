@@ -173,7 +173,7 @@ function AccountPage() {
               </li>
               <li>
                 <span className="account-summary-label">Primary email</span>
-                <span>{user.email}</span>
+                <span>{user.email || (user.isAnonymous ? "Guest session" : "Not set")}</span>
               </li>
             </ul>
             {displayNameSaving ? <p className="account-status">Saving display name…</p> : null}

@@ -11,6 +11,7 @@ const authFns = vi.hoisted(() => ({
     return mockUnsubscribe;
   }),
   sendPasswordResetEmail: vi.fn(),
+  signInAnonymously: vi.fn(),
   signInWithEmailAndPassword: vi.fn(),
   signInWithPopup: vi.fn(),
   signOut: vi.fn(),
@@ -38,6 +39,7 @@ afterEach(() => {
     return mockUnsubscribe;
   });
   authFns.sendPasswordResetEmail.mockReset();
+  authFns.signInAnonymously.mockReset();
   authFns.signInWithEmailAndPassword.mockReset();
   authFns.signInWithPopup.mockReset();
   authFns.signOut.mockReset();
@@ -85,6 +87,9 @@ function Harness() {
       </button>
       <button type="button" onClick={() => void ctx.loginWithGoogle().catch(() => {})}>
         login-google
+      </button>
+      <button type="button" onClick={() => void ctx.loginAsGuest().catch(() => {})}>
+        login-guest
       </button>
       <button type="button" onClick={() => ctx.clearError()}>
         clear-error
@@ -254,6 +259,28 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent("popup blocked");
     });
+  });
+
+  it("loginAsGuest calls signInAnonymously", async () => {
+    authFns.signInAnonymously.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(authFns.signInAnonymously).toHaveBeenCalledWith(fb.auth);
+    });
+  });
+
+  it("loginAsGuest sets error when signInAnonymously fails", async () => {
+    const err = new Error("anonymous disabled");
+    authFns.signInAnonymously.mockRejectedValue(err);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent("anonymous disabled");
+    });
+    expect(console.error).toHaveBeenCalledWith("Firebase auth error", err);
   });
 
   it("clearError removes error state", async () => {

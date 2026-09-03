@@ -12,4 +12,12 @@ test.describe("public routes (e2e)", () => {
       page.getByRole("heading", { name: /Sign in to Lost Tales Marketplace/i }),
     ).toBeVisible();
   });
+
+  test("Quick sign in does not open the Sign In modal", async ({ page }) => {
+    await page.goto("/auth/login");
+    await page.getByRole("button", { name: "Quick sign in" }).click();
+    await expect(page.locator(".auth-modal")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Sign In" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+  });
 });
