@@ -99,7 +99,8 @@ beforeEach(() => {
   });
 });
 
-describe("GettingStartedPage", { timeout: 15_000 }, () => {
+// Coverage + GitHub-hosted runners can push these large-tree interactions past Vitest's 5s default.
+describe("GettingStartedPage", { timeout: 20_000 }, () => {
   it("asks the collector profile question first", () => {
     renderPage();
 
