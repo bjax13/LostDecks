@@ -254,6 +254,31 @@ describe("MatchesPage", () => {
     expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
   });
 
+  it("omits the mailto link when the email percent-encodes a separator", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Lost Tester 2",
+            contact: {
+              method: "tradingEmail",
+              email: "a%3Battacker@example.com",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            lanes: testerLanes(),
+          },
+        ],
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
+  });
+
   it("shows discord contact details instead of email buttons", () => {
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({
