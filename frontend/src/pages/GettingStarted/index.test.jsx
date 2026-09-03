@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
@@ -24,6 +24,10 @@ vi.mock("../Collection/hooks/useUserCollection", () => ({
 vi.mock("../Collection/utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
 }));
+
+function setupUser() {
+  return userEvent.setup({ delay: null });
+}
 
 function renderPage() {
   return render(
@@ -77,11 +81,10 @@ async function cancelNoneCoverage(user) {
 
 async function applyBulkQuantity(user, bulkActions, quantity) {
   const input = within(bulkActions).getByLabelText(/custom quantity for/i);
-  await user.clear(input);
-  if (quantity !== "") {
-    await user.type(input, String(quantity));
-  }
-  await user.click(within(bulkActions).getByRole("button", { name: "Apply all" }));
+  fireEvent.change(input, { target: { value: String(quantity) } });
+  const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+  expect(applyAll).toBeEnabled();
+  await user.click(applyAll);
 }
 
 beforeEach(() => {
@@ -96,7 +99,7 @@ beforeEach(() => {
   });
 });
 
-describe("GettingStartedPage", { timeout: 15000 }, () => {
+describe("GettingStartedPage", { timeout: 15_000 }, () => {
   it("asks the collector profile question first", () => {
     renderPage();
 
@@ -116,7 +119,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("expands Some groups in review and supports bulk quantity edits", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -230,7 +233,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("defaults a non-spreadsheet collector to None", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -245,7 +248,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("jumps to card review from the progress indicator with manual defaults", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await user.click(screen.getByRole("button", { name: /card review/i }));
@@ -267,7 +270,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("lets collectors jump back to earlier steps from the progress indicator", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -284,7 +287,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("sends spreadsheet collectors to the bulk import explanation", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
@@ -299,7 +302,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("toggles card review group rows when clicking the row title", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -324,7 +327,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("does not toggle group expand state when clicking coverage controls", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -368,7 +371,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("shows coverage controls on card review group rows", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -422,7 +425,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("keeps quantities above 1 when selecting All on a group", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -464,7 +467,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("adjusts quantities with + and - buttons", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -486,7 +489,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("shows nonsense variant under-lines without letter prefixes in condensed SKU labels", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -514,7 +517,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("keeps All coverage when bulk-setting positive quantities on an All group", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -559,7 +562,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("rejects negative bulk Apply all quantities and keeps positive Apply all working", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -591,7 +594,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("moves All coverage to Some when one SKU is set to zero", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -622,7 +625,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("moves None coverage to Some when a SKU quantity is increased above zero", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -656,7 +659,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("prompts before setting a group to None and cancels without changes", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -685,7 +688,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("applies None after confirmation and clears quantities", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -713,7 +716,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("does not prompt when None is already selected", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -733,7 +736,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
   });
 
   it("cancels None confirmation with Escape", async () => {
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
@@ -763,7 +766,7 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
       loading: false,
       error: null,
     });
-    const user = userEvent.setup();
+    const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
