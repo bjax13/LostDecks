@@ -52,14 +52,32 @@ export function getDefaultExcludedIds() {
   return new Set(DEFAULT_EXCLUDED_SECTION_IDS);
 }
 
+function coerceQuantity(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
 function normalizeQuantity(entry) {
   const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
   for (const candidate of candidates) {
-    if (typeof candidate === "number" && Number.isFinite(candidate)) {
-      return candidate;
+    const parsed = coerceQuantity(candidate);
+    if (parsed != null) {
+      return parsed;
     }
   }
   return 1;
+}
+
+function skuKey(skuId) {
+  return String(skuId).trim().toUpperCase();
 }
 
 function getVariantLabel(detail) {
@@ -116,6 +134,14 @@ function matchSectionSku(sku, predicate) {
   return card;
 }
 
+function resolveEntrySkuId(entry) {
+  const rawSku = entry.skuId ? String(entry.skuId).trim() : "";
+  if (rawSku) {
+    return skuKey(rawSku);
+  }
+  return null;
+}
+
 function buildOwnedSkuCounts(entries) {
   const ownedSkuCounts = new Map();
   let skippedEntries = 0;
@@ -124,7 +150,7 @@ function buildOwnedSkuCounts(entries) {
     const quantity = Math.max(0, normalizeQuantity(entry));
     if (!quantity) return;
 
-    const skuId = entry.skuId ? String(entry.skuId).trim() : null;
+    const skuId = resolveEntrySkuId(entry);
     if (!skuId) {
       skippedEntries += 1;
       return;
@@ -135,12 +161,26 @@ function buildOwnedSkuCounts(entries) {
   return { ownedSkuCounts, skippedEntries };
 }
 
-/** ISO only completes story groups the collector has already started in this finish/section. */
+function ownedCountForSku(ownedSkuCounts, sku) {
+  return ownedSkuCounts.get(skuKey(sku.skuId)) ?? 0;
+}
+
+function buildOwnedCardIds(ownedSkuCounts) {
+  const ownedCardIds = new Set();
+  datasetSkus.forEach((sku) => {
+    if (ownedCountForSku(ownedSkuCounts, sku) <= 0 || !sku.cardId) {
+      return;
+    }
+    ownedCardIds.add(sku.cardId);
+  });
+  return ownedCardIds;
+}
+
+/** ISO only fills gaps in story groups already started for this finish/section. */
 function buildStartedStoryTitles(predicate, ownedSkuCounts) {
   const started = new Set();
   datasetSkus.forEach((sku) => {
-    const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
-    if (ownedCount <= 0) {
+    if (ownedCountForSku(ownedSkuCounts, sku) <= 0) {
       return;
     }
     const card = matchSectionSku(sku, predicate);
@@ -152,13 +192,26 @@ function buildStartedStoryTitles(predicate, ownedSkuCounts) {
   return started;
 }
 
-function buildSectionStories({ predicate, groupSuffix }, mode, ownedSkuCounts, storyRank) {
+function buildSectionStories(
+  { predicate, groupSuffix },
+  mode,
+  ownedSkuCounts,
+  ownedCardIds,
+  storyRank,
+) {
   const groups = new Map();
   const startedStories = mode === "iso" ? buildStartedStoryTitles(predicate, ownedSkuCounts) : null;
+  if (mode === "iso" && startedStories.size === 0) {
+    return [];
+  }
 
   datasetSkus.forEach((sku) => {
-    const ownedCount = ownedSkuCounts.get(sku.skuId) ?? 0;
-    if (mode === "iso" ? ownedCount > 0 : ownedCount <= 1) {
+    const ownedCount = ownedCountForSku(ownedSkuCounts, sku);
+    if (mode === "iso") {
+      if (ownedCount > 0 || ownedCardIds.has(sku.cardId)) {
+        return;
+      }
+    } else if (ownedCount <= 1) {
       return;
     }
 
@@ -211,6 +264,7 @@ function buildSectionStories({ predicate, groupSuffix }, mode, ownedSkuCounts, s
 
 export function buildIsoUftPostTree(entries) {
   const { ownedSkuCounts, skippedEntries } = buildOwnedSkuCounts(entries);
+  const ownedCardIds = buildOwnedCardIds(ownedSkuCounts);
 
   const storyOrder = datasetStories.map((story) => story.title);
   const storyRank = (title) => {
@@ -225,7 +279,7 @@ export function buildIsoUftPostTree(entries) {
 
   const tree = modes.map(({ id, label, mode }) => {
     const children = SECTIONS.map((section) => {
-      const stories = buildSectionStories(section, mode, ownedSkuCounts, storyRank);
+      const stories = buildSectionStories(section, mode, ownedSkuCounts, ownedCardIds, storyRank);
       if (stories.length === 0) {
         return null;
       }
