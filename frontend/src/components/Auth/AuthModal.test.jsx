@@ -79,6 +79,29 @@ describe("AuthModal (unit)", () => {
     expect(screen.getByText("Bad credentials")).toHaveClass("auth-modal__error");
   });
 
+  it("maps a Firebase invalid-credential error to friendly copy", () => {
+    mockError = {
+      code: "auth/invalid-credential",
+      message: "Firebase: Error (auth/invalid-credential).",
+    };
+    renderModal();
+    expect(screen.getByText("Email or password is incorrect.")).toHaveClass("auth-modal__error");
+    expect(screen.queryByText(/Firebase:/)).not.toBeInTheDocument();
+  });
+
+  it("maps user-not-found to reset copy in forgot-password mode", async () => {
+    mockError = {
+      code: "auth/user-not-found",
+      message: "Firebase: Error (auth/user-not-found).",
+    };
+    renderModal();
+    await user.click(screen.getByText("Forgot password?"));
+    expect(
+      screen.getByText("If an account exists for that email, a reset link has been sent."),
+    ).toHaveClass("auth-modal__error");
+    expect(screen.queryByText(/password is incorrect/i)).not.toBeInTheDocument();
+  });
+
   it("close button resets state, clears error, and calls onClose", async () => {
     const { onClose } = renderModal();
     await user.click(screen.getByLabelText(/^Email$/i));

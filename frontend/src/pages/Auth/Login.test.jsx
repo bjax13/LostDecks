@@ -61,4 +61,12 @@ describe("Login (unit)", () => {
     renderLogin();
     expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
   });
+
+  it("maps a Firebase invalid-credential error to friendly copy", () => {
+    mockError = new Error("Firebase: Error (auth/invalid-credential).");
+    mockError.code = "auth/invalid-credential";
+    renderLogin();
+    expect(screen.getByText("Email or password is incorrect.")).toBeInTheDocument();
+    expect(screen.queryByText(/Firebase:/)).not.toBeInTheDocument();
+  });
 });
