@@ -215,7 +215,14 @@ export default function IsoUftPostModal({ isOpen, onClose, entries, onCopied, on
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal backdrop; Escape closes via window listener
     // biome-ignore lint/a11y/useKeyWithClickEvents: dismiss is pointer-only; keyboard users use Escape
-    <div className="collection-bulk-post-modal__backdrop" onClick={onClose}>
+    <div
+      className="collection-bulk-post-modal__backdrop"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       {/* biome-ignore lint/complexity/noUselessFragments: fragment isolates the next suppression from the dialog root */}
       <>
         {/* biome-ignore lint/a11y/useKeyWithClickEvents: stops click bubbling to backdrop */}

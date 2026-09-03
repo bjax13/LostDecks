@@ -291,6 +291,48 @@ describe("BulkCollectionTools", () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
+  it("closes ISO/UFT post modal when Cancel is clicked", async () => {
+    const user = userEvent.setup();
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    await openPostModal(user);
+
+    await user.click(screen.getByRole("button", { name: /^cancel$/i }));
+    expect(
+      screen.queryByRole("dialog", { name: /iso\/uft post preview/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes ISO/UFT post modal when the backdrop is clicked", async () => {
+    const user = userEvent.setup();
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    await openPostModal(user);
+
+    fireEvent.click(document.querySelector(".collection-bulk-post-modal__backdrop"));
+    expect(
+      screen.queryByRole("dialog", { name: /iso\/uft post preview/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not close ISO/UFT post modal when the dialog surface is clicked", async () => {
+    const user = userEvent.setup();
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    await openPostModal(user);
+
+    fireEvent.click(getPostDialog());
+    expect(getPostDialog()).toBeInTheDocument();
+  });
+
+  it("closes ISO/UFT post modal when Escape is pressed", async () => {
+    const user = userEvent.setup();
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={[]} />);
+    await openPostModal(user);
+
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: /iso\/uft post preview/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("updates preview when a section is unchecked", async () => {
     const user = userEvent.setup();
     collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
