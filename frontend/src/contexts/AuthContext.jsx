@@ -146,6 +146,43 @@ export function AuthProvider({ children }) {
     [signInWithProvider],
   );
 
+  const updateDisplayName = useCallback(
+    async (displayName) => {
+      if (!auth) {
+        const err = new Error(
+          "Authentication is not configured. Set VITE_FIREBASE_* variables in frontend/.env to enable profile updates.",
+        );
+        handleError(err);
+        throw err;
+      }
+
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        const err = new Error("You must be signed in to update your display name.");
+        handleError(err);
+        throw err;
+      }
+
+      const trimmed = String(displayName ?? "").trim();
+      if (!trimmed) {
+        const err = new Error("Display name cannot be empty.");
+        handleError(err);
+        throw err;
+      }
+
+      clearError();
+      try {
+        await updateProfile(currentUser, { displayName: trimmed });
+        // updateProfile mutates the Firebase user in place; clone so React re-renders.
+        setUser({ ...currentUser, displayName: trimmed });
+      } catch (err) {
+        handleError(err);
+        throw err;
+      }
+    },
+    [clearError, handleError],
+  );
+
   const value = useMemo(
     () => ({
       user,
@@ -157,9 +194,21 @@ export function AuthProvider({ children }) {
       logout,
       resetPassword,
       loginWithGoogle,
+      updateDisplayName,
       hasFirebaseConfig,
     }),
-    [user, loading, error, clearError, login, register, logout, resetPassword, loginWithGoogle],
+    [
+      user,
+      loading,
+      error,
+      clearError,
+      login,
+      register,
+      logout,
+      resetPassword,
+      loginWithGoogle,
+      updateDisplayName,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
