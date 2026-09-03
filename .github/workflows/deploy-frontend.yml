@@ -1,16 +1,16 @@
-name: Full project deploy
+name: Front end only deploy
 
 # Production deploy: run manually after configuring repository secrets (see AGENTS.md).
 on:
   workflow_dispatch:
 
 concurrency:
-  group: full-project-deploy-${{ github.ref }}
+  group: frontend-only-deploy-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy hosting, firestore, and functions
+    name: Deploy hosting only with live Firebase config
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +28,6 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             frontend/package-lock.json
-            functions/package-lock.json
 
       - name: Install root dependencies
         run: npm ci
@@ -37,9 +36,5 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Install Cloud Functions dependencies
-        working-directory: functions
-        run: npm ci
-
-      - name: Deploy Hosting, Firestore, and Functions
-        run: npm run deploy:firebase
+      - name: Deploy Hosting only
+        run: npm run deploy:hosting
