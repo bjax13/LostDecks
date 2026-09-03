@@ -143,3 +143,7 @@ Scripts live in `.cursor/skills/verify-lost-tales-marketplace/scripts/` and are 
 ## Feature map
 
 [features/README.md](features/README.md)
+
+## Maintenance
+
+Use `/maintain-verification-skill` to keep this map honest. The committed weekly prompt is `.cursor/automations/maintain-verification-skill/PROMPT.md` (Friday 8:00 AM America/Denver once the Cursor Automation is enabled).
