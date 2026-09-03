@@ -51,6 +51,17 @@ vi.mock("../../lib/firebase", () => ({
   db: {},
 }));
 
+const mockAdjustCollectionEntryQuantity = vi.fn().mockResolvedValue({
+  deleted: false,
+  quantity: 1,
+  entryId: "e1",
+});
+
+vi.mock("./utils/adjustCollectionQuantity.js", () => ({
+  adjustCollectionEntryQuantity: (...args) => mockAdjustCollectionEntryQuantity(...args),
+  decrementCollectionBySku: vi.fn(),
+}));
+
 function renderCollectionPage() {
   return render(
     <TestMemoryRouter initialEntries={["/collection"]}>
@@ -63,6 +74,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockUseAuth.mockReturnValue({ user: { uid: "test-user" }, loading: false });
   mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mockAdjustCollectionEntryQuantity.mockResolvedValue({
+    deleted: false,
+    quantity: 1,
+    entryId: "e1",
+  });
 });
 
 describe("normalizeQuantity", () => {
@@ -561,6 +577,16 @@ describe("CollectionPage (integration)", () => {
 
     await user.click(elsRow);
     expect(mockNavigate).toHaveBeenCalledWith("/collectibles/LT24-ELS-01/LT24-ELS-01-DUN");
+
+    mockNavigate.mockClear();
+    await user.click(within(elsRow).getByRole("button", { name: /decrease/i }));
+    expect(mockAdjustCollectionEntryQuantity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entry: expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: 2 }),
+        delta: -1,
+      }),
+    );
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     const unknownRow = screen.getAllByText("UNKNOWN-SKU-XYZ")[0].closest("tr");
     expect(unknownRow).toBeTruthy();

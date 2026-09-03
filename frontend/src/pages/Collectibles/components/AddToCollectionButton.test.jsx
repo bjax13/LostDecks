@@ -26,6 +26,7 @@ const hookState = {
   user: mockUser,
   reset: vi.fn(),
   addToCollection: vi.fn(),
+  decrementFromCollection: vi.fn(),
 };
 
 vi.mock("../hooks/useAddToCollection", () => ({
@@ -90,6 +91,7 @@ describe("AddToCollectionButton", () => {
     hookState.user = mockUser;
     hookState.reset = vi.fn();
     hookState.addToCollection = vi.fn().mockResolvedValue(undefined);
+    hookState.decrementFromCollection = vi.fn().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -156,6 +158,32 @@ describe("AddToCollectionButton", () => {
     });
   });
 
+  it("shows a decrease control for owned finishes and decrements on click", async () => {
+    const user = userEvent.setup();
+    renderButton({
+      ownedBySkuId: {
+        "LT24-ELS-01-DUN": 2,
+      },
+    });
+
+    expect(screen.getByRole("button", { name: "Decrease Dun quantity" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Decrease Foil quantity" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun quantity" }));
+    expect(hookState.decrementFromCollection).toHaveBeenCalledWith({
+      card: baseCollectible,
+      finish: "DUN",
+    });
+    expect(hookState.addToCollection).not.toHaveBeenCalled();
+  });
+
+  it("does not show decrease controls when nothing is owned", () => {
+    renderButton();
+    expect(screen.queryByRole("button", { name: /decrease/i })).not.toBeInTheDocument();
+  });
+
   it("shows owned quantity on pin buttons", () => {
     renderButton({
       collectible: {
@@ -168,6 +196,26 @@ describe("AddToCollectionButton", () => {
     });
 
     expect(screen.getByRole("button", { name: "Owned · x4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decrease owned quantity" })).toBeInTheDocument();
+  });
+
+  it("decrements pin quantity from the owned control", async () => {
+    const user = userEvent.setup();
+    renderButton({
+      collectible: {
+        id: "PIN-CF-01",
+        collectibleType: "pin",
+        category: "pin",
+        finishes: [],
+      },
+      ownedBySkuId: { "PIN-CF-01": 1 },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Decrease owned quantity" }));
+    expect(hookState.decrementFromCollection).toHaveBeenCalledWith({
+      card: expect.objectContaining({ id: "PIN-CF-01", collectibleType: "pin" }),
+      finish: null,
+    });
   });
 
   it("renders empty state when neither collectible nor card is provided", () => {
@@ -333,19 +381,36 @@ describe("AddToCollectionButton", () => {
     expect(hookState.reset).toHaveBeenCalled();
   });
 
-  it("invokes addToCollection with card, finish, and quantity", async () => {
+  it("shows remove success feedback after decrement succeeds", async () => {
     const user = userEvent.setup();
-    hookState.addToCollection = vi.fn(async () => {
+    hookState.decrementFromCollection = vi.fn(async () => {
       hookState.status = "success";
     });
-    const { rerender } = renderButton();
-
-    await user.click(screen.getByRole("button", { name: "Add Dun" }));
-    expect(hookState.addToCollection).toHaveBeenCalledWith({
-      card: baseCollectible,
-      finish: "DUN",
-      quantity: 1,
+    const { rerender } = renderButton({
+      ownedBySkuId: { "LT24-ELS-01-DUN": 1 },
     });
-    rerender(<AddToCollectionButton collectible={baseCollectible} />);
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun quantity" }));
+    rerender(
+      <AddToCollectionButton
+        collectible={baseCollectible}
+        ownedBySkuId={{ "LT24-ELS-01-DUN": 1 }}
+      />,
+    );
+
+    expect(await screen.findByText("Removed Dun from your collection.")).toBeInTheDocument();
+  });
+
+  it("shows inline error when decrementFromCollection throws a non-auth error", async () => {
+    const user = userEvent.setup();
+    hookState.decrementFromCollection = vi.fn().mockRejectedValue(new Error("network down"));
+    renderButton({
+      ownedBySkuId: { "LT24-ELS-01-DUN": 1 },
+    });
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun quantity" }));
+    expect(
+      await screen.findByText("Couldn't update quantity. Please try again."),
+    ).toBeInTheDocument();
   });
 });

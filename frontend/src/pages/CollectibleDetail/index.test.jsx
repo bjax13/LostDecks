@@ -27,13 +27,19 @@ vi.mock("../../data/collectibles", () => ({
 vi.mock("./hooks/useCollectibleCollectionEntry", () => ({
   useCollectibleCollectionEntry: vi.fn(() => ({
     entry: null,
+    ownedBySkuId: {},
     loading: false,
     error: null,
   })),
 }));
 
 vi.mock("../Collectibles/components/AddToCollectionButton", () => ({
-  default: ({ collectible }) => <div data-testid="add-to-collection">{collectible?.id}</div>,
+  default: ({ collectible, ownedBySkuId }) => (
+    <div data-testid="add-to-collection">
+      {collectible?.id}
+      {ownedBySkuId?.["LT24-ELS-01-DUN"] ? ` dun:${ownedBySkuId["LT24-ELS-01-DUN"]}` : ""}
+    </div>
+  ),
 }));
 
 /* ------------------------------------------------------------------ */
@@ -79,7 +85,12 @@ function setDefaults({
   getCollectibleRecord.mockReturnValue(card);
   getSkuRecord.mockReturnValue(skuRecord);
   useAuth.mockReturnValue({ user });
-  useCollectibleCollectionEntry.mockReturnValue({ entry, loading, error: null });
+  useCollectibleCollectionEntry.mockReturnValue({
+    entry,
+    ownedBySkuId: {},
+    loading,
+    error: null,
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -285,6 +296,19 @@ describe("CollectibleDetailPage – collection section", () => {
     renderWithRoute("/collectibles/LT24-ELS-01");
 
     expect(screen.getByTestId("add-to-collection")).toBeInTheDocument();
+  });
+
+  it("forwards owned quantities to AddToCollectionButton", () => {
+    setDefaults({ card: CARD, user: USER });
+    useCollectibleCollectionEntry.mockReturnValue({
+      entry: { quantity: 2, skuId: "LT24-ELS-01-DUN" },
+      ownedBySkuId: { "LT24-ELS-01-DUN": 2 },
+      loading: false,
+      error: null,
+    });
+    renderWithRoute("/collectibles/LT24-ELS-01");
+
+    expect(screen.getByTestId("add-to-collection")).toHaveTextContent("dun:2");
   });
 });
 

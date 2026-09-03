@@ -2,21 +2,25 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { getSkuIdsForCollectible } from "../../../data/collectibles";
 import { db } from "../../../lib/firebase";
+import { buildOwnedQuantityBySkuId } from "../../Collectibles/utils/ownedQuantities";
 
 const initialState = {
   entry: null,
+  ownedBySkuId: {},
   loading: true,
   error: null,
 };
 
 export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
   const [entry, setEntry] = useState(initialState.entry);
+  const [ownedBySkuId, setOwnedBySkuId] = useState(initialState.ownedBySkuId);
   const [loading, setLoading] = useState(initialState.loading);
   const [error, setError] = useState(initialState.error);
 
   useEffect(() => {
     if (!ownerUid || (!collectibleId && !skuId)) {
       setEntry(null);
+      setOwnedBySkuId({});
       setLoading(false);
       setError(null);
       return undefined;
@@ -39,6 +43,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
       const skuIds = getSkuIdsForCollectible(collectibleId);
       if (skuIds.length === 0) {
         setEntry(null);
+        setOwnedBySkuId({});
         setLoading(false);
         return undefined;
       }
@@ -57,6 +62,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
       }
     } else {
       setEntry(null);
+      setOwnedBySkuId({});
       setLoading(false);
       return undefined;
     }
@@ -74,6 +80,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
         }
 
         setEntry(matchedEntry);
+        setOwnedBySkuId(buildOwnedQuantityBySkuId(docs));
         setLoading(false);
       },
       (err) => {
@@ -86,5 +93,5 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
     return () => unsubscribe();
   }, [ownerUid, collectibleId, skuId]);
 
-  return { entry, loading, error };
+  return { entry, ownedBySkuId, loading, error };
 }

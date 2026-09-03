@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { datasetMeta } from "../../data/collectibles";
 import { categoryLabels } from "../Collectibles/constants";
+import CollectionQuantityControls from "./components/CollectionQuantityControls.jsx";
 
 export function normalizeQuantity(entry) {
   const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
@@ -288,7 +289,7 @@ export function CollectionTable({ entries }) {
                 </div>
               </td>
               <td data-label="Quantity">
-                <span className="collection-table__quantity">{entry.quantity}</span>
+                <CollectionQuantityControls entry={entry} />
               </td>
               <td data-label="Last updated">
                 <div className="collection-table__updated">

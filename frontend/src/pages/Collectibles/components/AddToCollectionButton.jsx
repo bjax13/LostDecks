@@ -4,7 +4,9 @@ import { useAddToCollection } from "../hooks/useAddToCollection";
 import { getOwnedQuantity } from "../utils/ownedQuantities";
 
 const successMessage = "Added to your collection!";
+const removedMessage = "Removed from your collection.";
 const errorMessage = "Couldn't add collectible. Please try again.";
+const removeErrorMessage = "Couldn't update quantity. Please try again.";
 
 export function formatFinishLabel(finish) {
   if (!finish || typeof finish !== "string") {
@@ -32,12 +34,15 @@ export default function AddToCollectionButton({
   ownedBySkuId = {},
 }) {
   const item = collectible ?? card;
-  const { addToCollection, status, error, user, reset } = useAddToCollection();
+  const { addToCollection, decrementFromCollection, status, error, user, reset } =
+    useAddToCollection();
   const { openAuthModal } = useAuthModal();
   const [feedback, setFeedback] = useState(null);
   const [pendingFinish, setPendingFinish] = useState(null);
   const [lastFinish, setLastFinish] = useState(null);
   const [pendingPinAdd, setPendingPinAdd] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [lastAction, setLastAction] = useState("add");
 
   const isPin = isPinCollectible(item);
   const finishes = useMemo(() => item?.finishes ?? [], [item]);
@@ -60,15 +65,24 @@ export default function AddToCollectionButton({
     setPendingFinish(null);
     setLastFinish(null);
     setPendingPinAdd(false);
+    setPendingAction(null);
+    setLastAction("add");
     reset();
   }, [item, reset]);
 
   useEffect(() => {
     if (status === "success") {
       const finishLabel = lastFinish ? formatFinishLabel(lastFinish) : null;
+      const removed = lastAction === "remove";
+      let message = successMessage;
+      if (removed) {
+        message = finishLabel ? `Removed ${finishLabel} from your collection.` : removedMessage;
+      } else if (finishLabel) {
+        message = `Added ${finishLabel} to your collection!`;
+      }
       setFeedback({
         type: "success",
-        message: finishLabel ? `Added ${finishLabel} to your collection!` : successMessage,
+        message,
       });
       const timer = setTimeout(() => {
         setFeedback(null);
@@ -78,11 +92,14 @@ export default function AddToCollectionButton({
     }
 
     if (status === "error") {
-      setFeedback({ type: "error", message: errorMessage });
+      setFeedback({
+        type: "error",
+        message: lastAction === "remove" ? removeErrorMessage : errorMessage,
+      });
     }
 
     return undefined;
-  }, [status, reset, lastFinish]);
+  }, [status, reset, lastFinish, lastAction]);
 
   useEffect(() => () => reset(), [reset]);
 
@@ -90,10 +107,11 @@ export default function AddToCollectionButton({
     if (status !== "loading") {
       setPendingFinish(null);
       setPendingPinAdd(false);
+      setPendingAction(null);
     }
   }, [status]);
 
-  const handleAdd = async (finish) => {
+  const runAuthenticatedAction = async ({ finish, action }) => {
     if (!item) return;
 
     if (!user) {
@@ -109,20 +127,35 @@ export default function AddToCollectionButton({
         setPendingPinAdd(true);
         setLastFinish(null);
       }
+      setPendingAction(action);
+      setLastAction(action);
       setFeedback(null);
-      await addToCollection({
-        card: item,
-        finish: finish ?? null,
-        quantity: 1,
-      });
+      if (action === "remove") {
+        await decrementFromCollection({
+          card: item,
+          finish: finish ?? null,
+        });
+      } else {
+        await addToCollection({
+          card: item,
+          finish: finish ?? null,
+          quantity: 1,
+        });
+      }
     } catch (err) {
       if (err?.code === "auth-required") {
         openAuthModal({ reason: "add-to-collection" });
       } else {
-        setFeedback({ type: "error", message: errorMessage });
+        setFeedback({
+          type: "error",
+          message: action === "remove" ? removeErrorMessage : errorMessage,
+        });
       }
     }
   };
+
+  const handleAdd = (finish) => runAuthenticatedAction({ finish, action: "add" });
+  const handleRemove = (finish) => runAuthenticatedAction({ finish, action: "remove" });
 
   const isLoading = status === "loading";
   const finishButtons = useMemo(
@@ -148,31 +181,69 @@ export default function AddToCollectionButton({
     isPin: true,
   });
 
+  const renderRemoveButton = ({ finish, label, ownedQuantity, isPinButton = false }) => {
+    if (ownedQuantity <= 0) {
+      return null;
+    }
+
+    const removingThis =
+      isLoading &&
+      pendingAction === "remove" &&
+      (isPinButton ? pendingPinAdd : pendingFinish === finish);
+    const accessibleName = isPinButton ? "Decrease owned quantity" : `Decrease ${label} quantity`;
+
+    return (
+      <button
+        type="button"
+        className="add-to-collection__button add-to-collection__button--remove"
+        onClick={() => handleRemove(finish)}
+        disabled={isLoading}
+        aria-label={accessibleName}
+      >
+        {removingThis ? "Removing…" : "−"}
+      </button>
+    );
+  };
+
   return (
     <div className={`add-to-collection add-to-collection--${variant}`}>
       {isPin ? (
         <div className="add-to-collection__buttons">
-          <button
-            type="button"
-            className="add-to-collection__button"
-            onClick={() => handleAdd(null)}
-            disabled={isLoading}
-          >
-            {isLoading && pendingPinAdd ? "Adding…" : pinButtonLabel}
-          </button>
+          <div className="add-to-collection__finish-group">
+            {renderRemoveButton({
+              finish: null,
+              label: "owned",
+              ownedQuantity: pinOwnedQuantity,
+              isPinButton: true,
+            })}
+            <button
+              type="button"
+              className="add-to-collection__button"
+              onClick={() => handleAdd(null)}
+              disabled={isLoading}
+            >
+              {isLoading && pendingPinAdd && pendingAction !== "remove"
+                ? "Adding…"
+                : pinButtonLabel}
+            </button>
+          </div>
         </div>
       ) : finishButtons.length > 0 ? (
         <div className="add-to-collection__buttons">
-          {finishButtons.map(({ finish, label, buttonLabel }) => (
-            <button
-              key={finish}
-              type="button"
-              className="add-to-collection__button"
-              onClick={() => handleAdd(finish)}
-              disabled={isLoading}
-            >
-              {isLoading && pendingFinish === finish ? `Adding ${label}…` : buttonLabel}
-            </button>
+          {finishButtons.map(({ finish, label, buttonLabel, ownedQuantity }) => (
+            <div key={finish} className="add-to-collection__finish-group">
+              {renderRemoveButton({ finish, label, ownedQuantity })}
+              <button
+                type="button"
+                className="add-to-collection__button"
+                onClick={() => handleAdd(finish)}
+                disabled={isLoading}
+              >
+                {isLoading && pendingFinish === finish && pendingAction !== "remove"
+                  ? `Adding ${label}…`
+                  : buttonLabel}
+              </button>
+            </div>
           ))}
         </div>
       ) : (

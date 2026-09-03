@@ -3,11 +3,36 @@ import { useCallback, useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { resolveSkuId } from "../../../data/collectibles";
 import { db } from "../../../lib/firebase";
+import { decrementCollectionBySku } from "../../Collection/utils/adjustCollectionQuantity";
 
 const COLLECTIONS_PATH = "collections";
 
 function isPinCollectible(collectible) {
   return collectible?.collectibleType === "pin" || collectible?.category === "pin";
+}
+
+function resolveCollectionSku({ card, finish, user }) {
+  if (!card?.id) {
+    throw new Error("A valid collectible is required to add to the collection.");
+  }
+
+  const pin = isPinCollectible(card);
+  if (!pin && !finish) {
+    throw new Error("A finish is required (e.g. DUN or FOIL).");
+  }
+
+  if (!user) {
+    const authError = new Error("Authentication required");
+    authError.code = "auth-required";
+    throw authError;
+  }
+
+  const skuId = resolveSkuId(card, finish);
+  if (!skuId) {
+    throw new Error(pin ? "Invalid pin collectible." : "Invalid card or finish.");
+  }
+
+  return { skuId, pin };
 }
 
 export function useAddToCollection() {
@@ -17,25 +42,7 @@ export function useAddToCollection() {
 
   const addToCollection = useCallback(
     async ({ card, finish = null, quantity = 1, notes }) => {
-      if (!card?.id) {
-        throw new Error("A valid collectible is required to add to the collection.");
-      }
-
-      const pin = isPinCollectible(card);
-      if (!pin && !finish) {
-        throw new Error("A finish is required (e.g. DUN or FOIL).");
-      }
-
-      if (!user) {
-        const authError = new Error("Authentication required");
-        authError.code = "auth-required";
-        throw authError;
-      }
-
-      const skuId = resolveSkuId(card, finish);
-      if (!skuId) {
-        throw new Error(pin ? "Invalid pin collectible." : "Invalid card or finish.");
-      }
+      const { skuId } = resolveCollectionSku({ card, finish, user });
 
       setStatus("loading");
       setError(null);
@@ -64,6 +71,30 @@ export function useAddToCollection() {
     [user],
   );
 
+  const decrementFromCollection = useCallback(
+    async ({ card, finish = null }) => {
+      const { skuId } = resolveCollectionSku({ card, finish, user });
+
+      setStatus("loading");
+      setError(null);
+
+      try {
+        const result = await decrementCollectionBySku({
+          ownerUid: user.uid,
+          skuId,
+        });
+        setStatus("success");
+        return result;
+      } catch (err) {
+        console.error("Failed to remove from collection", err);
+        setError(err);
+        setStatus("error");
+        throw err;
+      }
+    },
+    [user],
+  );
+
   const reset = useCallback(() => {
     setStatus("idle");
     setError(null);
@@ -71,6 +102,7 @@ export function useAddToCollection() {
 
   return {
     addToCollection,
+    decrementFromCollection,
     status,
     error,
     user,

@@ -21,6 +21,19 @@ vi.mock("../../../data/collectibles", () => ({
   getSkuIdsForCollectible: (...args) => mockGetSkuIdsForCollectible(...args),
 }));
 
+vi.mock("../../Collectibles/utils/ownedQuantities", () => ({
+  buildOwnedQuantityBySkuId: (entries) => {
+    const owned = {};
+    for (const entry of entries ?? []) {
+      if (!entry?.skuId) continue;
+      const quantity = typeof entry.quantity === "number" ? entry.quantity : 0;
+      if (quantity <= 0) continue;
+      owned[entry.skuId] = (owned[entry.skuId] ?? 0) + quantity;
+    }
+    return owned;
+  },
+}));
+
 let useCollectibleCollectionEntry;
 
 beforeEach(async () => {
@@ -157,6 +170,10 @@ describe("useCollectibleCollectionEntry", () => {
         skuId: "LT24-ELS-01-FOIL",
         ownerUid: "user-123",
         quantity: 1,
+      });
+      expect(result.current.ownedBySkuId).toEqual({
+        "LT24-ELS-01-DUN": 1,
+        "LT24-ELS-01-FOIL": 1,
       });
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);

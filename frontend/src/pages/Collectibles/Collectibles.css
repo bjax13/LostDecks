@@ -534,6 +534,12 @@
   gap: 0.4rem;
 }
 
+.add-to-collection__finish-group {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
 .add-to-collection__button {
   align-self: flex-start;
   border: 1px solid rgba(201, 182, 255, 0.7);
@@ -554,6 +560,11 @@
 .add-to-collection__button:hover {
   background: rgba(143, 111, 230, 0.55);
   transform: translateY(-1px);
+}
+
+.add-to-collection__button--remove {
+  padding: 0.55rem 0.85rem;
+  min-width: 2.5rem;
 }
 
 .add-to-collection__button:disabled {

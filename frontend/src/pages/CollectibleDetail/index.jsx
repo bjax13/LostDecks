@@ -72,11 +72,11 @@ export default function CollectibleDetailPage() {
 
   const card = skuRecord?.card ?? cardRecord;
 
-  const { entry: collectionEntry, loading: collectionLoading } = useCollectibleCollectionEntry(
-    ownerUid,
-    collectibleId,
-    skuId,
-  );
+  const {
+    entry: collectionEntry,
+    ownedBySkuId = {},
+    loading: collectionLoading,
+  } = useCollectibleCollectionEntry(ownerUid, collectibleId, skuId);
 
   const quantity = useMemo(() => normalizeQuantity(collectionEntry), [collectionEntry]);
   const notes = useMemo(() => {
@@ -228,7 +228,11 @@ export default function CollectibleDetailPage() {
             )}
 
             <div className="card-detail__collection-actions">
-              <AddToCollectionButton collectible={card} variant="card" />
+              <AddToCollectionButton
+                collectible={card}
+                variant="card"
+                ownedBySkuId={ownedBySkuId}
+              />
             </div>
           </section>
         )}

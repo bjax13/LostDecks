@@ -15,6 +15,11 @@ vi.mock("../../../lib/firebase", () => ({
   db: { type: "mock-firestore" },
 }));
 
+const mockDecrementCollectionBySku = vi.fn();
+vi.mock("../../Collection/utils/adjustCollectionQuantity", () => ({
+  decrementCollectionBySku: (...args) => mockDecrementCollectionBySku(...args),
+}));
+
 const mockUseAuth = vi.fn();
 vi.mock("../../../contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
@@ -39,6 +44,11 @@ describe("useAddToCollection", () => {
     mockUseAuth.mockReturnValue({ user: fakeUser });
     mockAddDoc.mockResolvedValue({ id: "doc-1" });
     mockCollection.mockReturnValue("collections-ref");
+    mockDecrementCollectionBySku.mockResolvedValue({
+      deleted: true,
+      quantity: 0,
+      entryId: "doc-1",
+    });
   });
 
   afterEach(() => {
@@ -52,6 +62,7 @@ describe("useAddToCollection", () => {
     expect(result.current.error).toBeNull();
     expect(result.current.user).toBe(fakeUser);
     expect(typeof result.current.addToCollection).toBe("function");
+    expect(typeof result.current.decrementFromCollection).toBe("function");
     expect(typeof result.current.reset).toBe("function");
   });
 
@@ -289,6 +300,77 @@ describe("useAddToCollection", () => {
           }),
         ),
       ).rejects.toThrow("Invalid card or finish.");
+    });
+  });
+
+  describe("decrementFromCollection", () => {
+    it("decrements the resolved SKU and sets status to success", async () => {
+      const { result } = renderHook(() => useAddToCollection());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.decrementFromCollection({
+          card: { id: "LT24-ELS-01" },
+          finish: "DUN",
+        });
+      });
+
+      expect(mockDecrementCollectionBySku).toHaveBeenCalledWith({
+        ownerUid: "user-123",
+        skuId: "LT24-ELS-01-DUN",
+      });
+      expect(result.current.status).toBe("success");
+      expect(payload).toEqual({ deleted: true, quantity: 0, entryId: "doc-1" });
+    });
+
+    it("allows pins to be decremented without a finish", async () => {
+      const { result } = renderHook(() => useAddToCollection());
+
+      await act(async () => {
+        await result.current.decrementFromCollection({
+          card: { id: "PIN-CF-01", collectibleType: "pin", category: "pin" },
+        });
+      });
+
+      expect(mockDecrementCollectionBySku).toHaveBeenCalledWith({
+        ownerUid: "user-123",
+        skuId: "PIN-CF-01",
+      });
+    });
+
+    it("throws with auth-required code when user is not logged in", async () => {
+      mockUseAuth.mockReturnValue({ user: null });
+      const { result } = renderHook(() => useAddToCollection());
+
+      await expect(
+        act(() =>
+          result.current.decrementFromCollection({ card: { id: "LT24-ELS-01" }, finish: "DUN" }),
+        ),
+      ).rejects.toMatchObject({
+        message: "Authentication required",
+        code: "auth-required",
+      });
+      expect(mockDecrementCollectionBySku).not.toHaveBeenCalled();
+    });
+
+    it("sets error status when decrement fails", async () => {
+      const firestoreError = new Error("Permission denied");
+      mockDecrementCollectionBySku.mockRejectedValueOnce(firestoreError);
+      const { result } = renderHook(() => useAddToCollection());
+
+      await act(async () => {
+        await expect(
+          result.current.decrementFromCollection({
+            card: { id: "LT24-ELS-01" },
+            finish: "DUN",
+          }),
+        ).rejects.toThrow("Permission denied");
+      });
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("error");
+        expect(result.current.error).toBe(firestoreError);
+      });
     });
   });
 
