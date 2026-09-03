@@ -345,11 +345,10 @@ async function cmdLaunch() {
       existing.driverPid = driver.pid;
       existing.updatedAt = new Date().toISOString();
       writeState(existing);
+      await waitForDriver(driver.pid);
+    } else {
+      await waitForDriver(existing.driverPid);
     }
-    await waitForHttp(`${DRIVER_URL}/health`, {
-      timeoutMs: 20_000,
-      okWhen: (r) => r.status === 200,
-    });
     printReport({
       ok: true,
       reused: true,
@@ -426,10 +425,7 @@ async function cmdLaunch() {
   state.updatedAt = new Date().toISOString();
   writeState(state);
 
-  await waitForHttp(`${DRIVER_URL}/health`, {
-    timeoutMs: 30_000,
-    okWhen: (r) => r.status === 200,
-  });
+  await waitForDriver(driver.pid);
 
   printReport({
     ok: true,
@@ -451,6 +447,33 @@ function startDriver() {
     VERIFY_BASE_URL: BASE_URL,
     VERIFY_DRIVER_PORT: String(PORTS.driver),
   });
+}
+
+async function waitForDriver(pid) {
+  const driverLog = path.join(runDir, "driver.log");
+  const start = Date.now();
+  let lastError = null;
+  while (Date.now() - start < 30_000) {
+    if (!pidAlive(pid)) {
+      const log = fs.existsSync(driverLog) ? fs.readFileSync(driverLog, "utf8").trim() : "";
+      throw new Error(
+        `Playwright driver pid ${pid} exited before becoming ready.${log ? `\n${log}` : ""}`,
+      );
+    }
+    try {
+      const result = await httpGet(`${DRIVER_URL}/health`);
+      if (result.status === 200) {
+        return result;
+      }
+      lastError = new Error(`Driver health HTTP ${result.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+    await sleep(300);
+  }
+  throw new Error(
+    `Timed out waiting for ${DRIVER_URL}/health${lastError ? `: ${lastError.message}` : ""}`,
+  );
 }
 
 function runSeed() {
@@ -597,10 +620,7 @@ async function cmdDrive(argv) {
     const driver = startDriver();
     state.driverPid = driver.pid;
     writeState(state);
-    await waitForHttp(`${DRIVER_URL}/health`, {
-      timeoutMs: 20_000,
-      okWhen: (r) => r.status === 200,
-    });
+    await waitForDriver(driver.pid);
   }
 
   const cmd = { action, ...flags };

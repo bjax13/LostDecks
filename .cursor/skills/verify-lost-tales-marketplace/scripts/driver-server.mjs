@@ -9,7 +9,6 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 function findRepoRoot(startDir) {
@@ -35,10 +34,8 @@ function findRepoRoot(startDir) {
 }
 
 const repoRoot = findRepoRoot(here);
-const playwrightEntry = require.resolve("playwright", {
-  paths: [path.join(repoRoot, "frontend")],
-});
-const { chromium } = await import(playwrightEntry);
+const requireFrontend = createRequire(path.join(repoRoot, "frontend", "package.json"));
+const { chromium } = requireFrontend("playwright");
 
 const baseUrl = process.env.VERIFY_BASE_URL || "http://127.0.0.1:5173";
 const listenPort = Number(process.env.VERIFY_DRIVER_PORT || 17331);
