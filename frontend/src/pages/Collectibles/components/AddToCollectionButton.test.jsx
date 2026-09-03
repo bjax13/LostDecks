@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import "../Collectibles.css";
 import AddToCollectionButton, {
   formatFinishLabel,
   formatOwnedAddLabel,
@@ -215,6 +216,22 @@ describe("AddToCollectionButton", () => {
       quantity: 1,
       deleteWhenZero: true,
     });
+  });
+
+  it("keeps card-variant qty steppers on one compact chip row", () => {
+    const { container } = renderButton({
+      ownedBySkuId: {
+        "LT24-ELS-01-DUN": 2,
+        "LT24-ELS-01-FOIL": 1,
+      },
+    });
+
+    const stepper = container.querySelector(".add-to-collection__stepper");
+    const stepButton = container.querySelector(".add-to-collection__button--step");
+    const quantity = container.querySelector(".add-to-collection__quantity");
+    expect(getComputedStyle(stepper).flexWrap).toBe("nowrap");
+    expect(getComputedStyle(stepButton).padding).toBe("0.4rem 0.55rem");
+    expect(getComputedStyle(quantity).fontSize).toBe("0.68rem");
   });
 
   it("keeps soft-zero steppers visible and passes deleteWhenZero false", async () => {
