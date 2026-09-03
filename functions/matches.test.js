@@ -8,6 +8,7 @@ const {
   buildUserSkuTotals,
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_MATCH_PAGE_SIZE,
+  laneForSkuId,
   MAX_MATCH_PAGE_SIZE,
   normalizeMatchCursor,
   normalizeMatchPageSize,
@@ -47,39 +48,167 @@ test("buildUserMatchProfile tracks only extras", () => {
   assert.deepEqual(Array.from(profile.extras).sort(), ["SKU-2"]);
 });
 
-test("buildMatchesForCaller builds reciprocal pairs with pair limit", () => {
+test("laneForSkuId maps pin prefix and card finish tokens", () => {
+  assert.equal(laneForSkuId("PIN-CF-01"), "pins");
+  assert.equal(laneForSkuId("LT24-ELS-01-DUN"), "dun");
+  assert.equal(laneForSkuId("LT24-ELS-01-FOIL"), "foil");
+  assert.equal(laneForSkuId("LT24-NS-ELS-24-DUN-DANCE"), "dun");
+  assert.equal(laneForSkuId("UNKNOWN"), null);
+});
+
+test("buildMatchesForCaller builds reciprocal lanes with two piles", () => {
   const userSkuTotals = new Map([
-    ["me", new Map([["A", 2]])],
-    ["other", new Map([["B", 2]])],
+    ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+    ["other", new Map([["LT24-HLD-01-DUN", 2]])],
   ]);
 
   const result = buildMatchesForCaller({
     callerUid: "me",
     userSkuTotals,
     optedOutUserIds: new Set(),
-    pairLimit: 10,
   });
 
   assert.equal(result.isCallerOptedOut, false);
   assert.equal(result.matches.length, 1);
   assert.deepEqual(result.matches[0], {
     userId: "other",
-    pairs: [{ theirSkuId: "B", yourSkuId: "A" }],
+    lanes: [
+      {
+        id: "dun",
+        theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 2, extras: 1 }],
+        youCanSend: [{ skuId: "LT24-ELS-01-DUN", owned: 2, extras: 1 }],
+      },
+    ],
   });
 });
 
-test("buildMatchesForCaller sorts counterparties by userId for stable pagination", () => {
+test("buildMatchesForCaller fences lanes and hides empty ones for tester1 vs tester2", () => {
   const userSkuTotals = new Map([
-    ["me", new Map([["A", 2]])],
-    ["zeta", new Map([["B", 2]])],
-    ["alpha", new Map([["C", 2]])],
+    [
+      "tester1",
+      new Map([
+        ["LT24-ELS-01-DUN", 3],
+        ["LT24-CHM-01-DUN", 2],
+        ["PIN-CF-01", 2],
+      ]),
+    ],
+    [
+      "tester2",
+      new Map([
+        ["LT24-HLD-01-DUN", 2],
+        ["PIN-CF-02", 2],
+      ]),
+    ],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "tester1",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+  });
+
+  assert.equal(result.matches.length, 1);
+  assert.deepEqual(result.matches[0].lanes, [
+    {
+      id: "dun",
+      theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 2, extras: 1 }],
+      youCanSend: [
+        { skuId: "LT24-CHM-01-DUN", owned: 2, extras: 1 },
+        { skuId: "LT24-ELS-01-DUN", owned: 3, extras: 2 },
+      ],
+    },
+    {
+      id: "pins",
+      theyCanSend: [{ skuId: "PIN-CF-02", owned: 2, extras: 1 }],
+      youCanSend: [{ skuId: "PIN-CF-01", owned: 2, extras: 1 }],
+    },
+  ]);
+});
+
+test("buildMatchesForCaller does not match across lanes", () => {
+  const userSkuTotals = new Map([
+    ["me", new Map([["PIN-CF-01", 2]])],
+    ["other", new Map([["LT24-HLD-01-DUN", 2]])],
   ]);
 
   const result = buildMatchesForCaller({
     callerUid: "me",
     userSkuTotals,
     optedOutUserIds: new Set(),
-    pairLimit: 10,
+  });
+
+  assert.deepEqual(result.matches, []);
+});
+
+test("buildMatchesForCaller treats qty 1 as neither extra nor need", () => {
+  const userSkuTotals = new Map([
+    [
+      "me",
+      new Map([
+        ["LT24-ELS-01-DUN", 2],
+        ["LT24-HLD-01-DUN", 1],
+      ]),
+    ],
+    [
+      "other",
+      new Map([
+        ["LT24-HLD-01-DUN", 2],
+        ["LT24-ELS-01-DUN", 1],
+      ]),
+    ],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+  });
+
+  assert.deepEqual(result.matches, []);
+});
+
+test("buildMatchesForCaller omits a lane that is only one-way", () => {
+  const userSkuTotals = new Map([
+    [
+      "me",
+      new Map([
+        ["LT24-ELS-01-DUN", 2],
+        ["PIN-CF-01", 2],
+      ]),
+    ],
+    [
+      "other",
+      new Map([
+        ["LT24-HLD-01-DUN", 2],
+        ["LT24-ELS-02-FOIL", 2],
+      ]),
+    ],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+  });
+
+  assert.equal(result.matches.length, 1);
+  assert.deepEqual(
+    result.matches[0].lanes.map((lane) => lane.id),
+    ["dun"],
+  );
+});
+
+test("buildMatchesForCaller sorts counterparties by userId for stable pagination", () => {
+  const userSkuTotals = new Map([
+    ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+    ["zeta", new Map([["LT24-HLD-01-DUN", 2]])],
+    ["alpha", new Map([["LT24-CHM-01-DUN", 2]])],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
   });
 
   assert.deepEqual(
@@ -90,9 +219,9 @@ test("buildMatchesForCaller sorts counterparties by userId for stable pagination
 
 test("paginateMatches returns first page and next cursor", () => {
   const matches = [
-    { userId: "a", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
-    { userId: "b", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
-    { userId: "c", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+    { userId: "a", lanes: [{ id: "dun", theyCanSend: [], youCanSend: [] }] },
+    { userId: "b", lanes: [{ id: "dun", theyCanSend: [], youCanSend: [] }] },
+    { userId: "c", lanes: [{ id: "dun", theyCanSend: [], youCanSend: [] }] },
   ];
 
   const firstPage = paginateMatches(matches, { pageSize: 2, cursor: null });
@@ -117,8 +246,8 @@ test("paginateMatches returns first page and next cursor", () => {
 
 test("paginateMatches clamps page size and ignores unknown cursors", () => {
   const matches = [
-    { userId: "a", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
-    { userId: "b", pairs: [{ theirSkuId: "1", yourSkuId: "2" }] },
+    { userId: "a", lanes: [{ id: "dun", theyCanSend: [], youCanSend: [] }] },
+    { userId: "b", lanes: [{ id: "dun", theyCanSend: [], youCanSend: [] }] },
   ];
 
   assert.equal(normalizeMatchPageSize(0), 1);
@@ -136,15 +265,14 @@ test("paginateMatches clamps page size and ignores unknown cursors", () => {
 
 test("buildMatchesForCaller excludes opted-out counterparties and caller", () => {
   const userSkuTotals = new Map([
-    ["me", new Map([["A", 2]])],
-    ["other", new Map([["B", 2]])],
+    ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+    ["other", new Map([["LT24-HLD-01-DUN", 2]])],
   ]);
 
   const callerOptedOut = buildMatchesForCaller({
     callerUid: "me",
     userSkuTotals,
     optedOutUserIds: new Set(["me"]),
-    pairLimit: 10,
   });
   assert.equal(callerOptedOut.isCallerOptedOut, true);
   assert.deepEqual(callerOptedOut.matches, []);
@@ -153,7 +281,6 @@ test("buildMatchesForCaller excludes opted-out counterparties and caller", () =>
     callerUid: "me",
     userSkuTotals,
     optedOutUserIds: new Set(["other"]),
-    pairLimit: 10,
   });
   assert.equal(counterpartyOptedOut.isCallerOptedOut, false);
   assert.deepEqual(counterpartyOptedOut.matches, []);

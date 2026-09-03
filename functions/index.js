@@ -11,8 +11,6 @@ const {
   resolvePublicDisplayName,
 } = require("./matches");
 
-const MATCH_PAIR_LIMIT = 100;
-
 if (!admin.apps.length) {
   admin.initializeApp();
 }
@@ -86,7 +84,6 @@ exports.getTradeMatches = onCall(async (request) => {
     callerUid,
     userSkuTotals,
     optedOutUserIds,
-    pairLimit: MATCH_PAIR_LIMIT,
   });
 
   if (isCallerOptedOut) {
@@ -120,7 +117,7 @@ exports.getTradeMatches = onCall(async (request) => {
     return {
       userId: match.userId,
       displayName: profile.displayName,
-      pairs: match.pairs,
+      lanes: match.lanes,
       contact,
     };
   });
@@ -136,7 +133,6 @@ exports.getTradeMatches = onCall(async (request) => {
 });
 
 exports.__test = {
-  MATCH_PAIR_LIMIT,
   loadPreferencesByUserId,
   resolveAuthProfiles,
   resolveMatchContact,

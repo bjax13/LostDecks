@@ -10,6 +10,8 @@ const DEFAULT_DISCORD_CHANNEL = "Sanderson Collectors Guild";
 const DEFAULT_MATCH_PAGE_SIZE = 20;
 const MAX_MATCH_PAGE_SIZE = 50;
 
+const MATCH_LANE_IDS = Object.freeze(["dun", "foil", "pins"]);
+
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -55,46 +57,70 @@ function buildUserMatchProfile(skuTotals) {
   return { extras };
 }
 
-function buildPairRows({ callerTotals, callerExtras, otherTotals, otherExtras, pairLimit = 100 }) {
-  const offeredByOther = [];
-  for (const skuId of otherExtras) {
-    const callerOwned = callerTotals.get(skuId) || 0;
-    if (callerOwned <= 0) {
-      offeredByOther.push(skuId);
-    }
+function laneForSkuId(skuId) {
+  if (typeof skuId !== "string" || !skuId) {
+    return null;
   }
 
-  const neededFromCaller = [];
-  for (const skuId of callerExtras) {
-    const otherOwned = otherTotals.get(skuId) || 0;
-    if (otherOwned <= 0) {
-      neededFromCaller.push(skuId);
-    }
+  const tokens = skuId.split("-");
+  if (tokens[0] === "PIN") {
+    return "pins";
   }
-
-  if (!offeredByOther.length || !neededFromCaller.length) {
-    return [];
+  if (tokens.includes("FOIL")) {
+    return "foil";
   }
-
-  const pairs = [];
-  for (const theirSkuId of offeredByOther) {
-    for (const yourSkuId of neededFromCaller) {
-      pairs.push({ theirSkuId, yourSkuId });
-      if (pairs.length >= pairLimit) {
-        return pairs;
-      }
-    }
+  if (tokens.includes("DUN")) {
+    return "dun";
   }
-
-  return pairs;
+  return null;
 }
 
-function buildMatchesForCaller({
-  callerUid,
-  userSkuTotals,
-  optedOutUserIds = new Set(),
-  pairLimit = 100,
-}) {
+function buildPileItems(extras, ownerTotals, recipientTotals, lane) {
+  const items = [];
+
+  for (const skuId of extras) {
+    if (laneForSkuId(skuId) !== lane) {
+      continue;
+    }
+
+    const owned = ownerTotals.get(skuId) || 0;
+    const recipientOwned = recipientTotals.get(skuId) || 0;
+    if (owned <= 1 || recipientOwned > 0) {
+      continue;
+    }
+
+    items.push({
+      skuId,
+      owned,
+      extras: owned - 1,
+    });
+  }
+
+  items.sort((a, b) => a.skuId.localeCompare(b.skuId));
+  return items;
+}
+
+function buildLanesForCounterparty({ callerTotals, callerExtras, otherTotals, otherExtras }) {
+  const lanes = [];
+
+  for (const lane of MATCH_LANE_IDS) {
+    const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane);
+    const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane);
+    if (!theyCanSend.length || !youCanSend.length) {
+      continue;
+    }
+
+    lanes.push({
+      id: lane,
+      theyCanSend,
+      youCanSend,
+    });
+  }
+
+  return lanes;
+}
+
+function buildMatchesForCaller({ callerUid, userSkuTotals, optedOutUserIds = new Set() }) {
   if (optedOutUserIds.has(callerUid)) {
     return { isCallerOptedOut: true, matches: [] };
   }
@@ -109,16 +135,15 @@ function buildMatchesForCaller({
     }
 
     const otherProfile = buildUserMatchProfile(otherTotals);
-    const pairs = buildPairRows({
+    const lanes = buildLanesForCounterparty({
       callerTotals,
       callerExtras: callerProfile.extras,
       otherTotals,
       otherExtras: otherProfile.extras,
-      pairLimit,
     });
 
-    if (pairs.length > 0) {
-      matches.push({ userId: otherUid, pairs });
+    if (lanes.length > 0) {
+      matches.push({ userId: otherUid, lanes });
     }
   }
 
@@ -243,11 +268,13 @@ module.exports = {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_MATCH_PAGE_SIZE,
   MATCH_CONTACT_SHARING,
+  MATCH_LANE_IDS,
   MAX_MATCH_PAGE_SIZE,
+  buildLanesForCounterparty,
   buildMatchesForCaller,
-  buildPairRows,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  laneForSkuId,
   normalizeMatchContactSharing,
   normalizeMatchCursor,
   normalizeMatchPageSize,

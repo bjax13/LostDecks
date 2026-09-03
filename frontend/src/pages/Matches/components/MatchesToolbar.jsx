@@ -1,20 +1,14 @@
-import { MATCH_SCOPE_ANY, matchSortOptions } from "../constants";
+import { matchLaneOptions, matchSortOptions } from "../constants";
 
 export default function MatchesToolbar({
   searchTerm,
   onSearchChange,
-  categoryFilter,
-  onCategoryChange,
-  storyFilter,
-  onStoryChange,
-  rarityFilter,
-  onRarityChange,
+  laneFilter,
+  onLaneChange,
   sortField,
   onSortFieldChange,
   sortDirection,
   onToggleSortDirection,
-  rarityOptions,
-  stories,
   resultCount,
   totalCount,
   onReset,
@@ -26,7 +20,7 @@ export default function MatchesToolbar({
         <input
           id="matches-search"
           type="search"
-          placeholder="Search by collector, ID, story, or variant"
+          placeholder="Search by collector or collectible"
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}
         />
@@ -34,54 +28,17 @@ export default function MatchesToolbar({
 
       <div className="filter-grid">
         <div className="filter-control">
-          <label htmlFor="matches-category-filter">Category</label>
+          <label htmlFor="matches-lane-filter">Lane</label>
           <select
-            id="matches-category-filter"
-            value={categoryFilter}
-            onChange={(event) => onCategoryChange(event.target.value)}
+            id="matches-lane-filter"
+            value={laneFilter}
+            onChange={(event) => onLaneChange(event.target.value)}
           >
-            <option value={MATCH_SCOPE_ANY}>Show any valid trade</option>
-            <option value="all">All categories</option>
-            <option value="story">Story cards</option>
-            <option value="herald">Heralds</option>
-            <option value="nonsense">Nonsense variants</option>
-            <option value="pin">Pins</option>
-          </select>
-        </div>
-
-        <div className="filter-control">
-          <label htmlFor="matches-story-filter">Story</label>
-          <select
-            id="matches-story-filter"
-            value={storyFilter}
-            onChange={(event) => onStoryChange(event.target.value)}
-            disabled={categoryFilter === MATCH_SCOPE_ANY}
-          >
-            <option value="all">All stories</option>
-            {stories.map((story) => (
-              <option key={story.code} value={story.code}>
-                {story.title}
+            {matchLaneOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
-            <option value="heralds">Heralds only</option>
-          </select>
-        </div>
-
-        <div className="filter-control">
-          <label htmlFor="matches-rarity-filter">Rarity</label>
-          <select
-            id="matches-rarity-filter"
-            value={rarityFilter}
-            onChange={(event) => onRarityChange(event.target.value)}
-            disabled={categoryFilter === MATCH_SCOPE_ANY}
-          >
-            <option value="all">All rarities</option>
-            {rarityOptions.map((rarity) => (
-              <option key={rarity} value={rarity}>
-                {rarity}
-              </option>
-            ))}
-            <option value="none">No rarity (nonsense)</option>
           </select>
         </div>
 

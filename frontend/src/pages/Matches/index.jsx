@@ -1,32 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
 import MatchesToolbar from "./components/MatchesToolbar";
+import { matchLaneLabels } from "./constants";
 import { useMatchesExplorer } from "./hooks/useMatchesExplorer";
 import { useTradeMatches } from "./hooks/useTradeMatches";
 import "./Matches.css";
 
 const MAY_REFRESH_MESSAGE_MS = 3_000;
-
-function formatContactDetails(contact) {
-  if (!contact) {
-    return "Contact details are unavailable.";
-  }
-
-  if (contact.method === MATCH_CONTACT_SHARING.DISCORD && contact.discordHandle) {
-    return `Discord: ${contact.discordHandle} in ${contact.discordChannel || "Sanderson Collectors Guild"}`;
-  }
-
-  if (contact.email) {
-    const emailLabel =
-      contact.method === MATCH_CONTACT_SHARING.TRADING_EMAIL ? "Trading email" : "Email";
-    return `${emailLabel}: ${contact.email}`;
-  }
-
-  return "Contact details are unavailable.";
-}
 
 function formatSkuLabel(skuId) {
   const sku = getSkuRecord(skuId);
@@ -43,7 +26,89 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
-function MatchGroup({ activeRow, counterparty, onToggleRow }) {
+function formatOwnedExtras(owned, extras) {
+  const extraLabel = extras === 1 ? "1 extra" : `${extras} extras`;
+  return `owned ${owned} · ${extraLabel}`;
+}
+
+function PileItem({ item }) {
+  return (
+    <li className="matches-pile-item">
+      <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
+      <span className="matches-pile-item-qty">{formatOwnedExtras(item.owned, item.extras)}</span>
+    </li>
+  );
+}
+
+function TradeLane({ lane }) {
+  return (
+    <section className="matches-lane">
+      <h3 className="matches-lane-title">{matchLaneLabels[lane.id] ?? lane.id}</h3>
+      <div className="matches-piles">
+        <div className="matches-pile">
+          <h4 className="matches-pile-title">They can send you</h4>
+          <ul className="matches-pile-list">
+            {lane.theyCanSend.map((item) => (
+              <PileItem key={`they-${item.skuId}`} item={item} />
+            ))}
+          </ul>
+        </div>
+        <div className="matches-pile">
+          <h4 className="matches-pile-title">You can send them</h4>
+          <ul className="matches-pile-list">
+            {lane.youCanSend.map((item) => (
+              <PileItem key={`you-${item.skuId}`} item={item} />
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MatchContact({ contact, displayName }) {
+  const email = contact?.email?.trim() || "";
+  const canEmail = Boolean(email);
+  const isDiscord = contact?.method === MATCH_CONTACT_SHARING.DISCORD && contact.discordHandle;
+
+  async function copyEmail() {
+    if (!canEmail || !navigator.clipboard?.writeText) {
+      return;
+    }
+    await navigator.clipboard.writeText(email);
+  }
+
+  return (
+    <div className="matches-contact">
+      <p className="matches-contact-title">Contact {displayName}</p>
+      {isDiscord ? (
+        <p>
+          Discord: {contact.discordHandle} in{" "}
+          {contact.discordChannel || "Sanderson Collectors Guild"}
+        </p>
+      ) : null}
+      {canEmail ? (
+        <div className="matches-contact-actions">
+          <button type="button" className="matches-contact-button" onClick={copyEmail}>
+            Copy email
+          </button>
+          <a
+            className="matches-contact-button matches-contact-button-ghost"
+            href={`mailto:${email}`}
+          >
+            Email
+          </a>
+        </div>
+      ) : null}
+      {!canEmail && !isDiscord ? <p>Contact details are unavailable.</p> : null}
+      {contact?.fallbackReason ? (
+        <p className="matches-contact-fallback">{contact.fallbackReason}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function MatchGroup({ counterparty }) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -55,25 +120,10 @@ function MatchGroup({ activeRow, counterparty, onToggleRow }) {
       <summary className="matches-group-heading">
         <h2>{counterparty.displayName}</h2>
       </summary>
-      <ul className="matches-list">
-        {counterparty.pairs.map((pair) => (
-          <li key={pair.rowId}>
-            <button type="button" className="matches-row" onClick={() => onToggleRow(pair.rowId)}>
-              <span>{`${pair.theirLabel} is available for trade for your ${pair.yourLabel}.`}</span>
-            </button>
-            {activeRow === pair.rowId ? (
-              <div className="matches-contact">
-                <p>
-                  Contact {counterparty.displayName}. {formatContactDetails(counterparty.contact)}
-                </p>
-                {counterparty.contact?.fallbackReason ? (
-                  <p className="matches-contact-fallback">{counterparty.contact.fallbackReason}</p>
-                ) : null}
-              </div>
-            ) : null}
-          </li>
-        ))}
-      </ul>
+      {counterparty.lanes.map((lane) => (
+        <TradeLane key={lane.id} lane={lane} />
+      ))}
+      <MatchContact contact={counterparty.contact} displayName={counterparty.displayName} />
     </details>
   );
 }
@@ -108,7 +158,6 @@ function formatFreshnessMessage({
 
 function MatchesContent() {
   const { user } = useAuth();
-  const [activeRow, setActiveRow] = useState("");
   const [showMayRefreshMessage, setShowMayRefreshMessage] = useState(false);
   const {
     cacheAgeSeconds,
@@ -132,36 +181,16 @@ function MatchesContent() {
   const {
     matches: filteredMatches,
     totalMatches,
-    rarityOptions,
-    stories,
     searchTerm,
     setSearchTerm,
-    categoryFilter,
-    setCategoryFilter,
-    storyFilter,
-    setStoryFilter,
-    rarityFilter,
-    setRarityFilter,
+    laneFilter,
+    setLaneFilter,
     sortField,
     setSortField,
     sortDirection,
     setSortDirection,
     resetFilters,
   } = useMatchesExplorer({ matches });
-
-  const matchRows = useMemo(
-    () =>
-      filteredMatches.map((counterparty) => ({
-        ...counterparty,
-        pairs: counterparty.pairs.map((pair) => ({
-          ...pair,
-          rowId: `${counterparty.userId}:${pair.theirSkuId}:${pair.yourSkuId}`,
-          theirLabel: formatSkuLabel(pair.theirSkuId),
-          yourLabel: formatSkuLabel(pair.yourSkuId),
-        })),
-      })),
-    [filteredMatches],
-  );
 
   useEffect(() => {
     if (loading || error || cacheAgeSeconds == null || refreshAvailableInSeconds > 0) {
@@ -193,7 +222,7 @@ function MatchesContent() {
     (refreshAvailableInSeconds === 0 || showRefreshCountdown);
   const showMatchesChrome = !loading && !error && !callerOptedOut;
   const showEmptyMatches = showMatchesChrome && matches.length === 0;
-  const showFilteredEmpty = showMatchesChrome && matches.length > 0 && matchRows.length === 0;
+  const showFilteredEmpty = showMatchesChrome && matches.length > 0 && filteredMatches.length === 0;
   const showPagination = showMatchesChrome && (canGoPrevious || canGoNext || pageIndex > 1);
 
   return (
@@ -201,7 +230,7 @@ function MatchesContent() {
       <header className="matches-header">
         <h1>Matches</h1>
         <p className="matches-hint">
-          Find collectors with reciprocal duplicates so you can complete your set together.
+          Find collectors with extras you need, and extras they need from you.
         </p>
       </header>
 
@@ -235,21 +264,15 @@ function MatchesContent() {
         <MatchesToolbar
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          categoryFilter={categoryFilter}
-          onCategoryChange={setCategoryFilter}
-          storyFilter={storyFilter}
-          onStoryChange={setStoryFilter}
-          rarityFilter={rarityFilter}
-          onRarityChange={setRarityFilter}
+          laneFilter={laneFilter}
+          onLaneChange={setLaneFilter}
           sortField={sortField}
           onSortFieldChange={setSortField}
           sortDirection={sortDirection}
           onToggleSortDirection={() =>
             setSortDirection((current) => (current === "asc" ? "desc" : "asc"))
           }
-          rarityOptions={rarityOptions}
-          stories={stories}
-          resultCount={matchRows.length}
+          resultCount={filteredMatches.length}
           totalCount={totalMatches}
           onReset={resetFilters}
         />
@@ -270,13 +293,8 @@ function MatchesContent() {
       ) : null}
 
       {showMatchesChrome
-        ? matchRows.map((counterparty) => (
-            <MatchGroup
-              key={counterparty.userId}
-              counterparty={counterparty}
-              activeRow={activeRow}
-              onToggleRow={(rowId) => setActiveRow((current) => (current === rowId ? "" : rowId))}
-            />
+        ? filteredMatches.map((counterparty) => (
+            <MatchGroup key={counterparty.userId} counterparty={counterparty} />
           ))
         : null}
 

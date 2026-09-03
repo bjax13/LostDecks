@@ -18,11 +18,8 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
 }));
 
 vi.mock("../../data/collectibles", () => ({
-  collectiblesIndex: [
-    { id: "SKU-1", category: "story", rarity: "Rare", story: "ELS" },
-    { id: "SKU-2", category: "story", rarity: "Common", story: "ELS" },
-  ],
-  datasetStories: [{ code: "ELS", title: "Elantris" }],
+  collectiblesIndex: [],
+  datasetStories: [],
   getSkuRecord: mockGetSkuRecord,
 }));
 
@@ -31,6 +28,38 @@ vi.mock("./hooks/useTradeMatches", () => ({
 }));
 
 import MatchesPage from "./index.jsx";
+
+function testerLanes() {
+  return [
+    {
+      id: "dun",
+      theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 2, extras: 1 }],
+      youCanSend: [
+        { skuId: "LT24-ELS-01-DUN", owned: 3, extras: 2 },
+        { skuId: "LT24-CHM-01-DUN", owned: 2, extras: 1 },
+      ],
+    },
+    {
+      id: "pins",
+      theyCanSend: [{ skuId: "PIN-CF-02", owned: 2, extras: 1 }],
+      youCanSend: [{ skuId: "PIN-CF-01", owned: 2, extras: 1 }],
+    },
+  ];
+}
+
+function skuCard(skuId, displayName) {
+  const finish = skuId.includes("FOIL") ? "FOIL" : skuId.includes("DUN") ? "DUN" : null;
+  return {
+    skuId,
+    finish,
+    cardId: skuId,
+    card: {
+      id: skuId,
+      displayName,
+      searchTokens: `${displayName} ${skuId}`.toLowerCase(),
+    },
+  };
+}
 
 function defaultMatchesHook(overrides = {}) {
   return {
@@ -47,14 +76,14 @@ function defaultMatchesHook(overrides = {}) {
     matches: [
       {
         userId: "user-2",
-        displayName: "Collector Two",
+        displayName: "Lost Tester 2",
         contact: {
           method: "trueEmail",
           email: "two@example.com",
           usedFallback: false,
           fallbackReason: null,
         },
-        pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+        lanes: testerLanes(),
       },
     ],
     nextCursor: null,
@@ -76,21 +105,18 @@ describe("MatchesPage", () => {
       user: { uid: "me", displayName: "Me", email: "me@example.com" },
       loading: false,
     });
-    mockGetSkuRecord.mockImplementation((skuId) => ({
-      skuId,
-      finish: "DUN",
-      cardId: skuId,
-      card: {
-        id: skuId,
-        displayName: skuId,
-        category: "story",
-        story: "ELS",
-        storyTitle: "Elantris",
-        rarity: "Rare",
-        number: 1,
-        searchTokens: `${skuId} els elantris`.toLowerCase(),
-      },
-    }));
+    mockGetSkuRecord.mockImplementation((skuId) => {
+      const names = {
+        "LT24-HLD-01-DUN": "Jezrien",
+        "LT24-ELS-01-DUN": "Elsecaller #01",
+        "LT24-CHM-01-DUN": "The Chasmfriends get a Pet! #01",
+        "PIN-CF-02": "Howlerina",
+        "PIN-CF-01": "Shreadad",
+        "SKU-2": "SKU-2",
+        "SKU-1": "SKU-1",
+      };
+      return skuCard(skuId, names[skuId] ?? skuId);
+    });
     mockUseTradeMatches.mockReturnValue(defaultMatchesHook());
   });
 
@@ -98,17 +124,31 @@ describe("MatchesPage", () => {
     vi.useRealTimers();
   });
 
-  it("renders grouped matches by counterparty", () => {
+  it("renders a person card with dun and pin piles and no sentence rows", () => {
     render(<MatchesPage />);
 
     expect(screen.getByRole("heading", { name: "Matches" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Collector Two" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Lost Tester 2" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Dun cards" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Foil cards" })).not.toBeInTheDocument();
+    expect(screen.getByText("Jezrien (DUN)")).toBeInTheDocument();
+    expect(screen.getAllByText("owned 2 · 1 extra").length).toBeGreaterThan(0);
+    expect(screen.getByText("Elsecaller #01 (DUN)")).toBeInTheDocument();
+    expect(screen.getByText("owned 3 · 2 extras")).toBeInTheDocument();
+    expect(screen.getByText("The Chasmfriends get a Pet! #01 (DUN)")).toBeInTheDocument();
+    expect(screen.getByText("Howlerina")).toBeInTheDocument();
+    expect(screen.getByText("Shreadad")).toBeInTheDocument();
+    expect(screen.queryByText(/is available for trade for your/i)).not.toBeInTheDocument();
     expect(
-      screen.getByText("SKU-2 (DUN) is available for trade for your SKU-1 (DUN)."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Collector Two" }).closest("details"),
+      screen.getByRole("heading", { name: "Lost Tester 2" }).closest("details"),
     ).toHaveAttribute("open");
+    expect(screen.getByText("Contact Lost Tester 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Email" })).toHaveAttribute(
+      "href",
+      "mailto:two@example.com",
+    );
   });
 
   it("collapses one counterparty group without affecting another", async () => {
@@ -118,14 +158,14 @@ describe("MatchesPage", () => {
         matches: [
           {
             userId: "user-2",
-            displayName: "Collector Two",
+            displayName: "Lost Tester 2",
             contact: {
               method: "trueEmail",
               email: "two@example.com",
               usedFallback: false,
               fallbackReason: null,
             },
-            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+            lanes: testerLanes(),
           },
           {
             userId: "user-3",
@@ -136,7 +176,13 @@ describe("MatchesPage", () => {
               usedFallback: false,
               fallbackReason: null,
             },
-            pairs: [{ theirSkuId: "SKU-1", yourSkuId: "SKU-2" }],
+            lanes: [
+              {
+                id: "dun",
+                theyCanSend: [{ skuId: "SKU-1-DUN", owned: 2, extras: 1 }],
+                youCanSend: [{ skuId: "SKU-2-DUN", owned: 2, extras: 1 }],
+              },
+            ],
           },
         ],
         totalOnPage: 2,
@@ -145,52 +191,51 @@ describe("MatchesPage", () => {
 
     render(<MatchesPage />);
 
-    const collectorTwoHeading = screen.getByRole("heading", { name: "Collector Two" });
+    const testerTwoHeading = screen.getByRole("heading", { name: "Lost Tester 2" });
     const collectorThreeHeading = screen.getByRole("heading", { name: "Collector Three" });
-    const collectorTwoGroup = collectorTwoHeading.closest("details");
+    const testerTwoGroup = testerTwoHeading.closest("details");
     const collectorThreeGroup = collectorThreeHeading.closest("details");
-    const collectorTwoTrade = "SKU-2 (DUN) is available for trade for your SKU-1 (DUN).";
-    const collectorThreeTrade = "SKU-1 (DUN) is available for trade for your SKU-2 (DUN).";
 
-    expect(collectorTwoGroup).toHaveAttribute("open");
+    expect(testerTwoGroup).toHaveAttribute("open");
     expect(collectorThreeGroup).toHaveAttribute("open");
-    expect(screen.getByText(collectorTwoTrade)).toBeVisible();
-    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
+    expect(screen.getByText("Jezrien (DUN)")).toBeVisible();
+    expect(screen.getByText("SKU-1-DUN (DUN)")).toBeVisible();
 
-    await user.click(collectorTwoHeading);
+    await user.click(testerTwoHeading);
 
-    expect(collectorTwoGroup).not.toHaveAttribute("open");
+    expect(testerTwoGroup).not.toHaveAttribute("open");
     expect(collectorThreeGroup).toHaveAttribute("open");
-    expect(screen.getByRole("heading", { name: "Collector Two" })).toBeVisible();
-    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Lost Tester 2" })).toBeVisible();
+    expect(screen.getByText("SKU-1-DUN (DUN)")).toBeVisible();
 
-    await user.click(collectorTwoHeading);
+    await user.click(testerTwoHeading);
 
-    expect(collectorTwoGroup).toHaveAttribute("open");
+    expect(testerTwoGroup).toHaveAttribute("open");
     expect(collectorThreeGroup).toHaveAttribute("open");
-    expect(screen.getByText(collectorTwoTrade)).toBeVisible();
-    expect(screen.getByText(collectorThreeTrade)).toBeVisible();
+    expect(screen.getByText("Jezrien (DUN)")).toBeVisible();
   });
 
-  it("shows resolved contact details when a row is clicked", async () => {
+  it("copies the resolved email from the person contact block", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
     render(<MatchesPage />);
 
-    await user.click(
-      screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
-    );
+    await user.click(screen.getByRole("button", { name: "Copy email" }));
 
-    expect(screen.getByText("Contact Collector Two. Email: two@example.com")).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith("two@example.com");
   });
 
-  it("shows discord contact details and fallback reasons", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it("shows discord contact details instead of email buttons", () => {
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({
         matches: [
           {
             userId: "user-2",
-            displayName: "Collector Two",
+            displayName: "Lost Tester 2",
             contact: {
               method: "discord",
               discordHandle: "kaladin",
@@ -198,53 +243,46 @@ describe("MatchesPage", () => {
               usedFallback: false,
               fallbackReason: null,
             },
-            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+            lanes: testerLanes(),
           },
         ],
       }),
     );
 
     render(<MatchesPage />);
-    await user.click(
-      screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
-    );
 
-    expect(
-      screen.getByText("Contact Collector Two. Discord: kaladin in Sanderson Collectors Guild"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Discord: kaladin in Sanderson Collectors Guild")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copy email" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
   });
 
-  it("explains missing contact details without sharing the account email", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it("explains missing contact details without sharing the account email", () => {
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({
         matches: [
           {
             userId: "user-2",
-            displayName: "Collector Two",
+            displayName: "Lost Tester 2",
             contact: {
               method: "tradingEmail",
               usedFallback: false,
               fallbackReason: "Trading email is not set, so no contact details were shared.",
             },
-            pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+            lanes: testerLanes(),
           },
         ],
       }),
     );
 
     render(<MatchesPage />);
-    await user.click(
-      screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
-    );
 
-    expect(
-      screen.getByText("Contact Collector Two. Contact details are unavailable."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Contact Lost Tester 2")).toBeInTheDocument();
+    expect(screen.getByText("Contact details are unavailable.")).toBeInTheDocument();
     expect(
       screen.getByText("Trading email is not set, so no contact details were shared."),
     ).toBeInTheDocument();
     expect(screen.queryByText(/two@example.com/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copy email" })).not.toBeInTheDocument();
   });
 
   it("shows opted-out message from backend response", () => {
@@ -350,11 +388,12 @@ describe("MatchesPage", () => {
     expect(mockUseTradeMatches).toHaveBeenCalledWith("me");
   });
 
-  it("renders search and show any valid trade filter controls", () => {
+  it("renders search and lane filter controls", () => {
     render(<MatchesPage />);
 
     expect(screen.getByLabelText("Search")).toBeInTheDocument();
-    expect(screen.getByLabelText("Category")).toHaveDisplayValue("Show any valid trade");
+    expect(screen.getByLabelText("Lane")).toHaveDisplayValue("All lanes");
+    expect(screen.queryByLabelText("Category")).not.toBeInTheDocument();
     expect(screen.getByText(/Showing/i)).toBeInTheDocument();
   });
 
