@@ -56,6 +56,42 @@ export function normalizeMatchContact(rawContact) {
   };
 }
 
+const MATCH_LANE_IDS = new Set(["dun", "foil", "pins"]);
+
+function normalizePileItem(item) {
+  const skuId = typeof item?.skuId === "string" ? item.skuId.trim() : "";
+  if (!skuId) {
+    return null;
+  }
+
+  const owned = Number.isFinite(item?.owned) ? Math.max(0, Math.floor(item.owned)) : 0;
+  if (owned < 2) {
+    return null;
+  }
+
+  const extras = Number.isFinite(item?.extras) ? Math.max(0, Math.floor(item.extras)) : owned - 1;
+  return { skuId, owned, extras };
+}
+
+function normalizeLane(lane) {
+  const id = typeof lane?.id === "string" ? lane.id : "";
+  if (!MATCH_LANE_IDS.has(id)) {
+    return null;
+  }
+
+  const theyCanSend = Array.isArray(lane.theyCanSend)
+    ? lane.theyCanSend.map(normalizePileItem).filter(Boolean)
+    : [];
+  const youCanSend = Array.isArray(lane.youCanSend)
+    ? lane.youCanSend.map(normalizePileItem).filter(Boolean)
+    : [];
+  if (!theyCanSend.length || !youCanSend.length) {
+    return null;
+  }
+
+  return { id, theyCanSend, youCanSend };
+}
+
 function normalizeMatchRows(rawMatches) {
   if (!Array.isArray(rawMatches)) {
     return [];
@@ -69,16 +105,9 @@ function normalizeMatchRows(rawMatches) {
           ? entry.displayName.trim()
           : "Unknown collector",
       contact: normalizeMatchContact(entry?.contact),
-      pairs: Array.isArray(entry?.pairs)
-        ? entry.pairs
-            .map((pair) => ({
-              theirSkuId: typeof pair?.theirSkuId === "string" ? pair.theirSkuId : "",
-              yourSkuId: typeof pair?.yourSkuId === "string" ? pair.yourSkuId : "",
-            }))
-            .filter((pair) => pair.theirSkuId && pair.yourSkuId)
-        : [],
+      lanes: Array.isArray(entry?.lanes) ? entry.lanes.map(normalizeLane).filter(Boolean) : [],
     }))
-    .filter((entry) => entry.userId && entry.pairs.length > 0);
+    .filter((entry) => entry.userId && entry.lanes.length > 0);
 }
 
 function normalizePageSize(value) {

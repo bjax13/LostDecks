@@ -5,27 +5,37 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockGetSkuRecord = vi.hoisted(() => vi.fn());
 
 vi.mock("../../../data/collectibles", () => ({
-  collectiblesIndex: [
-    { id: "CARD-STORY", category: "story", rarity: "Rare", story: "ELS" },
-    { id: "CARD-HERALD", category: "herald", rarity: "Legendary", story: null },
-  ],
-  datasetStories: [{ code: "ELS", title: "Elantris" }],
   getSkuRecord: mockGetSkuRecord,
 }));
 
-import { MATCH_SCOPE_ANY } from "../constants";
-import { useMatchesExplorer } from "./useMatchesExplorer.js";
+import { MATCH_LANE_ALL } from "../constants";
+import { countTradeItems, useMatchesExplorer } from "./useMatchesExplorer.js";
 
 const MATCHES = [
   {
-    userId: "user-story",
-    displayName: "Story Collector",
-    pairs: [{ theirSkuId: "SKU-STORY", yourSkuId: "SKU-NEED-A" }],
+    userId: "user-dun",
+    displayName: "Dun Collector",
+    lanes: [
+      {
+        id: "dun",
+        theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 2, extras: 1 }],
+        youCanSend: [
+          { skuId: "LT24-ELS-01-DUN", owned: 3, extras: 2 },
+          { skuId: "LT24-CHM-01-DUN", owned: 2, extras: 1 },
+        ],
+      },
+    ],
   },
   {
-    userId: "user-herald",
-    displayName: "Herald Collector",
-    pairs: [{ theirSkuId: "SKU-HERALD", yourSkuId: "SKU-NEED-B" }],
+    userId: "user-pin",
+    displayName: "Pin Collector",
+    lanes: [
+      {
+        id: "pins",
+        theyCanSend: [{ skuId: "PIN-CF-02", owned: 2, extras: 1 }],
+        youCanSend: [{ skuId: "PIN-CF-01", owned: 2, extras: 1 }],
+      },
+    ],
   },
 ];
 
@@ -33,124 +43,69 @@ describe("useMatchesExplorer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetSkuRecord.mockImplementation((skuId) => {
-      if (skuId === "SKU-STORY") {
-        return {
-          skuId,
-          card: {
-            id: "CARD-STORY",
-            category: "story",
-            rarity: "Rare",
-            story: "ELS",
-            storyTitle: "Elantris",
-            number: 1,
-            displayName: "Elantris #01",
-            searchTokens: "card-story els elantris elantris #01",
-          },
-        };
-      }
-      if (skuId === "SKU-HERALD") {
-        return {
-          skuId,
-          card: {
-            id: "CARD-HERALD",
-            category: "herald",
-            rarity: "Legendary",
-            story: null,
-            storyTitle: "Heraldic Order",
-            number: 2,
-            displayName: "Jezrien",
-            searchTokens: "card-herald jezrien herald legendary",
-          },
-        };
-      }
-      if (skuId === "SKU-NEED-A" || skuId === "SKU-NEED-B") {
-        return {
-          skuId,
-          card: {
-            id: skuId,
-            category: "pin",
-            rarity: null,
-            story: null,
-            storyTitle: "Pins",
-            number: null,
-            displayName: "Need Pin",
-            searchTokens: "need pin",
-          },
-        };
-      }
-      return null;
+      const names = {
+        "LT24-HLD-01-DUN": "Jezrien",
+        "LT24-ELS-01-DUN": "Elsecaller #01",
+        "PIN-CF-02": "Howlerina",
+        "PIN-CF-01": "Shreadad",
+      };
+      return {
+        skuId,
+        card: {
+          id: skuId,
+          displayName: names[skuId] ?? skuId,
+          searchTokens: `${names[skuId] ?? skuId} ${skuId}`.toLowerCase(),
+        },
+      };
     });
   });
 
-  it("defaults to show any valid trade and keeps all counterparties", () => {
+  it("defaults to all lanes and keeps all counterparties", () => {
     const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
-    expect(result.current.categoryFilter).toBe(MATCH_SCOPE_ANY);
+    expect(result.current.laneFilter).toBe(MATCH_LANE_ALL);
     expect(result.current.matches).toHaveLength(2);
     expect(result.current.totalMatches).toBe(2);
   });
 
-  it("bypasses attribute filters while show any valid trade is selected", () => {
+  it("filters counterparties to a live lane and hides other lanes", () => {
     const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
 
     act(() => {
-      result.current.setStoryFilter("ELS");
-      result.current.setRarityFilter("Legendary");
-    });
-
-    expect(result.current.matches).toHaveLength(2);
-  });
-
-  it("filters by category using either side of a trade pair", () => {
-    const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
-
-    act(() => {
-      result.current.setCategoryFilter("herald");
+      result.current.setLaneFilter("dun");
     });
 
     expect(result.current.matches).toHaveLength(1);
-    expect(result.current.matches[0].userId).toBe("user-herald");
+    expect(result.current.matches[0].userId).toBe("user-dun");
+    expect(result.current.matches[0].lanes.map((lane) => lane.id)).toEqual(["dun"]);
   });
 
-  it("filters by story using either side of a trade pair", () => {
+  it("searches by collector name or pile item tokens", () => {
     const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
 
     act(() => {
-      result.current.setCategoryFilter("all");
-      result.current.setStoryFilter("ELS");
-    });
-
-    expect(result.current.matches.every((match) => match.userId === "user-story")).toBe(true);
-  });
-
-  it("searches by collector name or either-side card tokens", () => {
-    const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
-
-    act(() => {
-      result.current.setSearchTerm("jezrien");
+      result.current.setSearchTerm("howlerina");
     });
     expect(result.current.matches).toHaveLength(1);
-    expect(result.current.matches[0].userId).toBe("user-herald");
+    expect(result.current.matches[0].userId).toBe("user-pin");
 
     act(() => {
-      result.current.setSearchTerm("story collector");
+      result.current.setSearchTerm("dun collector");
     });
     expect(result.current.matches).toHaveLength(1);
-    expect(result.current.matches[0].userId).toBe("user-story");
+    expect(result.current.matches[0].userId).toBe("user-dun");
   });
 
-  it("resets back to show any valid trade", () => {
+  it("resets back to all lanes", () => {
     const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
 
     act(() => {
       result.current.setSearchTerm("herald");
-      result.current.setCategoryFilter("story");
-      result.current.setStoryFilter("ELS");
+      result.current.setLaneFilter("pins");
       result.current.resetFilters();
     });
 
     expect(result.current.searchTerm).toBe("");
-    expect(result.current.categoryFilter).toBe(MATCH_SCOPE_ANY);
-    expect(result.current.storyFilter).toBe("all");
+    expect(result.current.laneFilter).toBe(MATCH_LANE_ALL);
     expect(result.current.matches).toHaveLength(2);
   });
 
@@ -163,8 +118,21 @@ describe("useMatchesExplorer", () => {
     });
 
     expect(result.current.matches.map((match) => match.displayName)).toEqual([
-      "Herald Collector",
-      "Story Collector",
+      "Dun Collector",
+      "Pin Collector",
     ]);
+  });
+
+  it("sorts by trade count across live piles", () => {
+    const { result } = renderHook(() => useMatchesExplorer({ matches: MATCHES }));
+
+    act(() => {
+      result.current.setSortField("tradeCount");
+      result.current.setSortDirection("desc");
+    });
+
+    expect(result.current.matches.map((match) => match.userId)).toEqual(["user-dun", "user-pin"]);
+    expect(countTradeItems(MATCHES[0])).toBe(3);
+    expect(countTradeItems(MATCHES[1])).toBe(2);
   });
 });

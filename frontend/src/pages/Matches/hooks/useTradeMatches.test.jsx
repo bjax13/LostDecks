@@ -34,7 +34,13 @@ const MATCH_PAYLOAD = {
         usedFallback: false,
         fallbackReason: null,
       },
-      pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+      lanes: [
+        {
+          id: "dun",
+          theyCanSend: [{ skuId: "SKU-2", owned: 2, extras: 1 }],
+          youCanSend: [{ skuId: "SKU-1", owned: 2, extras: 1 }],
+        },
+      ],
     },
   ],
   pageSize: 20,
@@ -55,7 +61,13 @@ const PAGE_ONE_PAYLOAD = {
         usedFallback: false,
         fallbackReason: null,
       },
-      pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
+      lanes: [
+        {
+          id: "dun",
+          theyCanSend: [{ skuId: "SKU-2", owned: 2, extras: 1 }],
+          youCanSend: [{ skuId: "SKU-1", owned: 2, extras: 1 }],
+        },
+      ],
     },
   ],
   pageSize: 1,
@@ -76,7 +88,13 @@ const PAGE_TWO_PAYLOAD = {
         usedFallback: false,
         fallbackReason: null,
       },
-      pairs: [{ theirSkuId: "SKU-3", yourSkuId: "SKU-1" }],
+      lanes: [
+        {
+          id: "dun",
+          theyCanSend: [{ skuId: "SKU-3", owned: 2, extras: 1 }],
+          youCanSend: [{ skuId: "SKU-1", owned: 2, extras: 1 }],
+        },
+      ],
     },
   ],
   pageSize: 1,
@@ -286,7 +304,13 @@ describe("useTradeMatches cache + cooldown", () => {
         {
           userId: "user-9",
           displayName: "Other Tab Collector",
-          pairs: [{ theirSkuId: "SKU-9", yourSkuId: "SKU-1" }],
+          lanes: [
+            {
+              id: "dun",
+              theyCanSend: [{ skuId: "SKU-9", owned: 2, extras: 1 }],
+              youCanSend: [{ skuId: "SKU-1", owned: 2, extras: 1 }],
+            },
+          ],
         },
       ],
       pageSize: 20,

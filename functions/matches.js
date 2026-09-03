@@ -10,6 +10,9 @@ const DEFAULT_DISCORD_CHANNEL = "Sanderson Collectors Guild";
 const DEFAULT_MATCH_PAGE_SIZE = 20;
 const MAX_MATCH_PAGE_SIZE = 50;
 
+const MATCH_LANE_IDS = Object.freeze(["dun", "foil", "pins"]);
+const DEFAULT_PILE_ITEM_LIMIT = 100;
+
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -55,45 +58,84 @@ function buildUserMatchProfile(skuTotals) {
   return { extras };
 }
 
-function buildPairRows({ callerTotals, callerExtras, otherTotals, otherExtras, pairLimit = 100 }) {
-  const offeredByOther = [];
-  for (const skuId of otherExtras) {
-    const callerOwned = callerTotals.get(skuId) || 0;
-    if (callerOwned <= 0) {
-      offeredByOther.push(skuId);
+function laneForSkuId(skuId) {
+  if (typeof skuId !== "string" || !skuId) {
+    return null;
+  }
+
+  const tokens = skuId.split("-");
+  if (tokens[0] === "PIN") {
+    return "pins";
+  }
+  if (tokens.includes("FOIL")) {
+    return "foil";
+  }
+  if (tokens.includes("DUN")) {
+    return "dun";
+  }
+  return null;
+}
+
+function buildPileItems(extras, ownerTotals, recipientTotals, lane, itemLimit) {
+  const items = [];
+  const limit =
+    typeof itemLimit === "number" && Number.isFinite(itemLimit) && itemLimit > 0
+      ? Math.floor(itemLimit)
+      : DEFAULT_PILE_ITEM_LIMIT;
+
+  for (const skuId of extras) {
+    if (laneForSkuId(skuId) !== lane) {
+      continue;
     }
-  }
 
-  const neededFromCaller = [];
-  for (const skuId of callerExtras) {
-    const otherOwned = otherTotals.get(skuId) || 0;
-    if (otherOwned <= 0) {
-      neededFromCaller.push(skuId);
+    const owned = ownerTotals.get(skuId) || 0;
+    const recipientOwned = recipientTotals.get(skuId) || 0;
+    if (owned <= 1 || recipientOwned > 0) {
+      continue;
     }
+
+    items.push({
+      skuId,
+      owned,
+      extras: owned - 1,
+    });
   }
 
-  if (!offeredByOther.length || !neededFromCaller.length) {
-    return [];
-  }
+  items.sort((a, b) => a.skuId.localeCompare(b.skuId));
+  return items.slice(0, limit);
+}
 
-  const pairs = [];
-  for (const theirSkuId of offeredByOther) {
-    for (const yourSkuId of neededFromCaller) {
-      pairs.push({ theirSkuId, yourSkuId });
-      if (pairs.length >= pairLimit) {
-        return pairs;
-      }
+function buildLanesForCounterparty({
+  callerTotals,
+  callerExtras,
+  otherTotals,
+  otherExtras,
+  itemLimit = DEFAULT_PILE_ITEM_LIMIT,
+}) {
+  const lanes = [];
+
+  for (const lane of MATCH_LANE_IDS) {
+    const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane, itemLimit);
+    const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane, itemLimit);
+    if (!theyCanSend.length || !youCanSend.length) {
+      continue;
     }
+
+    lanes.push({
+      id: lane,
+      theyCanSend,
+      youCanSend,
+    });
   }
 
-  return pairs;
+  return lanes;
 }
 
 function buildMatchesForCaller({
   callerUid,
   userSkuTotals,
   optedOutUserIds = new Set(),
-  pairLimit = 100,
+  itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   if (optedOutUserIds.has(callerUid)) {
     return { isCallerOptedOut: true, matches: [] };
@@ -109,16 +151,16 @@ function buildMatchesForCaller({
     }
 
     const otherProfile = buildUserMatchProfile(otherTotals);
-    const pairs = buildPairRows({
+    const lanes = buildLanesForCounterparty({
       callerTotals,
       callerExtras: callerProfile.extras,
       otherTotals,
       otherExtras: otherProfile.extras,
-      pairLimit,
+      itemLimit,
     });
 
-    if (pairs.length > 0) {
-      matches.push({ userId: otherUid, pairs });
+    if (lanes.length > 0) {
+      matches.push({ userId: otherUid, lanes });
     }
   }
 
@@ -242,12 +284,15 @@ function resolveMatchContact({ preferences, trueEmail }) {
 module.exports = {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_MATCH_PAGE_SIZE,
+  DEFAULT_PILE_ITEM_LIMIT,
   MATCH_CONTACT_SHARING,
+  MATCH_LANE_IDS,
   MAX_MATCH_PAGE_SIZE,
+  buildLanesForCounterparty,
   buildMatchesForCaller,
-  buildPairRows,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  laneForSkuId,
   normalizeMatchContactSharing,
   normalizeMatchCursor,
   normalizeMatchPageSize,

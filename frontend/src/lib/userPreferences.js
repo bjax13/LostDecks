@@ -66,8 +66,10 @@ export function isValidTradingEmail(value) {
   if (!trimmed || trimmed.length > MAX_TRADING_EMAIL_LENGTH) {
     return false;
   }
-  // Lightweight format check; server/callable still treats empty as missing.
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+  // mailto: treats `;`, `,`, and `:` as header/query separators. Reject those
+  // here so Account saves and Matches Email links share one gate. `%` is also
+  // rejected so percent-encoded separators cannot survive a later decode.
+  return /^[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(trimmed);
 }
 
 export function subscribeUserPreferences(userId, onNext, onError) {
