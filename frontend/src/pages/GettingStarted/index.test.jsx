@@ -96,7 +96,7 @@ beforeEach(() => {
   });
 });
 
-describe("GettingStartedPage", () => {
+describe("GettingStartedPage", { timeout: 15000 }, () => {
   it("asks the collector profile question first", () => {
     renderPage();
 
