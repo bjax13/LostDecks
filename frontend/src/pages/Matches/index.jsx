@@ -26,16 +26,18 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
-function formatOwnedExtras(owned, extras) {
-  const extraLabel = extras === 1 ? "1 extra" : `${extras} extras`;
-  return `owned ${owned} · ${extraLabel}`;
+function formatPileQty(side, owned) {
+  if (side === "they") {
+    return "they have 2+";
+  }
+  return `you own ${owned}`;
 }
 
-function PileItem({ item }) {
+function PileItem({ item, side }) {
   return (
     <li className="matches-pile-item">
       <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
-      <span className="matches-pile-item-qty">{formatOwnedExtras(item.owned, item.extras)}</span>
+      <span className="matches-pile-item-qty">{formatPileQty(side, item.owned)}</span>
     </li>
   );
 }
@@ -49,7 +51,7 @@ function TradeLane({ lane }) {
           <h4 className="matches-pile-title">They can send you</h4>
           <ul className="matches-pile-list">
             {lane.theyCanSend.map((item) => (
-              <PileItem key={`they-${item.skuId}`} item={item} />
+              <PileItem key={`they-${item.skuId}`} item={item} side="they" />
             ))}
           </ul>
         </div>
@@ -57,7 +59,7 @@ function TradeLane({ lane }) {
           <h4 className="matches-pile-title">You can send them</h4>
           <ul className="matches-pile-list">
             {lane.youCanSend.map((item) => (
-              <PileItem key={`you-${item.skuId}`} item={item} />
+              <PileItem key={`you-${item.skuId}`} item={item} side="you" />
             ))}
           </ul>
         </div>

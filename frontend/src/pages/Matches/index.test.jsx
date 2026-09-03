@@ -133,9 +133,11 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Foil cards" })).not.toBeInTheDocument();
     expect(screen.getByText("Jezrien (DUN)")).toBeInTheDocument();
-    expect(screen.getAllByText("owned 2 · 1 extra").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("they have 2+").length).toBe(2);
     expect(screen.getByText("Elsecaller #01 (DUN)")).toBeInTheDocument();
-    expect(screen.getByText("owned 3 · 2 extras")).toBeInTheDocument();
+    expect(screen.getByText("you own 3")).toBeInTheDocument();
+    expect(screen.getAllByText("you own 2").length).toBe(2);
+    expect(screen.queryByText(/owned \d/)).not.toBeInTheDocument();
     expect(screen.getByText("The Chasmfriends get a Pet! #01 (DUN)")).toBeInTheDocument();
     expect(screen.getByText("Howlerina")).toBeInTheDocument();
     expect(screen.getByText("Shreadad")).toBeInTheDocument();
