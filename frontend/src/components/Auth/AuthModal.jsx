@@ -87,7 +87,13 @@ function AuthModal({ isOpen, onClose }) {
           {mode === modes.REGISTER && "Create Account"}
           {mode === modes.FORGOT && "Reset Password"}
         </h2>
-        {error ? <p className="auth-modal__error">{getAuthErrorMessage(error)}</p> : null}
+        {error ? (
+          <p className="auth-modal__error">
+            {getAuthErrorMessage(error, {
+              operation: mode === modes.FORGOT ? "reset" : mode,
+            })}
+          </p>
+        ) : null}
         <form className="auth-modal__form" onSubmit={handleSubmit}>
           {mode === modes.REGISTER && (
             <label className="auth-modal__field">

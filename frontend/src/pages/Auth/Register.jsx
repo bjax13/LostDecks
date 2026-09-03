@@ -32,7 +32,9 @@ function Register() {
   return (
     <section className="auth-page">
       <h1>Create your Lost Tales account</h1>
-      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
+      {error ? (
+        <p className="auth-page__error">{getAuthErrorMessage(error, { operation: "register" })}</p>
+      ) : null}
       <form className="auth-page__form" onSubmit={handleSubmit}>
         <label>
           <span>Display Name</span>

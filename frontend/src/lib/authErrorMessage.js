@@ -1,5 +1,8 @@
 const INCORRECT_EMAIL_OR_PASSWORD = "Email or password is incorrect.";
 const GENERIC_AUTH_MESSAGE = "Something went wrong. Please try again.";
+const RESET_UNKNOWN_ACCOUNT = "If an account exists for that email, a reset link has been sent.";
+
+const RESET_UNKNOWN_ACCOUNT_CODES = new Set(["auth/user-not-found"]);
 
 const AUTH_ERROR_MESSAGES = {
   "auth/invalid-credential": INCORRECT_EMAIL_OR_PASSWORD,
@@ -42,13 +45,16 @@ function getAuthErrorCode(error) {
   return null;
 }
 
-export function getAuthErrorMessage(error) {
+export function getAuthErrorMessage(error, options = {}) {
   if (!error) {
     return "";
   }
 
   const code = getAuthErrorCode(error);
   if (code) {
+    if (options.operation === "reset" && RESET_UNKNOWN_ACCOUNT_CODES.has(code)) {
+      return RESET_UNKNOWN_ACCOUNT;
+    }
     return AUTH_ERROR_MESSAGES[code] ?? GENERIC_AUTH_MESSAGE;
   }
 

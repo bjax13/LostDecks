@@ -34,7 +34,9 @@ function Login() {
   return (
     <section className="auth-page">
       <h1>Sign in to Lost Tales Marketplace</h1>
-      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
+      {error ? (
+        <p className="auth-page__error">{getAuthErrorMessage(error, { operation: "login" })}</p>
+      ) : null}
       <form className="auth-page__form" onSubmit={handleSubmit}>
         <label>
           <span>Email</span>

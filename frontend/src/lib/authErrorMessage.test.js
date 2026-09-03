@@ -13,7 +13,16 @@ describe("getAuthErrorMessage (unit)", () => {
     expect(getAuthErrorMessage(firebaseError("auth/invalid-credential"))).toBe(expected);
     expect(getAuthErrorMessage(firebaseError("auth/wrong-password"))).toBe(expected);
     expect(getAuthErrorMessage(firebaseError("auth/user-not-found"))).toBe(expected);
+    expect(getAuthErrorMessage(firebaseError("auth/user-not-found"), { operation: "login" })).toBe(
+      expected,
+    );
     expect(getAuthErrorMessage(firebaseError("auth/invalid-login-credentials"))).toBe(expected);
+  });
+
+  it("uses reset-specific copy for user-not-found without mentioning a password", () => {
+    expect(getAuthErrorMessage(firebaseError("auth/user-not-found"), { operation: "reset" })).toBe(
+      "If an account exists for that email, a reset link has been sent.",
+    );
   });
 
   it("extracts an auth code from a raw Firebase message when code is missing", () => {

@@ -22,7 +22,9 @@ function ForgotPassword() {
   return (
     <section className="auth-page">
       <h1>Reset your password</h1>
-      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
+      {error ? (
+        <p className="auth-page__error">{getAuthErrorMessage(error, { operation: "reset" })}</p>
+      ) : null}
       {submitted ? (
         <p>Check your inbox for a password reset link.</p>
       ) : (
