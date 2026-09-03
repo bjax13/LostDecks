@@ -1,15 +1,23 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import "../Collectibles.css";
 import AddToCollectionButton, {
   formatFinishLabel,
   formatOwnedAddLabel,
+  formatOwnedQuantityLabel,
 } from "./AddToCollectionButton.jsx";
 
 vi.mock("firebase/firestore", () => ({
   addDoc: vi.fn(),
   collection: vi.fn(),
+  deleteDoc: vi.fn(),
+  doc: vi.fn(),
+  getDocs: vi.fn(),
+  query: vi.fn(),
   serverTimestamp: vi.fn(() => ({ _methodName: "serverTimestamp" })),
+  updateDoc: vi.fn(),
+  where: vi.fn(),
 }));
 
 const openAuthModal = vi.fn();
@@ -26,10 +34,12 @@ const hookState = {
   user: mockUser,
   reset: vi.fn(),
   addToCollection: vi.fn(),
+  decrementFromCollection: vi.fn(),
+  removeFromCollection: vi.fn(),
 };
 
-vi.mock("../hooks/useAddToCollection", () => ({
-  useAddToCollection: () => hookState,
+vi.mock("../hooks/useCollectionQuantityMutations", () => ({
+  useCollectionQuantityMutations: () => hookState,
 }));
 
 vi.mock("../utils/ownedQuantities", () => ({
@@ -42,6 +52,18 @@ vi.mock("../utils/ownedQuantities", () => ({
     return ownedBySkuId[`${collectible.id}-${String(finish).toUpperCase()}`] ?? 0;
   },
 }));
+
+vi.mock("../../../data/collectibles", () => ({
+  resolveSkuId(collectible, finish = null) {
+    if (!collectible?.id) return null;
+    if (collectible.collectibleType === "pin" || collectible.category === "pin") {
+      return collectible.id;
+    }
+    if (!finish) return null;
+    return `${collectible.id}-${String(finish).toUpperCase()}`;
+  },
+}));
+
 const baseCollectible = {
   id: "LT24-ELS-01",
   finishes: ["DUN", "FOIL"],
@@ -82,6 +104,15 @@ describe("formatOwnedAddLabel", () => {
   });
 });
 
+describe("formatOwnedQuantityLabel", () => {
+  it("formats finish and pin quantity labels", () => {
+    expect(formatOwnedQuantityLabel({ label: "Dun", ownedQuantity: 2 })).toBe("Dun · x2");
+    expect(formatOwnedQuantityLabel({ label: "Owned", ownedQuantity: 1, isPin: true })).toBe(
+      "Owned · x1",
+    );
+  });
+});
+
 describe("AddToCollectionButton", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,7 +120,21 @@ describe("AddToCollectionButton", () => {
     hookState.error = null;
     hookState.user = mockUser;
     hookState.reset = vi.fn();
-    hookState.addToCollection = vi.fn().mockResolvedValue(undefined);
+    hookState.addToCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+    hookState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+    hookState.removeFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 0,
+      deleted: true,
+    });
   });
 
   afterEach(() => {
@@ -136,19 +181,78 @@ describe("AddToCollectionButton", () => {
     });
   });
 
-  it("shows owned quantity on finish buttons without changing click behavior", async () => {
+  it("renders stepper controls when owned quantity is positive", async () => {
     const user = userEvent.setup();
+    const onQuantityChange = vi.fn();
     renderButton({
+      ownedBySkuId: {
+        "LT24-ELS-01-DUN": 2,
+        "LT24-ELS-01-FOIL": 1,
+      },
+      onQuantityChange,
+    });
+
+    expect(screen.getByText("Dun · x2")).toBeInTheDocument();
+    expect(screen.getByText("Foil · x1")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Increase Dun · x2" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decrease Dun · x2" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Increase Dun · x2" }));
+    expect(hookState.addToCollection).toHaveBeenCalledWith({
+      card: baseCollectible,
+      finish: "DUN",
+      quantity: 1,
+    });
+    expect(onQuantityChange).toHaveBeenCalledWith({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun · x2" }));
+    expect(hookState.decrementFromCollection).toHaveBeenCalledWith({
+      card: baseCollectible,
+      finish: "DUN",
+      quantity: 1,
+      deleteWhenZero: true,
+    });
+  });
+
+  it("keeps card-variant qty steppers on one compact chip row", () => {
+    const { container } = renderButton({
       ownedBySkuId: {
         "LT24-ELS-01-DUN": 2,
         "LT24-ELS-01-FOIL": 1,
       },
     });
 
-    expect(screen.getByRole("button", { name: "Dun · x2" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Foil · x1" })).toBeInTheDocument();
+    const stepper = container.querySelector(".add-to-collection__stepper");
+    const stepButton = container.querySelector(".add-to-collection__button--step");
+    const quantity = container.querySelector(".add-to-collection__quantity");
+    expect(getComputedStyle(stepper).flexWrap).toBe("nowrap");
+    expect(getComputedStyle(stepButton).padding).toBe("0.4rem 0.55rem");
+    expect(getComputedStyle(quantity).fontSize).toBe("0.68rem");
+  });
 
-    await user.click(screen.getByRole("button", { name: "Dun · x2" }));
+  it("keeps soft-zero steppers visible and passes deleteWhenZero false", async () => {
+    const user = userEvent.setup();
+    const onQuantityChange = vi.fn();
+    hookState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 0,
+      deleted: false,
+    });
+
+    renderButton({
+      ownedBySkuId: { "LT24-ELS-01-DUN": 0 },
+      deleteWhenZero: false,
+      onQuantityChange,
+    });
+
+    expect(screen.getByText("Dun · x0")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decrease Dun · x0" })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Increase Dun · x0" }));
     expect(hookState.addToCollection).toHaveBeenCalledWith({
       card: baseCollectible,
       finish: "DUN",
@@ -156,7 +260,8 @@ describe("AddToCollectionButton", () => {
     });
   });
 
-  it("shows owned quantity on pin buttons", () => {
+  it("shows owned quantity stepper for pins", async () => {
+    const user = userEvent.setup();
     renderButton({
       collectible: {
         id: "PIN-CF-01",
@@ -167,7 +272,14 @@ describe("AddToCollectionButton", () => {
       ownedBySkuId: { "PIN-CF-01": 4 },
     });
 
-    expect(screen.getByRole("button", { name: "Owned · x4" })).toBeInTheDocument();
+    expect(screen.getByText("Owned · x4")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Decrease Owned · x4" }));
+    expect(hookState.decrementFromCollection).toHaveBeenCalledWith({
+      card: expect.objectContaining({ id: "PIN-CF-01" }),
+      finish: null,
+      quantity: 1,
+      deleteWhenZero: true,
+    });
   });
 
   it("renders empty state when neither collectible nor card is provided", () => {
@@ -190,6 +302,16 @@ describe("AddToCollectionButton", () => {
     expect(hookState.addToCollection).not.toHaveBeenCalled();
   });
 
+  it("opens auth modal when decrement is clicked while signed out", async () => {
+    const user = userEvent.setup();
+    hookState.user = null;
+    renderButton({ ownedBySkuId: { "LT24-ELS-01-DUN": 2 } });
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun · x2" }));
+    expect(openAuthModal).toHaveBeenCalledWith({ reason: "add-to-collection" });
+    expect(hookState.decrementFromCollection).not.toHaveBeenCalled();
+  });
+
   it("opens auth modal when addToCollection throws auth-required", async () => {
     const user = userEvent.setup();
     const err = new Error("Authentication required");
@@ -210,7 +332,7 @@ describe("AddToCollectionButton", () => {
 
     await user.click(screen.getByRole("button", { name: "Add Dun" }));
     expect(
-      await screen.findByText("Couldn't add collectible. Please try again."),
+      await screen.findByText("Couldn't update collection. Please try again."),
     ).toBeInTheDocument();
   });
 
@@ -218,6 +340,7 @@ describe("AddToCollectionButton", () => {
     const user = userEvent.setup();
     hookState.addToCollection = vi.fn(async () => {
       hookState.status = "success";
+      return { skuId: "LT24-ELS-01-DUN", quantity: 1, deleted: false };
     });
     const { rerender } = renderButton();
 
@@ -225,6 +348,25 @@ describe("AddToCollectionButton", () => {
     rerender(<AddToCollectionButton collectible={baseCollectible} />);
 
     expect(await screen.findByText("Added Dun to your collection!")).toBeInTheDocument();
+  });
+
+  it("shows decrement success feedback", async () => {
+    const user = userEvent.setup();
+    hookState.decrementFromCollection = vi.fn(async () => {
+      hookState.status = "success";
+      return { skuId: "LT24-ELS-01-DUN", quantity: 1, deleted: false };
+    });
+    const { rerender } = renderButton({ ownedBySkuId: { "LT24-ELS-01-DUN": 2 } });
+
+    await user.click(screen.getByRole("button", { name: "Decrease Dun · x2" }));
+    rerender(
+      <AddToCollectionButton
+        collectible={baseCollectible}
+        ownedBySkuId={{ "LT24-ELS-01-DUN": 2 }}
+      />,
+    );
+
+    expect(await screen.findByText("Removed one Dun.")).toBeInTheDocument();
   });
 
   it("shows generic success when status is success before a finish was recorded", () => {
@@ -237,7 +379,7 @@ describe("AddToCollectionButton", () => {
     hookState.status = "error";
     hookState.error = new Error("Firestore failed");
     renderButton();
-    expect(screen.getByText("Couldn't add collectible. Please try again.")).toBeInTheDocument();
+    expect(screen.getByText("Couldn't update collection. Please try again.")).toBeInTheDocument();
   });
 
   it("shows error detail line when status is error with a non-auth error code", () => {
@@ -247,7 +389,7 @@ describe("AddToCollectionButton", () => {
     hookState.error = err;
     renderButton();
     expect(screen.getByText("Permission denied")).toBeInTheDocument();
-    expect(screen.getByText("Couldn't add collectible. Please try again.")).toBeInTheDocument();
+    expect(screen.getByText("Couldn't update collection. Please try again.")).toBeInTheDocument();
   });
 
   it("uses fallback text when error has code but no message", () => {
@@ -286,7 +428,7 @@ describe("AddToCollectionButton", () => {
     expect(screen.getByRole("button", { name: "Adding Dun…" })).toBeDisabled();
 
     hookState.status = "success";
-    resolveAdd();
+    resolveAdd({ skuId: "LT24-ELS-01-DUN", quantity: 1, deleted: false });
     await clickPromise;
     rerender(<AddToCollectionButton collectible={baseCollectible} />);
 
@@ -297,7 +439,7 @@ describe("AddToCollectionButton", () => {
     vi.useFakeTimers();
     hookState.addToCollection = vi.fn(() => {
       hookState.status = "success";
-      return Promise.resolve();
+      return Promise.resolve({ skuId: "LT24-ELS-01-FOIL", quantity: 1, deleted: false });
     });
     const { rerender } = renderButton();
 
@@ -337,6 +479,7 @@ describe("AddToCollectionButton", () => {
     const user = userEvent.setup();
     hookState.addToCollection = vi.fn(async () => {
       hookState.status = "success";
+      return { skuId: "LT24-ELS-01-DUN", quantity: 1, deleted: false };
     });
     const { rerender } = renderButton();
 

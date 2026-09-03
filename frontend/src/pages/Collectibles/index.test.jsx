@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
+import "./Collectibles.css";
 import CollectiblesPage from "./index.jsx";
 
 const mockOpenAuthModal = vi.hoisted(() => vi.fn());
@@ -10,6 +11,16 @@ const collectionState = vi.hoisted(() => ({
   entries: [],
   loading: false,
   error: null,
+}));
+const mutationsState = vi.hoisted(() => ({
+  addToCollection: vi.fn(),
+  decrementFromCollection: vi.fn(),
+  removeFromCollection: vi.fn(),
+  purgeZeroQuantityEntries: vi.fn(),
+  status: "idle",
+  error: null,
+  user: null,
+  reset: vi.fn(),
 }));
 
 vi.mock("../../contexts/AuthContext", () => ({
@@ -29,6 +40,13 @@ vi.mock("../../contexts/AuthModalContext", () => ({
 
 vi.mock("../Collection/hooks/useUserCollection", () => ({
   useUserCollection: () => collectionState,
+}));
+
+vi.mock("./hooks/useCollectionQuantityMutations", () => ({
+  useCollectionQuantityMutations: () => ({
+    ...mutationsState,
+    user: authState.user,
+  }),
 }));
 
 const { testCollectibles, testDatasetMeta, testDatasetStories } = vi.hoisted(() => {
@@ -113,6 +131,25 @@ describe("CollectiblesPage (integration)", () => {
     collectionState.entries = [];
     collectionState.loading = false;
     collectionState.error = null;
+    mutationsState.addToCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+    mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+    mutationsState.removeFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 0,
+      deleted: true,
+    });
+    mutationsState.purgeZeroQuantityEntries = vi.fn().mockResolvedValue({ deleted: 0 });
+    mutationsState.status = "idle";
+    mutationsState.error = null;
+    mutationsState.reset = vi.fn();
   });
 
   it("renders header and collectibles content", () => {
@@ -173,7 +210,80 @@ describe("CollectiblesPage (integration)", () => {
     expect(screen.getByRole("button", { name: "Add Foil" })).toBeInTheDocument();
   });
 
-  it("shows owned quantities for signed-in users in grid and table", async () => {
+  it("adds from compact card-actions without expanding glance details", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+
+    renderWithRouter(<CollectiblesPage />);
+
+    const storyCard = screen.getByRole("heading", { name: "Test Story #01" }).closest(".card-tile");
+    const siblingCard = screen
+      .getByRole("heading", { name: "Test Story Nonsense #01" })
+      .closest(".card-tile");
+    const addDun = screen.getByRole("button", { name: "Add Dun" });
+
+    expect(storyCard.querySelector(".card-actions")).toContainElement(addDun);
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(getComputedStyle(document.querySelector(".cards-grid")).alignItems).toBe("start");
+    expect(getComputedStyle(storyCard.querySelector(".card-actions")).marginTop).toBe("auto");
+
+    await user.click(addDun);
+
+    expect(mutationsState.addToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1 }),
+    );
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+  });
+
+  it("increments and decrements compact-card qty without expanding siblings", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+    collectionState.entries = [
+      { id: "e1", skuId: "LT24-ELS-01-DUN", quantity: 2 },
+      { id: "e2", skuId: "LT24-NS-ELS-01-FOIL", quantity: 1 },
+    ];
+    mutationsState.addToCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 3,
+      deleted: false,
+    });
+    mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+
+    renderWithRouter(<CollectiblesPage />);
+
+    const storyCard = screen.getByRole("heading", { name: "Test Story #01" }).closest(".card-tile");
+    const siblingCard = screen
+      .getByRole("heading", { name: "Test Story Nonsense #01" })
+      .closest(".card-tile");
+    const increase = screen.getByRole("button", { name: "Increase Dun · x2" });
+    const decrease = screen.getByRole("button", { name: "Decrease Dun · x2" });
+
+    expect(storyCard.querySelector(".card-actions")).toContainElement(increase);
+    expect(storyCard.querySelector(".card-actions")).toContainElement(decrease);
+    expect(storyCard.querySelector(".add-to-collection__stepper")).toBeVisible();
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+
+    await user.click(increase);
+    expect(mutationsState.addToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1 }),
+    );
+    await user.click(decrease);
+    expect(mutationsState.decrementFromCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1, deleteWhenZero: false }),
+    );
+
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+  });
+
+  it("shows owned quantity steppers for signed-in users in grid and table", async () => {
     const user = setupUser();
     authState.user = { uid: "user-1" };
     collectionState.entries = [
@@ -182,11 +292,81 @@ describe("CollectiblesPage (integration)", () => {
     ];
 
     renderWithRouter(<CollectiblesPage />);
-    expect(screen.getByRole("button", { name: "Dun · x2" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Foil · x1" })).toBeInTheDocument();
+    expect(screen.getByText("Dun · x2")).toBeInTheDocument();
+    expect(screen.getByText("Foil · x1")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Increase Dun · x2" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Decrease Dun · x2" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Table view" }));
-    expect(screen.getByRole("button", { name: "Dun · x2" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Foil · x1" })).toBeInTheDocument();
+    expect(screen.getByText("Dun · x2")).toBeInTheDocument();
+    expect(screen.getByText("Foil · x1")).toBeInTheDocument();
+  });
+
+  it("soft-zeros stay visible after decrement and hard-delete is deferred", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+    collectionState.entries = [
+      { id: "e1", ownerUid: "user-1", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+    ];
+    mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 0,
+      deleted: false,
+    });
+
+    renderWithRouter(<CollectiblesPage />);
+    await user.click(screen.getByRole("button", { name: "Decrease Dun · x1" }));
+
+    expect(mutationsState.decrementFromCollection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        finish: "DUN",
+        quantity: 1,
+        deleteWhenZero: false,
+      }),
+    );
+    expect(await screen.findByText("Dun · x0")).toBeInTheDocument();
+    expect(mutationsState.purgeZeroQuantityEntries).not.toHaveBeenCalled();
+  });
+
+  it("increments after soft-zero and clears the zero override", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+    collectionState.entries = [
+      { id: "e1", ownerUid: "user-1", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+    ];
+    mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 0,
+      deleted: false,
+    });
+    mutationsState.addToCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+
+    renderWithRouter(<CollectiblesPage />);
+    await user.click(screen.getByRole("button", { name: "Decrease Dun · x1" }));
+    expect(await screen.findByText("Dun · x0")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Increase Dun · x0" }));
+    expect(mutationsState.addToCollection).toHaveBeenCalled();
+  });
+
+  it("purges zero-quantity entries once after collection load", async () => {
+    authState.user = { uid: "user-1" };
+    collectionState.entries = [
+      { id: "zero-1", ownerUid: "user-1", skuId: "LT24-ELS-01-DUN", quantity: 0 },
+      { id: "keep-1", ownerUid: "user-1", skuId: "LT24-NS-ELS-01-FOIL", quantity: 2 },
+    ];
+    mutationsState.purgeZeroQuantityEntries = vi.fn().mockResolvedValue({ deleted: 1 });
+
+    renderWithRouter(<CollectiblesPage />);
+
+    await waitFor(() => {
+      expect(mutationsState.purgeZeroQuantityEntries).toHaveBeenCalledWith([
+        expect.objectContaining({ id: "zero-1", quantity: 0 }),
+      ]);
+    });
   });
 });

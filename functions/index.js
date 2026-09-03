@@ -1,6 +1,15 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
-const { buildMatchesForCaller, buildUserSkuTotals } = require("./matches");
+const {
+  buildMatchesForCaller,
+  buildUserSkuTotals,
+  DEFAULT_MATCH_PAGE_SIZE,
+  normalizeMatchCursor,
+  normalizeMatchPageSize,
+  paginateMatches,
+  resolveMatchContact,
+  resolvePublicDisplayName,
+} = require("./matches");
 
 const MATCH_PAIR_LIMIT = 100;
 
@@ -8,23 +17,42 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-async function resolveDisplayNames(userIds) {
+async function resolveAuthProfiles(userIds) {
   if (!userIds.length) {
     return new Map();
   }
 
   const auth = admin.auth();
-  const namesByUserId = new Map();
+  const profilesByUserId = new Map();
 
   for (let index = 0; index < userIds.length; index += 100) {
     const batchIds = userIds.slice(index, index + 100);
     const result = await auth.getUsers(batchIds.map((uid) => ({ uid })));
     for (const user of result.users) {
-      namesByUserId.set(uidOrEmpty(user.uid), user.displayName || user.email || user.uid);
+      const uid = uidOrEmpty(user.uid);
+      profilesByUserId.set(uid, {
+        displayName: resolvePublicDisplayName(user),
+        email: typeof user.email === "string" ? user.email : "",
+      });
     }
   }
 
-  return namesByUserId;
+  return profilesByUserId;
+}
+
+async function loadPreferencesByUserId(db, userIds) {
+  const preferencesByUserId = new Map();
+  if (!userIds.length) {
+    return preferencesByUserId;
+  }
+
+  const refs = userIds.map((userId) => db.collection("userPreferences").doc(userId));
+  const snapshots = await db.getAll(...refs);
+  for (const snapshot of snapshots) {
+    preferencesByUserId.set(snapshot.id, snapshot.exists ? snapshot.data() : {});
+  }
+
+  return preferencesByUserId;
 }
 
 function uidOrEmpty(value) {
@@ -36,6 +64,11 @@ exports.getTradeMatches = onCall(async (request) => {
   if (!callerUid) {
     throw new HttpsError("unauthenticated", "You must be signed in to view trade matches.");
   }
+
+  const pageSize = normalizeMatchPageSize(request.data?.pageSize, {
+    defaultSize: DEFAULT_MATCH_PAGE_SIZE,
+  });
+  const cursor = normalizeMatchCursor(request.data?.cursor);
 
   const db = admin.firestore();
   const [collectionsSnapshot, optedOutSnapshot] = await Promise.all([
@@ -60,26 +93,51 @@ exports.getTradeMatches = onCall(async (request) => {
     return {
       callerOptedOut: true,
       matches: [],
+      pageSize,
+      nextCursor: null,
+      hasMore: false,
+      totalOnPage: 0,
     };
   }
 
-  const counterpartyIds = matches.map((match) => match.userId);
-  const namesByUserId = await resolveDisplayNames(counterpartyIds);
+  const page = paginateMatches(matches, { pageSize, cursor });
+  const counterpartyIds = page.matches.map((match) => match.userId);
+  const [profilesByUserId, preferencesByUserId] = await Promise.all([
+    resolveAuthProfiles(counterpartyIds),
+    loadPreferencesByUserId(db, counterpartyIds),
+  ]);
 
-  const payload = matches
-    .map((match) => ({
+  const payload = page.matches.map((match) => {
+    const profile = profilesByUserId.get(match.userId) || {
+      displayName: match.userId,
+      email: "",
+    };
+    const contact = resolveMatchContact({
+      preferences: preferencesByUserId.get(match.userId) || {},
+      trueEmail: profile.email,
+    });
+
+    return {
       userId: match.userId,
-      displayName: namesByUserId.get(match.userId) || match.userId,
+      displayName: profile.displayName,
       pairs: match.pairs,
-    }))
-    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+      contact,
+    };
+  });
 
   return {
     callerOptedOut: false,
     matches: payload,
+    pageSize: page.pageSize,
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore,
+    totalOnPage: page.totalOnPage,
   };
 });
 
 exports.__test = {
   MATCH_PAIR_LIMIT,
+  loadPreferencesByUserId,
+  resolveAuthProfiles,
+  resolveMatchContact,
 };

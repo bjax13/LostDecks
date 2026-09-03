@@ -15,8 +15,28 @@ service cloud.firestore {
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
+    function contactSharingComplete(data) {
+      return !("matchContactSharing" in data)
+        || data.matchContactSharing == "trueEmail"
+        || (data.matchContactSharing == "tradingEmail"
+          && data.tradingEmail is string
+          && data.tradingEmail.size() > 0)
+        || (data.matchContactSharing == "discord"
+          && data.discordHandle is string
+          && data.discordHandle.size() > 0);
+    }
+
     function validUserPreferences(data) {
-      return !("matchingOptOut" in data) || data.matchingOptOut is bool;
+      return (!("matchingOptOut" in data) || data.matchingOptOut is bool)
+        && (!("matchContactSharing" in data)
+          || data.matchContactSharing in ["trueEmail", "tradingEmail", "discord"])
+        && (!("tradingEmail" in data)
+          || (data.tradingEmail is string && data.tradingEmail.size() <= 320))
+        && (!("discordHandle" in data)
+          || (data.discordHandle is string && data.discordHandle.size() <= 100))
+        && (!("discordChannel" in data)
+          || (data.discordChannel is string && data.discordChannel.size() <= 100))
+        && contactSharingComplete(data);
     }
 
     // User preferences (single per-user doc)
