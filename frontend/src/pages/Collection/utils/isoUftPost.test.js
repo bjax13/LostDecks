@@ -27,6 +27,7 @@ describe("isoUftPost", () => {
   beforeEach(() => {
     collectiblesState.stories = [{ title: "Zeta" }, { title: "Alpha" }];
     collectiblesState.skus = [
+      { skuId: "owned-story-foil", cardId: "c-owned-sf", finish: "FOIL" },
       { skuId: "iso-story-foil", cardId: "c-iso-sf", finish: "FOIL" },
       { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
       { skuId: "iso-herald-dun", cardId: "c-iso-hd", finish: "DUN" },
@@ -34,6 +35,7 @@ describe("isoUftPost", () => {
       { skuId: "uft-nonsense-plain", cardId: "c-uft-ns2", finish: "DUN" },
     ];
     collectiblesState.cardById = {
+      "c-owned-sf": { category: "story", number: 8, storyTitle: "Alpha" },
       "c-iso-sf": { category: "story", number: 9, storyTitle: "Alpha" },
       "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
       "c-iso-hd": {
@@ -58,6 +60,7 @@ describe("isoUftPost", () => {
   });
 
   const entries = [
+    { skuId: "owned-story-foil", quantity: 1 },
     { skuId: "uft-story-foil", quantity: 3 },
     { skuId: "uft-nonsense-variant", count: 2 },
     { skuId: "uft-nonsense-plain", total: 4 },
@@ -88,6 +91,64 @@ describe("isoUftPost", () => {
     expect(uftSections).toEqual(
       expect.arrayContaining(["uft:story-foils", "uft:nonsense-foil", "uft:nonsense-dun"]),
     );
+
+    const isoSectionIds = tree[0].children.map((section) => section.id);
+    expect(isoSectionIds).toEqual(["iso:story-foils"]);
+    expect(isoSectionIds).not.toContain("iso:heralds-dun");
+  });
+
+  it("does not list unowned SKUs from stories or finishes the user has not started", () => {
+    collectiblesState.skus = [
+      { skuId: "chm-01-dun", cardId: "c-chm-01", finish: "DUN" },
+      { skuId: "chm-01-foil", cardId: "c-chm-01", finish: "FOIL" },
+      { skuId: "chm-02-dun", cardId: "c-chm-02", finish: "DUN" },
+      { skuId: "els-01-dun", cardId: "c-els-01", finish: "DUN" },
+      { skuId: "herald-dun", cardId: "c-herald", finish: "DUN" },
+    ];
+    collectiblesState.cardById = {
+      "c-chm-01": { category: "story", number: 1, storyTitle: "Chasm" },
+      "c-chm-02": { category: "story", number: 2, storyTitle: "Chasm" },
+      "c-els-01": { category: "story", number: 1, storyTitle: "Elsecaller" },
+      "c-herald": { category: "herald", number: 1, displayName: "Herald", storyTitle: "Heralds" },
+    };
+
+    const { tree } = buildIsoUftPostTree([{ skuId: "chm-01-dun", quantity: 1 }]);
+    const isoSectionIds = tree[0].children.map((section) => section.id);
+    expect(isoSectionIds).toEqual(["iso:story-dun"]);
+
+    expect(tree[0].children[0].children).toEqual([
+      expect.objectContaining({
+        id: "iso:story-dun:Chasm",
+        line: "Chasm Dun: 2",
+      }),
+    ]);
+    expect(tree[1].children).toHaveLength(0);
+  });
+
+  it("lists only extras as UFT and keeps owned SKUs out of ISO", () => {
+    collectiblesState.skus = [
+      { skuId: "chm-01-dun", cardId: "c-chm-01", finish: "DUN" },
+      { skuId: "chm-02-dun", cardId: "c-chm-02", finish: "DUN" },
+      { skuId: "chm-03-dun", cardId: "c-chm-03", finish: "DUN" },
+    ];
+    collectiblesState.cardById = {
+      "c-chm-01": { category: "story", number: 1, storyTitle: "Chasm" },
+      "c-chm-02": { category: "story", number: 2, storyTitle: "Chasm" },
+      "c-chm-03": { category: "story", number: 3, storyTitle: "Chasm" },
+    };
+
+    const { text } = buildIsoUftPost([
+      { skuId: "chm-01-dun", quantity: 1 },
+      { skuId: "chm-02-dun", quantity: 3 },
+    ]);
+
+    const [isoBlock, uftBlock] = text.split("UFT:");
+    expect(isoBlock).toMatch(/Chasm Dun: 3\b/);
+    expect(isoBlock).not.toMatch(/Chasm Dun:.*\b1\b/);
+    expect(isoBlock).not.toMatch(/Chasm Dun:.*\b2\b/);
+    expect(uftBlock).toMatch(/Chasm Dun: 2\b/);
+    expect(uftBlock).not.toMatch(/Chasm Dun:.*\b1\b/);
+    expect(uftBlock).not.toMatch(/Chasm Dun:.*\b3\b/);
   });
 
   it("omits empty sections from the tree", () => {

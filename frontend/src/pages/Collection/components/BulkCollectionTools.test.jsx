@@ -585,6 +585,7 @@ describe("BulkCollectionTools", () => {
 
     collectiblesState.stories = [{ title: "Zeta" }, { title: "Alpha" }];
     collectiblesState.skus = [
+      { skuId: "owned-story-foil", cardId: "c-owned-sf", finish: "FOIL" },
       { skuId: "iso-story-foil", cardId: "c-iso-sf", finish: "FOIL" },
       { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
       { skuId: "iso-herald-dun", cardId: "c-iso-hd", finish: "DUN" },
@@ -592,6 +593,7 @@ describe("BulkCollectionTools", () => {
       { skuId: "uft-nonsense-plain", cardId: "c-uft-ns2", finish: "DUN" },
     ];
     collectiblesState.cardById = {
+      "c-owned-sf": { category: "story", number: 8, storyTitle: "Alpha" },
       "c-iso-sf": { category: "story", number: 9, storyTitle: "Alpha" },
       "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
       "c-iso-hd": {
@@ -615,6 +617,7 @@ describe("BulkCollectionTools", () => {
     };
 
     const entries = [
+      { skuId: "owned-story-foil", quantity: 1 },
       { skuId: "uft-story-foil", quantity: 3 },
       { skuId: "uft-nonsense-variant", count: 2 },
       { skuId: "uft-nonsense-plain", total: 4 },

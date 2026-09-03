@@ -99,7 +99,8 @@ beforeEach(() => {
   });
 });
 
-describe("GettingStartedPage", { timeout: 15_000 }, () => {
+// Coverage + GitHub-hosted runners can push these large-tree interactions past Vitest's 5s default.
+describe("GettingStartedPage", { timeout: 20_000 }, () => {
   it("asks the collector profile question first", () => {
     renderPage();
 
@@ -585,6 +586,11 @@ describe("GettingStartedPage", { timeout: 15_000 }, () => {
     expect(applyAll).toBeDisabled();
     expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "-5" } });
+    fireEvent.input(input, { target: { value: "-5" } });
+    expect(applyAll).toBeDisabled();
+    expect(within(bulkActions).getByRole("alert")).toBeInTheDocument();
 
     await applyBulkQuantity(user, bulkActions, 2);
 
