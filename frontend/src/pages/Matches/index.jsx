@@ -43,6 +43,41 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
+function MatchGroup({ activeRow, counterparty, onToggleRow }) {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <details
+      className="matches-panel"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary className="matches-group-heading">
+        <h2>{counterparty.displayName}</h2>
+      </summary>
+      <ul className="matches-list">
+        {counterparty.pairs.map((pair) => (
+          <li key={pair.rowId}>
+            <button type="button" className="matches-row" onClick={() => onToggleRow(pair.rowId)}>
+              <span>{`${pair.theirLabel} is available for trade for your ${pair.yourLabel}.`}</span>
+            </button>
+            {activeRow === pair.rowId ? (
+              <div className="matches-contact">
+                <p>
+                  Contact {counterparty.displayName}. {formatContactDetails(counterparty.contact)}
+                </p>
+                {counterparty.contact?.fallbackReason ? (
+                  <p className="matches-contact-fallback">{counterparty.contact.fallbackReason}</p>
+                ) : null}
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 function formatFreshnessMessage({
   cacheAgeSeconds,
   refreshAvailableInSeconds,
@@ -236,37 +271,12 @@ function MatchesContent() {
 
       {showMatchesChrome
         ? matchRows.map((counterparty) => (
-            <section className="matches-panel" key={counterparty.userId}>
-              <h2>{counterparty.displayName}</h2>
-              <ul className="matches-list">
-                {counterparty.pairs.map((pair) => (
-                  <li key={pair.rowId}>
-                    <button
-                      type="button"
-                      className="matches-row"
-                      onClick={() =>
-                        setActiveRow((current) => (current === pair.rowId ? "" : pair.rowId))
-                      }
-                    >
-                      <span>{`${pair.theirLabel} is available for trade for your ${pair.yourLabel}.`}</span>
-                    </button>
-                    {activeRow === pair.rowId ? (
-                      <div className="matches-contact">
-                        <p>
-                          Contact {counterparty.displayName}.{" "}
-                          {formatContactDetails(counterparty.contact)}
-                        </p>
-                        {counterparty.contact?.fallbackReason ? (
-                          <p className="matches-contact-fallback">
-                            {counterparty.contact.fallbackReason}
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <MatchGroup
+              key={counterparty.userId}
+              counterparty={counterparty}
+              activeRow={activeRow}
+              onToggleRow={(rowId) => setActiveRow((current) => (current === rowId ? "" : rowId))}
+            />
           ))
         : null}
 
