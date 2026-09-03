@@ -1,11 +1,10 @@
 import {
   collection,
-  deleteDoc,
   doc,
   getDocs,
   query,
+  runTransaction,
   serverTimestamp,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -47,20 +46,28 @@ export async function adjustCollectionEntryQuantity({ entry, delta = -1 }) {
     throw new Error("A collection entry is required to update quantity.");
   }
 
-  const current = Math.max(0, normalizeQuantity(entry));
-  const next = current + delta;
   const ref = doc(collectionRef(), entry.id);
 
-  if (next <= 0) {
-    await deleteDoc(ref);
-    return { deleted: true, quantity: 0, entryId: entry.id };
-  }
+  return runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists()) {
+      return { deleted: true, quantity: 0, entryId: entry.id };
+    }
 
-  await updateDoc(ref, {
-    quantity: next,
-    updatedAt: serverTimestamp(),
+    const current = Math.max(0, normalizeQuantity({ id: snapshot.id, ...snapshot.data() }));
+    const next = current + delta;
+
+    if (next <= 0) {
+      transaction.delete(ref);
+      return { deleted: true, quantity: 0, entryId: entry.id };
+    }
+
+    transaction.update(ref, {
+      quantity: next,
+      updatedAt: serverTimestamp(),
+    });
+    return { deleted: false, quantity: next, entryId: entry.id };
   });
-  return { deleted: false, quantity: next, entryId: entry.id };
 }
 
 export async function decrementCollectionBySku({ ownerUid, skuId, amount = 1 }) {

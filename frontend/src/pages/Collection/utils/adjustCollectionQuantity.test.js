@@ -8,15 +8,17 @@ const mockCollection = vi.fn(() => ({ _type: "collections-ref" }));
 const mockQuery = vi.fn((...args) => ({ _type: "query", args }));
 const mockWhere = vi.fn((...args) => ({ _type: "where", args }));
 const mockServerTimestamp = vi.fn(() => ({ _type: "serverTimestamp" }));
+const mockRunTransaction = vi.fn();
+
+const firestoreDocs = new Map();
 
 vi.mock("firebase/firestore", () => ({
   collection: (...args) => mockCollection(...args),
-  deleteDoc: (...args) => mockDeleteDoc(...args),
   doc: (...args) => mockDoc(...args),
   getDocs: (...args) => mockGetDocs(...args),
   query: (...args) => mockQuery(...args),
+  runTransaction: (...args) => mockRunTransaction(...args),
   serverTimestamp: () => mockServerTimestamp(),
-  updateDoc: (...args) => mockUpdateDoc(...args),
   where: (...args) => mockWhere(...args),
 }));
 
@@ -35,20 +37,47 @@ function fakeDoc(id, data) {
   };
 }
 
+function seedDoc(id, data) {
+  firestoreDocs.set(id, { ...data });
+}
+
 describe("adjustCollectionEntryQuantity", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDeleteDoc.mockResolvedValue(undefined);
-    mockUpdateDoc.mockResolvedValue(undefined);
+    firestoreDocs.clear();
+    mockRunTransaction.mockImplementation(async (_db, updater) => {
+      const transaction = {
+        get: async (ref) => {
+          const data = firestoreDocs.get(ref.id);
+          return {
+            exists: () => data !== undefined,
+            id: ref.id,
+            data: () => data,
+          };
+        },
+        update: (ref, patch) => {
+          mockUpdateDoc(ref, patch);
+          const current = firestoreDocs.get(ref.id) ?? {};
+          firestoreDocs.set(ref.id, { ...current, ...patch });
+        },
+        delete: (ref) => {
+          mockDeleteDoc(ref);
+          firestoreDocs.delete(ref.id);
+        },
+      };
+      return updater(transaction);
+    });
   });
 
   it("throws when the entry has no id", async () => {
     await expect(adjustCollectionEntryQuantity({ entry: {}, delta: -1 })).rejects.toThrow(
       "A collection entry is required to update quantity.",
     );
+    expect(mockRunTransaction).not.toHaveBeenCalled();
   });
 
   it("deletes the document when decrementing the last copy", async () => {
+    seedDoc("doc-1", { quantity: 1 });
     const result = await adjustCollectionEntryQuantity({
       entry: { id: "doc-1", quantity: 1 },
       delta: -1,
@@ -60,6 +89,7 @@ describe("adjustCollectionEntryQuantity", () => {
   });
 
   it("deletes when the current quantity is already 0", async () => {
+    seedDoc("doc-0", { quantity: 0 });
     const result = await adjustCollectionEntryQuantity({
       entry: { id: "doc-0", quantity: 0 },
       delta: -1,
@@ -70,6 +100,7 @@ describe("adjustCollectionEntryQuantity", () => {
   });
 
   it("updates quantity when copies remain", async () => {
+    seedDoc("doc-2", { quantity: 3 });
     const result = await adjustCollectionEntryQuantity({
       entry: { id: "doc-2", quantity: 3 },
       delta: -1,
@@ -83,7 +114,33 @@ describe("adjustCollectionEntryQuantity", () => {
     expect(result).toEqual({ deleted: false, quantity: 2, entryId: "doc-2" });
   });
 
+  it("uses the live document quantity instead of a stale client value", async () => {
+    seedDoc("doc-stale", { quantity: 5 });
+    const result = await adjustCollectionEntryQuantity({
+      entry: { id: "doc-stale", quantity: 2 },
+      delta: -1,
+    });
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(
+      { id: "doc-stale" },
+      expect.objectContaining({ quantity: 4 }),
+    );
+    expect(result).toEqual({ deleted: false, quantity: 4, entryId: "doc-stale" });
+  });
+
+  it("returns deleted when the document no longer exists", async () => {
+    const result = await adjustCollectionEntryQuantity({
+      entry: { id: "gone", quantity: 2 },
+      delta: -1,
+    });
+
+    expect(result).toEqual({ deleted: true, quantity: 0, entryId: "gone" });
+    expect(mockDeleteDoc).not.toHaveBeenCalled();
+    expect(mockUpdateDoc).not.toHaveBeenCalled();
+  });
+
   it("uses count fallback when quantity is absent", async () => {
+    seedDoc("doc-count", { count: 4 });
     await adjustCollectionEntryQuantity({
       entry: { id: "doc-count", count: 4 },
       delta: -1,
@@ -99,9 +156,32 @@ describe("adjustCollectionEntryQuantity", () => {
 describe("decrementCollectionBySku", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDeleteDoc.mockResolvedValue(undefined);
-    mockUpdateDoc.mockResolvedValue(undefined);
-    mockGetDocs.mockResolvedValue({ docs: [] });
+    firestoreDocs.clear();
+    mockRunTransaction.mockImplementation(async (_db, updater) => {
+      const transaction = {
+        get: async (ref) => {
+          const data = firestoreDocs.get(ref.id);
+          return {
+            exists: () => data !== undefined,
+            id: ref.id,
+            data: () => data,
+          };
+        },
+        update: (ref, patch) => {
+          mockUpdateDoc(ref, patch);
+          const current = firestoreDocs.get(ref.id) ?? {};
+          firestoreDocs.set(ref.id, { ...current, ...patch });
+        },
+        delete: (ref) => {
+          mockDeleteDoc(ref);
+          firestoreDocs.delete(ref.id);
+        },
+      };
+      return updater(transaction);
+    });
+    mockGetDocs.mockImplementation(async () => ({
+      docs: [...firestoreDocs.entries()].map(([id, data]) => fakeDoc(id, data)),
+    }));
   });
 
   it("throws auth-required when ownerUid is missing", async () => {
@@ -130,12 +210,8 @@ describe("decrementCollectionBySku", () => {
   });
 
   it("decrements the highest-quantity document when several exist", async () => {
-    mockGetDocs.mockResolvedValue({
-      docs: [
-        fakeDoc("low", { skuId: "LT24-ELS-01-DUN", quantity: 1 }),
-        fakeDoc("high", { skuId: "LT24-ELS-01-DUN", quantity: 4 }),
-      ],
-    });
+    seedDoc("low", { skuId: "LT24-ELS-01-DUN", quantity: 1 });
+    seedDoc("high", { skuId: "LT24-ELS-01-DUN", quantity: 4 });
 
     const result = await decrementCollectionBySku({
       ownerUid: "user-1",
@@ -150,9 +226,7 @@ describe("decrementCollectionBySku", () => {
   });
 
   it("deletes a single remaining copy", async () => {
-    mockGetDocs.mockResolvedValue({
-      docs: [fakeDoc("only", { skuId: "LT24-ELS-01-DUN", quantity: 1 })],
-    });
+    seedDoc("only", { skuId: "LT24-ELS-01-DUN", quantity: 1 });
 
     const result = await decrementCollectionBySku({
       ownerUid: "user-1",
