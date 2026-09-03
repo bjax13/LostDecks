@@ -44,8 +44,14 @@ function formatSkuLabel(skuId) {
 }
 
 function MatchGroup({ activeRow, counterparty, onToggleRow }) {
+  const [open, setOpen] = useState(true);
+
   return (
-    <details className="matches-panel" defaultOpen>
+    <details
+      className="matches-panel"
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
       <summary className="matches-group-heading">
         <h2>{counterparty.displayName}</h2>
       </summary>
