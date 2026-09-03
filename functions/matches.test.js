@@ -14,6 +14,7 @@ const {
   normalizeQuantity,
   paginateMatches,
   resolveMatchContact,
+  resolvePublicDisplayName,
 } = require("./matches");
 
 test("normalizeQuantity clamps invalid values to zero", () => {
@@ -191,7 +192,7 @@ test("resolveMatchContact uses trading email when configured", () => {
   );
 });
 
-test("resolveMatchContact falls back to true email when trading email is missing", () => {
+test("resolveMatchContact omits the account email when trading email is missing", () => {
   assert.deepEqual(
     resolveMatchContact({
       preferences: {
@@ -201,15 +202,14 @@ test("resolveMatchContact falls back to true email when trading email is missing
       trueEmail: "true@example.com",
     }),
     {
-      method: "trueEmail",
-      email: "true@example.com",
-      usedFallback: true,
-      fallbackReason: "Trading email was not set, so their account email was shared instead.",
+      method: "tradingEmail",
+      usedFallback: false,
+      fallbackReason: "Trading email is not set, so no contact details were shared.",
     },
   );
 });
 
-test("resolveMatchContact uses discord details and falls back when incomplete", () => {
+test("resolveMatchContact uses discord details and omits email when incomplete", () => {
   assert.deepEqual(
     resolveMatchContact({
       preferences: {
@@ -237,11 +237,29 @@ test("resolveMatchContact uses discord details and falls back when incomplete", 
       trueEmail: "true@example.com",
     }),
     {
-      method: "trueEmail",
-      email: "true@example.com",
-      usedFallback: true,
-      fallbackReason:
-        "Discord information was incomplete, so their account email was shared instead.",
+      method: "discord",
+      usedFallback: false,
+      fallbackReason: "Discord information is incomplete, so no contact details were shared.",
     },
   );
+});
+
+test("resolvePublicDisplayName never uses the Auth email", () => {
+  assert.equal(
+    resolvePublicDisplayName({
+      uid: "uid-1",
+      displayName: " Collector Two ",
+      email: "two@example.com",
+    }),
+    "Collector Two",
+  );
+  assert.equal(
+    resolvePublicDisplayName({
+      uid: "uid-2",
+      displayName: "   ",
+      email: "hidden@example.com",
+    }),
+    "uid-2",
+  );
+  assert.equal(resolvePublicDisplayName({ email: "hidden@example.com" }), "Collector");
 });

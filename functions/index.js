@@ -8,6 +8,7 @@ const {
   normalizeMatchPageSize,
   paginateMatches,
   resolveMatchContact,
+  resolvePublicDisplayName,
 } = require("./matches");
 
 const MATCH_PAIR_LIMIT = 100;
@@ -30,7 +31,7 @@ async function resolveAuthProfiles(userIds) {
     for (const user of result.users) {
       const uid = uidOrEmpty(user.uid);
       profilesByUserId.set(uid, {
-        displayName: user.displayName || user.email || user.uid,
+        displayName: resolvePublicDisplayName(user),
         email: typeof user.email === "string" ? user.email : "",
       });
     }

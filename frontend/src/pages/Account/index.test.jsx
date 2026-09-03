@@ -234,4 +234,63 @@ describe("AccountPage", () => {
       matchContactSharing: "discord",
     });
   });
+
+  it("resets sharing to true email when the selected trading email is cleared", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchContactSharing: "tradingEmail",
+        tradingEmail: "trade@example.com",
+        discordHandle: "kaladin",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(screen.getByRole("radio", { name: "My trading email" })).toBeChecked();
+
+    await user.clear(screen.getByLabelText("Trading email"));
+    await user.tab();
+
+    expect(screen.getByRole("radio", { name: "My true email" })).toBeChecked();
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      tradingEmail: "",
+      matchContactSharing: "trueEmail",
+    });
+    expect(
+      screen.getByText(
+        "Trading email is empty, so Matches will use your true email until you fill this in and select this option again.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("resets sharing to true email when the selected Discord name is cleared", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchContactSharing: "discord",
+        tradingEmail: "",
+        discordHandle: "kaladin",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(screen.getByRole("radio", { name: "My Discord information" })).toBeChecked();
+
+    await user.clear(screen.getByLabelText("Discord name"));
+    await user.tab();
+
+    expect(screen.getByRole("radio", { name: "My true email" })).toBeChecked();
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      discordHandle: "",
+      matchContactSharing: "trueEmail",
+    });
+  });
 });

@@ -256,8 +256,7 @@ function MatchesContent() {
                           Contact {counterparty.displayName}.{" "}
                           {formatContactDetails(counterparty.contact)}
                         </p>
-                        {counterparty.contact?.usedFallback &&
-                        counterparty.contact?.fallbackReason ? (
+                        {counterparty.contact?.fallbackReason ? (
                           <p className="matches-contact-fallback">
                             {counterparty.contact.fallbackReason}
                           </p>

@@ -148,16 +148,20 @@ function AccountPage() {
     setTradingEmail(nextEmail);
 
     if (!nextEmail) {
-      setTradingEmailError(
-        matchContactSharing === MATCH_CONTACT_SHARING.TRADING_EMAIL
-          ? "Enter a trading email before selecting this option."
-          : null,
-      );
       if (matchContactSharing === MATCH_CONTACT_SHARING.TRADING_EMAIL) {
+        setTradingEmailError("Enter a trading email before selecting this option.");
         setContactSharingError(
-          "Trading email is empty. Fill it in, then choose this option again.",
+          "Trading email is empty, so Matches will use your true email until you fill this in and select this option again.",
         );
+        setMatchContactSharing(MATCH_CONTACT_SHARING.TRUE_EMAIL);
+        await persistPreferences({
+          tradingEmail: "",
+          matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+        });
+        return;
       }
+
+      setTradingEmailError(null);
       await persistPreferences({ tradingEmail: "" });
       return;
     }
@@ -179,16 +183,20 @@ function AccountPage() {
     setDiscordHandle(nextHandle);
 
     if (!nextHandle) {
-      setDiscordError(
-        matchContactSharing === MATCH_CONTACT_SHARING.DISCORD
-          ? "Enter a Discord name before selecting this option."
-          : null,
-      );
       if (matchContactSharing === MATCH_CONTACT_SHARING.DISCORD) {
+        setDiscordError("Enter a Discord name before selecting this option.");
         setContactSharingError(
-          "Discord information is incomplete. Add a Discord name, then choose this option again.",
+          "Discord name is empty, so Matches will use your true email until you add a Discord name and select this option again.",
         );
+        setMatchContactSharing(MATCH_CONTACT_SHARING.TRUE_EMAIL);
+        await persistPreferences({
+          discordHandle: "",
+          matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
+        });
+        return;
       }
+
+      setDiscordError(null);
       await persistPreferences({ discordHandle: "" });
       return;
     }

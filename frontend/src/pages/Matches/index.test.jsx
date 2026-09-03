@@ -150,7 +150,7 @@ describe("MatchesPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows fallback explanation when contact fell back to true email", async () => {
+  it("explains missing contact details without sharing the account email", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({
@@ -159,11 +159,9 @@ describe("MatchesPage", () => {
             userId: "user-2",
             displayName: "Collector Two",
             contact: {
-              method: "trueEmail",
-              email: "two@example.com",
-              usedFallback: true,
-              fallbackReason:
-                "Trading email was not set, so their account email was shared instead.",
+              method: "tradingEmail",
+              usedFallback: false,
+              fallbackReason: "Trading email is not set, so no contact details were shared.",
             },
             pairs: [{ theirSkuId: "SKU-2", yourSkuId: "SKU-1" }],
           },
@@ -176,10 +174,13 @@ describe("MatchesPage", () => {
       screen.getByRole("button", { name: /sku-2 \(dun\).*trade for your.*sku-1 \(dun\)/i }),
     );
 
-    expect(screen.getByText("Contact Collector Two. Email: two@example.com")).toBeInTheDocument();
     expect(
-      screen.getByText("Trading email was not set, so their account email was shared instead."),
+      screen.getByText("Contact Collector Two. Contact details are unavailable."),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("Trading email is not set, so no contact details were shared."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/two@example.com/)).not.toBeInTheDocument();
   });
 
   it("shows opted-out message from backend response", () => {
