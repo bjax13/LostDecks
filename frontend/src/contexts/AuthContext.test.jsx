@@ -28,6 +28,12 @@ const fb = vi.hoisted(() => ({
 
 vi.mock("../lib/firebase", () => fb);
 
+const prefs = vi.hoisted(() => ({
+  updateUserPreferences: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../lib/userPreferences", () => prefs);
+
 import { AuthProvider, useAuth } from "./AuthContext.jsx";
 
 afterEach(() => {
@@ -44,6 +50,8 @@ afterEach(() => {
   authFns.signInWithPopup.mockReset();
   authFns.signOut.mockReset();
   authFns.updateProfile.mockReset();
+  prefs.updateUserPreferences.mockReset();
+  prefs.updateUserPreferences.mockResolvedValue(undefined);
   mockUnsubscribe.mockClear();
   fb.auth = { __tag: "auth" };
   fb.googleProvider = { __tag: "google" };
@@ -261,14 +269,29 @@ describe("AuthProvider", () => {
     });
   });
 
-  it("loginAsGuest calls signInAnonymously", async () => {
-    authFns.signInAnonymously.mockResolvedValue(undefined);
+  it("loginAsGuest calls signInAnonymously and opts the guest out of matching", async () => {
+    authFns.signInAnonymously.mockResolvedValue({ user: { uid: "guest-1" } });
     const user = userEvent.setup();
     renderAuth();
     await user.click(screen.getByRole("button", { name: "login-guest" }));
     await waitFor(() => {
       expect(authFns.signInAnonymously).toHaveBeenCalledWith(fb.auth);
     });
+    expect(prefs.updateUserPreferences).toHaveBeenCalledWith("guest-1", { matchingOptOut: true });
+  });
+
+  it("loginAsGuest still succeeds when matching opt-out write fails", async () => {
+    authFns.signInAnonymously.mockResolvedValue({ user: { uid: "guest-2" } });
+    const prefErr = new Error("firestore down");
+    prefs.updateUserPreferences.mockRejectedValue(prefErr);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-guest" }));
+    await waitFor(() => {
+      expect(prefs.updateUserPreferences).toHaveBeenCalled();
+    });
+    expect(console.error).toHaveBeenCalledWith("Failed to opt guest out of matching", prefErr);
+    expect(screen.getByTestId("error-msg")).toHaveTextContent("");
   });
 
   it("loginAsGuest sets error when signInAnonymously fails", async () => {

@@ -24,6 +24,10 @@ vi.mock("../lib/firebase", () => ({
   hasFirebaseConfig: true,
 }));
 
+vi.mock("../lib/userPreferences", () => ({
+  updateUserPreferences: vi.fn(),
+}));
+
 import { AuthProvider, useAuth } from "./AuthContext.jsx";
 
 describe("AuthProvider with auth but no OAuth providers", () => {

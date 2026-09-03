@@ -11,6 +11,7 @@ import {
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { syncPostHogUser } from "../analytics/posthog.js";
 import { auth, googleProvider, hasFirebaseConfig } from "../lib/firebase";
+import { updateUserPreferences } from "../lib/userPreferences";
 
 const AuthContext = createContext(null);
 
@@ -77,7 +78,15 @@ export function AuthProvider({ children }) {
 
     clearError();
     try {
-      await signInAnonymously(auth);
+      const credentials = await signInAnonymously(auth);
+      const guestUid = credentials?.user?.uid;
+      if (guestUid) {
+        try {
+          await updateUserPreferences(guestUid, { matchingOptOut: true });
+        } catch (prefErr) {
+          console.error("Failed to opt guest out of matching", prefErr);
+        }
+      }
     } catch (err) {
       handleError(err);
       throw err;

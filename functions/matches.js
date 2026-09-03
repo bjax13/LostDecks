@@ -1,5 +1,13 @@
 "use strict";
 
+function isAnonymousAuthUser(user) {
+  const providers = Array.isArray(user?.providerData) ? user.providerData : [];
+  if (providers.length === 0) {
+    return true;
+  }
+  return providers.every((provider) => provider?.providerId === "anonymous");
+}
+
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return 0;
@@ -120,5 +128,6 @@ module.exports = {
   buildPairRows,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  isAnonymousAuthUser,
   normalizeQuantity,
 };

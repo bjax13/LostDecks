@@ -6,8 +6,27 @@ const {
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
+  isAnonymousAuthUser,
   normalizeQuantity,
 } = require("./matches");
+
+test("isAnonymousAuthUser treats empty or anonymous-only provider data as guest", () => {
+  assert.equal(isAnonymousAuthUser(null), true);
+  assert.equal(isAnonymousAuthUser({ uid: "anon" }), true);
+  assert.equal(isAnonymousAuthUser({ uid: "anon", providerData: [] }), true);
+  assert.equal(
+    isAnonymousAuthUser({ uid: "anon", providerData: [{ providerId: "anonymous" }] }),
+    true,
+  );
+  assert.equal(
+    isAnonymousAuthUser({ uid: "real", providerData: [{ providerId: "password" }] }),
+    false,
+  );
+  assert.equal(
+    isAnonymousAuthUser({ uid: "google", providerData: [{ providerId: "google.com" }] }),
+    false,
+  );
+});
 
 test("normalizeQuantity clamps invalid values to zero", () => {
   assert.equal(normalizeQuantity(undefined), 0);

@@ -101,7 +101,7 @@ function AccountPage() {
   };
 
   const handleMatchingToggleChange = async (event) => {
-    if (!user?.uid) {
+    if (!user?.uid || user.isAnonymous) {
       return;
     }
 
@@ -190,13 +190,15 @@ function AccountPage() {
           <section className="account-section">
             <h2>Match preferences</h2>
             <p className="account-hint">
-              Control whether your collection is included in trade match discovery.
+              {user.isAnonymous
+                ? "Guest sessions are not included in trade matching."
+                : "Control whether your collection is included in trade match discovery."}
             </p>
             <label className="account-toggle">
               <input
                 type="checkbox"
-                checked={!matchingOptOut}
-                disabled={preferencesLoading || preferencesSaving}
+                checked={user.isAnonymous ? false : !matchingOptOut}
+                disabled={user.isAnonymous || preferencesLoading || preferencesSaving}
                 onChange={handleMatchingToggleChange}
               />
               Include me in Matches
