@@ -151,6 +151,34 @@ describe("isoUftPost", () => {
     expect(uftBlock).not.toMatch(/Chasm Dun:.*\b3\b/);
   });
 
+  it("omits other finishes of an owned card from ISO once that finish group is started", () => {
+    collectiblesState.skus = [
+      { skuId: "chm-01-dun", cardId: "c-chm-01", finish: "DUN" },
+      { skuId: "chm-01-foil", cardId: "c-chm-01", finish: "FOIL" },
+      { skuId: "chm-02-dun", cardId: "c-chm-02", finish: "DUN" },
+      { skuId: "chm-02-foil", cardId: "c-chm-02", finish: "FOIL" },
+      { skuId: "chm-03-dun", cardId: "c-chm-03", finish: "DUN" },
+      { skuId: "chm-03-foil", cardId: "c-chm-03", finish: "FOIL" },
+    ];
+    collectiblesState.cardById = {
+      "c-chm-01": { category: "story", number: 1, storyTitle: "Chasm" },
+      "c-chm-02": { category: "story", number: 2, storyTitle: "Chasm" },
+      "c-chm-03": { category: "story", number: 3, storyTitle: "Chasm" },
+    };
+
+    const { text } = buildIsoUftPost([
+      { skuId: "chm-01-dun", quantity: 1 },
+      { skuId: "chm-02-foil", quantity: 1 },
+    ]);
+    const [isoBlock] = text.split("UFT:");
+    expect(isoBlock).toMatch(/Chasm Dun: 3\b/);
+    expect(isoBlock).toMatch(/Chasm Foils: 3\b/);
+    expect(isoBlock).not.toMatch(/Chasm Dun:.*\b1\b/);
+    expect(isoBlock).not.toMatch(/Chasm Dun:.*\b2\b/);
+    expect(isoBlock).not.toMatch(/Chasm Foils:.*\b1\b/);
+    expect(isoBlock).not.toMatch(/Chasm Foils:.*\b2\b/);
+  });
+
   it("omits empty sections from the tree", () => {
     collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
     collectiblesState.cardById = {

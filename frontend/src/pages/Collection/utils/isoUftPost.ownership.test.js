@@ -34,8 +34,38 @@ describe("isoUftPost ownership (#107)", () => {
     expect(text).not.toContain("Heralds");
     expect(text).not.toContain("Nonsense");
     expect(text).not.toContain("Pins");
+    expect(text).not.toContain("Elsecaller");
+    expect(text).not.toContain("King Lopen");
+    expect(text.split("\n").length).toBeLessThan(20);
     expect(text).toContain("UFT:");
     expect(text).toContain("None available yet.");
+  });
+
+  it("matches owned SKUs case-insensitively and still omits other finishes of that card", () => {
+    const { tree, text } = (() => {
+      const built = buildIsoUftPostTree([{ skuId: "lt24-chm-01-dun", quantity: "1" }]);
+      return { tree: built.tree, text: formatIsoUftPost(built.tree) };
+    })();
+
+    expect(tree[0].children.map((section) => section.id)).toEqual(["iso:story-dun"]);
+    const chasmDun = tree[0].children[0].children.find((leaf) => leaf.label === CHASM_TITLE);
+    expect(numberedItems(chasmDun.line)).not.toContain(1);
+    expect(text).not.toContain("Story Foils:");
+  });
+
+  it("excludes every finish of an owned card from ISO even when that finish section is started", () => {
+    const { text } = buildIsoUftPost([
+      { skuId: "LT24-CHM-01-DUN", quantity: 1 },
+      { skuId: "LT24-CHM-02-FOIL", quantity: 1 },
+    ]);
+    const [isoBlock] = text.split("UFT:");
+    const dunLine = isoBlock.split("\n").find((line) => line.startsWith(`${CHASM_TITLE} Dun:`));
+    const foilLine = isoBlock.split("\n").find((line) => line.startsWith(`${CHASM_TITLE} Foils:`));
+
+    expect(numberedItems(dunLine)).not.toContain(1);
+    expect(numberedItems(dunLine)).not.toContain(2);
+    expect(numberedItems(foilLine)).not.toContain(1);
+    expect(numberedItems(foilLine)).not.toContain(2);
   });
 
   it("lists only duplicate SKUs as UFT and excludes those SKUs from ISO", () => {
