@@ -26,34 +26,53 @@ const mockCollectible = {
   searchTokens: "lt24-els-01",
 };
 
+function renderGrid(props = {}) {
+  return render(
+    <TestMemoryRouter>
+      <CollectibleGrid collectibles={[mockCollectible]} {...props} />
+    </TestMemoryRouter>,
+  );
+}
+
 describe("CollectibleGrid (unit)", () => {
-  it("renders collectible cards as links", () => {
-    render(
-      <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} />
-      </TestMemoryRouter>,
+  it("shows glance fields and hides details until expanded", async () => {
+    renderGrid();
+
+    expect(screen.getByText("Story")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Story #01" })).toBeVisible();
+    expect(screen.getByTestId("add-btn")).toBeVisible();
+
+    expect(screen.getByText("LT24-ELS-01")).not.toBeVisible();
+    expect(screen.getByText("Story card")).not.toBeVisible();
+    expect(screen.getByText("Elsecaller")).not.toBeVisible();
+    expect(screen.getByText("Common")).not.toBeVisible();
+    expect(screen.getByText("Not in binder mosaic")).not.toBeVisible();
+
+    await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
+
+    expect(screen.getByRole("link", { name: "LT24-ELS-01" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "LT24-ELS-01" })).toHaveAttribute(
+      "href",
+      "/collectibles/LT24-ELS-01",
     );
-    const link = screen.getByRole("link", { name: /Story #01/i });
-    expect(link).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
+    expect(screen.getByText("Story card")).toBeVisible();
+    expect(screen.getByText("Elsecaller")).toBeVisible();
+    expect(screen.getByText("1")).toBeVisible();
+    expect(screen.getByText("Common")).toBeVisible();
+    expect(screen.getByText("DUN")).toBeVisible();
+    expect(screen.getByText("FOIL")).toBeVisible();
+    expect(screen.getByText("Not in binder mosaic")).toBeVisible();
   });
 
-  it("prevents navigation when clicking add-to-collection button", async () => {
-    render(
-      <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} />
-      </TestMemoryRouter>,
-    );
-    const addBtn = screen.getByTestId("add-btn");
-    await userEvent.click(addBtn);
-    expect(window.location.pathname).toBe("/");
+  it("does not expand details when add-to-collection is clicked", async () => {
+    renderGrid();
+    await userEvent.click(screen.getByTestId("add-btn"));
+    expect(screen.getByText("LT24-ELS-01")).not.toBeVisible();
+    expect(screen.getByTestId("add-btn")).toBeVisible();
   });
 
   it("forwards ownedBySkuId to the add button", () => {
-    render(
-      <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} ownedBySkuId={{ "LT24-ELS-01-DUN": 3 }} />
-      </TestMemoryRouter>,
-    );
+    renderGrid({ ownedBySkuId: { "LT24-ELS-01-DUN": 3 } });
     expect(screen.getByTestId("add-btn")).toHaveTextContent("Add LT24-ELS-01 · x3");
   });
 });

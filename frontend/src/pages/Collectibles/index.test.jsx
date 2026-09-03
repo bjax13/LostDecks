@@ -134,6 +134,23 @@ describe("CollectiblesPage (integration)", () => {
     expect(document.querySelector(".cards-grid")).toBeInTheDocument();
   });
 
+  it("keeps catalog details collapsed until a card is expanded", async () => {
+    const user = setupUser();
+    renderWithRouter(<CollectiblesPage />);
+
+    expect(screen.getByRole("heading", { name: "Test Story #01" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Add Dun" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "LT24-ELS-01" })).not.toBeInTheDocument();
+    expect(screen.getByText("Rare")).not.toBeVisible();
+    expect(screen.getByText("Page 1")).not.toBeVisible();
+
+    await user.click(screen.getByRole("heading", { name: "Test Story #01" }));
+
+    expect(screen.getByRole("link", { name: "LT24-ELS-01" })).toBeVisible();
+    expect(screen.getByText("Rare")).toBeVisible();
+    expect(screen.getByText("Page 1")).toBeVisible();
+  });
+
   it("toggles sort direction when sort button clicked", async () => {
     const user = setupUser();
     renderWithRouter(<CollectiblesPage />);
