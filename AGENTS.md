@@ -74,13 +74,17 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
    - Open **Hosting** in the console and complete the “Get started” flow if you have not deployed Hosting before.
 
 2. **GitHub Actions (optional automation)**  
-   Workflow: `.github/workflows/deploy-firebase.yml` (manual **Run workflow** only). Configure these **repository secrets**:
+   Workflows (manual **Run workflow** only):
+   - `Full project deploy` (`.github/workflows/deploy-firebase.yml`) — deploys Hosting + Firestore + Functions
+   - `Front end only deploy` (`.github/workflows/deploy-frontend.yml`) — deploys Hosting only
+
+   Configure these **repository secrets**:
 
    | Secret | Purpose |
    |--------|---------|
    | `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account that can deploy Hosting, Firestore rules/indexes, and Cloud Functions (Firebase recommends a dedicated CI account with the right IAM roles). |
 
-   The workflow now runs `npm run deploy:firebase`, which fetches Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` at deploy time. `VITE_FIREBASE_*` repo secrets are no longer required for this workflow.
+   Both workflows use the safe repo scripts (`npm run deploy:firebase` / `npm run deploy:hosting`), which fetch Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` at deploy time. `VITE_FIREBASE_*` repo secrets are no longer required.
 
 3. **What gets deployed**  
    `firebase deploy --only hosting,firestore,functions` publishes the Vite build from `frontend/dist`, Firestore rules/indexes, and Cloud Functions. It does not deploy other Google Cloud resources.
