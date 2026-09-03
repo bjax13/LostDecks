@@ -147,7 +147,7 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Email" })).toHaveAttribute(
       "href",
-      "mailto:two@example.com",
+      "mailto:two%40example.com",
     );
   });
 
@@ -227,6 +227,31 @@ describe("MatchesPage", () => {
     await user.click(screen.getByRole("button", { name: "Copy email" }));
 
     expect(writeText).toHaveBeenCalledWith("two@example.com");
+  });
+
+  it("omits the mailto link when the email is not a safe address", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Lost Tester 2",
+            contact: {
+              method: "tradingEmail",
+              email: "trade@example.com?subject=phish",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            lanes: testerLanes(),
+          },
+        ],
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
   });
 
   it("shows discord contact details instead of email buttons", () => {

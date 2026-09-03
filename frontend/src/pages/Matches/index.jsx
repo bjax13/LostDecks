@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
-import { MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
+import { isValidTradingEmail, MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
 import MatchesToolbar from "./components/MatchesToolbar";
 import { matchLaneLabels } from "./constants";
 import { useMatchesExplorer } from "./hooks/useMatchesExplorer";
@@ -66,13 +66,22 @@ function TradeLane({ lane }) {
   );
 }
 
+function mailtoHref(email) {
+  const trimmed = typeof email === "string" ? email.trim() : "";
+  if (!isValidTradingEmail(trimmed) || /[/?#&\\]/.test(trimmed)) {
+    return null;
+  }
+  return `mailto:${encodeURIComponent(trimmed)}`;
+}
+
 function MatchContact({ contact, displayName }) {
   const email = contact?.email?.trim() || "";
-  const canEmail = Boolean(email);
+  const mailHref = mailtoHref(email);
+  const canCopyEmail = Boolean(email);
   const isDiscord = contact?.method === MATCH_CONTACT_SHARING.DISCORD && contact.discordHandle;
 
   async function copyEmail() {
-    if (!canEmail || !navigator.clipboard?.writeText) {
+    if (!canCopyEmail || !navigator.clipboard?.writeText) {
       return;
     }
     await navigator.clipboard.writeText(email);
@@ -87,20 +96,21 @@ function MatchContact({ contact, displayName }) {
           {contact.discordChannel || "Sanderson Collectors Guild"}
         </p>
       ) : null}
-      {canEmail ? (
+      {canCopyEmail || mailHref ? (
         <div className="matches-contact-actions">
-          <button type="button" className="matches-contact-button" onClick={copyEmail}>
-            Copy email
-          </button>
-          <a
-            className="matches-contact-button matches-contact-button-ghost"
-            href={`mailto:${email}`}
-          >
-            Email
-          </a>
+          {canCopyEmail ? (
+            <button type="button" className="matches-contact-button" onClick={copyEmail}>
+              Copy email
+            </button>
+          ) : null}
+          {mailHref ? (
+            <a className="matches-contact-button matches-contact-button-ghost" href={mailHref}>
+              Email
+            </a>
+          ) : null}
         </div>
       ) : null}
-      {!canEmail && !isDiscord ? <p>Contact details are unavailable.</p> : null}
+      {!canCopyEmail && !isDiscord ? <p>Contact details are unavailable.</p> : null}
       {contact?.fallbackReason ? (
         <p className="matches-contact-fallback">{contact.fallbackReason}</p>
       ) : null}

@@ -125,6 +125,27 @@ test("buildMatchesForCaller fences lanes and hides empty ones for tester1 vs tes
   ]);
 });
 
+test("buildMatchesForCaller caps each pile to the item limit", () => {
+  const otherTotals = new Map();
+  for (let index = 1; index <= 12; index += 1) {
+    otherTotals.set(`LT24-ELS-${String(index).padStart(2, "0")}-DUN`, 2);
+  }
+  const userSkuTotals = new Map([
+    ["me", new Map([["LT24-HLD-01-DUN", 2]])],
+    ["other", otherTotals],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    itemLimit: 5,
+  });
+
+  assert.equal(result.matches[0].lanes[0].theyCanSend.length, 5);
+  assert.equal(result.matches[0].lanes[0].youCanSend.length, 1);
+});
+
 test("buildMatchesForCaller does not match across lanes", () => {
   const userSkuTotals = new Map([
     ["me", new Map([["PIN-CF-01", 2]])],

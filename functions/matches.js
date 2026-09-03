@@ -11,6 +11,7 @@ const DEFAULT_MATCH_PAGE_SIZE = 20;
 const MAX_MATCH_PAGE_SIZE = 50;
 
 const MATCH_LANE_IDS = Object.freeze(["dun", "foil", "pins"]);
+const DEFAULT_PILE_ITEM_LIMIT = 100;
 
 function normalizeQuantity(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
@@ -75,8 +76,12 @@ function laneForSkuId(skuId) {
   return null;
 }
 
-function buildPileItems(extras, ownerTotals, recipientTotals, lane) {
+function buildPileItems(extras, ownerTotals, recipientTotals, lane, itemLimit) {
   const items = [];
+  const limit =
+    typeof itemLimit === "number" && Number.isFinite(itemLimit) && itemLimit > 0
+      ? Math.floor(itemLimit)
+      : DEFAULT_PILE_ITEM_LIMIT;
 
   for (const skuId of extras) {
     if (laneForSkuId(skuId) !== lane) {
@@ -97,15 +102,21 @@ function buildPileItems(extras, ownerTotals, recipientTotals, lane) {
   }
 
   items.sort((a, b) => a.skuId.localeCompare(b.skuId));
-  return items;
+  return items.slice(0, limit);
 }
 
-function buildLanesForCounterparty({ callerTotals, callerExtras, otherTotals, otherExtras }) {
+function buildLanesForCounterparty({
+  callerTotals,
+  callerExtras,
+  otherTotals,
+  otherExtras,
+  itemLimit = DEFAULT_PILE_ITEM_LIMIT,
+}) {
   const lanes = [];
 
   for (const lane of MATCH_LANE_IDS) {
-    const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane);
-    const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane);
+    const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane, itemLimit);
+    const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane, itemLimit);
     if (!theyCanSend.length || !youCanSend.length) {
       continue;
     }
@@ -120,7 +131,12 @@ function buildLanesForCounterparty({ callerTotals, callerExtras, otherTotals, ot
   return lanes;
 }
 
-function buildMatchesForCaller({ callerUid, userSkuTotals, optedOutUserIds = new Set() }) {
+function buildMatchesForCaller({
+  callerUid,
+  userSkuTotals,
+  optedOutUserIds = new Set(),
+  itemLimit = DEFAULT_PILE_ITEM_LIMIT,
+}) {
   if (optedOutUserIds.has(callerUid)) {
     return { isCallerOptedOut: true, matches: [] };
   }
@@ -140,6 +156,7 @@ function buildMatchesForCaller({ callerUid, userSkuTotals, optedOutUserIds = new
       callerExtras: callerProfile.extras,
       otherTotals,
       otherExtras: otherProfile.extras,
+      itemLimit,
     });
 
     if (lanes.length > 0) {
@@ -267,6 +284,7 @@ function resolveMatchContact({ preferences, trueEmail }) {
 module.exports = {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_MATCH_PAGE_SIZE,
+  DEFAULT_PILE_ITEM_LIMIT,
   MATCH_CONTACT_SHARING,
   MATCH_LANE_IDS,
   MAX_MATCH_PAGE_SIZE,
