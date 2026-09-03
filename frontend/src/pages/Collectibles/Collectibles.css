@@ -337,6 +337,7 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
   gap: 0.75rem;
   min-width: 0;
+  align-items: start;
 }
 
 .card-tile {
@@ -347,6 +348,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 8rem;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
 }
 
@@ -356,8 +358,8 @@
 
 .card-glance {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   gap: 0.4rem 0.55rem;
   cursor: pointer;
   list-style: none;
@@ -398,8 +400,13 @@
   font-size: 0.95rem;
   line-height: 1.3;
   margin: 0;
-  flex: 1 1 8rem;
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: calc(1.3em * 2);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   overflow-wrap: anywhere;
 }
 
@@ -550,6 +557,7 @@
     padding: 0.6rem 0.7rem;
     border-radius: 10px;
     gap: 0.4rem;
+    min-height: 0;
   }
 
   .card-tile h2 {
@@ -567,7 +575,7 @@
 }
 
 .card-actions {
-  margin-top: 0;
+  margin-top: auto;
   padding-top: 0;
 }
 

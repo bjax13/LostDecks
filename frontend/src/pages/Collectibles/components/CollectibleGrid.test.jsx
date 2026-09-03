@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../../test/router.jsx";
+import "../Collectibles.css";
 import CollectibleGrid from "./CollectibleGrid.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
@@ -69,5 +70,30 @@ describe("CollectibleGrid (unit)", () => {
   it("forwards ownedBySkuId to the add button", () => {
     renderGrid({ ownedBySkuId: { "LT24-ELS-01-DUN": 3 } });
     expect(screen.getByTestId("add-btn")).toHaveTextContent("Add LT24-ELS-01 · x3");
+  });
+
+  it("pins actions to the card bottom and keeps collapsed siblings at glance size", async () => {
+    const longTitle = {
+      ...mockCollectible,
+      id: "LT24-ELS-02",
+      displayName: "The Chasmfriends get a Pet! #01 with a much longer title",
+    };
+    render(
+      <TestMemoryRouter>
+        <CollectibleGrid collectibles={[mockCollectible, longTitle]} />
+      </TestMemoryRouter>,
+    );
+
+    const grid = document.querySelector(".cards-grid");
+    const tiles = [...document.querySelectorAll(".card-tile")];
+    expect(tiles).toHaveLength(2);
+    expect(getComputedStyle(grid).alignItems).toBe("start");
+    expect(getComputedStyle(tiles[0].querySelector(".card-actions")).marginTop).toBe("auto");
+    expect(getComputedStyle(tiles[0].querySelector("h2")).webkitLineClamp).toBe("2");
+
+    await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
+
+    expect(tiles[0].querySelector(".card-details")).toHaveAttribute("open");
+    expect(tiles[1].querySelector(".card-details")).not.toHaveAttribute("open");
   });
 });
