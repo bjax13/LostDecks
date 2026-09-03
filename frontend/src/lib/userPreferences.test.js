@@ -26,6 +26,7 @@ describe("userPreferences normalization", () => {
       }),
     ).toEqual({
       matchingOptOut: true,
+      matchLanes: { dun: true, foil: true, pins: true },
       matchContactSharing: MATCH_CONTACT_SHARING.TRADING_EMAIL,
       tradingEmail: "trade@example.com",
       discordHandle: "stormlight",
@@ -41,10 +42,28 @@ describe("userPreferences normalization", () => {
       }),
     ).toEqual({
       matchingOptOut: false,
+      matchLanes: { dun: true, foil: true, pins: true },
       matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
       tradingEmail: "",
       discordHandle: "",
       discordChannel: DEFAULT_DISCORD_CHANNEL,
+    });
+  });
+
+  it("defaults missing match lanes to enabled and keeps explicit false", () => {
+    expect(normalizeUserPreferences({}).matchLanes).toEqual({
+      dun: true,
+      foil: true,
+      pins: true,
+    });
+    expect(
+      normalizeUserPreferences({
+        matchLanes: { dun: false, pins: "nope" },
+      }).matchLanes,
+    ).toEqual({
+      dun: false,
+      foil: true,
+      pins: true,
     });
   });
 

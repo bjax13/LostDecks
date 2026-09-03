@@ -162,6 +162,36 @@
   height: 1rem;
 }
 
+.account-match-lanes {
+  margin: 0;
+  margin-left: 1.7rem;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.account-toggle--nested {
+  font-weight: 500;
+}
+
+.account-match-lanes:disabled .account-toggle--nested {
+  opacity: 0.55;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .account-contact-sharing {
   margin: 0;
   padding: 0;

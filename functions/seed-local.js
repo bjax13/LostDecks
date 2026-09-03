@@ -100,16 +100,24 @@ async function seedUserData(db, uid, userConfig) {
       ? userConfig.discordChannel.trim()
       : "Sanderson Collectors Guild";
 
-  await db.collection(PREFERENCES_NAME).doc(uid).set(
-    {
-      matchingOptOut,
-      matchContactSharing,
-      tradingEmail,
-      discordHandle,
-      discordChannel,
-    },
-    { merge: true },
-  );
+  await db
+    .collection(PREFERENCES_NAME)
+    .doc(uid)
+    .set(
+      {
+        matchingOptOut,
+        matchLanes: {
+          dun: userConfig.matchLanes?.dun !== false,
+          foil: userConfig.matchLanes?.foil !== false,
+          pins: userConfig.matchLanes?.pins !== false,
+        },
+        matchContactSharing,
+        tradingEmail,
+        discordHandle,
+        discordChannel,
+      },
+      { merge: true },
+    );
 
   const entries = Array.isArray(userConfig.collection) ? userConfig.collection : [];
   let createdEntries = 0;

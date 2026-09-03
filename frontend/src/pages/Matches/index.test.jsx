@@ -124,6 +124,39 @@ describe("MatchesPage", () => {
     vi.useRealTimers();
   });
 
+  it("shows only Pins when the payload has a pins-only reciprocal lane", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Lost Tester 2",
+            contact: {
+              method: "trueEmail",
+              email: "two@example.com",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            lanes: [
+              {
+                id: "pins",
+                theyCanSend: [{ skuId: "PIN-CF-02", owned: 2, extras: 1 }],
+                youCanSend: [{ skuId: "PIN-CF-01", owned: 2, extras: 1 }],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.getByRole("heading", { name: "Lost Tester 2" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Dun cards" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Foil cards" })).not.toBeInTheDocument();
+  });
+
   it("renders a person card with dun and pin piles and no sentence rows", () => {
     render(<MatchesPage />);
 

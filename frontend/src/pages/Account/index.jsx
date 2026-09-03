@@ -6,17 +6,22 @@ import {
   DEFAULT_USER_PREFERENCES,
   isValidTradingEmail,
   MATCH_CONTACT_SHARING,
+  MATCH_LANE_IDS,
   MAX_DISCORD_CHANNEL_LENGTH,
   MAX_DISCORD_HANDLE_LENGTH,
   MAX_TRADING_EMAIL_LENGTH,
   subscribeUserPreferences,
   updateUserPreferences,
 } from "../../lib/userPreferences";
+import { matchLaneLabels } from "../Matches/constants";
 import "./Account.css";
 
 function AccountPage() {
   const { user, updateDisplayName } = useAuth();
   const [matchingOptOut, setMatchingOptOut] = useState(DEFAULT_USER_PREFERENCES.matchingOptOut);
+  const [matchLanes, setMatchLanes] = useState(() => ({
+    ...DEFAULT_USER_PREFERENCES.matchLanes,
+  }));
   const [matchContactSharing, setMatchContactSharing] = useState(
     DEFAULT_USER_PREFERENCES.matchContactSharing,
   );
@@ -39,6 +44,7 @@ function AccountPage() {
   useEffect(() => {
     if (!user?.uid) {
       setMatchingOptOut(DEFAULT_USER_PREFERENCES.matchingOptOut);
+      setMatchLanes({ ...DEFAULT_USER_PREFERENCES.matchLanes });
       setMatchContactSharing(DEFAULT_USER_PREFERENCES.matchContactSharing);
       setTradingEmail(DEFAULT_USER_PREFERENCES.tradingEmail);
       setDiscordHandle(DEFAULT_USER_PREFERENCES.discordHandle);
@@ -59,6 +65,10 @@ function AccountPage() {
       user.uid,
       (preferences) => {
         setMatchingOptOut(Boolean(preferences.matchingOptOut));
+        setMatchLanes({
+          ...DEFAULT_USER_PREFERENCES.matchLanes,
+          ...preferences.matchLanes,
+        });
         setMatchContactSharing(preferences.matchContactSharing);
         setTradingEmail(preferences.tradingEmail);
         setDiscordHandle(preferences.discordHandle);
@@ -153,6 +163,16 @@ function AccountPage() {
     setMatchingOptOut(nextOptOut);
     await persistPreferences({ matchingOptOut: nextOptOut }, () => {
       setMatchingOptOut(previousOptOut);
+    });
+  };
+
+  const handleMatchLaneChange = async (laneId, event) => {
+    const nextEnabled = event.target.checked;
+    const previousLanes = matchLanes;
+    const nextLanes = { ...matchLanes, [laneId]: nextEnabled };
+    setMatchLanes(nextLanes);
+    await persistPreferences({ matchLanes: nextLanes }, () => {
+      setMatchLanes(previousLanes);
     });
   };
 
@@ -353,6 +373,19 @@ function AccountPage() {
               />
               Include me in Matches
             </label>
+            <fieldset className="account-match-lanes" disabled={controlsDisabled || matchingOptOut}>
+              <legend className="visually-hidden">Match lanes</legend>
+              {MATCH_LANE_IDS.map((laneId) => (
+                <label key={laneId} className="account-toggle account-toggle--nested">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(matchLanes[laneId])}
+                    onChange={(event) => handleMatchLaneChange(laneId, event)}
+                  />
+                  {matchLaneLabels[laneId]}
+                </label>
+              ))}
+            </fieldset>
 
             <fieldset
               key={contactSharingResetKey}

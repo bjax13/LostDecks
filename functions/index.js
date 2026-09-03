@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const {
+  buildLanePrefsByUserId,
   buildMatchesForCaller,
   buildUserSkuTotals,
   DEFAULT_MATCH_PAGE_SIZE,
@@ -40,14 +41,18 @@ async function resolveAuthProfiles(userIds) {
 
 async function loadPreferencesByUserId(db, userIds) {
   const preferencesByUserId = new Map();
-  if (!userIds.length) {
+  const uniqueIds = [...new Set(userIds.map(uidOrEmpty).filter(Boolean))];
+  if (!uniqueIds.length) {
     return preferencesByUserId;
   }
 
-  const refs = userIds.map((userId) => db.collection("userPreferences").doc(userId));
-  const snapshots = await db.getAll(...refs);
-  for (const snapshot of snapshots) {
-    preferencesByUserId.set(snapshot.id, snapshot.exists ? snapshot.data() : {});
+  for (let index = 0; index < uniqueIds.length; index += 100) {
+    const batchIds = uniqueIds.slice(index, index + 100);
+    const refs = batchIds.map((userId) => db.collection("userPreferences").doc(userId));
+    const snapshots = await db.getAll(...refs);
+    for (const snapshot of snapshots) {
+      preferencesByUserId.set(snapshot.id, snapshot.exists ? snapshot.data() : {});
+    }
   }
 
   return preferencesByUserId;
@@ -79,11 +84,15 @@ exports.getTradeMatches = onCall(async (request) => {
   const optedOutUserIds = new Set(
     optedOutSnapshot.docs.map((snapshot) => uidOrEmpty(snapshot.id)).filter(Boolean),
   );
+  const preferenceUserIds = [callerUid, ...userSkuTotals.keys()];
+  const preferencesByUserId = await loadPreferencesByUserId(db, preferenceUserIds);
+  const lanePrefsByUserId = buildLanePrefsByUserId(preferencesByUserId);
 
   const { isCallerOptedOut, matches } = buildMatchesForCaller({
     callerUid,
     userSkuTotals,
     optedOutUserIds,
+    lanePrefsByUserId,
   });
 
   if (isCallerOptedOut) {
@@ -99,10 +108,7 @@ exports.getTradeMatches = onCall(async (request) => {
 
   const page = paginateMatches(matches, { pageSize, cursor });
   const counterpartyIds = page.matches.map((match) => match.userId);
-  const [profilesByUserId, preferencesByUserId] = await Promise.all([
-    resolveAuthProfiles(counterpartyIds),
-    loadPreferencesByUserId(db, counterpartyIds),
-  ]);
+  const profilesByUserId = await resolveAuthProfiles(counterpartyIds);
 
   const payload = page.matches.map((match) => {
     const profile = profilesByUserId.get(match.userId) || {
