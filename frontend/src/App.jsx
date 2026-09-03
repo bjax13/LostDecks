@@ -40,6 +40,11 @@ function MainNav() {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clear stale guest errors when the route or session changes
+  useEffect(() => {
+    setGuestError(null);
+  }, [location.pathname, user]);
+
   useEffect(() => {
     if (!menuOpen) {
       return;

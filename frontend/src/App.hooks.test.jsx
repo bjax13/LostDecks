@@ -27,6 +27,7 @@ function signedOutAuth(overrides = {}) {
 describe("App (hook mocks)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.pushState({}, "", "/");
     mockUseAuthModal.mockReturnValue({ openAuthModal: vi.fn() });
     mockUseAuth.mockReturnValue(signedOutAuth());
   });
@@ -139,6 +140,45 @@ describe("App (hook mocks)", () => {
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Quick sign in" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Guest sign-in failed.");
+    errSpy.mockRestore();
+  });
+
+  it("clears the guest error when the route changes", async () => {
+    const user = userEvent.setup();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockUseAuth.mockReturnValue(
+      signedOutAuth({ loginAsGuest: vi.fn().mockRejectedValue(new Error("guest failed")) }),
+    );
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: "Quick sign in" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("guest failed");
+    await user.click(screen.getByRole("link", { name: "Collectibles" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    errSpy.mockRestore();
+  });
+
+  it("clears the guest error after a later signed-in session ends", async () => {
+    const user = userEvent.setup();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockUseAuth.mockReturnValue(
+      signedOutAuth({ loginAsGuest: vi.fn().mockRejectedValue(new Error("guest failed")) }),
+    );
+    const { rerender } = render(<App />);
+    await user.click(screen.getByRole("button", { name: "Quick sign in" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("guest failed");
+
+    mockUseAuth.mockReturnValue({
+      user: { displayName: "Pat", email: "pat@example.com" },
+      logout: vi.fn(),
+      loading: false,
+      loginAsGuest: vi.fn(),
+    });
+    rerender(<App />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    mockUseAuth.mockReturnValue(signedOutAuth());
+    rerender(<App />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     errSpy.mockRestore();
   });
 
