@@ -55,6 +55,7 @@ function Harness() {
       <span data-testid="loading">{String(ctx.loading)}</span>
       <span data-testid="user-id">{ctx.user?.uid ?? "none"}</span>
       <span data-testid="error-msg">{ctx.error?.message ?? ""}</span>
+      <span data-testid="display-name">{ctx.user?.displayName ?? ""}</span>
       <span data-testid="has-config">{String(ctx.hasFirebaseConfig)}</span>
       <button
         type="button"
@@ -87,6 +88,12 @@ function Harness() {
       </button>
       <button type="button" onClick={() => ctx.clearError()}>
         clear-error
+      </button>
+      <button type="button" onClick={() => void ctx.updateDisplayName("River Tam").catch(() => {})}>
+        update-display-name
+      </button>
+      <button type="button" onClick={() => void ctx.updateDisplayName("   ").catch(() => {})}>
+        update-display-name-blank
       </button>
     </div>
   );
@@ -279,6 +286,99 @@ describe("AuthProvider", () => {
     await user.click(screen.getByRole("button", { name: "register-with-name" }));
     await waitFor(() => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent("profile update failed");
+    });
+  });
+
+  it("updateDisplayName writes the trimmed name and refreshes user state", async () => {
+    const currentUser = { uid: "user-1", displayName: "Old Name", email: "a@example.com" };
+    fb.auth = { currentUser };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      callback(currentUser);
+      return mockUnsubscribe;
+    });
+    authFns.updateProfile.mockImplementation(async (firebaseUser, profile) => {
+      firebaseUser.displayName = profile.displayName;
+    });
+    const user = userEvent.setup();
+    renderAuth();
+    await waitFor(() => {
+      expect(screen.getByTestId("display-name")).toHaveTextContent("Old Name");
+    });
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(authFns.updateProfile).toHaveBeenCalledWith(currentUser, { displayName: "River Tam" });
+    });
+    expect(screen.getByTestId("display-name")).toHaveTextContent("River Tam");
+  });
+
+  it("updateDisplayName does not restore a user after the auth session changes", async () => {
+    const originalUser = { uid: "user-1", displayName: "Old Name", email: "a@example.com" };
+    const nextUser = { uid: "user-2", displayName: "Other" };
+    let authCallback = () => {};
+    fb.auth = { currentUser: originalUser };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      authCallback = callback;
+      callback(originalUser);
+      return mockUnsubscribe;
+    });
+    authFns.updateProfile.mockImplementation(async () => {
+      fb.auth.currentUser = nextUser;
+      authCallback(nextUser);
+    });
+    const user = userEvent.setup();
+    renderAuth();
+    await waitFor(() => {
+      expect(screen.getByTestId("user-id")).toHaveTextContent("user-1");
+    });
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(authFns.updateProfile).toHaveBeenCalledWith(originalUser, {
+        displayName: "River Tam",
+      });
+    });
+    expect(screen.getByTestId("user-id")).toHaveTextContent("user-2");
+    expect(screen.getByTestId("display-name")).toHaveTextContent("Other");
+  });
+
+  it("updateDisplayName rejects a blank name without calling updateProfile", async () => {
+    const currentUser = { uid: "user-1", displayName: "Old Name" };
+    fb.auth = { currentUser };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      callback(currentUser);
+      return mockUnsubscribe;
+    });
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "update-display-name-blank" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent("Display name cannot be empty.");
+    });
+    expect(authFns.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it("updateDisplayName errors when no user is signed in", async () => {
+    fb.auth = { currentUser: null };
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent(
+        "You must be signed in to update your display name.",
+      );
+    });
+    expect(authFns.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it("updateDisplayName surfaces updateProfile failures", async () => {
+    const currentUser = { uid: "user-1", displayName: "Old Name" };
+    fb.auth = { currentUser };
+    const err = new Error("profile write failed");
+    authFns.updateProfile.mockRejectedValue(err);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent("profile write failed");
     });
   });
 });

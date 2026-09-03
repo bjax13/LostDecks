@@ -55,4 +55,19 @@ describe("ForgotPassword (unit)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Send reset email" }));
     expect(screen.getByText(/Check your inbox/)).toBeInTheDocument();
   });
+
+  it("maps user-not-found to reset copy instead of a password message", () => {
+    mockError = new Error("Firebase: Error (auth/user-not-found).");
+    mockError.code = "auth/user-not-found";
+    render(
+      <TestMemoryRouter>
+        <ForgotPassword />
+      </TestMemoryRouter>,
+    );
+    expect(
+      screen.getByText("If an account exists for that email, a reset link has been sent."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/password is incorrect/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Firebase:/)).not.toBeInTheDocument();
+  });
 });

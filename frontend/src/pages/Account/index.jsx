@@ -15,7 +15,7 @@ import {
 import "./Account.css";
 
 function AccountPage() {
-  const { user } = useAuth();
+  const { user, updateDisplayName } = useAuth();
   const [matchingOptOut, setMatchingOptOut] = useState(DEFAULT_USER_PREFERENCES.matchingOptOut);
   const [matchContactSharing, setMatchContactSharing] = useState(
     DEFAULT_USER_PREFERENCES.matchContactSharing,
@@ -26,6 +26,11 @@ function AccountPage() {
   const [preferencesLoading, setPreferencesLoading] = useState(true);
   const [preferencesSaving, setPreferencesSaving] = useState(false);
   const [preferencesError, setPreferencesError] = useState(null);
+  const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
+  const [displayNameDraft, setDisplayNameDraft] = useState("");
+  const [displayNameSaving, setDisplayNameSaving] = useState(false);
+  const [displayNameError, setDisplayNameError] = useState(null);
+  const [displayNameSaved, setDisplayNameSaved] = useState(false);
   const [tradingEmailError, setTradingEmailError] = useState(null);
   const [discordError, setDiscordError] = useState(null);
   const [contactSharingError, setContactSharingError] = useState(null);
@@ -69,6 +74,59 @@ function AccountPage() {
 
     return () => unsubscribe();
   }, [user?.uid]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset editor when the signed-in user changes, not when displayName updates after save
+  useEffect(() => {
+    setIsEditingDisplayName(false);
+    setDisplayNameDraft(user?.displayName || "");
+    setDisplayNameError(null);
+    setDisplayNameSaved(false);
+  }, [user?.uid]);
+
+  const startEditingDisplayName = () => {
+    setDisplayNameDraft(user?.displayName || "");
+    setDisplayNameError(null);
+    setDisplayNameSaved(false);
+    setIsEditingDisplayName(true);
+  };
+
+  const cancelEditingDisplayName = () => {
+    setDisplayNameDraft(user?.displayName || "");
+    setDisplayNameError(null);
+    setIsEditingDisplayName(false);
+  };
+
+  const handleDisplayNameSave = async (event) => {
+    event.preventDefault();
+    const trimmed = displayNameDraft.trim();
+    if (!trimmed) {
+      setDisplayNameError(new Error("Display name cannot be empty."));
+      setDisplayNameSaved(false);
+      return;
+    }
+
+    if (trimmed === (user?.displayName || "").trim()) {
+      setDisplayNameError(null);
+      setDisplayNameSaved(false);
+      setIsEditingDisplayName(false);
+      return;
+    }
+
+    setDisplayNameSaving(true);
+    setDisplayNameError(null);
+    setDisplayNameSaved(false);
+
+    try {
+      await updateDisplayName(trimmed);
+      setIsEditingDisplayName(false);
+      setDisplayNameSaved(true);
+    } catch (err) {
+      console.error("Failed to update display name", err);
+      setDisplayNameError(err);
+    } finally {
+      setDisplayNameSaving(false);
+    }
+  };
 
   const persistPreferences = async (updates, revert) => {
     if (!user?.uid) {
@@ -221,7 +279,7 @@ function AccountPage() {
       <section className="account-page">
         <header className="account-header">
           <h1>Account Settings</h1>
-          <p className="account-hint">View your account profile.</p>
+          <p className="account-hint">View and update your account profile.</p>
         </header>
 
         {user ? (
@@ -229,14 +287,54 @@ function AccountPage() {
             <h2>Profile overview</h2>
             <ul className="account-summary">
               <li>
-                <span className="account-summary-label">Display name</span>
-                <span>{user.displayName || "Not set"}</span>
+                <span className="account-summary-label" id="account-display-name-label">
+                  Display name
+                </span>
+                {isEditingDisplayName ? (
+                  <form className="account-display-name-form" onSubmit={handleDisplayNameSave}>
+                    <input
+                      id="account-display-name"
+                      type="text"
+                      name="displayName"
+                      autoComplete="nickname"
+                      value={displayNameDraft}
+                      onChange={(event) => setDisplayNameDraft(event.target.value)}
+                      aria-labelledby="account-display-name-label"
+                      disabled={displayNameSaving}
+                      required
+                    />
+                    <button type="submit" disabled={displayNameSaving}>
+                      {displayNameSaving ? "Saving…" : "Save"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditingDisplayName}
+                      disabled={displayNameSaving}
+                    >
+                      Cancel
+                    </button>
+                  </form>
+                ) : (
+                  <span className="account-display-name">
+                    <span>{user.displayName || "Not set"}</span>
+                    <button type="button" onClick={startEditingDisplayName}>
+                      Edit
+                    </button>
+                  </span>
+                )}
               </li>
               <li>
                 <span className="account-summary-label">Primary email</span>
                 <span>{user.email}</span>
               </li>
             </ul>
+            {displayNameSaving ? <p className="account-status">Saving display name…</p> : null}
+            {displayNameSaved ? <p className="account-status">Display name updated.</p> : null}
+            {displayNameError ? (
+              <p className="account-error">
+                {displayNameError.message || "Could not update display name. Please try again."}
+              </p>
+            ) : null}
           </section>
         ) : null}
 

@@ -48,6 +48,8 @@ const MOCK_USER = {
   email: "jane@example.com",
 };
 
+const mockUpdateDisplayName = vi.hoisted(() => vi.fn());
+
 function renderAccountPage() {
   return render(<AccountPage />);
 }
@@ -55,7 +57,12 @@ function renderAccountPage() {
 describe("AccountPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAuth.mockReturnValue({ user: MOCK_USER, loading: false });
+    mockUpdateDisplayName.mockResolvedValue(undefined);
+    mockUseAuth.mockReturnValue({
+      user: MOCK_USER,
+      loading: false,
+      updateDisplayName: mockUpdateDisplayName,
+    });
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
       onNext({
         matchingOptOut: false,
@@ -80,7 +87,7 @@ describe("AccountPage", () => {
   it("renders the page header and hint when authenticated", () => {
     renderAccountPage();
     expect(screen.getByRole("heading", { name: "Account Settings" })).toBeInTheDocument();
-    expect(screen.getByText(/view your account profile/i)).toBeInTheDocument();
+    expect(screen.getByText(/view and update your account profile/i)).toBeInTheDocument();
   });
 
   it("renders within an account-page section", () => {
@@ -147,6 +154,113 @@ describe("AccountPage", () => {
 
     expect(mockUpdateUserPreferences).toHaveBeenCalledTimes(1);
     expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", { matchingOptOut: true });
+  });
+
+  it("lets a signed-in user edit and save a new display name", async () => {
+    mockUpdateDisplayName.mockImplementation(async (name) => {
+      mockUseAuth.mockReturnValue({
+        user: { ...MOCK_USER, displayName: name },
+        loading: false,
+        updateDisplayName: mockUpdateDisplayName,
+      });
+    });
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await user.clear(input);
+    await user.type(input, "Jane Smith");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockUpdateDisplayName).toHaveBeenCalledWith("Jane Smith");
+    expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+    expect(screen.getByText("Display name updated.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("cancels display name editing without saving", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await user.clear(input);
+    await user.type(input, "Someone Else");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(mockUpdateDisplayName).not.toHaveBeenCalled();
+    expect(screen.getByText("Jane Doe")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Display name" })).not.toBeInTheDocument();
+  });
+
+  it("does not call updateDisplayName when the name is unchanged", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockUpdateDisplayName).not.toHaveBeenCalled();
+    expect(screen.getByText("Jane Doe")).toBeInTheDocument();
+    expect(screen.queryByText("Display name updated.")).not.toBeInTheDocument();
+  });
+
+  it("rejects a blank display name without saving", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await user.clear(input);
+    await user.type(input, "   ");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockUpdateDisplayName).not.toHaveBeenCalled();
+    expect(screen.getByText("Display name cannot be empty.")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Display name" })).toBeInTheDocument();
+  });
+
+  it("keeps the editor open when saving the display name fails", async () => {
+    mockUpdateDisplayName.mockRejectedValue(new Error("network"));
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    const input = screen.getByRole("textbox", { name: "Display name" });
+    await user.clear(input);
+    await user.type(input, "Jane Smith");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("network")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Display name" })).toBeInTheDocument();
+  });
+
+  it("lets a user set a display name when none is stored", async () => {
+    mockUseAuth.mockReturnValue({
+      user: { ...MOCK_USER, displayName: null },
+      loading: false,
+      updateDisplayName: mockUpdateDisplayName,
+    });
+    mockUpdateDisplayName.mockImplementation(async (name) => {
+      mockUseAuth.mockReturnValue({
+        user: { ...MOCK_USER, displayName: name },
+        loading: false,
+        updateDisplayName: mockUpdateDisplayName,
+      });
+    });
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    expect(screen.getByText("Not set")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.type(screen.getByRole("textbox", { name: "Display name" }), "Collector");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockUpdateDisplayName).toHaveBeenCalledWith("Collector");
+    expect(screen.getByText("Collector")).toBeInTheDocument();
+    expect(screen.getByText("Display name updated.")).toBeInTheDocument();
   });
 
   it("renders contact sharing radios with inline trading and discord fields", () => {
