@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
+import "./Collectibles.css";
 import CollectiblesPage from "./index.jsx";
 
 const mockOpenAuthModal = vi.hoisted(() => vi.fn());
@@ -207,6 +208,79 @@ describe("CollectiblesPage (integration)", () => {
     renderWithRouter(<CollectiblesPage />);
     expect(screen.getByRole("button", { name: "Add Dun" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add Foil" })).toBeInTheDocument();
+  });
+
+  it("adds from compact card-actions without expanding glance details", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+
+    renderWithRouter(<CollectiblesPage />);
+
+    const storyCard = screen.getByRole("heading", { name: "Test Story #01" }).closest(".card-tile");
+    const siblingCard = screen
+      .getByRole("heading", { name: "Test Story Nonsense #01" })
+      .closest(".card-tile");
+    const addDun = screen.getByRole("button", { name: "Add Dun" });
+
+    expect(storyCard.querySelector(".card-actions")).toContainElement(addDun);
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(getComputedStyle(document.querySelector(".cards-grid")).alignItems).toBe("start");
+    expect(getComputedStyle(storyCard.querySelector(".card-actions")).marginTop).toBe("auto");
+
+    await user.click(addDun);
+
+    expect(mutationsState.addToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1 }),
+    );
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+  });
+
+  it("increments and decrements compact-card qty without expanding siblings", async () => {
+    const user = setupUser();
+    authState.user = { uid: "user-1" };
+    collectionState.entries = [
+      { id: "e1", skuId: "LT24-ELS-01-DUN", quantity: 2 },
+      { id: "e2", skuId: "LT24-NS-ELS-01-FOIL", quantity: 1 },
+    ];
+    mutationsState.addToCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 3,
+      deleted: false,
+    });
+    mutationsState.decrementFromCollection = vi.fn().mockResolvedValue({
+      skuId: "LT24-ELS-01-DUN",
+      quantity: 1,
+      deleted: false,
+    });
+
+    renderWithRouter(<CollectiblesPage />);
+
+    const storyCard = screen.getByRole("heading", { name: "Test Story #01" }).closest(".card-tile");
+    const siblingCard = screen
+      .getByRole("heading", { name: "Test Story Nonsense #01" })
+      .closest(".card-tile");
+    const increase = screen.getByRole("button", { name: "Increase Dun · x2" });
+    const decrease = screen.getByRole("button", { name: "Decrease Dun · x2" });
+
+    expect(storyCard.querySelector(".card-actions")).toContainElement(increase);
+    expect(storyCard.querySelector(".card-actions")).toContainElement(decrease);
+    expect(storyCard.querySelector(".add-to-collection__stepper")).toBeVisible();
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
+
+    await user.click(increase);
+    expect(mutationsState.addToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1 }),
+    );
+    await user.click(decrease);
+    expect(mutationsState.decrementFromCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ finish: "DUN", quantity: 1, deleteWhenZero: false }),
+    );
+
+    expect(storyCard.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(siblingCard.querySelector(".card-details")).not.toHaveAttribute("open");
   });
 
   it("shows owned quantity steppers for signed-in users in grid and table", async () => {
