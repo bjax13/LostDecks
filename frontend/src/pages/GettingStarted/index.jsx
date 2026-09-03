@@ -48,11 +48,37 @@ function parseBulkQuantity(value) {
   return { valid: true, quantity: Math.floor(parsed) };
 }
 
+function inspectBulkQuantityInput(input) {
+  if (!input) return { status: "empty" };
+  if (input.validity.badInput || input.validity.rangeUnderflow) {
+    return { status: "invalid" };
+  }
+  const parsed = parseBulkQuantity(input.value);
+  if (!parsed.valid) {
+    return input.value === "" ? { status: "empty" } : { status: "invalid" };
+  }
+  return { status: "ok", quantity: parsed.quantity };
+}
+
 function GroupBulkActions({ groupLabel, summary, onSetAll }) {
-  const [customValue, setCustomValue] = useState("1");
+  const inputRef = useRef(null);
   const errorId = useId();
-  const parsedQuantity = parseBulkQuantity(customValue);
-  const hasInvalidQuantity = customValue !== "" && !parsedQuantity.valid;
+  const [inputStatus, setInputStatus] = useState("ok");
+  const hasInvalidQuantity = inputStatus === "invalid";
+  const canApply = inputStatus === "ok";
+
+  const syncFromInput = (input) => {
+    setInputStatus(inspectBulkQuantityInput(input).status);
+  };
+
+  const applyAll = () => {
+    const input = inputRef.current;
+    const result = inspectBulkQuantityInput(input);
+    setInputStatus(result.status);
+    if (result.status !== "ok") return;
+    onSetAll(String(result.quantity));
+    if (input) input.value = String(result.quantity);
+  };
 
   return (
     <div
@@ -62,28 +88,26 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
     >
       <div className="getting-started__bulk-actions-controls">
         <span className="getting-started__bulk-actions-label">Bulk Action</span>
-        <div className="getting-started__bulk-actions-apply">
+        <div
+          className={`getting-started__bulk-actions-apply${hasInvalidQuantity ? " is-invalid" : ""}`}
+        >
           <label className="getting-started__bulk-actions-custom">
             <span className="getting-started__sr-only">Custom quantity for {groupLabel}</span>
             <input
+              ref={inputRef}
               type="number"
               min="0"
               step="1"
               inputMode="numeric"
+              defaultValue="1"
               aria-invalid={hasInvalidQuantity}
               aria-describedby={hasInvalidQuantity ? errorId : undefined}
-              value={customValue}
-              onChange={(event) => setCustomValue(event.target.value)}
+              onChange={(event) => syncFromInput(event.currentTarget)}
+              onInput={(event) => syncFromInput(event.currentTarget)}
+              onBlur={(event) => syncFromInput(event.currentTarget)}
             />
           </label>
-          <button
-            type="button"
-            disabled={!parsedQuantity.valid}
-            onClick={() => {
-              if (!parsedQuantity.valid) return;
-              onSetAll(String(parsedQuantity.quantity));
-            }}
-          >
+          <button type="button" disabled={!canApply} onClick={applyAll}>
             Apply all
           </button>
         </div>
@@ -395,7 +419,9 @@ export default function GettingStartedPage() {
     String(resolveSkuQuantity(skuId, coverage[groupId], quantities, DEFAULT_MANUAL_QUANTITY));
 
   const setGroupQuantities = (group, quantity) => {
-    const nextValue = String(quantity);
+    const parsed = parseBulkQuantity(String(quantity));
+    if (!parsed.valid) return;
+    const nextValue = String(parsed.quantity);
     const groupStatus = coverage[group.id];
     const nextQuantities = { ...quantities };
     for (const sku of group.skus) {

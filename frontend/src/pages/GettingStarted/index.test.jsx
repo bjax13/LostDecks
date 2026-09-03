@@ -586,6 +586,11 @@ describe("GettingStartedPage", { timeout: 15_000 }, () => {
     expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
 
+    fireEvent.change(input, { target: { value: "-5" } });
+    fireEvent.input(input, { target: { value: "-5" } });
+    expect(applyAll).toBeDisabled();
+    expect(within(bulkActions).getByRole("alert")).toBeInTheDocument();
+
     await applyBulkQuantity(user, bulkActions, 2);
 
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 2$/i)).toBeInTheDocument();
