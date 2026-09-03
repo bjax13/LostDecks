@@ -79,13 +79,8 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
    | Secret | Purpose |
    |--------|---------|
    | `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account that can deploy Hosting, Firestore rules/indexes, and Cloud Functions (Firebase recommends a dedicated CI account with the right IAM roles). |
-   | `VITE_FIREBASE_API_KEY` | Same values as `frontend/.env.example` — injected at **build** time for the production bundle. |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | |
-   | `VITE_FIREBASE_PROJECT_ID` | |
-   | `VITE_FIREBASE_STORAGE_BUCKET` | |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | |
-   | `VITE_FIREBASE_APP_ID` | |
-   | `VITE_FIREBASE_MEASUREMENT_ID` | |
+
+   The workflow now runs `npm run deploy:firebase`, which fetches Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` at deploy time. `VITE_FIREBASE_*` repo secrets are no longer required for this workflow.
 
 3. **What gets deployed**  
    `firebase deploy --only hosting,firestore,functions` publishes the Vite build from `frontend/dist`, Firestore rules/indexes, and Cloud Functions. It does not deploy other Google Cloud resources.
