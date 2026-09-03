@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
+import { getAuthErrorMessage } from "../../lib/authErrorMessage";
 
 function Login() {
   const { login, error, clearError } = useAuth();
@@ -33,7 +34,7 @@ function Login() {
   return (
     <section className="auth-page">
       <h1>Sign in to Lost Tales Marketplace</h1>
-      {error ? <p className="auth-page__error">{error.message}</p> : null}
+      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
       <form className="auth-page__form" onSubmit={handleSubmit}>
         <label>
           <span>Email</span>

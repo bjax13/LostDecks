@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
+import { getAuthErrorMessage } from "../../lib/authErrorMessage";
 
 function Register() {
   const { register, error, clearError } = useAuth();
@@ -31,7 +32,7 @@ function Register() {
   return (
     <section className="auth-page">
       <h1>Create your Lost Tales account</h1>
-      {error ? <p className="auth-page__error">{error.message}</p> : null}
+      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
       <form className="auth-page__form" onSubmit={handleSubmit}>
         <label>
           <span>Display Name</span>

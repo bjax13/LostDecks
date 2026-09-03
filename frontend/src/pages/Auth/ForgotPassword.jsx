@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { getAuthErrorMessage } from "../../lib/authErrorMessage";
 
 function ForgotPassword() {
   const { resetPassword, error, clearError } = useAuth();
@@ -21,7 +22,7 @@ function ForgotPassword() {
   return (
     <section className="auth-page">
       <h1>Reset your password</h1>
-      {error ? <p className="auth-page__error">{error.message}</p> : null}
+      {error ? <p className="auth-page__error">{getAuthErrorMessage(error)}</p> : null}
       {submitted ? (
         <p>Check your inbox for a password reset link.</p>
       ) : (
