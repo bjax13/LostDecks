@@ -558,6 +558,38 @@ describe("GettingStartedPage", { timeout: 15000 }, () => {
     expect(elsecallerGroup.skus.length).toBeGreaterThan(0);
   });
 
+  it("rejects negative bulk Apply all quantities and keeps positive Apply all working", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const bulkActions = screen.getByRole("toolbar", {
+      name: /bulk action for elsecaller story foils/i,
+    });
+    const input = within(bulkActions).getByLabelText(/custom quantity for/i);
+    const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+
+    expect(input).toHaveAttribute("min", "0");
+    expect(input).toHaveAttribute("step", "1");
+
+    await user.clear(input);
+    await user.type(input, "-5");
+
+    expect(input).toHaveValue(-5);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(applyAll).toBeDisabled();
+    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
+    expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
+
+    await applyBulkQuantity(user, bulkActions, 2);
+
+    expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 2$/i)).toBeInTheDocument();
+    expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
+    expect(within(bulkActions).getByRole("button", { name: "Apply all" })).toBeEnabled();
+  });
+
   it("moves All coverage to Some when one SKU is set to zero", async () => {
     const user = userEvent.setup();
     renderPage();

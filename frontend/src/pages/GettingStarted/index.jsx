@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAuthModal } from "../../contexts/AuthModalContext.jsx";
@@ -41,8 +41,18 @@ const COVERAGE_OPTIONS = [
   { id: "none", label: "None" },
 ];
 
+function parseBulkQuantity(value) {
+  if (value === "") return { valid: false };
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return { valid: false };
+  return { valid: true, quantity: Math.floor(parsed) };
+}
+
 function GroupBulkActions({ groupLabel, summary, onSetAll }) {
   const [customValue, setCustomValue] = useState("1");
+  const errorId = useId();
+  const parsedQuantity = parseBulkQuantity(customValue);
+  const hasInvalidQuantity = customValue !== "" && !parsedQuantity.valid;
 
   return (
     <div
@@ -58,21 +68,30 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
             <input
               type="number"
               min="0"
+              step="1"
               inputMode="numeric"
+              aria-invalid={hasInvalidQuantity}
+              aria-describedby={hasInvalidQuantity ? errorId : undefined}
               value={customValue}
               onChange={(event) => setCustomValue(event.target.value)}
             />
           </label>
           <button
             type="button"
+            disabled={!parsedQuantity.valid}
             onClick={() => {
-              if (customValue === "" || Number(customValue) < 0) return;
-              onSetAll(customValue);
+              if (!parsedQuantity.valid) return;
+              onSetAll(String(parsedQuantity.quantity));
             }}
           >
             Apply all
           </button>
         </div>
+        {hasInvalidQuantity ? (
+          <p id={errorId} className="getting-started__bulk-actions-error" role="alert">
+            Quantity must be 0 or more.
+          </p>
+        ) : null}
       </div>
       {summary ? <small className="getting-started__bulk-actions-summary">{summary}</small> : null}
     </div>
