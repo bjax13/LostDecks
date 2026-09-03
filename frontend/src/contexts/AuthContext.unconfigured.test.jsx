@@ -56,6 +56,9 @@ function Harness() {
       <button type="button" onClick={() => void ctx.loginWithGoogle().catch(() => {})}>
         login-google
       </button>
+      <button type="button" onClick={() => void ctx.updateDisplayName("River").catch(() => {})}>
+        update-display-name
+      </button>
     </div>
   );
 }
@@ -128,6 +131,20 @@ describe("AuthProvider without Firebase auth", () => {
     await waitFor(() => {
       expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable social sign-in/i);
     });
+  });
+
+  it("updateDisplayName throws a configuration error", async () => {
+    const user = userEvent.setup();
+    render(
+      <AuthProvider>
+        <Harness />
+      </AuthProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "update-display-name" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("error-msg")).toHaveTextContent(/enable profile updates/i);
+    });
+    expect(authFns.updateProfile).not.toHaveBeenCalled();
   });
 
   it("logout still invokes signOut with null auth", async () => {
