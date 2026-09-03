@@ -11,6 +11,21 @@ const initialState = {
   error: null,
 };
 
+function buildOwnedSkusQuery(collectionRef, ownerUid, collectibleId, skuId) {
+  const skuIds = collectibleId ? getSkuIdsForCollectible(collectibleId) : [];
+
+  if (skuIds.length > 1) {
+    return query(collectionRef, where("ownerUid", "==", ownerUid), where("skuId", "in", skuIds));
+  }
+  if (skuIds.length === 1) {
+    return query(collectionRef, where("ownerUid", "==", ownerUid), where("skuId", "==", skuIds[0]));
+  }
+  if (skuId) {
+    return query(collectionRef, where("ownerUid", "==", ownerUid), where("skuId", "==", skuId));
+  }
+  return null;
+}
+
 export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
   const [entry, setEntry] = useState(initialState.entry);
   const [ownedBySkuId, setOwnedBySkuId] = useState(initialState.ownedBySkuId);
@@ -30,37 +45,9 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
     setError(null);
 
     const collectionRef = collection(db, "collections");
+    const collectionQuery = buildOwnedSkusQuery(collectionRef, ownerUid, collectibleId, skuId);
 
-    let collectionQuery;
-
-    if (skuId) {
-      collectionQuery = query(
-        collectionRef,
-        where("ownerUid", "==", ownerUid),
-        where("skuId", "==", skuId),
-      );
-    } else if (collectibleId) {
-      const skuIds = getSkuIdsForCollectible(collectibleId);
-      if (skuIds.length === 0) {
-        setEntry(null);
-        setOwnedBySkuId({});
-        setLoading(false);
-        return undefined;
-      }
-      if (skuIds.length === 1) {
-        collectionQuery = query(
-          collectionRef,
-          where("ownerUid", "==", ownerUid),
-          where("skuId", "==", skuIds[0]),
-        );
-      } else {
-        collectionQuery = query(
-          collectionRef,
-          where("ownerUid", "==", ownerUid),
-          where("skuId", "in", skuIds),
-        );
-      }
-    } else {
+    if (!collectionQuery) {
       setEntry(null);
       setOwnedBySkuId({});
       setLoading(false);
