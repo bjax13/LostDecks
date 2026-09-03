@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../../test/router.jsx";
+import "../Collectibles.css";
 import CollectibleGrid from "./CollectibleGrid.jsx";
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
@@ -26,34 +27,73 @@ const mockCollectible = {
   searchTokens: "lt24-els-01",
 };
 
+function renderGrid(props = {}) {
+  return render(
+    <TestMemoryRouter>
+      <CollectibleGrid collectibles={[mockCollectible]} {...props} />
+    </TestMemoryRouter>,
+  );
+}
+
 describe("CollectibleGrid (unit)", () => {
-  it("renders collectible cards as links", () => {
-    render(
-      <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} />
-      </TestMemoryRouter>,
+  it("shows glance fields and hides details until expanded", async () => {
+    renderGrid();
+
+    const details = document.querySelector(".card-details");
+    expect(details).not.toHaveAttribute("open");
+    expect(document.querySelector(".category-pill")).toHaveTextContent("Story");
+    expect(screen.getByRole("heading", { name: "Story #01" })).toBeVisible();
+    expect(screen.getByTestId("add-btn")).toBeVisible();
+
+    await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
+
+    expect(details).toHaveAttribute("open");
+    expect(screen.getByRole("link", { name: "LT24-ELS-01" })).toHaveAttribute(
+      "href",
+      "/collectibles/LT24-ELS-01",
     );
-    const link = screen.getByRole("link", { name: /Story #01/i });
-    expect(link).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
+    expect(screen.getByText("Story card")).toBeVisible();
+    expect(screen.getByText("Elsecaller")).toBeVisible();
+    expect(screen.getByText("Common")).toBeVisible();
+    expect(screen.getByText("DUN")).toBeVisible();
+    expect(screen.getByText("FOIL")).toBeVisible();
+    expect(screen.getByText("Not in binder mosaic")).toBeVisible();
   });
 
-  it("prevents navigation when clicking add-to-collection button", async () => {
-    render(
-      <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} />
-      </TestMemoryRouter>,
-    );
-    const addBtn = screen.getByTestId("add-btn");
-    await userEvent.click(addBtn);
-    expect(window.location.pathname).toBe("/");
+  it("does not expand details when add-to-collection is clicked", async () => {
+    renderGrid();
+    await userEvent.click(screen.getByTestId("add-btn"));
+    expect(document.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(screen.getByTestId("add-btn")).toBeVisible();
   });
 
   it("forwards ownedBySkuId to the add button", () => {
+    renderGrid({ ownedBySkuId: { "LT24-ELS-01-DUN": 3 } });
+    expect(screen.getByTestId("add-btn")).toHaveTextContent("Add LT24-ELS-01 · x3");
+  });
+
+  it("pins actions to the card bottom and keeps collapsed siblings at glance size", async () => {
+    const longTitle = {
+      ...mockCollectible,
+      id: "LT24-ELS-02",
+      displayName: "The Chasmfriends get a Pet! #01 with a much longer title",
+    };
     render(
       <TestMemoryRouter>
-        <CollectibleGrid collectibles={[mockCollectible]} ownedBySkuId={{ "LT24-ELS-01-DUN": 3 }} />
+        <CollectibleGrid collectibles={[mockCollectible, longTitle]} />
       </TestMemoryRouter>,
     );
-    expect(screen.getByTestId("add-btn")).toHaveTextContent("Add LT24-ELS-01 · x3");
+
+    const grid = document.querySelector(".cards-grid");
+    const tiles = [...document.querySelectorAll(".card-tile")];
+    expect(tiles).toHaveLength(2);
+    expect(getComputedStyle(grid).alignItems).toBe("start");
+    expect(getComputedStyle(tiles[0].querySelector(".card-actions")).marginTop).toBe("auto");
+    expect(getComputedStyle(tiles[0].querySelector("h2")).webkitLineClamp).toBe("2");
+
+    await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
+
+    expect(tiles[0].querySelector(".card-details")).toHaveAttribute("open");
+    expect(tiles[1].querySelector(".card-details")).not.toHaveAttribute("open");
   });
 });
