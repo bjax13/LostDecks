@@ -169,8 +169,7 @@ describe("Home page", () => {
     expect(section).toBeTruthy();
     const pinsTile = within(section).getByRole("link", { name: /ChasmFriends Pins/ });
     expect(pinsTile).toHaveAttribute("href", "/collectibles");
-    expect(within(pinsTile).getByText("ChasmFriends Pins")).toBeInTheDocument();
-    expect(within(pinsTile).getByText(pinDatasetMeta.setName)).toBeInTheDocument();
+    expect(within(pinsTile).getAllByText("ChasmFriends Pins")).toHaveLength(2);
     expect(pinDatasetMeta.setName).toBe("ChasmFriends Pins");
     expect(within(pinsTile).getByText("Browse pins")).toBeInTheDocument();
     expect(within(pinsTile).queryByText("Coming soon")).not.toBeInTheDocument();
