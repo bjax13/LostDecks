@@ -144,7 +144,7 @@ function formatPinCollectible(pin) {
     displayName,
     detail: pin.detail ?? "Enamel pin",
     finishes: toFinishList(pin.id),
-    searchTokens: [pin.id, displayName, seriesTitle, "pin", "chasmfriends"].join(" ").toLowerCase(),
+    searchTokens: [pin.id, displayName, seriesTitle, "pin"].join(" ").toLowerCase(),
   };
 }
 

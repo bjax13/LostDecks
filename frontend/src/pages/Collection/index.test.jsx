@@ -346,6 +346,34 @@ describe("CollectionSummary", () => {
     expect(within(region).getByText("Categories")).toBeInTheDocument();
   });
 
+  it("renders the ChasmFriends Pins subset heading when pin progress is present", () => {
+    const summary = {
+      uniqueCardCount: 0,
+      uniqueSkuCount: 1,
+      totalQuantity: 1,
+      completionRate: 0,
+      finishCounts: {},
+      categoryCounts: { pin: 1 },
+      progressBreakdowns: {
+        stories: [],
+        heralds: [],
+        pins: [
+          {
+            key: "skus",
+            label: "Pins owned",
+            owned: 1,
+            total: 5,
+            percent: 20,
+          },
+        ],
+      },
+    };
+
+    render(<CollectionSummary summary={summary} />);
+    expect(screen.getByRole("heading", { name: "ChasmFriends Pins" })).toBeInTheDocument();
+    expect(screen.getByText("Pins owned")).toBeInTheDocument();
+  });
+
   it("omits the herald subset card when herald breakdown is empty", () => {
     const summary = {
       uniqueCardCount: 1,

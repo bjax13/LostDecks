@@ -51,7 +51,7 @@ export default function HomeCollectionSnapshot({ stats, loading }) {
             hint={!isSignedIn ? "Sign in" : null}
           />
           <SnapshotStat
-            label="Chasm Friend Pins"
+            label="ChasmFriends Pins"
             value={formatStatValue(stats.uniquePinCount, pinCatalogTotal, isSignedIn)}
             hint={!isSignedIn ? "Sign in" : null}
           />

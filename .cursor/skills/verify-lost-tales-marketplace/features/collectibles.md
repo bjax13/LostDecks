@@ -1,6 +1,6 @@
 # Collectibles
 
-Collectibles is the public catalog: search, filter, and sort Stormlight Lost Tales cards and Chasm Friend pins, switch grid/table, and open a collectible detail page.
+Collectibles is the public catalog: search, filter, and sort Stormlight Lost Tales cards and ChasmFriends pins, switch grid/table, and open a collectible detail page.
 
 ## Sub-features
 

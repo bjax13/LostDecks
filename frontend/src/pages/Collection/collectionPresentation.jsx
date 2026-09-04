@@ -163,7 +163,7 @@ export function CollectionSummary({ summary }) {
 
           {pinProgress.length > 0 ? (
             <div className="collection-summary__subset-card">
-              <h3 className="collection-summary__subset-heading">Chasmfriends Pins</h3>
+              <h3 className="collection-summary__subset-heading">ChasmFriends Pins</h3>
               <ul className="collection-summary__subset-list">
                 {pinProgress.map((item) => (
                   <li key={item.key} className="collection-summary__subset-item">
