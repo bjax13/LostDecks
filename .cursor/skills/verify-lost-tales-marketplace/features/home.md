@@ -7,7 +7,7 @@ Home is the signed-out landing page: a hero that sends collectors into getting s
 - `home-load` shows the marketplace heading and primary navigation.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
 - `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
-- `home-supported` opens the catalog from Story Deck and Chasm Friend pin tiles.
+- `home-supported` opens the catalog from Story Deck and ChasmFriends pin tiles.
 - `home-snapshot-signed-out` shows Collection Snapshot values as placeholders with Sign in hints.
 
 ## How to get to it (user POV)

@@ -68,6 +68,8 @@ describe("collectibles (unit)", () => {
       expect(rec?.collectibleType).toBe("pin");
       expect(rec?.category).toBe("pin");
       expect(rec?.displayName).toBe("Shreadad");
+      expect(rec?.storyTitle).toBe("ChasmFriends");
+      expect(rec?.detail).toBe("ChasmFriends enamel pin");
       expect(rec?.finishes).toEqual([]);
     });
 

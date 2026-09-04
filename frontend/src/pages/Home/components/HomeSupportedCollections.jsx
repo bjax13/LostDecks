@@ -16,7 +16,7 @@ export default function HomeSupportedCollections() {
           className="home-supported__tile home-supported__tile--active"
           state={{ categoryFilter: "pin" }}
         >
-          <span className="home-supported__tile-label">Chasm Friend Pins</span>
+          <span className="home-supported__tile-label">ChasmFriends Pins</span>
           <span className="home-supported__tile-meta">{pinDatasetMeta.setName}</span>
           <span className="home-supported__tile-action">Browse pins</span>
         </Link>
