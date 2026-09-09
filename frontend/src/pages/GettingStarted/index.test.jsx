@@ -765,6 +765,39 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
   });
 
+  it("includes ChasmFriends Pins in manual review with coverage controls", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const pinsSection = gettingStartedTree.find((section) => section.id === "pins");
+    const pinsGroup = pinsSection.children[0];
+    const pinsTitle = "ChasmFriends Pins";
+
+    expect(screen.getByRole("button", { name: /^collapse chasmfriends pins$/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    const pinsCoverage = screen.getByRole("group", { name: `${pinsTitle} coverage` });
+    expect(within(pinsCoverage).getByRole("button", { name: "None" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(within(pinsCoverage).getByRole("button", { name: "Some" }));
+    expect(within(pinsCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await user.click(within(pinsCoverage).getByRole("button", { name: "All" }));
+    expect(
+      getSkuQuantityGroup(new RegExp(`${pinsTitle} #1 quantity, 1$`, "i")),
+    ).toBeInTheDocument();
+    expect(pinsGroup.skus).toHaveLength(5);
+  });
+
   it("saves a zeroed default collection for a signed-in non-spreadsheet collector", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
@@ -782,6 +815,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       ownerUid: "user-1",
       rows: expect.arrayContaining([expect.objectContaining({ quantity: "0" })]),
       existingEntries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
+      allowPins: true,
     });
   });
 });

@@ -33,6 +33,11 @@ const SECTION_DEFINITIONS = [
     label: "Nonsense (Foil)",
     includes: (card, finish) => card.category === "nonsense" && finish === "FOIL",
   },
+  {
+    id: "pins",
+    label: "ChasmFriends Pins",
+    includes: (card) => card.collectibleType === "pin" || card.category === "pin",
+  },
 ];
 
 const storyOrder = new Map(datasetStories.map((story, index) => [story.title, index]));
@@ -58,7 +63,7 @@ function buildGettingStartedTree() {
     for (const sku of datasetSkus) {
       const card = getCollectibleRecord(sku.cardId);
       const finish = sku.finish?.toUpperCase() ?? null;
-      if (!card || card.collectibleType === "pin" || !section.includes(card, finish)) {
+      if (!card || !section.includes(card, finish)) {
         continue;
       }
 
@@ -174,6 +179,9 @@ export function getSkuFinishLabel(sku) {
 }
 
 export function formatReviewGroupLabel(group, section) {
+  if (section.id === "pins") {
+    return section.label;
+  }
   return `${group.label} ${section.label}`;
 }
 

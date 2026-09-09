@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { datasetSkus, getCollectibleRecord } from "../../data/collectibles";
+import { datasetSkus } from "../../data/collectibles";
 import {
   buildCollectionRows,
   createCoverageState,
@@ -22,7 +22,7 @@ import {
 } from "./gettingStartedCatalog";
 
 describe("gettingStartedCatalog", () => {
-  it("organizes every Lost Decks SKU into the ISO-style sections exactly once", () => {
+  it("organizes every catalog SKU into the ISO-style sections exactly once", () => {
     expect(gettingStartedTree.map((section) => section.label)).toEqual([
       "Story Foils",
       "Story Dun",
@@ -30,23 +30,37 @@ describe("gettingStartedCatalog", () => {
       "Heralds (Dun)",
       "Nonsense (Dun)",
       "Nonsense (Foil)",
+      "ChasmFriends Pins",
     ]);
 
     const treeSkuIds = gettingStartedTree.flatMap((section) =>
       section.children.flatMap((group) => group.skus.map((sku) => sku.skuId)),
     );
-    const cardSkuIds = datasetSkus
-      .filter((sku) => getCollectibleRecord(sku.cardId)?.collectibleType !== "pin")
-      .map((sku) => sku.skuId);
+    const catalogSkuIds = datasetSkus.map((sku) => sku.skuId);
 
-    expect(new Set(treeSkuIds)).toEqual(new Set(cardSkuIds));
-    expect(treeSkuIds).toHaveLength(cardSkuIds.length);
+    expect(new Set(treeSkuIds)).toEqual(new Set(catalogSkuIds));
+    expect(treeSkuIds).toHaveLength(catalogSkuIds.length);
+  });
+
+  it("groups ChasmFriends Pins under a single ChasmFriends review group", () => {
+    const pinsSection = gettingStartedTree.find((section) => section.id === "pins");
+    expect(pinsSection?.label).toBe("ChasmFriends Pins");
+    expect(pinsSection?.children).toHaveLength(1);
+    expect(pinsSection?.children[0].label).toBe("ChasmFriends");
+    expect(pinsSection?.children[0].skus.map((sku) => sku.skuId)).toEqual([
+      "PIN-CF-01",
+      "PIN-CF-02",
+      "PIN-CF-03",
+      "PIN-CF-04",
+      "PIN-CF-05",
+    ]);
+    expect(formatReviewGroupLabel(pinsSection.children[0], pinsSection)).toBe("ChasmFriends Pins");
   });
 
   it("omits unused detail from tree SKU objects", () => {
-    const sku = gettingStartedTree[0].children[0].skus[0];
-    expect(sku).not.toHaveProperty("detail");
-    expect(sku).toEqual(
+    const cardSku = gettingStartedTree[0].children[0].skus[0];
+    expect(cardSku).not.toHaveProperty("detail");
+    expect(cardSku).toEqual(
       expect.objectContaining({
         skuId: expect.any(String),
         cardId: expect.any(String),
@@ -55,6 +69,10 @@ describe("gettingStartedCatalog", () => {
         card: expect.any(Object),
       }),
     );
+
+    const pinSku = gettingStartedTree.find((section) => section.id === "pins").children[0].skus[0];
+    expect(pinSku.finish).toBeNull();
+    expect(pinSku.label).toBe("Shreadad");
   });
 
   it("starts many-card collectors at all and few-card collectors at none", () => {

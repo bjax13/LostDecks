@@ -528,6 +528,7 @@ export default function GettingStartedPage() {
           ownerUid: user.uid,
           rows: buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY),
           existingEntries: entries,
+          allowPins: true,
         }),
         new Promise((_, reject) => {
           timeoutId = window.setTimeout(() => {
@@ -708,7 +709,11 @@ export default function GettingStartedPage() {
                                       const quantityLabel = formatSkuQuantityAriaLabel({
                                         groupTitle,
                                         finishLabel:
-                                          sku.card?.category === "nonsense" ? null : finishLabel,
+                                          sku.card?.category === "nonsense" ||
+                                          sku.card?.collectibleType === "pin" ||
+                                          sku.card?.category === "pin"
+                                            ? null
+                                            : finishLabel,
                                         numberLabel,
                                         variantLabel,
                                       });
