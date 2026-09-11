@@ -72,27 +72,41 @@ $VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/collectibles/gr
 $VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.aria.txt
 $VERIFY drive login --email collector.one@example.com --password replace-me-local-only
 $VERIFY drive logout
+$VERIFY drive check --role checkbox --name "Include me in Matches"
+$VERIFY drive uncheck --role checkbox --name "Include me in Matches"
+$VERIFY drive expect --text "Saving preference…"
+$VERIFY drive expect --text "Saving preference…" --state hidden
 ```
 
 Locator flags (Playwright accessible names, not CSS or coordinates):
 
 | Flag | Meaning |
 |------|---------|
-| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status) |
+| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status, checkbox, radio, region, tree) |
 | `--label` | `getByLabel` (Search, Email, Password, Category, Story, Rarity) |
 | `--placeholder` | `getByPlaceholder` |
 | `--text` | `getByText` |
 | `--scope nav` | Restrict to `navigation` named `Primary` |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name (required when another heading contains the same words) |
+| `--force` | Click even if another node intercepts the pointer (clipped radios) |
+| `--state` | `expect` wait: `visible` (default) or `hidden` |
+| `--timeout` | Milliseconds for `expect` (default 15000). Use `35000` when waiting out the Matches 30s refresh cache. |
+| `--disabled` / `--enabled` | Role locator matches a disabled or enabled control |
+| `--checked` | Role locator matches a checked checkbox or radio |
+
+`check` / `uncheck` set a checkbox instead of toggling it. They also wait until `Saving preference…` has appeared or 3s have passed, then until that status is hidden. Drive HTTP waits up to 90s so `--timeout 35000` can outlast the Matches 30s cache.
 
 Stable handles from this repo:
 
 - Primary nav (`aria-label="Primary"`): links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` and `Quick sign in`; signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
 - Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
+- Catalog grid: heading (for example `Elsecaller #01`) expands the tile glance; the detail link’s accessible name is the collectible id (`LT24-ELS-01`)
+- Catalog table: region `Collectibles table` (the `<table>` itself is unnamed); column `Name / Detail`
 - Login h1: `Sign in to Lost Tales Marketplace`; Register h1: `Create your Lost Tales account`
-- Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`)
+- Collection h1: `Your Collection` with `--exact` (substring-matches `Bulk update your collection`); auth-gated; unauthenticated visitors land on `/auth/login`
+- Collection bulk: `Empty template (all 0s)`, `Full-set template (all 1s)`, `My collection (current)`, `Copy ISO/UFT post`, `Upload filled template`
 - Matches h1: `Matches`; Account h1: `Account Settings`
 
 Read `features/README.md` and the matching feature file before driving. A proof that uses one convenient entry point is incomplete when the map lists others.
@@ -135,7 +149,7 @@ Auth/Firestore/Functions/UI/Vite ports are the repo defaults and cannot host two
 | `$VERIFY launch` | Install frontend/functions deps if needed, install Chromium, start emulators + Vite + driver, seed |
 | `$VERIFY doctor` | Read-only health check; exit 1 when the instance is not worth driving |
 | `$VERIFY seed` | Re-run `functions/seed-local.js --wipe` |
-| `$VERIFY drive …` | One Playwright action against the live UI |
+| `$VERIFY drive …` | One Playwright action against the live UI (`click`, `check` / `uncheck`, `expect --state`, `--force`) |
 | `$VERIFY cleanup` | Stop PIDs from `run.json`; keep artifacts |
 
 Scripts live in `.cursor/skills/verify-lost-tales-marketplace/scripts/` and are executable. `driver-server.mjs` is started by `launch`; do not run it directly.

@@ -72,6 +72,15 @@ function locatorFor(spec) {
       options.name = spec.name;
       options.exact = exact;
     }
+    if (spec.disabled === true || spec.disabled === "true") {
+      options.disabled = true;
+    }
+    if (spec.enabled === true || spec.enabled === "true") {
+      options.disabled = false;
+    }
+    if (spec.checked === true || spec.checked === "true") {
+      options.checked = true;
+    }
     let loc = root.getByRole(spec.role, options);
     if (spec.nth != null) {
       loc = loc.nth(Number(spec.nth));
@@ -109,6 +118,23 @@ async function pageInfo() {
   };
 }
 
+async function waitForSavingPreferenceToSettle() {
+  if (!new URL(page.url()).pathname.startsWith("/account")) {
+    return;
+  }
+  const loc = page.getByText("Saving preference…");
+  try {
+    await loc.waitFor({ state: "visible", timeout: 3000 });
+  } catch {
+    // Save often finishes before the next wait; still give Firestore a beat.
+  }
+  try {
+    await loc.waitFor({ state: "hidden", timeout: 15_000 });
+  } catch {
+    // Status may never have appeared.
+  }
+}
+
 async function handleCommand(cmd) {
   const action = cmd.action;
   if (action === "goto") {
@@ -117,7 +143,21 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    const options = {};
+    if (cmd.force === true || cmd.force === "true") {
+      options.force = true;
+    }
+    await locatorFor(cmd).click(options);
+    return pageInfo();
+  }
+  if (action === "check") {
+    await locatorFor(cmd).check();
+    await waitForSavingPreferenceToSettle();
+    return pageInfo();
+  }
+  if (action === "uncheck") {
+    await locatorFor(cmd).uncheck();
+    await waitForSavingPreferenceToSettle();
     return pageInfo();
   }
   if (action === "fill") {
@@ -144,7 +184,11 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "expect") {
-    await locatorFor(cmd).waitFor({ state: cmd.state || "visible" });
+    const waitOptions = { state: cmd.state || "visible" };
+    if (cmd.timeout != null) {
+      waitOptions.timeout = Number(cmd.timeout);
+    }
+    await locatorFor(cmd).waitFor(waitOptions);
     return pageInfo();
   }
   if (action === "expect-url") {
