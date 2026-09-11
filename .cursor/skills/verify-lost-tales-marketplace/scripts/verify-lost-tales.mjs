@@ -87,11 +87,16 @@ Commands:
 
 Drive actions:
   goto --path /collectibles
-  click --role link --name Collectibles [--scope nav] [--nth 0] [--exact]
+  click --role link --name Collectibles [--scope nav] [--nth 0] [--exact] [--force]
+  check --role checkbox --name "Include me in Matches"
+  uncheck --role checkbox --name "Include me in Matches"
   fill --label Search --value Elsecaller
   select --label Category --value "Story cards"
   press --key Escape
   expect --role heading --name Collectibles
+  expect --text "Saving preference…" --state hidden
+  expect --role checkbox --name "Dun cards" --disabled
+  expect --role button --name Refresh --enabled --timeout 35000
   expect-url --path /collectibles
   count --role heading --name "Elsecaller #01"
   text [--role heading --name Collectibles]
@@ -246,7 +251,7 @@ function httpPostJson(url, body) {
       },
     );
     req.on("error", reject);
-    req.setTimeout(30_000, () => {
+    req.setTimeout(90_000, () => {
       req.destroy(new Error("timeout"));
     });
     req.write(payload);
