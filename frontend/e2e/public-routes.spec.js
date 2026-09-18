@@ -25,4 +25,18 @@ test.describe("public routes (e2e)", () => {
     await expect(page.getByRole("main")).toContainText("Story Deck Bazaar");
     await expect(page.getByRole("contentinfo").getByRole("link", { name: "About" })).toBeVisible();
   });
+
+  test("footer feedback modal shows shared email and Discord contacts", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("contentinfo").getByRole("button", { name: "Feedback" }).click();
+
+    const dialog = page.getByRole("dialog", { name: "Send site feedback" });
+    await expect(dialog).toContainText("not trade match contact");
+    await expect(dialog.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
+      "href",
+      "mailto:shardstashinfo@gmail.com?subject=ShardStash%20feedback",
+    );
+    await expect(dialog).toContainText("gimpy_12");
+    await expect(dialog).toContainText("1bjax");
+  });
 });

@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "storydeck-16"
+  },
+  "targets": {
+    "storydeck-16": {
+      "hosting": {
+        "shardstash": ["shardstash"]
+      }
+    }
   }
 }
