@@ -5,6 +5,7 @@ import { SITE_NAME } from "./brand.js";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
+import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Login from "./pages/Auth/Login";
@@ -111,6 +112,7 @@ function App() {
       <hr />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/collectibles" element={<CollectiblesPage />} />
         <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
         <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
