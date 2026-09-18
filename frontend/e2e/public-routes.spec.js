@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("public routes (e2e)", () => {
+  test("signed-out home document footer links About next to Feedback", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: /sign in/i })).toBeVisible();
+
+    const footer = page.getByRole("contentinfo");
+    await footer.scrollIntoViewIfNeeded();
+    const aboutLink = footer.getByRole("link", { name: "About" });
+    await expect(aboutLink).toBeVisible();
+    await expect(aboutLink).toHaveAttribute("href", "/about");
+    await expect(footer.getByRole("button", { name: "Feedback" })).toBeVisible();
+  });
+
   test("collectibles page shows catalog heading", async ({ page }) => {
     await page.goto("/collectibles");
     await expect(page.getByRole("heading", { name: "Collectibles" })).toBeVisible();
