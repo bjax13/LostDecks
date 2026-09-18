@@ -42,8 +42,9 @@ Keep implementation details out of the map. Name only user paths, stable handles
 
 ## Features
 
-- [Home](./home.md) covers the landing page, primary nav, catalog tiles, and getting-started CTAs.
+- [Home](./home.md) covers the landing page, primary nav, catalog tiles, today tiles, and getting-started CTAs.
 - [Collectibles](./collectibles.md) covers catalog search, filters, grid/table, and collectible detail.
 - [Sign in](./auth.md) covers login, register, the quick-sign-in modal, and auth-gated redirects.
 - [Collection](./collection.md) covers the signed-in collection, getting-started save, and bulk tools.
 - [Matches](./matches.md) covers reciprocal trade matches and the Account matching opt-out.
+- [About and feedback](./about.md) covers the About page and the footer Feedback dialog.
