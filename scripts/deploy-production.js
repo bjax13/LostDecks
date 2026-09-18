@@ -1,5 +1,6 @@
 const { spawnSync } = require("node:child_process");
 const path = require("node:path");
+const { googleOAuthClientConsoleFallback } = require("./googleOAuthClientConsoleFallback");
 const { prepareHostingDeploy } = require("./prepare-hosting-deploy");
 const { hostFromPublicUrl, resolveProductionAuthDomain } = require("./productionAuthDomain");
 
@@ -170,6 +171,7 @@ async function main() {
   console.log(
     "The default storydeck-16 Hosting site is not deleted. It will go stale as new releases go to shardstash only.",
   );
+  console.log(`\n${googleOAuthClientConsoleFallback(projectId, hosting.siteId)}\n`);
   runInherit(npmCmd, ["run", deployScript], deployEnv);
 }
 
