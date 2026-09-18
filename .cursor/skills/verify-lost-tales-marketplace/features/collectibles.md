@@ -23,7 +23,7 @@ Collectibles is the public catalog: search, filter, and sort Stormlight Lost Tal
 
 Preconditions:
 
-- Lost Tales Marketplace is healthy at `http://127.0.0.1:5173`.
+- ShardStash is healthy at `http://127.0.0.1:5173`.
 - The browser session is signed out.
 - `doctor` reports `ok=true`.
 

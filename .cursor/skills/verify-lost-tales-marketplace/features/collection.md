@@ -23,14 +23,14 @@ Collection is the signed-in inventory: quantities already saved for the collecto
 
 Preconditions:
 
-- Lost Tales Marketplace is healthy at `http://127.0.0.1:5173`.
+- ShardStash is healthy at `http://127.0.0.1:5173`.
 - Seed data has not been overwritten since launch (or `$VERIFY seed` was just run).
 - `doctor` reports `ok=true`.
 
-- **Signed-out gate.** Open Collection signed out. Run `$VERIFY drive logout` then `$VERIFY drive click --role link --name Collection --scope nav`. The heading `Sign in to Lost Tales Marketplace` is visible.
+- **Signed-out gate.** Open Collection signed out. Run `$VERIFY drive logout` then `$VERIFY drive click --role link --name Collection --scope nav`. The heading `Sign in to ShardStash` is visible.
 - **Seeded inventory.** Sign in as Collector One. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`. Heading `Your Collection` is visible. Summary includes `Unique Cards` and the table lists Elsecaller cards from the seed (`LT24-ELS-01` / `LT24-ELS-03` quantities). Empty copy `No collectibles catalogued yet` is absent.
 - **Bulk tools.** Confirm the bulk region. Run `$VERIFY drive expect --role heading --name "Bulk update your collection"`. Buttons `Download template` and `Copy ISO/UFT post` are enabled, and `Upload filled template` is visible.
-- **Getting started profile.** Open the wizard. Run `$VERIFY drive goto --path /getting-started`. Heading `Build your collection without entering every card.` and `What best describes you?` are visible.
+- **Getting started profile.** Open the wizard. Run `$VERIFY drive goto --path /getting-started`. The eyebrow `ShardStash setup` and heading `Build your collection without entering every card.` and `What best describes you?` are visible.
 - **Manual branch.** Choose the non-spreadsheet profile. Run `$VERIFY drive click --role radio --name "My collection is not in a spreadsheet"` then `$VERIFY drive click --role button --name Continue`. Heading `Review your collection` is visible with a tree named `Cards to review`.
 - **Spreadsheet branch.** Go back and choose spreadsheet. Run `$VERIFY drive click --role button --name Back`, `$VERIFY drive click --role radio --name "My collection is in a spreadsheet"`, `$VERIFY drive click --role button --name Continue`. Heading `Prepare your collection for bulk import.` is visible. Signed in, `Go to bulk import` is a link to the collection bulk section.
 - **Save requires session.** On the manual branch while signed out, the primary action is `Sign in and save` (opens the auth modal) rather than `Save collection`.

@@ -1,11 +1,11 @@
 ---
 name: verify-lost-tales-marketplace
-description: Verify Lost Tales Marketplace (Vite + React SPA) through the real browser UI with the Playwright harness. Use when proving a user-facing change, before merging UI/auth/collection/matches work, or when asked to drive the running app the way a collector would.
+description: Verify ShardStash (Vite + React SPA) through the real browser UI with the Playwright harness. Use when proving a user-facing change, before merging UI/auth/collection/matches work, or when asked to drive the running app the way a collector would.
 ---
 
-# Verify Lost Tales Marketplace
+# Verify ShardStash
 
-Lost Tales Marketplace is a Vite + React 18 SPA in `frontend/` backed by Firebase Auth, Firestore, and callable Cloud Functions in `functions/`. The user-facing surface is the web UI at `http://127.0.0.1:5173`. Card catalog data is static JSON bundled with the frontend; collection, matches, and account state live in Firestore.
+ShardStash is a Vite + React 18 SPA in `frontend/` backed by Firebase Auth, Firestore, and callable Cloud Functions in `functions/`. The user-facing surface is the web UI at `http://127.0.0.1:5173`. Card catalog data is static JSON bundled with the frontend; collection, matches, and account state live in Firestore.
 
 Drive that UI. Do not treat Vitest, Playwright specs under `frontend/e2e/`, or Cloud Function unit tests as proof of a user-facing change.
 
@@ -51,7 +51,7 @@ $VERIFY doctor
 Require `ok=true`. Doctor checks, read-only:
 
 - `/tmp/lost-tales-verify/run.json` exists and its emulator, Vite, and driver PIDs are alive
-- `GET http://127.0.0.1:5173` is HTTP 200 and the HTML includes `Lost Tales Marketplace`
+- `GET http://127.0.0.1:5173` is HTTP 200 and the HTML includes `ShardStash`
 - Auth emulator answers on `127.0.0.1:9099`
 - Playwright driver `GET http://127.0.0.1:17331/health` returns `ok`
 
@@ -88,10 +88,10 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 
 Stable handles from this repo:
 
-- Primary nav (`aria-label="Primary"`): links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` and `Quick sign in`; signed-in `Sign out` and `Hi, <name>`
+- Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` and `Quick sign in`; signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
 - Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
-- Login h1: `Sign in to Lost Tales Marketplace`; Register h1: `Create your Lost Tales account`
+- Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`
 - Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`)
 - Matches h1: `Matches`; Account h1: `Account Settings`
 

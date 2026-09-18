@@ -4,7 +4,7 @@
 
 ### Project overview
 
-Lost Tales Marketplace is a single-product Vite + React 18 SPA (`frontend/`) backed by Firebase (Auth, Firestore, Cloud Functions in `functions/`). There is no custom backend server; all server-side logic runs as Firebase callable Cloud Functions.
+ShardStash is a single-product Vite + React 18 SPA (`frontend/`) backed by Firebase (Auth, Firestore, Cloud Functions in `functions/`). There is no custom backend server; all server-side logic runs as Firebase callable Cloud Functions.
 
 ### Repository layout
 

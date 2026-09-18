@@ -35,7 +35,7 @@ describe("Register (unit)", () => {
       </TestMemoryRouter>,
     );
     expect(
-      screen.getByRole("heading", { name: /Create your Lost Tales account/i }),
+      screen.getByRole("heading", { name: /Create your ShardStash account/i }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();

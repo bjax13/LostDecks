@@ -119,6 +119,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     renderPage();
 
     expect(screen.getByRole("heading", { name: /what best describes you/i })).toBeInTheDocument();
+    expect(screen.getByText("ShardStash setup")).toBeInTheDocument();
     expect(
       screen.getByText(/tell us what you collect, then choose how you want to start/i),
     ).toBeInTheDocument();
@@ -350,12 +351,20 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const user = setupUser();
     renderPage();
 
-    await chooseCollectibleType(user, /^story deck cards$/i);
+    await chooseCollectibleType(user, /^both$/i);
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
     expect(
       screen.getByRole("heading", { name: /prepare your collection for bulk import/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/match every row to a ShardStash SKU before saving/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Story Deck card rows are supported here; add ChasmFriends pins later from your collection/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/export as csv and upload/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /sign in to import/i }));

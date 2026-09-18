@@ -102,6 +102,7 @@ describe("App (hook mocks)", () => {
 
   it("renders sign-in navigation for a signed-out user", () => {
     render(<App />);
+    expect(screen.getByRole("link", { name: "ShardStash" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Quick sign in" })).toBeInTheDocument();
   });

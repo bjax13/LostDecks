@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
+import { SITE_NAME } from "./brand.js";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
@@ -53,6 +54,9 @@ function MainNav() {
 
   return (
     <nav className="main-nav" aria-label="Primary">
+      <Link to="/" className="main-nav__brand">
+        {SITE_NAME}
+      </Link>
       <button
         type="button"
         className="main-nav__menu-toggle"

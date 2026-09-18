@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Lost Tales Marketplace verification harness.
+ * ShardStash verification harness.
  *
  *   node .cursor/skills/verify-lost-tales-marketplace/scripts/verify-lost-tales.mjs launch
  *   node .cursor/skills/verify-lost-tales-marketplace/scripts/verify-lost-tales.mjs doctor
@@ -76,7 +76,7 @@ const SEED_EMAIL = "collector.one@example.com";
 const SEED_PASSWORD = "replace-me-local-only";
 
 function usage() {
-  return `Lost Tales Marketplace verification harness
+  return `ShardStash verification harness
 
 Commands:
   launch     Start Firebase emulators, Vite, seed data, and the Playwright driver
@@ -417,7 +417,7 @@ async function cmdLaunch() {
 
   await waitForHttp(BASE_URL, {
     timeoutMs: 60_000,
-    okWhen: (r) => r.status === 200 && r.body.includes("Lost Tales Marketplace"),
+    okWhen: (r) => r.status === 200 && r.body.includes("ShardStash"),
   });
 
   const driver = startDriver();
@@ -520,14 +520,12 @@ async function cmdDoctor() {
   try {
     const page = await httpGet(BASE_URL);
     frontendStatus = page.status;
-    frontendTitle = page.body.includes("Lost Tales Marketplace")
-      ? "Lost Tales Marketplace"
-      : "missing-title";
+    frontendTitle = page.body.includes("ShardStash") ? "ShardStash" : "missing-title";
     if (page.status !== 200) {
       problems.push(`Frontend HTTP ${page.status} at ${BASE_URL}`);
     }
-    if (!page.body.includes("Lost Tales Marketplace")) {
-      problems.push("Frontend HTML does not include title Lost Tales Marketplace");
+    if (!page.body.includes("ShardStash")) {
+      problems.push("Frontend HTML does not include title ShardStash");
     }
   } catch (error) {
     problems.push(`Frontend not reachable at ${BASE_URL}: ${error.message}`);
