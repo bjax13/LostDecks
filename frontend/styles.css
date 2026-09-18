@@ -155,7 +155,7 @@ body {
   }
 
   .main-nav a:not(.main-nav__brand),
-  .main-nav button {
+  .main-nav button:not(.main-nav__menu-toggle) {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
