@@ -1,4 +1,4 @@
-# Lost Tales Marketplace Plan
+# ShardStash Plan
 
 This document outlines a very early roadmap for a simple web application that allows
 users to trade Brandon Sanderson "Lost Tales" collectible story cards.

@@ -1,6 +1,6 @@
-# Lost Tales Marketplace
+# ShardStash
 
-This repository contains an early prototype for a web application that
+This repository contains a web application that
 facilitates trading of Brandon Sanderson "Lost Tales" collectible story
 cards. The project is still in the planning phase, but a simple
 wireframe has been created to outline navigation and page structure.
@@ -33,15 +33,18 @@ cp .env.example .env
 
 ### Production deploy (safe default)
 
-Use repo-root deploy scripts so production builds always use live Firebase Web
-SDK config from project `storydeck-16`:
+The public site is https://shardstash.web.app (Firebase Hosting site `shardstash`
+on project `storydeck-16`). Use repo-root deploy scripts so production builds
+always use live Firebase Web SDK config from that project:
 
 ```bash
 npm run deploy:firebase
 ```
 
-This command fetches `apps:sdkconfig` and injects `VITE_FIREBASE_*` for the
-build before deploy, which prevents emulator/dummy keys from being shipped.
+This command fetches `apps:sdkconfig`, injects `VITE_FIREBASE_*` for the build,
+creates the `shardstash` Hosting site if it is missing, and deploys Hosting to
+that site. The default `storydeck-16.web.app` site is not deleted and may go
+stale.
 
 ### Local emulator seed data (Matches testing)
 

@@ -1,12 +1,14 @@
-# Lost Tales Marketplace Frontend
+# ShardStash Frontend
 
-This Vite-powered React application implements the Lost Tales Marketplace experience, including Firebase Authentication scaffolding for managing user sessions and protecting collection-oriented routes.
+This Vite-powered React application implements the ShardStash experience, including Firebase Authentication scaffolding for managing user sessions and protecting collection-oriented routes.
 
 ## Prerequisites
 
 - Node.js 18+
 - npm 9+
-- A Firebase project with Email/Password and Google authentication providers configured.
+- A Firebase project with Email/Password and Google authentication providers configured. Production Google sign-in also needs `shardstash.web.app` (and `shardstash.firebaseapp.com`) on that project's Auth authorized domains; deploy scripts try to add them automatically.
+- Production Hosting URL: https://shardstash.web.app (Firebase project id remains `storydeck-16`).
+- Production deploys set `VITE_FIREBASE_AUTH_DOMAIN` to `shardstash.web.app` (see `scripts/productionAuthDomain.js`). Local emulator auth does not use that Google chooser domain.
 
 ## Setup
 

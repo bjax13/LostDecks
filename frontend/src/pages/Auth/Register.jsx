@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { SITE_NAME } from "../../brand.js";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAuthErrorMessage } from "../../lib/authErrorMessage";
+import { usePostAuthRedirect } from "../../lib/postAuthRedirect";
 
 function Register() {
   const { register, error, clearError } = useAuth();
   const [formState, setFormState] = useState({ displayName: "", email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const redirectAfterAuth = usePostAuthRedirect();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -21,7 +23,7 @@ function Register() {
     clearError();
     try {
       await register(formState.email, formState.password, { displayName: formState.displayName });
-      navigate("/collections", { replace: true });
+      redirectAfterAuth();
     } catch (err) {
       console.error("Registration failed", err);
     } finally {
@@ -31,7 +33,7 @@ function Register() {
 
   return (
     <section className="auth-page">
-      <h1>Create your Lost Tales account</h1>
+      <h1>Create your {SITE_NAME} account</h1>
       {error ? (
         <p className="auth-page__error">{getAuthErrorMessage(error, { operation: "register" })}</p>
       ) : null}
@@ -74,7 +76,7 @@ function Register() {
       <div className="auth-page__links">
         <Link to="/auth/login">Already have an account? Sign in</Link>
       </div>
-      <SocialLoginButtons />
+      <SocialLoginButtons onSuccess={redirectAfterAuth} />
     </section>
   );
 }

@@ -1,5 +1,8 @@
 name: Full project deploy
 
+# Production Hosting target: shardstash (https://shardstash.web.app), plus Firestore and Functions.
+# Run workflow on the branch you want to publish (select the PR branch for a pre-merge poke).
+# The first successful run creates site shardstash if it is missing.
 # Production deploy: run manually after configuring repository secrets (see AGENTS.md).
 on:
   workflow_dispatch:

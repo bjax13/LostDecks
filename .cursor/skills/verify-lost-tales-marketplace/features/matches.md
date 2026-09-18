@@ -22,7 +22,7 @@ Matches shows reciprocal extras between collectors, grouped as a person card wit
 
 Preconditions:
 
-- Lost Tales Marketplace is healthy at `http://127.0.0.1:5173`.
+- ShardStash is healthy at `http://127.0.0.1:5173`.
 - Seed data is the example pair: Collector One owns extra `LT24-ELS-01-DUN`; Collector Two owns extra `LT24-ELS-02-DUN`; both have `matchingOptOut: false`.
 - `doctor` reports `ok=true`.
 

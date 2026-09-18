@@ -29,6 +29,7 @@ describe("App (integration)", () => {
   it("renders primary navigation for a signed-out user after auth finishes loading", async () => {
     renderWithAppProviders(<App />);
     expect(screen.getByRole("link", { name: "Collectibles" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "ShardStash" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: "Matches" })).toBeInTheDocument();
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
@@ -37,10 +38,11 @@ describe("App (integration)", () => {
     expect(footer).toHaveClass("site-footer");
     expect(window.getComputedStyle(footer).position).not.toBe("fixed");
     expect(window.getComputedStyle(footer).position).not.toBe("sticky");
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
   });
 
-  it("opens Discord-only site feedback from the document footer", async () => {
+  it("opens site feedback from the document footer with mailto and Discord", async () => {
     const user = userEvent.setup();
     renderWithAppProviders(<App />);
 
@@ -48,8 +50,33 @@ describe("App (integration)", () => {
 
     const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
     expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
+    expect(dialog).toHaveTextContent("Story Deck Bazaar");
     expect(dialog).toHaveTextContent("gimpy_12");
     expect(dialog).toHaveTextContent("1bjax");
     expect(dialog).toHaveTextContent("not trade match contact");
+    expect(screen.queryByRole("link", { name: "gimpy_12" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "1bjax" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
+      "href",
+      "mailto:shardstashinfo@gmail.com?subject=ShardStash%20feedback",
+    );
+  });
+
+  it("navigates to the About page from the document footer", async () => {
+    const user = userEvent.setup();
+    renderWithAppProviders(<App />);
+
+    await user.click(screen.getByRole("link", { name: "About" }));
+
+    expect(screen.getByRole("heading", { name: "About" })).toBeInTheDocument();
+    expect(screen.getByText(/ShardStash has two jobs/)).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveTextContent("Sanderson Collectors Guild");
+    expect(screen.getByRole("main")).toHaveTextContent("Story Deck Bazaar");
+    expect(screen.getByRole("main")).toHaveTextContent("gimpy_12");
+    expect(screen.getByRole("main")).toHaveTextContent("1bjax");
+    expect(screen.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
+      "href",
+      "mailto:shardstashinfo@gmail.com?subject=ShardStash%20feedback",
+    );
   });
 });
