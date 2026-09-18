@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
+import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
+import { ACCOUNT_MATCHING_HELP } from "../../lib/matchHelpCopy.js";
 import {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_USER_PREFERENCES,
@@ -360,7 +362,10 @@ function AccountPage() {
 
         {user ? (
           <section className="account-section">
-            <h2>Match preferences</h2>
+            <div className="account-section-heading">
+              <h2>Match preferences</h2>
+              <InfoBubble label="About matching settings">{ACCOUNT_MATCHING_HELP}</InfoBubble>
+            </div>
             <p className="account-hint">
               Control whether your collection is included in trade match discovery.
             </p>

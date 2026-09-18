@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ACCOUNT_MATCHING_HELP } from "../../lib/matchHelpCopy.js";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
@@ -147,6 +148,19 @@ describe("AccountPage", () => {
     renderAccountPage();
     expect(screen.getByRole("heading", { name: "Match preferences" })).toBeInTheDocument();
     expect(screen.getByRole("checkbox", { name: "Include me in Matches" })).toBeChecked();
+  });
+
+  it("exposes matching help copy from an info bubble near match preferences", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    const trigger = screen.getByRole("button", { name: "About matching settings" });
+    expect(trigger).toBeInTheDocument();
+    expect(screen.getByText(ACCOUNT_MATCHING_HELP)).not.toBeVisible();
+
+    await user.click(trigger);
+
+    expect(screen.getByText(ACCOUNT_MATCHING_HELP)).toBeVisible();
   });
 
   it("defaults match lane checkboxes to checked when participating", () => {

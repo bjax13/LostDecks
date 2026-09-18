@@ -16,6 +16,12 @@
   gap: 0.5rem;
 }
 
+.matches-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .matches-header h1 {
   margin: 0;
   font-size: clamp(2rem, 4.5vw, 2.75rem);

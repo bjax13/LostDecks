@@ -51,6 +51,12 @@
   text-transform: uppercase;
 }
 
+.account-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .account-summary {
   list-style: none;
   margin: 0;
