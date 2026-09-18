@@ -1,6 +1,6 @@
 # Weekly verification-skill maintenance
 
-Cursor Automation that runs `/maintain-verification-skill` against Lost Tales Marketplace every Friday morning.
+Cursor Automation that runs `/maintain-verification-skill` against ShardStash every Friday morning.
 
 This directory is the committed prompt the live automation should read. It is not a slash skill.
 

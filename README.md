@@ -1,6 +1,6 @@
-# Lost Tales Marketplace
+# ShardStash
 
-This repository contains an early prototype for a web application that
+This repository contains a web application that
 facilitates trading of Brandon Sanderson "Lost Tales" collectible story
 cards. The project is still in the planning phase, but a simple
 wireframe has been created to outline navigation and page structure.

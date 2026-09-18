@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { SITE_NAME } from "../../brand.js";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAuthModal } from "../../contexts/AuthModalContext.jsx";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
@@ -645,7 +646,7 @@ export default function GettingStartedPage() {
         <Link to="/" className="getting-started__back">
           Back to home
         </Link>
-        <p className="getting-started__eyebrow">Lost Decks setup</p>
+        <p className="getting-started__eyebrow">{SITE_NAME} setup</p>
         <h1>Build your collection without entering every card.</h1>
         <p>
           Tell us roughly what you own. We will only ask about the cards that need a closer look.
@@ -938,7 +939,8 @@ export default function GettingStartedPage() {
               <span>Spreadsheet import</span>
               <h2>Prepare your collection for bulk import.</h2>
               <p>
-                The importer uses a CSV so it can match every row to a Lost Decks SKU before saving.
+                The importer uses a CSV so it can match every row to a {SITE_NAME} SKU before
+                saving.
                 {includesPins(collectibleType)
                   ? " Story Deck card rows are supported here; add ChasmFriends pins later from your collection or by restarting Getting Started with Pins."
                   : null}

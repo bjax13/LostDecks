@@ -8,8 +8,6 @@ test.describe("public routes (e2e)", () => {
 
   test("login page renders sign-in heading", async ({ page }) => {
     await page.goto("/auth/login");
-    await expect(
-      page.getByRole("heading", { name: /Sign in to Lost Tales Marketplace/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Sign in to ShardStash/i })).toBeVisible();
   });
 });

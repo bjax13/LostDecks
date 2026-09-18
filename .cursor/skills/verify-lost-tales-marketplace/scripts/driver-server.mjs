@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Long-lived Playwright driver for Lost Tales Marketplace verification.
+ * Long-lived Playwright driver for ShardStash verification.
  * Bound to 127.0.0.1. Started by verify-lost-tales.mjs; do not launch by hand.
  */
 import fs from "node:fs";
@@ -188,7 +188,7 @@ async function handleCommand(cmd) {
       throw new Error("login requires --email and --password");
     }
     await page.goto(new URL("/auth/login", baseUrl).toString(), { waitUntil: "domcontentloaded" });
-    await page.getByRole("heading", { name: /Sign in to Lost Tales Marketplace/i }).waitFor();
+    await page.getByRole("heading", { name: /Sign in to ShardStash/i }).waitFor();
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: "Sign In", exact: true }).click();

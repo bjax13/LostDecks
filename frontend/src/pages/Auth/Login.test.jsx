@@ -39,7 +39,7 @@ describe("Login (unit)", () => {
 
   it("renders sign in form", () => {
     renderLogin();
-    expect(screen.getByRole("heading", { name: /Sign in to Lost Tales/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Sign in to ShardStash/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument();

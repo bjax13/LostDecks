@@ -1,6 +1,6 @@
-# Lost Tales Marketplace Frontend
+# ShardStash Frontend
 
-This Vite-powered React application implements the Lost Tales Marketplace experience, including Firebase Authentication scaffolding for managing user sessions and protecting collection-oriented routes.
+This Vite-powered React application implements the ShardStash experience, including Firebase Authentication scaffolding for managing user sessions and protecting collection-oriented routes.
 
 ## Prerequisites
 

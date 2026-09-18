@@ -1,6 +1,6 @@
-# Lost Tales Marketplace verification map
+# ShardStash verification map
 
-This directory is the maintained source for verifying user-facing behavior of Lost Tales Marketplace. Read this index before driving the app, then use the matching feature file as the recipe.
+This directory is the maintained source for verifying user-facing behavior of ShardStash. Read this index before driving the app, then use the matching feature file as the recipe.
 
 ## Baseline preconditions
 

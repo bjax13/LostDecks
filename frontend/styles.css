@@ -21,6 +21,14 @@ body {
   box-sizing: border-box;
 }
 
+.main-nav__brand {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
 .main-nav__menu-toggle {
   display: none;
   flex-shrink: 0;
@@ -107,18 +115,24 @@ body {
 
 @media (max-width: 768px) {
   .main-nav {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .main-nav__brand {
+    margin-right: auto;
   }
 
   .main-nav__menu-toggle {
     display: inline-flex;
-    align-self: flex-end;
+    align-self: center;
   }
 
   .main-nav__panel {
     display: none;
     flex: none;
+    flex-basis: 100%;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
@@ -140,7 +154,7 @@ body {
     gap: 0.5rem;
   }
 
-  .main-nav a,
+  .main-nav a:not(.main-nav__brand),
   .main-nav button {
     width: 100%;
     max-width: 100%;

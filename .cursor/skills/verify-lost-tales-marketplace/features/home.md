@@ -4,7 +4,7 @@ Home is the signed-out landing page: a hero that sends collectors into getting s
 
 ## Sub-features
 
-- `home-load` shows the marketplace heading and primary navigation.
+- `home-load` shows the ShardStash heading and primary navigation.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
 - `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
 - `home-supported` opens the catalog from Story Deck and ChasmFriends pin tiles.
@@ -20,11 +20,11 @@ Home is the signed-out landing page: a hero that sends collectors into getting s
 
 Preconditions:
 
-- Lost Tales Marketplace is healthy at `http://127.0.0.1:5173`.
+- ShardStash is healthy at `http://127.0.0.1:5173`.
 - The browser session is signed out.
 - `doctor` reports `ok=true`.
 
-- **Direct load.** Open home. Run `$VERIFY drive goto --path /`. The heading `Track your collectibles in one place.` is visible and the document title is `Lost Tales Marketplace`.
+- **Direct load.** Open home. Run `$VERIFY drive goto --path /`. The heading `Track your collectibles in one place.` is visible, the primary nav shows the `ShardStash` brand, and the document title is `ShardStash`.
 - **Primary nav.** Confirm nav targets. Run `$VERIFY drive expect --role navigation --name Primary` then `$VERIFY drive click --role link --name Collectibles --scope nav`. The heading `Collectibles` is visible. Return with `$VERIFY drive click --role link --name Home --scope nav`.
 - **Hero getting started.** From home, choose the first Getting Started control. Run `$VERIFY drive click --role link --name "Getting Started" --nth 0`. The heading `Build your collection without entering every card.` is visible.
 - **Hero catalog.** Return home, then choose View Collectibles. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "View Collectibles"`. The heading `Collectibles` is visible.
