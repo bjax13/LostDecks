@@ -1,8 +1,8 @@
-import SiteFeedbackContact from "../../components/SiteFeedbackContact.jsx";
 import {
   SITE_FEEDBACK_CONTACTS,
   SITE_FEEDBACK_EMAIL,
   SITE_FEEDBACK_GUILD,
+  SITE_FEEDBACK_MAILTO,
 } from "../../siteFeedback.js";
 import "./About.css";
 
@@ -20,11 +20,11 @@ export default function AboutPage() {
           grab-bag ChasmFriends toward a full pin set.
         </p>
         <p>
-          We’re all ears. Email ideas or bugs to {SITE_FEEDBACK_EMAIL}, or message{" "}
+          We’re all ears. Email ideas or bugs to{" "}
+          <a href={SITE_FEEDBACK_MAILTO}>{SITE_FEEDBACK_EMAIL}</a>, or message{" "}
           {SITE_FEEDBACK_CONTACTS[0]} or {SITE_FEEDBACK_CONTACTS[1]} in the {SITE_FEEDBACK_GUILD}{" "}
           Discord.
         </p>
-        <SiteFeedbackContact />
       </div>
     </main>
   );

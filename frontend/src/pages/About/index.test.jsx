@@ -37,6 +37,7 @@ describe("About page", () => {
       "href",
       SITE_FEEDBACK_MAILTO,
     );
+    expect(page).toHaveTextContent(`Email ideas or bugs to ${SITE_FEEDBACK_EMAIL}`);
     expect(page).toHaveTextContent(SITE_FEEDBACK_GUILD);
     expect(page).toHaveTextContent(SITE_FEEDBACK_CONTACTS[0]);
     expect(page).toHaveTextContent(SITE_FEEDBACK_CONTACTS[1]);
