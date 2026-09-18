@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 test.describe("getting started bulk quantity (e2e)", () => {
   test("rejects negative Apply all and still applies a positive quantity", async ({ page }) => {
     await page.goto("/getting-started");
-    await page.getByText(/my collection is not in a spreadsheet/i).click();
+    await page.getByRole("radio", { name: "Story Deck Cards" }).click();
+    await page.getByRole("radio", { name: /not in a spreadsheet/i }).click();
     await page.getByRole("button", { name: "Continue" }).click();
     await expect(page.getByRole("heading", { name: /review your collection/i })).toBeVisible();
 
