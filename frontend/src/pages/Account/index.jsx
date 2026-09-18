@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
-import SiteFeedback from "../../components/SiteFeedback.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   DEFAULT_DISCORD_CHANNEL,
@@ -518,14 +517,6 @@ function AccountPage() {
             ) : null}
           </section>
         ) : null}
-
-        <section className="account-section" aria-labelledby="account-site-feedback-heading">
-          <h2 id="account-site-feedback-heading">Site feedback</h2>
-          <p className="account-hint">
-            For bugs and ideas about the site, not trade match contact.
-          </p>
-          <SiteFeedback triggerLabel="Send feedback" />
-        </section>
       </section>
     </AuthGuard>
   );

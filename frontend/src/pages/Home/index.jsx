@@ -1,4 +1,3 @@
-import SiteFeedback from "../../components/SiteFeedback.jsx";
 import HomeCollectionSnapshot from "./components/HomeCollectionSnapshot";
 import HomeFeatureTiles from "./components/HomeFeatureTiles";
 import HomeFooterCta from "./components/HomeFooterCta";
@@ -18,9 +17,6 @@ export default function Home() {
         <HomeFeatureTiles />
         <HomeCollectionSnapshot stats={stats} loading={loading} />
         <HomeFooterCta />
-        <section className="home-feedback" aria-label="Site feedback">
-          <SiteFeedback />
-        </section>
       </div>
     </main>
   );

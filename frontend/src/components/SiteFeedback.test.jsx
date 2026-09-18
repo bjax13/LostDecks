@@ -4,18 +4,15 @@ import { describe, expect, it } from "vitest";
 import SiteFeedback, { SITE_FEEDBACK_CONTACTS, SITE_FEEDBACK_GUILD } from "./SiteFeedback.jsx";
 
 describe("SiteFeedback", () => {
-  it("shows a Feedback control without opening the panel", () => {
+  it("shows a document-end Feedback footer without opening the panel", () => {
     render(<SiteFeedback />);
 
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveClass("site-footer");
+    expect(window.getComputedStyle(footer).position).not.toBe("fixed");
+    expect(window.getComputedStyle(footer).position).not.toBe("sticky");
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Send site feedback" })).not.toBeInTheDocument();
-  });
-
-  it("uses a custom trigger label when provided", () => {
-    render(<SiteFeedback triggerLabel="Send feedback" />);
-
-    expect(screen.getByRole("button", { name: "Send feedback" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Feedback" })).not.toBeInTheDocument();
   });
 
   it("opens site-feedback copy with the guild name and both Discord usernames", async () => {

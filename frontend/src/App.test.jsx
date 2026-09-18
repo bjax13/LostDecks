@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 // Avoid initializing the real Firebase client in this file (faster, no env required).
@@ -32,6 +33,23 @@ describe("App (integration)", () => {
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toHaveClass("site-footer");
+    expect(window.getComputedStyle(footer).position).not.toBe("fixed");
+    expect(window.getComputedStyle(footer).position).not.toBe("sticky");
+    expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
+  });
+
+  it("opens Discord-only site feedback from the document footer", async () => {
+    const user = userEvent.setup();
+    renderWithAppProviders(<App />);
+
+    await user.click(screen.getByRole("button", { name: "Feedback" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
+    expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
+    expect(dialog).toHaveTextContent("gimpy_12");
+    expect(dialog).toHaveTextContent("1bjax");
+    expect(dialog).toHaveTextContent("not trade match contact");
   });
 });
