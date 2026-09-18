@@ -1,6 +1,7 @@
 const { spawnSync } = require("node:child_process");
 const path = require("node:path");
 const { prepareHostingDeploy } = require("./prepare-hosting-deploy");
+const { hostFromPublicUrl, resolveProductionAuthDomain } = require("./productionAuthDomain");
 
 const repoRoot = path.resolve(__dirname, "..");
 const isWindows = process.platform === "win32";
@@ -127,10 +128,21 @@ async function main() {
   const deployScript = getDeployMode();
   const appId = getWebAppId();
   const sdk = getSdkConfig(appId);
+  const hosting = await prepareHostingDeploy({ projectId });
+  const authDomain = resolveProductionAuthDomain({
+    publicHost: hostFromPublicUrl(hosting.publicUrl),
+    env: process.env,
+  });
+
+  if (sdk.authDomain && sdk.authDomain !== authDomain) {
+    console.log(
+      `Overriding sdkconfig authDomain ${sdk.authDomain} with ${authDomain} so Google sign-in shows the public Hosting host.`,
+    );
+  }
 
   const required = {
     VITE_FIREBASE_API_KEY: sdk.apiKey,
-    VITE_FIREBASE_AUTH_DOMAIN: sdk.authDomain,
+    VITE_FIREBASE_AUTH_DOMAIN: authDomain,
     VITE_FIREBASE_PROJECT_ID: sdk.projectId,
     VITE_FIREBASE_STORAGE_BUCKET: sdk.storageBucket,
     VITE_FIREBASE_MESSAGING_SENDER_ID: sdk.messagingSenderId,
@@ -152,7 +164,6 @@ async function main() {
     ...required,
   };
 
-  const hosting = await prepareHostingDeploy({ projectId });
   console.log(
     `Deploying project ${projectId} using Firebase WEB app ${appId} to Hosting site ${hosting.siteId} (${hosting.publicUrl})...`,
   );

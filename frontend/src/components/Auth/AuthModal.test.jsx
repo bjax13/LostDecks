@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { TestMemoryRouter } from "../../test/router.jsx";
 import AuthModal from "./AuthModal.jsx";
 
 const mockLogin = vi.fn();
@@ -228,5 +230,36 @@ describe("AuthModal (unit)", () => {
     await user.click(screen.getByTestId("social-mock-success"));
     expect(mockClearError).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes on success without navigating away from the page that opened the modal", async () => {
+    mockLogin.mockResolvedValueOnce(undefined);
+    const onClose = vi.fn();
+    render(
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
+        <Routes>
+          <Route
+            path="/collectibles"
+            element={
+              <>
+                <h1>Collectibles</h1>
+                <AuthModal isOpen onClose={onClose} />
+              </>
+            }
+          />
+          <Route path="/" element={<h1>Home page</h1>} />
+        </Routes>
+      </TestMemoryRouter>,
+    );
+
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("u@x.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw123456");
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Home page" })).not.toBeInTheDocument();
   });
 });

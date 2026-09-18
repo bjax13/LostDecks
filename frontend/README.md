@@ -8,6 +8,7 @@ This Vite-powered React application implements the ShardStash experience, includ
 - npm 9+
 - A Firebase project with Email/Password and Google authentication providers configured. Production Google sign-in also needs `shardstash.web.app` (and `shardstash.firebaseapp.com`) on that project's Auth authorized domains; deploy scripts try to add them automatically.
 - Production Hosting URL: https://shardstash.web.app (Firebase project id remains `storydeck-16`).
+- Production deploys set `VITE_FIREBASE_AUTH_DOMAIN` to `shardstash.web.app` (see `scripts/productionAuthDomain.js`). Local emulator auth does not use that Google chooser domain.
 
 ## Setup
 

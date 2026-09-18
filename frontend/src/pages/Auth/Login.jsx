@@ -1,17 +1,16 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { SITE_NAME } from "../../brand.js";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAuthErrorMessage } from "../../lib/authErrorMessage";
+import { usePostAuthRedirect } from "../../lib/postAuthRedirect";
 
 function Login() {
   const { login, error, clearError } = useAuth();
   const [formState, setFormState] = useState({ email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname ?? "/collections";
+  const redirectAfterAuth = usePostAuthRedirect();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -24,7 +23,7 @@ function Login() {
     clearError();
     try {
       await login(formState.email, formState.password);
-      navigate(from, { replace: true });
+      redirectAfterAuth();
     } catch (err) {
       console.error("Login failed", err);
     } finally {
@@ -67,7 +66,7 @@ function Login() {
         <Link to="/auth/forgot">Forgot password?</Link>
         <Link to="/auth/register">Need an account? Sign up</Link>
       </div>
-      <SocialLoginButtons />
+      <SocialLoginButtons onSuccess={redirectAfterAuth} />
     </section>
   );
 }
