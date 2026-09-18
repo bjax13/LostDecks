@@ -35,7 +35,7 @@ const SECTION_DEFINITIONS = [
   },
   {
     id: "pins",
-    label: "ChasmFriends Pins",
+    label: "Pin Collections",
     includes: (card) => card.collectibleType === "pin" || card.category === "pin",
   },
 ];
@@ -92,11 +92,38 @@ function buildGettingStartedTree() {
 
 export const gettingStartedTree = buildGettingStartedTree();
 
-export function createCoverageState(defaultStatus) {
+/** @typedef {"pins" | "cards" | "both"} CollectibleType */
+
+export const COLLECTIBLE_TYPE_PINS = "pins";
+export const COLLECTIBLE_TYPE_CARDS = "cards";
+export const COLLECTIBLE_TYPE_BOTH = "both";
+
+/**
+ * Filter the review tree for pin-only, card-only, or combined collectors.
+ * @param {typeof gettingStartedTree} [tree]
+ * @param {CollectibleType | null} collectibleType
+ */
+export function filterGettingStartedTree(tree = gettingStartedTree, collectibleType = null) {
+  if (collectibleType === COLLECTIBLE_TYPE_PINS) {
+    return tree.filter((section) => section.id === "pins");
+  }
+  if (collectibleType === COLLECTIBLE_TYPE_CARDS) {
+    return tree.filter((section) => section.id !== "pins");
+  }
+  return tree;
+}
+
+export function includesPins(collectibleType) {
+  return collectibleType === COLLECTIBLE_TYPE_PINS || collectibleType === COLLECTIBLE_TYPE_BOTH;
+}
+
+export function includesCards(collectibleType) {
+  return collectibleType === COLLECTIBLE_TYPE_CARDS || collectibleType === COLLECTIBLE_TYPE_BOTH;
+}
+
+export function createCoverageState(defaultStatus, tree = gettingStartedTree) {
   return Object.fromEntries(
-    gettingStartedTree.flatMap((section) =>
-      section.children.map((group) => [group.id, defaultStatus]),
-    ),
+    tree.flatMap((section) => section.children.map((group) => [group.id, defaultStatus])),
   );
 }
 
@@ -108,7 +135,15 @@ function needsNonsenseDisambiguation(sku, groupSkus) {
   return groupSkus.filter((entry) => entry.card?.number === number).length > 1;
 }
 
+function isPinSku(sku) {
+  return sku.card?.collectibleType === "pin" || sku.card?.category === "pin";
+}
+
 export function formatSkuNumberLabel(sku) {
+  // Pins are identified by name (Shreadad, etc.), not catalog numbers.
+  if (isPinSku(sku)) {
+    return sku.label || sku.card?.displayName || sku.card?.name || "Pin";
+  }
   const number = sku.card?.number;
   if (number == null) {
     return sku.label;
@@ -180,14 +215,15 @@ export function getSkuFinishLabel(sku) {
 
 export function formatReviewGroupLabel(group, section) {
   if (section.id === "pins") {
-    return section.label;
+    // Section header is generic ("Pin Collections"); group keeps the product name.
+    return `${group.label} Pins`;
   }
   return `${group.label} ${section.label}`;
 }
 
-export function getDefaultExpandedReviewIds(coverage) {
-  const expanded = new Set(gettingStartedTree.map((section) => section.id));
-  for (const section of gettingStartedTree) {
+export function getDefaultExpandedReviewIds(coverage, tree = gettingStartedTree) {
+  const expanded = new Set(tree.map((section) => section.id));
+  for (const section of tree) {
     for (const group of section.children) {
       if (coverage[group.id] === "some") {
         expanded.add(group.id);
@@ -299,23 +335,31 @@ export function getCollectionQuantityStats(
   );
 }
 
+export function formatCollectionQuantityNoun(collectibleType) {
+  if (collectibleType === COLLECTIBLE_TYPE_PINS) return "pins";
+  if (collectibleType === COLLECTIBLE_TYPE_BOTH) return "items";
+  return "cards";
+}
+
 export function formatCollectionQuantitySummary(
   tree,
   coverage,
   quantities,
   defaultQuantity = DEFAULT_MANUAL_QUANTITY,
+  collectibleType = COLLECTIBLE_TYPE_CARDS,
 ) {
   return `${formatQuantitySummary(
     getCollectionQuantityStats(tree, coverage, quantities, defaultQuantity),
-  )} cards`;
+  )} ${formatCollectionQuantityNoun(collectibleType)}`;
 }
 
 export function buildCollectionRows(
   coverage,
   quantities,
   defaultQuantity = DEFAULT_MANUAL_QUANTITY,
+  tree = gettingStartedTree,
 ) {
-  return gettingStartedTree.flatMap((section) =>
+  return tree.flatMap((section) =>
     section.children.flatMap((group) => {
       const status = coverage[group.id];
       return group.skus.map((sku, index) => ({

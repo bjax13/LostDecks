@@ -3,7 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import {
+  COLLECTIBLE_TYPE_BOTH,
   DEFAULT_MANUAL_QUANTITY,
+  filterGettingStartedTree,
   formatCollectionQuantitySummary,
   gettingStartedTree,
 } from "./gettingStartedCatalog";
@@ -37,10 +39,22 @@ function renderPage() {
   );
 }
 
-async function goToCardReview(user, profilePattern = /not in a spreadsheet/i) {
+async function chooseCollectibleType(user, collectiblePattern = /^both$/i) {
+  await user.click(screen.getByRole("radio", { name: collectiblePattern }));
+}
+
+async function goToCardReview(
+  user,
+  {
+    collectiblePattern = /^both$/i,
+    profilePattern = /not in a spreadsheet/i,
+    reviewHeading = /review your collection/i,
+  } = {},
+) {
+  await chooseCollectibleType(user, collectiblePattern);
   await user.click(screen.getByRole("radio", { name: profilePattern }));
   await user.click(screen.getByRole("button", { name: "Continue" }));
-  expect(screen.getByRole("heading", { name: /review your collection/i })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: reviewHeading })).toBeInTheDocument();
 }
 
 async function setElsecallerStoryFoilsToSome(user) {
@@ -101,22 +115,64 @@ beforeEach(() => {
 
 // Coverage + GitHub-hosted runners can push these large-tree interactions past Vitest's 5s default.
 describe("GettingStartedPage", { timeout: 20_000 }, () => {
-  it("asks the collector profile question first", () => {
+  it("asks collectible type then the collector profile question first", () => {
     renderPage();
 
     expect(screen.getByRole("heading", { name: /what best describes you/i })).toBeInTheDocument();
     expect(
-      screen.getByText(/choose whether to import from a spreadsheet or review cards in the app/i),
+      screen.getByText(/tell us what you collect, then choose how you want to start/i),
     ).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^chasmfriends pins$/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^story deck cards$/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^both$/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("radio", { name: /collection is in a spreadsheet/i }),
-    ).toBeInTheDocument();
+      screen.queryByRole("radio", { name: /collection is in a spreadsheet/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+  });
+
+  it("reveals spreadsheet or manual options after choosing a collectible type", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await chooseCollectibleType(user, /^story deck cards$/i);
+    const spreadsheetOption = screen.getByRole("radio", {
+      name: /collection is in a spreadsheet/i,
+    });
+    expect(spreadsheetOption).toBeEnabled();
     expect(
       screen.getByRole("radio", { name: /collection is not in a spreadsheet/i }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("radio", { name: /many or all/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("radio", { name: /do not have many/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
+
+    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeDisabled();
+    expect(
+      screen.getByRole("radio", { name: /collection is not in a spreadsheet/i }),
+    ).toBeChecked();
+    expect(
+      screen.getByText(/spreadsheet import is for story deck cards only/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
+  });
+
+  it("keeps spreadsheet option visible but disabled for pins-only collectors", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await chooseCollectibleType(user, /^both$/i);
+    await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
+    expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeChecked();
+
+    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    const spreadsheetOption = screen.getByRole("radio", {
+      name: /collection is in a spreadsheet/i,
+    });
+    expect(spreadsheetOption).toBeDisabled();
+    expect(spreadsheetOption).not.toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /collection is not in a spreadsheet/i }),
+    ).toBeChecked();
   });
 
   it("expands Some groups in review and supports bulk quantity edits", async () => {
@@ -141,8 +197,9 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const elsecallerQuantities = Object.fromEntries(
       elsecallerGroup.skus.map((sku) => [sku.skuId, "1"]),
     );
+    const reviewTree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_BOTH);
     const coverage = Object.fromEntries(
-      gettingStartedTree.flatMap((section) =>
+      reviewTree.flatMap((section) =>
         section.children.map((group) => [
           group.id,
           group.id === elsecallerGroup.id ? "some" : "none",
@@ -151,10 +208,11 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
     expect(collectionSummary).toHaveTextContent(
       formatCollectionQuantitySummary(
-        gettingStartedTree,
+        reviewTree,
         coverage,
         elsecallerQuantities,
         DEFAULT_MANUAL_QUANTITY,
+        COLLECTIBLE_TYPE_BOTH,
       ),
     );
 
@@ -210,6 +268,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
         coverage,
         Object.fromEntries(elsecallerGroup.skus.map((sku) => [sku.skuId, "0"])),
         DEFAULT_MANUAL_QUANTITY,
+        COLLECTIBLE_TYPE_BOTH,
       ),
     );
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 0$/i)).toBeInTheDocument();
@@ -291,6 +350,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const user = setupUser();
     renderPage();
 
+    await chooseCollectibleType(user, /^story deck cards$/i);
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
     await user.click(screen.getByRole("button", { name: "Continue" }));
 
@@ -765,7 +825,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
   });
 
-  it("includes ChasmFriends Pins in manual review with coverage controls", async () => {
+  it("includes ChasmFriends Pins under Pin Collections in manual review", async () => {
     const user = setupUser();
     renderPage();
 
@@ -775,10 +835,12 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const pinsGroup = pinsSection.children[0];
     const pinsTitle = "ChasmFriends Pins";
 
-    expect(screen.getByRole("button", { name: /^collapse chasmfriends pins$/i })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /^collapse pin collections$/i })).toHaveAttribute(
       "aria-expanded",
       "true",
     );
+    expect(screen.getByText("Pin Collections")).toBeInTheDocument();
+    expect(screen.getByText(pinsTitle)).toBeInTheDocument();
 
     const pinsCoverage = screen.getByRole("group", { name: `${pinsTitle} coverage` });
     expect(within(pinsCoverage).getByRole("button", { name: "None" })).toHaveAttribute(
@@ -793,9 +855,37 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
     await user.click(within(pinsCoverage).getByRole("button", { name: "All" }));
     expect(
-      getSkuQuantityGroup(new RegExp(`${pinsTitle} #1 quantity, 1$`, "i")),
+      getSkuQuantityGroup(new RegExp(`${pinsTitle} Shreadad quantity, 1$`, "i")),
     ).toBeInTheDocument();
     expect(pinsGroup.skus).toHaveLength(5);
+  });
+
+  it("shows only Pin Collections for pins-only collectors", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^chasmfriends pins$/i,
+      reviewHeading: /review your pins/i,
+    });
+
+    expect(screen.getByRole("button", { name: /^collapse pin collections$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /story foils/i })).not.toBeInTheDocument();
+    expect(screen.getByText("ChasmFriends Pins")).toBeInTheDocument();
+  });
+
+  it("hides Pin Collections for Story Deck-only collectors", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^story deck cards$/i,
+      reviewHeading: /review your cards/i,
+    });
+
+    expect(screen.getByRole("button", { name: /^collapse story foils$/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /pin collections/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
   });
 
   it("saves a zeroed default collection for a signed-in non-spreadsheet collector", async () => {
@@ -817,5 +907,22 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       existingEntries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
       allowPins: true,
     });
+  });
+
+  it("saves cards-only collectors without allowing pin updates", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^story deck cards$/i,
+      reviewHeading: /review your cards/i,
+    });
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+    const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
+    expect(call.allowPins).toBe(false);
+    expect(call.rows.some((row) => String(row.skuId).startsWith("PIN-"))).toBe(false);
   });
 });
