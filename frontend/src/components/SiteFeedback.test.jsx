@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   SITE_FEEDBACK_CONTACTS,
   SITE_FEEDBACK_EMAIL,
-  SITE_FEEDBACK_GUILD,
   SITE_FEEDBACK_MAILTO,
+  SITE_FEEDBACK_PLACES,
 } from "../siteFeedback.js";
 import { TestMemoryRouter } from "../test/router.jsx";
 import SiteFeedback from "./SiteFeedback.jsx";
@@ -40,13 +40,17 @@ describe("SiteFeedback", () => {
     const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
     expect(dialog).toHaveTextContent("product and site feedback");
     expect(dialog).toHaveTextContent("not trade match contact");
-    expect(dialog).toHaveTextContent(SITE_FEEDBACK_GUILD);
+    expect(dialog).toHaveTextContent(SITE_FEEDBACK_PLACES[0]);
+    expect(dialog).toHaveTextContent(SITE_FEEDBACK_PLACES[1]);
     expect(dialog).toHaveTextContent(SITE_FEEDBACK_CONTACTS[0]);
     expect(dialog).toHaveTextContent(SITE_FEEDBACK_CONTACTS[1]);
     expect(screen.getByRole("link", { name: SITE_FEEDBACK_EMAIL })).toHaveAttribute(
       "href",
       SITE_FEEDBACK_MAILTO,
     );
+    expect(screen.queryByRole("link", { name: SITE_FEEDBACK_CONTACTS[0] })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: SITE_FEEDBACK_CONTACTS[1] })).not.toBeInTheDocument();
+    expect(dialog.textContent).not.toMatch(/discord\.gg/i);
   });
 
   it("closes the panel from Close, Escape, and the backdrop", async () => {

@@ -21,6 +21,8 @@ test.describe("public routes (e2e)", () => {
     );
     await expect(page.getByRole("main")).toContainText("gimpy_12");
     await expect(page.getByRole("main")).toContainText("1bjax");
+    await expect(page.getByRole("main")).toContainText("Sanderson Collectors Guild");
+    await expect(page.getByRole("main")).toContainText("Story Deck Bazaar");
     await expect(page.getByRole("contentinfo").getByRole("link", { name: "About" })).toBeVisible();
   });
 
