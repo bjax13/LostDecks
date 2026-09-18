@@ -16,8 +16,8 @@ export default function AboutPage() {
           you’re missing.
         </p>
         <p>
-          It started as a side project for Corby and Bryan — finishing a Story Deck set and trading
-          grab-bag ChasmFriends toward a full pin set.
+          It started as a side project for Corby and Bryan to finish their Story Deck set and trade
+          grab-bag ChasmFriends for a full pin set.
         </p>
         <p>
           We’re all ears. Email ideas or bugs to{" "}

@@ -19,8 +19,12 @@ describe("About page", () => {
 
     expect(screen.getByRole("heading", { name: "About" })).toBeInTheDocument();
     expect(screen.getByText(/ShardStash has two jobs: track what you own/i)).toBeInTheDocument();
-    expect(screen.getByText(/Story Deck set/)).toBeInTheDocument();
-    expect(screen.getByText(/grab-bag ChasmFriends/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "It started as a side project for Corby and Bryan to finish their Story Deck set and trade grab-bag ChasmFriends for a full pin set.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("main").textContent).not.toMatch(/[—–]/);
     expect(screen.queryByText(/Lost Tales Marketplace/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Lost Decks/i)).not.toBeInTheDocument();
   });
