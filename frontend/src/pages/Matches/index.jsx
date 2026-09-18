@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
+import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
+import { MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
 import { isValidTradingEmail, MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
 import MatchesToolbar from "./components/MatchesToolbar";
 import { matchLaneLabels } from "./constants";
@@ -240,7 +242,10 @@ function MatchesContent() {
   return (
     <section className="matches-page">
       <header className="matches-header">
-        <h1>Matches</h1>
+        <div className="matches-title-row">
+          <h1>Matches</h1>
+          <InfoBubble label="How matching works">{MATCHES_PAGE_HELP}</InfoBubble>
+        </div>
         <p className="matches-hint">
           Find collectors with extras you need, and extras they need from you.
         </p>

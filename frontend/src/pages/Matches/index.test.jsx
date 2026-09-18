@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseTradeMatches = vi.hoisted(() => vi.fn());
@@ -155,6 +156,19 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Dun cards" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Foil cards" })).not.toBeInTheDocument();
+  });
+
+  it("exposes matching help copy from an info bubble next to the heading", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<MatchesPage />);
+
+    const trigger = screen.getByRole("button", { name: "How matching works" });
+    expect(trigger).toBeInTheDocument();
+    expect(screen.getByText(MATCHES_PAGE_HELP)).not.toBeVisible();
+
+    await user.click(trigger);
+
+    expect(screen.getByText(MATCHES_PAGE_HELP)).toBeVisible();
   });
 
   it("renders a person card with dun and pin piles and no sentence rows", () => {
