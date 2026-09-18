@@ -1,23 +1,39 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import SiteFeedback, { SITE_FEEDBACK_CONTACTS, SITE_FEEDBACK_GUILD } from "./SiteFeedback.jsx";
+import {
+  SITE_FEEDBACK_CONTACTS,
+  SITE_FEEDBACK_EMAIL,
+  SITE_FEEDBACK_GUILD,
+  SITE_FEEDBACK_MAILTO,
+} from "../siteFeedback.js";
+import { TestMemoryRouter } from "../test/router.jsx";
+import SiteFeedback from "./SiteFeedback.jsx";
+
+function renderFooter() {
+  return render(
+    <TestMemoryRouter>
+      <SiteFeedback />
+    </TestMemoryRouter>,
+  );
+}
 
 describe("SiteFeedback", () => {
-  it("shows a document-end Feedback footer without opening the panel", () => {
-    render(<SiteFeedback />);
+  it("shows a document-end footer with About and Feedback without opening the panel", () => {
+    renderFooter();
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveClass("site-footer");
     expect(window.getComputedStyle(footer).position).not.toBe("fixed");
     expect(window.getComputedStyle(footer).position).not.toBe("sticky");
+    expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Send site feedback" })).not.toBeInTheDocument();
   });
 
-  it("opens site-feedback copy with the guild name and both Discord usernames", async () => {
+  it("opens site-feedback copy with mailto and both Discord usernames", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedback />);
+    renderFooter();
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
 
@@ -27,11 +43,15 @@ describe("SiteFeedback", () => {
     expect(dialog).toHaveTextContent(SITE_FEEDBACK_GUILD);
     expect(dialog).toHaveTextContent(SITE_FEEDBACK_CONTACTS[0]);
     expect(dialog).toHaveTextContent(SITE_FEEDBACK_CONTACTS[1]);
+    expect(screen.getByRole("link", { name: SITE_FEEDBACK_EMAIL })).toHaveAttribute(
+      "href",
+      SITE_FEEDBACK_MAILTO,
+    );
   });
 
   it("closes the panel from Close, Escape, and the backdrop", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedback />);
+    renderFooter();
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
@@ -48,7 +68,7 @@ describe("SiteFeedback", () => {
 
   it("does not close when the dialog surface is clicked", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedback />);
+    renderFooter();
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
     await user.click(screen.getByRole("dialog", { name: "Send site feedback" }));

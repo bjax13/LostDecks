@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
-
-export const SITE_FEEDBACK_GUILD = "Sanderson Collectors Guild";
-export const SITE_FEEDBACK_CONTACTS = ["gimpy_12", "1bjax"];
+import { Link } from "react-router-dom";
+import SiteFeedbackContact from "./SiteFeedbackContact.jsx";
 
 export default function SiteFeedback() {
   const [open, setOpen] = useState(false);
@@ -30,6 +29,9 @@ export default function SiteFeedback() {
 
   return (
     <footer className="site-footer">
+      <Link to="/about" className="site-footer__link">
+        About
+      </Link>
       <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
         Feedback
       </button>
@@ -53,10 +55,7 @@ export default function SiteFeedback() {
               <p>
                 This is for product and site feedback (bugs and ideas), not trade match contact.
               </p>
-              <p>
-                In the {SITE_FEEDBACK_GUILD} Discord, message {SITE_FEEDBACK_CONTACTS[0]} or{" "}
-                {SITE_FEEDBACK_CONTACTS[1]}.
-              </p>
+              <SiteFeedbackContact />
             </div>
             <button type="button" className="site-feedback-modal__close" onClick={close}>
               Close

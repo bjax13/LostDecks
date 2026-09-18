@@ -375,11 +375,14 @@ h2 {
 .site-footer {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
   padding: 1rem;
   border-top: 1px solid rgba(138, 43, 226, 0.3);
   background: linear-gradient(135deg, #1a0f2e 0%, #2d1b4e 100%);
 }
 
+.site-footer__link,
 .site-footer__feedback {
   background: none;
   border: none;
@@ -390,6 +393,7 @@ h2 {
   text-decoration: underline;
 }
 
+.site-footer__link:hover,
 .site-footer__feedback:hover {
   color: #ffffff;
 }
@@ -429,6 +433,16 @@ h2 {
   margin: 0;
   color: rgba(224, 224, 224, 0.85);
   line-height: 1.5;
+}
+
+.site-feedback-modal__body a {
+  color: #cfa8ff;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.site-feedback-modal__body a:hover {
+  color: #ffffff;
 }
 
 .site-feedback-modal__close {
