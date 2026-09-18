@@ -93,6 +93,25 @@ describe("AccountPage", () => {
     expect(screen.getByText(/view and update your account profile/i)).toBeInTheDocument();
   });
 
+  it("opens Discord-only site feedback from a Send feedback entry", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    expect(screen.getByRole("heading", { name: "Site feedback" })).toBeInTheDocument();
+    expect(
+      screen.getByText(/for bugs and ideas about the site, not trade match contact/i),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Send feedback" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
+    expect(dialog).toHaveTextContent("product and site feedback");
+    expect(dialog).toHaveTextContent("not trade match contact");
+    expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
+    expect(dialog).toHaveTextContent("gimpy_12");
+    expect(dialog).toHaveTextContent("1bjax");
+  });
+
   it("renders within an account-page section", () => {
     const { container } = renderAccountPage();
     const accountPage = container.querySelector(".account-page");

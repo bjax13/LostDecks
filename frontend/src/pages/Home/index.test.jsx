@@ -110,6 +110,23 @@ describe("Home page", () => {
       const hints = within(snapshot).getAllByText("Sign in");
       expect(hints.length).toBeGreaterThan(0);
     });
+
+    it("opens Discord-only site feedback from a modest Feedback control", async () => {
+      const user = userEvent.setup({ delay: null });
+      renderHome();
+
+      const feedback = screen.getByRole("region", { name: "Site feedback" });
+      expect(within(feedback).getByRole("button", { name: "Feedback" })).toBeInTheDocument();
+
+      await user.click(within(feedback).getByRole("button", { name: "Feedback" }));
+
+      const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
+      expect(dialog).toHaveTextContent("product and site feedback");
+      expect(dialog).toHaveTextContent("not trade match contact");
+      expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
+      expect(dialog).toHaveTextContent("gimpy_12");
+      expect(dialog).toHaveTextContent("1bjax");
+    });
   });
 
   describe("signed in", () => {

@@ -33,19 +33,16 @@ describe("App (integration)", () => {
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
   });
 
-  it("opens Discord-only site feedback from the signed-out footer", async () => {
+  it("does not keep a sitewide Feedback control on Collectibles", async () => {
     const user = userEvent.setup();
     renderWithAppProviders(<App />);
 
-    await user.click(screen.getByRole("button", { name: "Feedback" }));
+    await user.click(screen.getByRole("link", { name: "Collectibles" }));
 
-    const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
-    expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
-    expect(dialog).toHaveTextContent("gimpy_12");
-    expect(dialog).toHaveTextContent("1bjax");
-    expect(dialog).toHaveTextContent("not trade match contact");
+    expect(await screen.findByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Feedback" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Send feedback" })).not.toBeInTheDocument();
   });
 });

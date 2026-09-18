@@ -1,22 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import SiteFeedbackFooter, {
-  SITE_FEEDBACK_CONTACTS,
-  SITE_FEEDBACK_GUILD,
-} from "./SiteFeedbackFooter.jsx";
+import SiteFeedback, { SITE_FEEDBACK_CONTACTS, SITE_FEEDBACK_GUILD } from "./SiteFeedback.jsx";
 
-describe("SiteFeedbackFooter", () => {
+describe("SiteFeedback", () => {
   it("shows a Feedback control without opening the panel", () => {
-    render(<SiteFeedbackFooter />);
+    render(<SiteFeedback />);
 
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Send site feedback" })).not.toBeInTheDocument();
   });
 
+  it("uses a custom trigger label when provided", () => {
+    render(<SiteFeedback triggerLabel="Send feedback" />);
+
+    expect(screen.getByRole("button", { name: "Send feedback" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Feedback" })).not.toBeInTheDocument();
+  });
+
   it("opens site-feedback copy with the guild name and both Discord usernames", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedbackFooter />);
+    render(<SiteFeedback />);
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
 
@@ -30,7 +34,7 @@ describe("SiteFeedbackFooter", () => {
 
   it("closes the panel from Close, Escape, and the backdrop", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedbackFooter />);
+    render(<SiteFeedback />);
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
     await user.click(screen.getByRole("button", { name: "Close" }));
@@ -47,7 +51,7 @@ describe("SiteFeedbackFooter", () => {
 
   it("does not close when the dialog surface is clicked", async () => {
     const user = userEvent.setup();
-    render(<SiteFeedbackFooter />);
+    render(<SiteFeedback />);
 
     await user.click(screen.getByRole("button", { name: "Feedback" }));
     await user.click(screen.getByRole("dialog", { name: "Send site feedback" }));

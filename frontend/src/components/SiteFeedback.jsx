@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 export const SITE_FEEDBACK_GUILD = "Sanderson Collectors Guild";
 export const SITE_FEEDBACK_CONTACTS = ["gimpy_12", "1bjax"];
 
-export default function SiteFeedbackFooter() {
+export default function SiteFeedback({ triggerLabel = "Feedback" }) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
@@ -29,9 +29,9 @@ export default function SiteFeedbackFooter() {
   const close = () => setOpen(false);
 
   return (
-    <footer className="site-footer">
-      <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
-        Feedback
+    <div className="site-feedback">
+      <button type="button" className="site-feedback__trigger" onClick={() => setOpen(true)}>
+        {triggerLabel}
       </button>
       {open ? (
         // biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismisses on pointer click
@@ -64,6 +64,6 @@ export default function SiteFeedbackFooter() {
           </div>
         </div>
       ) : null}
-    </footer>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
-import SiteFeedbackFooter from "./components/SiteFeedbackFooter.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
 import AccountPage from "./pages/Account";
@@ -119,7 +118,6 @@ function App() {
         <Route path="/auth/forgot" element={<ForgotPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <SiteFeedbackFooter />
     </BrowserRouter>
   );
 }

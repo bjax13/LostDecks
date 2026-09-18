@@ -358,17 +358,10 @@ h2 {
   background: #0d0a1a;
 }
 
-.site-footer {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
-  border-top: 1px solid rgba(138, 43, 226, 0.3);
-  background: linear-gradient(135deg, #1a0f2e 0%, #2d1b4e 100%);
-}
-
-.site-footer__feedback {
+.site-feedback__trigger {
   background: none;
   border: none;
+  padding: 0;
   color: #cfa8ff;
   cursor: pointer;
   font: inherit;
@@ -376,7 +369,7 @@ h2 {
   text-decoration: underline;
 }
 
-.site-footer__feedback:hover {
+.site-feedback__trigger:hover {
   color: #ffffff;
 }
 
