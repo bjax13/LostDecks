@@ -7,9 +7,10 @@ test.describe("public routes (e2e)", () => {
 
     const footer = page.getByRole("contentinfo");
     await footer.scrollIntoViewIfNeeded();
-    const aboutLink = footer.getByRole("link", { name: "About" });
+    const aboutLink = footer.getByTestId("site-footer-about-link");
     await expect(aboutLink).toBeVisible();
     await expect(aboutLink).toHaveAttribute("href", "/about");
+    await expect(aboutLink).toHaveText("About");
     await expect(footer.getByRole("button", { name: "Feedback" })).toBeVisible();
   });
 

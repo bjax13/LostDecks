@@ -29,12 +29,14 @@ export default function SiteFeedback() {
 
   return (
     <footer className="site-footer">
-      <Link to="/about" className="site-footer__link">
-        About
-      </Link>
-      <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
-        Feedback
-      </button>
+      <nav className="site-footer__nav" aria-label="Site information">
+        <Link to="/about" className="site-footer__link" data-testid="site-footer-about-link">
+          About
+        </Link>
+        <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
+          Feedback
+        </button>
+      </nav>
       {open ? (
         // biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismisses on pointer click
         // biome-ignore lint/a11y/useKeyWithClickEvents: Escape closes via window listener
