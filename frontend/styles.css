@@ -375,15 +375,11 @@ h2 {
 .site-footer {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
   padding: 1rem;
   border-top: 1px solid rgba(138, 43, 226, 0.3);
   background: linear-gradient(135deg, #1a0f2e 0%, #2d1b4e 100%);
-}
-
-.site-footer__nav {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
 }
 
 .site-footer__link,
