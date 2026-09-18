@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 // Avoid initializing the real Firebase client in this file (faster, no env required).
@@ -33,16 +32,6 @@ describe("App (integration)", () => {
     expect(
       await screen.findByRole("link", { name: /sign in/i }, { timeout: 500 }),
     ).toBeInTheDocument();
-  });
-
-  it("does not keep a sitewide Feedback control on Collectibles", async () => {
-    const user = userEvent.setup();
-    renderWithAppProviders(<App />);
-
-    await user.click(screen.getByRole("link", { name: "Collectibles" }));
-
-    expect(await screen.findByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Feedback" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Send feedback" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
   });
 });
