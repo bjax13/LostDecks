@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   SITE_FEEDBACK_CONTACTS,
   SITE_FEEDBACK_EMAIL,
-  SITE_FEEDBACK_GUILD,
   SITE_FEEDBACK_MAILTO,
+  SITE_FEEDBACK_PLACES,
 } from "../../siteFeedback.js";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import AboutPage from "./index.jsx";
@@ -42,8 +42,12 @@ describe("About page", () => {
       SITE_FEEDBACK_MAILTO,
     );
     expect(page).toHaveTextContent(`Email ideas or bugs to ${SITE_FEEDBACK_EMAIL}`);
-    expect(page).toHaveTextContent(SITE_FEEDBACK_GUILD);
+    expect(page).toHaveTextContent(SITE_FEEDBACK_PLACES[0]);
+    expect(page).toHaveTextContent(SITE_FEEDBACK_PLACES[1]);
     expect(page).toHaveTextContent(SITE_FEEDBACK_CONTACTS[0]);
     expect(page).toHaveTextContent(SITE_FEEDBACK_CONTACTS[1]);
+    expect(screen.queryByRole("link", { name: SITE_FEEDBACK_CONTACTS[0] })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: SITE_FEEDBACK_CONTACTS[1] })).not.toBeInTheDocument();
+    expect(page.textContent).not.toMatch(/discord\.gg/i);
   });
 });

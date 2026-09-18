@@ -50,9 +50,12 @@ describe("App (integration)", () => {
 
     const dialog = screen.getByRole("dialog", { name: "Send site feedback" });
     expect(dialog).toHaveTextContent("Sanderson Collectors Guild");
+    expect(dialog).toHaveTextContent("Story Deck Bazaar");
     expect(dialog).toHaveTextContent("gimpy_12");
     expect(dialog).toHaveTextContent("1bjax");
     expect(dialog).toHaveTextContent("not trade match contact");
+    expect(screen.queryByRole("link", { name: "gimpy_12" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "1bjax" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
       "href",
       "mailto:shardstashinfo@gmail.com?subject=ShardStash%20feedback",
@@ -67,6 +70,10 @@ describe("App (integration)", () => {
 
     expect(screen.getByRole("heading", { name: "About" })).toBeInTheDocument();
     expect(screen.getByText(/ShardStash has two jobs/)).toBeInTheDocument();
+    expect(screen.getByRole("main")).toHaveTextContent("Sanderson Collectors Guild");
+    expect(screen.getByRole("main")).toHaveTextContent("Story Deck Bazaar");
+    expect(screen.getByRole("main")).toHaveTextContent("gimpy_12");
+    expect(screen.getByRole("main")).toHaveTextContent("1bjax");
     expect(screen.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
       "href",
       "mailto:shardstashinfo@gmail.com?subject=ShardStash%20feedback",
