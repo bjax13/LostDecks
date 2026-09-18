@@ -29,7 +29,7 @@ export default function SiteFeedback() {
 
   return (
     <footer className="site-footer">
-      <Link to="/about" className="site-footer__link">
+      <Link to="/about" className="site-footer__link" data-testid="site-footer-about-link">
         About
       </Link>
       <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
