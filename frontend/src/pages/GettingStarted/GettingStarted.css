@@ -153,6 +153,28 @@
   margin: 0;
 }
 
+.getting-started__profile-block {
+  margin-bottom: 1.5rem;
+}
+
+.getting-started__profile-block:last-of-type {
+  margin-bottom: 0;
+}
+
+.getting-started__profile-question {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.getting-started__profile-note {
+  margin: 0 0 0.85rem;
+  color: rgba(224, 224, 224, 0.68);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .getting-started__profile-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -160,6 +182,17 @@
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.getting-started__profile-options.is-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .getting-started__profile-options,
+  .getting-started__profile-options.is-three {
+    grid-template-columns: 1fr;
+  }
 }
 
 .getting-started__profile-options label {
@@ -180,9 +213,26 @@
   background: rgba(96, 66, 178, 0.25);
 }
 
+.getting-started__profile-options label.is-disabled,
+.getting-started__profile-options label.is-disabled:hover {
+  border-color: rgba(138, 43, 226, 0.2);
+  background: rgba(16, 12, 35, 0.42);
+  color: rgba(224, 224, 224, 0.42);
+  cursor: not-allowed;
+}
+
+.getting-started__profile-options label.is-disabled strong,
+.getting-started__profile-options label.is-disabled small {
+  color: rgba(224, 224, 224, 0.42);
+}
+
 .getting-started__profile-options label:has(input:focus-visible) {
   outline: 2px solid rgba(216, 120, 215, 0.85);
   outline-offset: 2px;
+}
+
+.getting-started__profile-options label.is-disabled:has(input:focus-visible) {
+  outline-color: rgba(224, 224, 224, 0.35);
 }
 
 .getting-started__profile-options input[type="radio"] {
@@ -474,6 +524,16 @@
   min-height: 2.35rem;
   padding-top: 0.28rem;
   padding-bottom: 0.28rem;
+}
+
+.getting-started__sku-condensed.has-name-label {
+  grid-template-columns: minmax(7ch, 13ch) auto auto auto;
+}
+
+.getting-started__sku-condensed.has-name-label .getting-started__sku-condensed-label {
+  align-items: flex-start;
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
 }
 
 .getting-started__sku-condensed-label {

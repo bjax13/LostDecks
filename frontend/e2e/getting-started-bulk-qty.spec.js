@@ -3,9 +3,12 @@ import { expect, test } from "@playwright/test";
 test.describe("getting started bulk quantity (e2e)", () => {
   test("rejects negative Apply all and still applies a positive quantity", async ({ page }) => {
     await page.goto("/getting-started");
+    // Collectible type is asked first; Story Deck matches this card-review / bulk qty flow.
+    // Click label text (same pattern as profile options) — the radio input is covered by the label span.
+    await page.getByText("Story Deck Cards", { exact: true }).click();
     await page.getByText(/my collection is not in a spreadsheet/i).click();
     await page.getByRole("button", { name: "Continue" }).click();
-    await expect(page.getByRole("heading", { name: /review your collection/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /review your cards/i })).toBeVisible();
 
     await page.getByRole("button", { name: /^expand elsecaller story foils$/i }).click();
 

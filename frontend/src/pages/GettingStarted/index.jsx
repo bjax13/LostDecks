@@ -6,8 +6,12 @@ import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
   buildCollectionRows,
+  COLLECTIBLE_TYPE_BOTH,
+  COLLECTIBLE_TYPE_CARDS,
+  COLLECTIBLE_TYPE_PINS,
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
+  filterGettingStartedTree,
   formatCollectionQuantitySummary,
   formatGroupQuantitySummary,
   formatReviewGroupLabel,
@@ -18,15 +22,35 @@ import {
   getSkuFinishLabel,
   getSkuVariantLabel,
   gettingStartedTree,
+  includesPins,
   resolveSkuQuantity,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
+
+const COLLECTIBLE_OPTIONS = [
+  {
+    id: COLLECTIBLE_TYPE_PINS,
+    title: "ChasmFriends Pins",
+    description: "I only collect ChasmFriends pins.",
+  },
+  {
+    id: COLLECTIBLE_TYPE_CARDS,
+    title: "Story Deck Cards",
+    description: "I only collect Story Deck cards.",
+  },
+  {
+    id: COLLECTIBLE_TYPE_BOTH,
+    title: "Both",
+    description: "I collect pins and Story Deck cards.",
+  },
+];
 
 const PROFILE_OPTIONS = [
   {
     id: "spreadsheet",
     title: "My collection is in a spreadsheet",
     description: "Prepare a CSV and use the bulk importer on your collection page.",
+    cardsOnly: true,
   },
   {
     id: "manual",
@@ -122,16 +146,26 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
   );
 }
 
-function CondensedSkuCell({ shortLabel, variantLabel = null, quantityLabel, quantity, onAdjust }) {
+function CondensedSkuCell({
+  shortLabel,
+  variantLabel = null,
+  quantityLabel,
+  quantity,
+  onAdjust,
+  usesNameLabel = false,
+}) {
   const hasVariantLine = Boolean(variantLabel);
+  const cellClassName = [
+    "getting-started__sku-condensed",
+    hasVariantLine ? "has-variant" : null,
+    usesNameLabel ? "has-name-label" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     // biome-ignore lint/a11y/useSemanticElements: quantity cell is a composite control, not a form fieldset
-    <div
-      className={`getting-started__sku-condensed${hasVariantLine ? " has-variant" : ""}`}
-      role="group"
-      aria-label={`${quantityLabel}, ${quantity}`}
-    >
+    <div className={cellClassName} role="group" aria-label={`${quantityLabel}, ${quantity}`}>
       <span className="getting-started__sku-condensed-label">
         <span className="getting-started__sku-condensed-short">{shortLabel} :</span>
         {hasVariantLine ? (
@@ -240,8 +274,9 @@ function CoverageControl({ label, value, onChange }) {
   );
 }
 
-function StepIndicator({ step, profile, onSelectStep }) {
+function StepIndicator({ step, profile, collectibleType, onSelectStep }) {
   const spreadsheet = profile === "spreadsheet";
+  const reviewLabel = collectibleType === COLLECTIBLE_TYPE_PINS ? "Pin review" : "Card review";
   const steps = spreadsheet
     ? [
         { id: "profile", label: "About you" },
@@ -249,7 +284,7 @@ function StepIndicator({ step, profile, onSelectStep }) {
       ]
     : [
         { id: "profile", label: "About you" },
-        { id: "manual", label: "Card review" },
+        { id: "manual", label: reviewLabel },
       ];
   const activeIndex = Math.max(
     0,
@@ -299,6 +334,7 @@ function StepIndicator({ step, profile, onSelectStep }) {
 
 export default function GettingStartedPage() {
   const [step, setStep] = useState("profile");
+  const [collectibleType, setCollectibleType] = useState(null);
   const [profile, setProfile] = useState(null);
   const [coverage, setCoverage] = useState({});
   const [quantities, setQuantities] = useState({});
@@ -311,29 +347,66 @@ export default function GettingStartedPage() {
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
   const navigate = useNavigate();
 
+  const reviewTree = useMemo(
+    () => filterGettingStartedTree(gettingStartedTree, collectibleType ?? COLLECTIBLE_TYPE_BOTH),
+    [collectibleType],
+  );
+
+  const spreadsheetDisabled = collectibleType === COLLECTIBLE_TYPE_PINS;
+
+  const canContinueProfile = Boolean(
+    collectibleType && profile && !(spreadsheetDisabled && profile === "spreadsheet"),
+  );
+
   const collectionSummary = useMemo(
     () =>
       formatCollectionQuantitySummary(
-        gettingStartedTree,
+        reviewTree,
         coverage,
         quantities,
         DEFAULT_MANUAL_QUANTITY,
+        collectibleType ?? COLLECTIBLE_TYPE_BOTH,
       ),
-    [coverage, quantities],
+    [collectibleType, coverage, quantities, reviewTree],
   );
 
+  const selectCollectibleType = (nextType) => {
+    setCollectibleType(nextType);
+    if (nextType === COLLECTIBLE_TYPE_PINS) {
+      setProfile("manual");
+    }
+  };
+
+  const selectProfile = (nextProfile) => {
+    if (spreadsheetDisabled && nextProfile === "spreadsheet") return;
+    setProfile(nextProfile);
+  };
+
+  const beginManualReview = (nextCollectibleType = collectibleType) => {
+    const tree = filterGettingStartedTree(
+      gettingStartedTree,
+      nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH,
+    );
+    const newCoverage = createCoverageState("none", tree);
+    setCoverage(newCoverage);
+    setQuantities({});
+    setExpandedReviewIds(getDefaultExpandedReviewIds(newCoverage, tree));
+    setStep("manual");
+  };
+
   const beginProfile = () => {
-    if (!profile) return;
+    if (!collectibleType || !profile) return;
+    if (collectibleType === COLLECTIBLE_TYPE_PINS && profile === "spreadsheet") {
+      setProfile("manual");
+      beginManualReview(COLLECTIBLE_TYPE_PINS);
+      return;
+    }
     setError(null);
     if (profile === "spreadsheet") {
       setStep("spreadsheet");
       return;
     }
-    const newCoverage = createCoverageState("none");
-    setCoverage(newCoverage);
-    setQuantities({});
-    setExpandedReviewIds(getDefaultExpandedReviewIds(newCoverage));
-    setStep("manual");
+    beginManualReview(collectibleType);
   };
 
   const selectStep = (targetStep) => {
@@ -344,16 +417,21 @@ export default function GettingStartedPage() {
 
     if (targetStep === "manual") {
       setError(null);
-      if (!profile) {
+      const nextCollectibleType = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+      if (!collectibleType) {
+        setCollectibleType(COLLECTIBLE_TYPE_BOTH);
+      }
+      if (
+        !profile ||
+        (nextCollectibleType === COLLECTIBLE_TYPE_PINS && profile === "spreadsheet")
+      ) {
         setProfile("manual");
       }
-      const newCoverage =
-        Object.keys(coverage).length === 0 ? createCoverageState("none") : coverage;
       if (Object.keys(coverage).length === 0) {
-        setCoverage(newCoverage);
-        setQuantities({});
+        beginManualReview(nextCollectibleType);
+        return;
       }
-      setExpandedReviewIds(getDefaultExpandedReviewIds(newCoverage));
+      setExpandedReviewIds(getDefaultExpandedReviewIds(coverage, reviewTree));
       setStep("manual");
       return;
     }
@@ -377,7 +455,7 @@ export default function GettingStartedPage() {
   };
 
   const findReviewGroup = (groupId) => {
-    for (const section of gettingStartedTree) {
+    for (const section of reviewTree) {
       const group = section.children.find((child) => child.id === groupId);
       if (group) return group;
     }
@@ -526,8 +604,9 @@ export default function GettingStartedPage() {
       await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY),
+          rows: buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, reviewTree),
           existingEntries: entries,
+          allowPins: includesPins(collectibleType),
         }),
         new Promise((_, reject) => {
           timeoutId = window.setTimeout(() => {
@@ -551,6 +630,15 @@ export default function GettingStartedPage() {
     }
   };
 
+  const reviewHeading =
+    collectibleType === COLLECTIBLE_TYPE_PINS
+      ? "Review your pins"
+      : collectibleType === COLLECTIBLE_TYPE_CARDS
+        ? "Review your cards"
+        : "Review your collection";
+  const reviewTreeLabel =
+    collectibleType === COLLECTIBLE_TYPE_PINS ? "Pins to review" : "Cards to review";
+
   return (
     <main className="getting-started">
       <header className="getting-started__header">
@@ -564,7 +652,12 @@ export default function GettingStartedPage() {
         </p>
       </header>
 
-      <StepIndicator step={step} profile={profile} onSelectStep={selectStep} />
+      <StepIndicator
+        step={step}
+        profile={profile}
+        collectibleType={collectibleType}
+        onSelectStep={selectStep}
+      />
 
       <section className="getting-started__workspace" aria-live="polite">
         {step === "profile" ? (
@@ -572,33 +665,90 @@ export default function GettingStartedPage() {
             <div className="getting-started__section-heading">
               <span>Step 1</span>
               <h2>What best describes you?</h2>
-              <p>Choose whether to import from a spreadsheet or review cards in the app.</p>
+              <p>Tell us what you collect, then choose how you want to start.</p>
             </div>
-            <fieldset className="getting-started__profile-options">
-              <legend className="getting-started__sr-only">
-                Choose a collection starting point
-              </legend>
-              {PROFILE_OPTIONS.map((option) => (
-                <label key={option.id} className={profile === option.id ? "is-selected" : ""}>
-                  <input
-                    type="radio"
-                    name="profile"
-                    value={option.id}
-                    checked={profile === option.id}
-                    onChange={() => setProfile(option.id)}
-                  />
-                  <span>
-                    <strong>{option.title}</strong>
-                    <small>{option.description}</small>
-                  </span>
-                </label>
-              ))}
-            </fieldset>
+
+            <div className="getting-started__profile-block">
+              <h3 className="getting-started__profile-question">Do you collect…</h3>
+              <fieldset className="getting-started__profile-options is-three">
+                <legend className="getting-started__sr-only">
+                  Choose what collectibles you collect
+                </legend>
+                {COLLECTIBLE_OPTIONS.map((option) => (
+                  <label
+                    key={option.id}
+                    className={collectibleType === option.id ? "is-selected" : ""}
+                  >
+                    <input
+                      type="radio"
+                      name="collectible-type"
+                      value={option.id}
+                      checked={collectibleType === option.id}
+                      aria-label={option.title}
+                      onChange={() => selectCollectibleType(option.id)}
+                    />
+                    <span>
+                      <strong aria-hidden="true">{option.title}</strong>
+                      <small>{option.description}</small>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+            </div>
+
+            {collectibleType ? (
+              <div className="getting-started__profile-block">
+                <h3 className="getting-started__profile-question">
+                  {collectibleType === COLLECTIBLE_TYPE_PINS
+                    ? "How do you want to set up your pins?"
+                    : "How is your collection stored?"}
+                </h3>
+                <fieldset className="getting-started__profile-options">
+                  <legend className="getting-started__sr-only">
+                    Choose a collection starting point
+                  </legend>
+                  {PROFILE_OPTIONS.map((option) => {
+                    const optionDisabled = spreadsheetDisabled && option.cardsOnly;
+                    const labelClassName = [
+                      profile === option.id && !optionDisabled ? "is-selected" : null,
+                      optionDisabled ? "is-disabled" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+
+                    return (
+                      <label key={option.id} className={labelClassName || undefined}>
+                        <input
+                          type="radio"
+                          name="profile"
+                          value={option.id}
+                          checked={profile === option.id}
+                          disabled={optionDisabled}
+                          aria-label={option.title}
+                          onChange={() => selectProfile(option.id)}
+                        />
+                        <span>
+                          <strong aria-hidden="true">{option.title}</strong>
+                          <small>
+                            {optionDisabled
+                              ? "Spreadsheet import is for Story Deck cards only."
+                              : collectibleType === COLLECTIBLE_TYPE_PINS && option.id === "manual"
+                                ? "Start with zero selected, then mark the pins you already own."
+                                : option.description}
+                          </small>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </fieldset>
+              </div>
+            ) : null}
+
             <div className="getting-started__actions">
               <button
                 type="button"
                 className="getting-started__button is-primary"
-                disabled={!profile}
+                disabled={!canContinueProfile}
                 onClick={beginProfile}
               >
                 Continue
@@ -611,14 +761,14 @@ export default function GettingStartedPage() {
           <>
             <div className="getting-started__section-heading">
               <span>Step 2</span>
-              <h2>Review your collection</h2>
+              <h2>{reviewHeading}</h2>
               <p>
                 All and None are set to 1 and 0, but can be expanded for more granular edits.
                 Selecting Some will proactively open the granular view.
               </p>
             </div>
-            <div className="getting-started__tree" role="tree" aria-label="Cards to review">
-              {gettingStartedTree.map((section) => {
+            <div className="getting-started__tree" role="tree" aria-label={reviewTreeLabel}>
+              {reviewTree.map((section) => {
                 const sectionExpanded = expandedReviewIds.has(section.id);
                 return (
                   <div
@@ -705,10 +855,15 @@ export default function GettingStartedPage() {
                                       const numberLabel = formatSkuNumberLabel(sku);
                                       const variantLabel = getSkuVariantLabel(sku, group.skus);
                                       const finishLabel = getSkuFinishLabel(sku);
+                                      const isPin =
+                                        sku.card?.collectibleType === "pin" ||
+                                        sku.card?.category === "pin";
                                       const quantityLabel = formatSkuQuantityAriaLabel({
                                         groupTitle,
                                         finishLabel:
-                                          sku.card?.category === "nonsense" ? null : finishLabel,
+                                          sku.card?.category === "nonsense" || isPin
+                                            ? null
+                                            : finishLabel,
                                         numberLabel,
                                         variantLabel,
                                       });
@@ -724,6 +879,7 @@ export default function GettingStartedPage() {
                                           variantLabel={variantLabel}
                                           quantityLabel={quantityLabel}
                                           quantity={displayQuantity}
+                                          usesNameLabel={isPin}
                                           onAdjust={(delta) =>
                                             adjustSkuQuantity(sku.skuId, group.id, delta)
                                           }
@@ -783,6 +939,9 @@ export default function GettingStartedPage() {
               <h2>Prepare your collection for bulk import.</h2>
               <p>
                 The importer uses a CSV so it can match every row to a Lost Decks SKU before saving.
+                {includesPins(collectibleType)
+                  ? " Story Deck card rows are supported here; add ChasmFriends pins later from your collection or by restarting Getting Started with Pins."
+                  : null}
               </p>
             </div>
             <ol className="getting-started__import-steps">

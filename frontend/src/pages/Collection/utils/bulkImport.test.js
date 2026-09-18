@@ -192,6 +192,18 @@ describe("bulkImport (unit)", () => {
       expect(mockBatchCommit).not.toHaveBeenCalled();
     });
 
+    it("updates pin SKUs when allowPins is enabled", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "PIN-CF-01", quantity: "5" }],
+        existingEntries: [{ id: "pin-doc", skuId: "PIN-CF-01", quantity: 1 }],
+        allowPins: true,
+      });
+      expect(result.issues).toEqual([]);
+      expect(result.updated).toBe(1);
+      expect(mockBatchCommit).toHaveBeenCalled();
+    });
+
     it("returns issues when duplicate SKU in rows", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",

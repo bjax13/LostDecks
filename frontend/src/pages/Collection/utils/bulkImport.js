@@ -269,7 +269,12 @@ function toUniqueKey(skuId) {
   return skuId ? `sku:${skuId}` : null;
 }
 
-export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntries }) {
+export async function applyBulkCollectionUpdate({
+  ownerUid,
+  rows,
+  existingEntries,
+  allowPins = false,
+}) {
   if (!ownerUid) {
     throw new Error("You need to be signed in to update your collection.");
   }
@@ -307,7 +312,7 @@ export async function applyBulkCollectionUpdate({ ownerUid, rows, existingEntrie
       return;
     }
 
-    if (isPinSkuId(skuId)) {
+    if (!allowPins && isPinSkuId(skuId)) {
       issues.push({
         line,
         message: "Pins are not included in Story Deck bulk import.",
