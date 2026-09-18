@@ -1,5 +1,6 @@
 const { spawnSync } = require("node:child_process");
 const path = require("node:path");
+const { prepareHostingDeploy } = require("./prepare-hosting-deploy");
 
 const repoRoot = path.resolve(__dirname, "..");
 const isWindows = process.platform === "win32";
@@ -122,7 +123,7 @@ function getDeployMode() {
   return only === "hosting" ? "deploy:hosting:raw" : "deploy:firebase:raw";
 }
 
-function main() {
+async function main() {
   const deployScript = getDeployMode();
   const appId = getWebAppId();
   const sdk = getSdkConfig(appId);
@@ -151,13 +152,17 @@ function main() {
     ...required,
   };
 
-  console.log(`Deploying project ${projectId} using Firebase WEB app ${appId}...`);
+  const hosting = await prepareHostingDeploy({ projectId });
+  console.log(
+    `Deploying project ${projectId} using Firebase WEB app ${appId} to Hosting site ${hosting.siteId} (${hosting.publicUrl})...`,
+  );
+  console.log(
+    "The default storydeck-16 Hosting site is not deleted. It will go stale as new releases go to shardstash only.",
+  );
   runInherit(npmCmd, ["run", deployScript], deployEnv);
 }
 
-try {
-  main();
-} catch (error) {
+main().catch((error) => {
   console.error(error.message);
   process.exit(1);
-}
+});
