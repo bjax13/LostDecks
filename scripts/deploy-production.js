@@ -145,11 +145,22 @@ function main() {
     throw new Error(`Firebase SDK config missing required fields: ${missing.join(", ")}`);
   }
 
+  const posthogKey = process.env.VITE_POSTHOG_KEY?.trim() ?? "";
+  const posthogHost = process.env.VITE_POSTHOG_HOST?.trim() || "https://us.i.posthog.com";
+
   const deployEnv = {
     ...process.env,
     VITE_USE_EMULATORS: "false",
     ...required,
   };
+
+  if (posthogKey) {
+    deployEnv.VITE_POSTHOG_KEY = posthogKey;
+    deployEnv.VITE_POSTHOG_HOST = posthogHost;
+    console.log("PostHog analytics enabled for this production build.");
+  } else {
+    console.warn("VITE_POSTHOG_KEY not set; production build will ship without PostHog.");
+  }
 
   console.log(`Deploying project ${projectId} using Firebase WEB app ${appId}...`);
   runInherit(npmCmd, ["run", deployScript], deployEnv);

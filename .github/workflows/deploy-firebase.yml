@@ -43,3 +43,7 @@ jobs:
 
       - name: Deploy Hosting, Firestore, and Functions
         run: npm run deploy:firebase
+        env:
+          # Optional product analytics — leave unset to ship without PostHog.
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
