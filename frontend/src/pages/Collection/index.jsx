@@ -7,6 +7,7 @@ import { usePurgeSoftZeroEntriesOnMount } from "../Collectibles/hooks/usePurgeSo
 import { CollectionSummary, CollectionTable } from "./collectionPresentation.jsx";
 import { buildCollectionSummary, decorateCollectionEntries } from "./collectionSummary";
 import BulkCollectionTools from "./components/BulkCollectionTools";
+import CollectionBackupDownload from "./components/CollectionBackupDownload";
 import { useUserCollection } from "./hooks/useUserCollection";
 import "./Collection.css";
 
@@ -99,6 +100,7 @@ function CollectionContent() {
       ) : null}
 
       <div className="collection-page__body">
+        <CollectionBackupDownload ownerUid={ownerUid} entries={entries} disabled={loading} />
         <BulkCollectionTools ownerUid={ownerUid} entries={entries} disabled={loading} />
         {loading ? (
           <div className="collection-page__loading">

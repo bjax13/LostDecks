@@ -573,10 +573,16 @@ describe("CollectionPage (integration)", () => {
     mockUseUserCollection.mockReturnValue({ entries: [], loading: true, error: null });
     renderCollectionPage();
     expect(screen.getByText("Fetching your collectibles…")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download CSV" })).toBeDisabled();
   });
 
   it("shows empty state when there are no entries", () => {
     renderCollectionPage();
+    expect(screen.getByRole("region", { name: "Download my collection" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download CSV" })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Story Deck quantities (current)" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("No collectibles catalogued yet")).toBeInTheDocument();
     expect(screen.getByText(/Browse the Collectibles page/)).toBeInTheDocument();
     expect(screen.getByText(/Your additions will show up here right away/)).toBeInTheDocument();
