@@ -100,7 +100,6 @@ function CollectionContent() {
       ) : null}
 
       <div className="collection-page__body">
-        <CollectionBackupDownload ownerUid={ownerUid} entries={entries} disabled={loading} />
         <BulkCollectionTools ownerUid={ownerUid} entries={entries} disabled={loading} />
         {loading ? (
           <div className="collection-page__loading">
@@ -126,6 +125,7 @@ function CollectionContent() {
             />
           </>
         )}
+        <CollectionBackupDownload ownerUid={ownerUid} entries={entries} disabled={loading} />
       </div>
     </section>
   );

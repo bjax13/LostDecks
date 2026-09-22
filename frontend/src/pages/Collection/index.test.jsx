@@ -572,18 +572,29 @@ describe("CollectionPage (integration)", () => {
   it("shows loading state while the collection hook reports loading", () => {
     mockUseUserCollection.mockReturnValue({ entries: [], loading: true, error: null });
     renderCollectionPage();
-    expect(screen.getByText("Fetching your collectibles…")).toBeInTheDocument();
+    const loadingMessage = screen.getByText("Fetching your collectibles…");
+    const backup = screen.getByRole("region", { name: "Download my collection" });
+    expect(loadingMessage.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(screen.getByRole("button", { name: "Download CSV" })).toBeDisabled();
   });
 
   it("shows empty state when there are no entries", () => {
     renderCollectionPage();
-    expect(screen.getByRole("region", { name: "Download my collection" })).toBeInTheDocument();
+    const backup = screen.getByRole("region", { name: "Download my collection" });
+    const bulk = screen.getByRole("region", { name: "Bulk update tools" });
+    const empty = screen.getByText("No collectibles catalogued yet");
+    expect(bulk.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(empty.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(screen.getByRole("button", { name: "Download CSV" })).toBeEnabled();
     expect(
       screen.getByRole("button", { name: "Story Deck quantities (current)" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("No collectibles catalogued yet")).toBeInTheDocument();
     expect(screen.getByText(/Browse the Collectibles page/)).toBeInTheDocument();
     expect(screen.getByText(/Your additions will show up here right away/)).toBeInTheDocument();
     expect(screen.queryByText(/Firestore/)).not.toBeInTheDocument();
@@ -670,6 +681,11 @@ describe("CollectionPage (integration)", () => {
 
     renderCollectionPage();
 
+    const backup = screen.getByRole("region", { name: "Download my collection" });
+    const table = screen.getByRole("table");
+    expect(table.compareDocumentPosition(backup) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     expect(screen.getByRole("region", { name: "Collection summary" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Card" })).toBeInTheDocument();
 
