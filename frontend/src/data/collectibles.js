@@ -74,6 +74,7 @@ function formatStoryCard(card) {
   return {
     id: card.id,
     collectibleType: "card",
+    setName: dataset.meta.setName,
     category: card.category,
     story: card.story,
     storyTitle,
@@ -93,6 +94,7 @@ function formatHeraldCard(card) {
   return {
     id: card.id,
     collectibleType: "card",
+    setName: dataset.meta.setName,
     category: card.category,
     story: null,
     storyTitle,
@@ -113,6 +115,7 @@ function formatNonsenseCard(card) {
   return {
     id: card.id,
     collectibleType: "card",
+    setName: dataset.meta.setName,
     category: card.category,
     story: card.story,
     storyTitle,
@@ -135,6 +138,7 @@ function formatPinCollectible(pin) {
   return {
     id: pin.id,
     collectibleType: "pin",
+    setName: pinDataset.meta.setName,
     category: "pin",
     story: null,
     storyTitle: seriesTitle,

@@ -45,7 +45,7 @@ const CSV_DOWNLOADS = [
   },
   {
     mode: "current",
-    label: "My collection (current)",
+    label: "Story Deck quantities (current)",
     filename: "lost-tales-collection-current.csv",
   },
 ];
@@ -161,8 +161,8 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
           SKU (not an increment). Use 0 to remove that card SKU from your Story Deck collection.
         </p>
         <p>
-          Downloads: empty template (all 0s), full-set template (all 1s), or your current Story Deck
-          quantities for editing and re-upload.
+          Downloads: empty template (all 0s), full-set template (all 1s), or Story Deck quantities
+          (current) for editing and re-upload. Pins are left out of these files.
         </p>
       </div>
 

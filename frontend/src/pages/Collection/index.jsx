@@ -7,6 +7,7 @@ import { usePurgeSoftZeroEntriesOnMount } from "../Collectibles/hooks/usePurgeSo
 import { CollectionSummary, CollectionTable } from "./collectionPresentation.jsx";
 import { buildCollectionSummary, decorateCollectionEntries } from "./collectionSummary";
 import BulkCollectionTools from "./components/BulkCollectionTools";
+import CollectionBackupDownload from "./components/CollectionBackupDownload";
 import { useUserCollection } from "./hooks/useUserCollection";
 import "./Collection.css";
 
@@ -124,6 +125,7 @@ function CollectionContent() {
             />
           </>
         )}
+        <CollectionBackupDownload ownerUid={ownerUid} entries={entries} disabled={loading} />
       </div>
     </section>
   );

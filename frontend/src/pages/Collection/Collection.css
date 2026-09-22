@@ -40,6 +40,7 @@
   gap: 1.5rem;
 }
 
+.collection-backup,
 .collection-bulk {
   background: rgba(24, 18, 45, 0.85);
   border-radius: 20px;
@@ -48,6 +49,58 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.collection-backup__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.collection-backup__header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ffffff;
+}
+
+.collection-backup__header p {
+  margin: 0;
+  color: rgba(224, 224, 224, 0.8);
+  line-height: 1.5;
+}
+
+.collection-backup__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.collection-backup__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.collection-backup__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.collection-backup__button:not(:disabled):hover {
+  transform: translateY(-1px);
 }
 
 .collection-bulk__header {
@@ -809,13 +862,25 @@
     padding: 2rem 1.25rem;
   }
 
+  .collection-backup,
   .collection-bulk {
     padding: 1.15rem;
     border-radius: 16px;
   }
 
+  .collection-backup__header h2,
   .collection-bulk__header h2 {
     font-size: 1.25rem;
+  }
+
+  .collection-backup__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .collection-backup__button {
+    width: 100%;
+    justify-content: center;
   }
 
   .collection-bulk__actions {

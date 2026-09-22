@@ -97,6 +97,10 @@ describe("BulkCollectionTools", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/quantity in the csv is the new total/i)).toBeInTheDocument();
     expect(screen.getByText(/pins are not included/i)).toBeInTheDocument();
+    expect(screen.getByText(/pins are left out of these files/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/story deck quantities \(current\) for editing and re-upload/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/use 0 to remove that card sku/i)).toBeInTheDocument();
   });
 
@@ -105,7 +109,9 @@ describe("BulkCollectionTools", () => {
     expect(screen.getByText(/sign in to download a csv or upload updates/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /empty template \(all 0s\)/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /full-set template \(all 1s\)/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /my collection \(current\)/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /story deck quantities \(current\)/i }),
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: /copy iso\/uft post/i })).toBeDisabled();
     expect(getFileInput(container)).toBeDisabled();
   });
@@ -115,7 +121,9 @@ describe("BulkCollectionTools", () => {
     expect(screen.queryByText(/sign in to download/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /empty template \(all 0s\)/i })).toBeEnabled();
     expect(screen.getByRole("button", { name: /full-set template \(all 1s\)/i })).toBeEnabled();
-    expect(screen.getByRole("button", { name: /my collection \(current\)/i })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: /story deck quantities \(current\)/i }),
+    ).toBeEnabled();
     expect(screen.getByRole("button", { name: /copy iso\/uft post/i })).toBeEnabled();
     expect(getFileInput(container)).toBeEnabled();
   });
@@ -146,7 +154,7 @@ describe("BulkCollectionTools", () => {
       entries,
     });
 
-    await user.click(screen.getByRole("button", { name: /my collection \(current\)/i }));
+    await user.click(screen.getByRole("button", { name: /story deck quantities \(current\)/i }));
     expect(bulkImportMocks.createStoryDeckCollectionCsv).toHaveBeenCalledWith({
       mode: "current",
       entries,
@@ -831,7 +839,7 @@ describe("BulkCollectionTools", () => {
     });
 
     render(<BulkCollectionTools ownerUid={null} entries={[]} />);
-    const downloadBtn = screen.getByRole("button", { name: /my collection \(current\)/i });
+    const downloadBtn = screen.getByRole("button", { name: /story deck quantities \(current\)/i });
     const copyBtn = screen.getByRole("button", { name: /copy iso\/uft post/i });
     expect(downloadBtn).toBeDisabled();
     expect(copyBtn).toBeDisabled();
