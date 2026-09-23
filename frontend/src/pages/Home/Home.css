@@ -63,17 +63,20 @@
   cursor: pointer;
   transition:
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .home-cta--primary {
-  border: 1px solid rgba(201, 182, 255, 0.7);
-  background: rgba(96, 66, 178, 0.45);
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
   color: #ffffff;
+  font-weight: 600;
 }
 
 .home-cta--primary:hover {
-  background: rgba(96, 66, 178, 0.65);
+  background: linear-gradient(135deg, #9b45f0 0%, #e48de0 100%);
+  transform: translateY(-1px);
 }
 
 .home-cta--secondary {
