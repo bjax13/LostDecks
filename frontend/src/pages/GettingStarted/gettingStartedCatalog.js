@@ -353,6 +353,50 @@ export function formatCollectionQuantitySummary(
   )} ${formatCollectionQuantityNoun(collectibleType)}`;
 }
 
+function inferGroupCoverageFromQuantities(group, quantities) {
+  const values = group.skus.map((sku) => {
+    const raw = quantities[sku.skuId];
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+  });
+
+  if (values.every((value) => value === 0)) {
+    return "none";
+  }
+  if (values.every((value) => value === 1)) {
+    return "all";
+  }
+  return "some";
+}
+
+/**
+ * Build coverage + per-SKU quantity map from saved collection entries (for visual bulk editor).
+ * @param {Array<{ skuId?: string, quantity?: number }>} [entries]
+ * @param {typeof gettingStartedTree} [tree]
+ */
+export function deriveReviewStateFromEntries(entries = [], tree = gettingStartedTree) {
+  const qtyBySku = new Map();
+  for (const entry of entries) {
+    if (!entry?.skuId) continue;
+    const parsed = Number(entry.quantity);
+    qtyBySku.set(entry.skuId, Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
+  }
+
+  const quantities = {};
+  const coverage = {};
+
+  for (const section of tree) {
+    for (const group of section.children) {
+      for (const sku of group.skus) {
+        quantities[sku.skuId] = String(qtyBySku.get(sku.skuId) ?? 0);
+      }
+      coverage[group.id] = inferGroupCoverageFromQuantities(group, quantities);
+    }
+  }
+
+  return { coverage, quantities };
+}
+
 export function buildCollectionRows(
   coverage,
   quantities,

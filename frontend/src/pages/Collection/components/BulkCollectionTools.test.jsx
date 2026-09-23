@@ -95,6 +95,9 @@ describe("BulkCollectionTools", () => {
     expect(
       screen.getByRole("heading", { name: /bulk update your collection/i }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /csv import/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /visual editor/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open visual editor/i })).toBeInTheDocument();
     expect(screen.getByText(/quantity in the csv is the new total/i)).toBeInTheDocument();
     expect(screen.getByText(/pins are not included/i)).toBeInTheDocument();
     expect(screen.getByText(/pins are left out of these files/i)).toBeInTheDocument();

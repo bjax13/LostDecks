@@ -7,6 +7,7 @@ import {
   COLLECTIBLE_TYPE_PINS,
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
+  deriveReviewStateFromEntries,
   filterGettingStartedTree,
   formatCollectionQuantityNoun,
   formatCollectionQuantitySummary,
@@ -365,6 +366,22 @@ describe("gettingStartedCatalog", () => {
       unique: totalSkus - 1,
       possible: totalSkus,
     });
+  });
+
+  it("derives review coverage and quantities from saved collection entries", () => {
+    const allGroup = gettingStartedTree[0].children[0];
+    const skuWithQty = allGroup.skus[0].skuId;
+
+    const { coverage, quantities } = deriveReviewStateFromEntries(
+      [{ skuId: skuWithQty, quantity: 2 }],
+      gettingStartedTree,
+    );
+
+    expect(quantities[skuWithQty]).toBe("2");
+    expect(coverage[allGroup.id]).toBe("some");
+
+    const emptyGroup = gettingStartedTree[1].children[0];
+    expect(coverage[emptyGroup.id]).toBe("none");
   });
 
   it("turns coverage and manual quantities into bulk collection rows", () => {

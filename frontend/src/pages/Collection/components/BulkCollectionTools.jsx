@@ -5,6 +5,7 @@ import {
   parseBulkCollectionCsv,
 } from "../utils/bulkImport";
 import IsoUftPostModal from "./IsoUftPostModal.jsx";
+import VisualBulkCollectionEditorModal from "./VisualBulkCollectionEditorModal.jsx";
 
 function formatSummaryCount(count, singular, plural) {
   if (count === 0) {
@@ -71,6 +72,9 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isVisualEditorOpen, setIsVisualEditorOpen] = useState(false);
+  const [visualEditorSession, setVisualEditorSession] = useState(0);
+  const [visualReport, setVisualReport] = useState(null);
 
   const existingEntries = useMemo(() => entries ?? [], [entries]);
 
@@ -94,6 +98,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
     setProcessing(true);
     setReport(null);
+    setVisualReport(null);
     setIssues([]);
     setError(null);
     setLastFileName(file.name);
@@ -148,6 +153,21 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
     setPostError("Unable to copy the post. Please try again.");
   };
 
+  const handleOpenVisualEditor = () => {
+    if (!ownerUid || processing || disabled) {
+      return;
+    }
+    setVisualReport(null);
+    setVisualEditorSession((current) => current + 1);
+    setIsVisualEditorOpen(true);
+  };
+
+  const handleVisualSaved = (result) => {
+    setVisualReport(result);
+    setReport(result);
+    setIssues(result.issues ?? []);
+  };
+
   const summaryText = report ? combineSummary(report) : null;
   const actionsDisabled = !ownerUid || disabled || processing;
 
@@ -170,35 +190,58 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         <p className="collection-bulk__hint">Sign in to download a CSV or upload updates.</p>
       ) : null}
 
-      <div className="collection-bulk__actions">
-        {CSV_DOWNLOADS.map((download) => (
+      <div className="collection-bulk__panel">
+        <h3 className="collection-bulk__panel-title">CSV import</h3>
+        <p className="collection-bulk__panel-description">
+          Best for large updates from a spreadsheet. Quantity in the file is the new total per SKU.
+        </p>
+        <div className="collection-bulk__actions">
+          {CSV_DOWNLOADS.map((download) => (
+            <button
+              key={download.mode}
+              type="button"
+              className="collection-bulk__button"
+              onClick={() => handleDownloadCsv(download.mode, download.filename)}
+              disabled={actionsDisabled}
+            >
+              {download.label}
+            </button>
+          ))}
           <button
-            key={download.mode}
             type="button"
             className="collection-bulk__button"
-            onClick={() => handleDownloadCsv(download.mode, download.filename)}
+            onClick={handleOpenPostModal}
             disabled={actionsDisabled}
           >
-            {download.label}
+            Copy ISO/UFT post
           </button>
-        ))}
-        <button
-          type="button"
-          className="collection-bulk__button"
-          onClick={handleOpenPostModal}
-          disabled={actionsDisabled}
-        >
-          Copy ISO/UFT post
-        </button>
-        <label className={`collection-bulk__upload ${processing ? "is-uploading" : ""}`}>
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleFileChange}
+          <label className={`collection-bulk__upload ${processing ? "is-uploading" : ""}`}>
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleFileChange}
+              disabled={actionsDisabled}
+            />
+            <span>{processing ? "Uploading…" : "Upload filled template"}</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="collection-bulk__panel collection-bulk__panel--visual">
+        <h3 className="collection-bulk__panel-title">Visual editor</h3>
+        <p className="collection-bulk__panel-description">
+          Your current collection quantities are prefilled when you open the editor.
+        </p>
+        <div className="collection-bulk__actions">
+          <button
+            type="button"
+            className="collection-bulk__button collection-bulk__button--visual"
+            onClick={handleOpenVisualEditor}
             disabled={actionsDisabled}
-          />
-          <span>{processing ? "Uploading…" : "Upload filled template"}</span>
-        </label>
+          >
+            Open visual editor
+          </button>
+        </div>
       </div>
 
       {lastFileName ? (
@@ -219,7 +262,8 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
       {summaryText ? (
         <div className="collection-bulk__report" role="status">
-          <strong>Bulk update complete.</strong> {summaryText}
+          <strong>{visualReport ? "Visual update complete." : "Bulk update complete."}</strong>{" "}
+          {summaryText}
         </div>
       ) : null}
 
@@ -248,6 +292,14 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         entries={existingEntries}
         onCopied={handlePostCopied}
         onCopyError={handlePostCopyError}
+      />
+      <VisualBulkCollectionEditorModal
+        isOpen={isVisualEditorOpen}
+        onClose={() => setIsVisualEditorOpen(false)}
+        ownerUid={ownerUid}
+        entries={existingEntries}
+        onSaved={handleVisualSaved}
+        sessionKey={visualEditorSession}
       />
     </section>
   );
