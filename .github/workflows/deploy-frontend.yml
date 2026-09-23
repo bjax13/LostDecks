@@ -41,3 +41,7 @@ jobs:
 
       - name: Deploy Hosting only
         run: npm run deploy:hosting
+        env:
+          # PostHog is baked into the Vite build; deploy-production.js forwards process.env.
+          VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
