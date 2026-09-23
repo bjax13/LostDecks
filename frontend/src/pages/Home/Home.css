@@ -69,13 +69,14 @@
 
 .home-cta--primary {
   border: 1px solid transparent;
-  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  /* Keep both gradient stops dark enough for white text (≥ ~4.5:1). */
+  background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
   color: #ffffff;
   font-weight: 600;
 }
 
 .home-cta--primary:hover {
-  background: linear-gradient(135deg, #9b45f0 0%, #e48de0 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #a21caf 100%);
   transform: translateY(-1px);
 }
 
