@@ -87,11 +87,11 @@ Commands:
 
 Drive actions:
   goto --path /collectibles
-  click --role link --name Collectibles [--scope nav] [--nth 0] [--exact]
+  click --role link --name Collectibles [--scope nav] [--nth 0] [--exact] [--force] [--timeout 35000]
   fill --label Search --value Elsecaller
   select --label Category --value "Story cards"
   press --key Escape
-  expect --role heading --name Collectibles
+  expect --role heading --name Collectibles [--exact] [--timeout 35000]
   expect-url --path /collectibles
   count --role heading --name "Elsecaller #01"
   text [--role heading --name Collectibles]
@@ -214,7 +214,7 @@ function httpGet(url) {
   });
 }
 
-function httpPostJson(url, body) {
+function httpPostJson(url, body, timeoutMs = 30_000) {
   const payload = JSON.stringify(body);
   return new Promise((resolve, reject) => {
     const target = new URL(url);
@@ -246,7 +246,7 @@ function httpPostJson(url, body) {
       },
     );
     req.on("error", reject);
-    req.setTimeout(30_000, () => {
+    req.setTimeout(timeoutMs, () => {
       req.destroy(new Error("timeout"));
     });
     req.write(payload);
@@ -622,7 +622,12 @@ async function cmdDrive(argv) {
   }
 
   const cmd = { action, ...flags };
-  const result = await httpPostJson(`${DRIVER_URL}/command`, cmd);
+  const commandTimeoutMs = flags.timeout != null ? Number(flags.timeout) : 15_000;
+  const result = await httpPostJson(
+    `${DRIVER_URL}/command`,
+    cmd,
+    Math.max(30_000, commandTimeoutMs + 5_000),
+  );
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   if (!result.ok) {
     process.exitCode = 1;

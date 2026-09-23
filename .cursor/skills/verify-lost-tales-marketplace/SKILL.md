@@ -66,7 +66,10 @@ $VERIFY drive goto --path /collectibles
 $VERIFY drive click --role link --name Collectibles --scope nav
 $VERIFY drive fill --label Search --value Elsecaller
 $VERIFY drive select --label Category --value "Story cards"
-$VERIFY drive expect --role heading --name Collectibles
+$VERIFY drive expect --role heading --name Collectibles --exact
+$VERIFY drive click --role radio --name "ChasmFriends Pins"
+$VERIFY drive click --role button --name "Sign In" --exact
+$VERIFY drive click --role button --name Refresh --timeout 35000
 $VERIFY drive expect-url --path /collectibles
 $VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.png --full-page
 $VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.aria.txt
@@ -78,22 +81,26 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 
 | Flag | Meaning |
 |------|---------|
-| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status) |
+| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status, radio, checkbox, region) |
 | `--label` | `getByLabel` (Search, Email, Password, Category, Story, Rarity) |
 | `--placeholder` | `getByPlaceholder` |
 | `--text` | `getByText` |
 | `--scope nav` | Restrict to `navigation` named `Primary` |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name (required when a substring would match a second control, e.g. `Sign In` vs `Quick sign in`, `Your Collection` vs `Bulk update your collection`, `Back` vs footer `Feedback`) |
+| `--force` | Playwright force-click (optional; radio clicks already force-click because Getting Started overlays the input with label text) |
+| `--timeout` | Milliseconds to wait for this action (Refresh after Matches cache cooldown needs ~30s) |
 
 Stable handles from this repo:
 
 - Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` and `Quick sign in`; signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
-- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
-- Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`
-- Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`)
-- Matches h1: `Matches`; Account h1: `Account Settings`
+- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; `Sort by`; buttons `Grid view`, `Table view`, `Reset filters`; grid tiles expand via the heading, then the ID link (e.g. `LT24-ELS-01`) opens detail; table lives in a region named `Collectibles table`
+- Login h1: `Sign in to ShardStash`; modal h2: `Sign In` (use `--exact`); Register h1: `Create your ShardStash account`
+- Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`; expect with `--exact`); bulk downloads `Empty template (all 0s)`, `Full-set template (all 1s)`, `My collection (current)`
+- Getting Started: radios `ChasmFriends Pins`, `Story Deck Cards`, `Both`, then storage profile; Continue stays disabled until a type is chosen and a profile is set (pins auto-selects manual)
+- Matches h1: `Matches`; lane heading `Dun cards`; help `How matching works`; Account h1: `Account Settings`; help `About matching settings`
+- Footer (every page): `About` link, `Feedback` button; About h1: `About`; feedback dialog h2: `Send site feedback`
 
 Read `features/README.md` and the matching feature file before driving. A proof that uses one convenient entry point is incomplete when the map lists others.
 
