@@ -230,8 +230,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
       <div className="collection-bulk__panel collection-bulk__panel--visual">
         <h3 className="collection-bulk__panel-title">Visual editor</h3>
         <p className="collection-bulk__panel-description">
-          Use the same add/remove tree as Getting Started step 2. Your current collection quantities
-          are prefilled when you open the editor.
+          Your current collection quantities are prefilled when you open the editor.
         </p>
         <div className="collection-bulk__actions">
           <button

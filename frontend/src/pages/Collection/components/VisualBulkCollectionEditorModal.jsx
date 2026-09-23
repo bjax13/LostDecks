@@ -73,10 +73,7 @@ function VisualBulkCollectionEditorModalContent({ ownerUid, entries, onClose, on
         <header className="collection-bulk-visual-modal__header">
           <div>
             <h2 id="collection-bulk-visual-modal-title">Visual collection editor</h2>
-            <p>
-              Adjust quantities with the same add/remove controls as Getting Started. Changes apply
-              when you save.
-            </p>
+            <p>Adjust quantities with add/remove controls. Changes apply when you save.</p>
           </div>
           <button type="button" className="collection-bulk-visual-modal__close" onClick={onClose}>
             Close
