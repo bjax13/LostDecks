@@ -86,8 +86,12 @@ The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE
    | Secret | Purpose |
    |--------|---------|
    | `FIREBASE_SERVICE_ACCOUNT_JSON` | Full JSON for a service account that can deploy Hosting, Firestore rules/indexes, and Cloud Functions (Firebase recommends a dedicated CI account with the right IAM roles). Site create needs `firebasehosting.sites.create`. Authorized-domain updates need `firebaseauth.configs.update` (Identity Toolkit Admin or Editor). |
+   | `VITE_POSTHOG_KEY` | PostHog project API key (optional). When set, production builds initialize the PostHog SDK; leave unset to disable analytics. |
+   | `VITE_POSTHOG_HOST` | PostHog ingest host (optional; default `https://us.i.posthog.com` when the key is set). |
 
    Both workflows use the safe repo scripts (`npm run deploy:firebase` / `npm run deploy:hosting`), which fetch Firebase Web SDK config (`apps:sdkconfig`) from project `storydeck-16` at deploy time. `VITE_FIREBASE_*` repo secrets are no longer required.
+
+   **PostHog:** Adding `VITE_POSTHOG_KEY` and `VITE_POSTHOG_HOST` as repository secrets alone does not enable production analytics. The deploy workflows must export those secrets into the job environment on the deploy step so `scripts/deploy-production.js` can pass them into the Vite build (`...process.env`). Local CLI deploys need the same variables in your shell or `frontend/.env`. The frontend CI workflow (`.github/workflows/frontend-tests.yml`) already forwards them for optional production-shaped builds; the deploy workflows do the same.
 
 3. **What gets deployed**  
    `firebase deploy --only hosting:shardstash,firestore,functions` publishes the Vite build from `frontend/dist` to https://shardstash.web.app, plus Firestore rules/indexes and Cloud Functions. It does not deploy other Google Cloud resources, and it does not overwrite the default `storydeck-16` Hosting site. If site id `shardstash` is taken globally, the deploy helper tries `shard-stash` then `shardstash-app`.
