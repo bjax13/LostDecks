@@ -301,7 +301,7 @@ function MatchesContent() {
       {showEmptyMatches ? (
         <section className="matches-panel">
           <h2>No reciprocal matches yet</h2>
-          <p>Keep collecting duplicates and check back as more collectors join.</p>
+          <p>Collect copies above what you keep, then check back as more collectors join.</p>
         </section>
       ) : null}
 

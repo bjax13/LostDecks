@@ -386,6 +386,26 @@ describe("MatchesPage", () => {
     expect(screen.queryByRole("button", { name: "Copy email" })).not.toBeInTheDocument();
   });
 
+  it("explains an empty match list without a fixed duplicate rule", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [],
+        totalOnPage: 0,
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(screen.getByRole("heading", { name: "No reciprocal matches yet" })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Collect copies above what you keep, then check back as more collectors join.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/2\+/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/duplicates/i)).not.toBeInTheDocument();
+  });
+
   it("shows opted-out message from backend response", () => {
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({
