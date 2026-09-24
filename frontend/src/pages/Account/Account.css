@@ -178,11 +178,49 @@
   gap: 0.55rem;
 }
 
+.account-lane-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.85rem;
+}
+
 .account-toggle--nested {
+  flex: 0 0 8.75rem;
   font-weight: 500;
 }
 
-.account-match-lanes:disabled .account-toggle--nested {
+.account-keep-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #c7bbff;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.account-keep-control select {
+  box-sizing: border-box;
+  width: 2.75rem;
+  padding: 0.12rem 0.15rem 0.12rem 0.35rem;
+  border-radius: 8px;
+  border: 1px solid rgba(132, 105, 221, 0.55);
+  background: rgba(24, 18, 45, 0.85);
+  color: #f4f1ff;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.account-keep-control select:focus-visible {
+  outline: 2px solid rgba(177, 157, 255, 0.95);
+  outline-offset: 1px;
+}
+
+.account-keep-help {
+  margin-top: 0.2rem;
+}
+
+.account-match-lanes:disabled .account-lane-row {
   opacity: 0.55;
 }
 

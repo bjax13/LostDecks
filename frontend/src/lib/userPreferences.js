@@ -21,9 +21,22 @@ export const DEFAULT_MATCH_LANES = Object.freeze({
   pins: true,
 });
 
+export const DEFAULT_MATCH_KEEP = 1;
+export const MIN_MATCH_KEEP = 1;
+export const MAX_MATCH_KEEP = 3;
+
+export const DEFAULT_MATCH_KEEP_BY_LANE = Object.freeze({
+  dun: DEFAULT_MATCH_KEEP,
+  foil: DEFAULT_MATCH_KEEP,
+  pins: DEFAULT_MATCH_KEEP,
+});
+
+export const MATCH_KEEP_OPTIONS = Object.freeze([1, 2, 3]);
+
 export const DEFAULT_USER_PREFERENCES = Object.freeze({
   matchingOptOut: false,
   matchLanes: DEFAULT_MATCH_LANES,
+  matchKeep: DEFAULT_MATCH_KEEP_BY_LANE,
   matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
   tradingEmail: "",
   discordHandle: "",
@@ -46,6 +59,28 @@ export function normalizeMatchLanes(value) {
   };
 }
 
+export function normalizeMatchKeepCount(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT_MATCH_KEEP;
+  }
+
+  const count = Math.floor(value);
+  if (count < MIN_MATCH_KEEP || count > MAX_MATCH_KEEP) {
+    return DEFAULT_MATCH_KEEP;
+  }
+
+  return count;
+}
+
+export function normalizeMatchKeep(value) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    dun: normalizeMatchKeepCount(source.dun),
+    foil: normalizeMatchKeepCount(source.foil),
+    pins: normalizeMatchKeepCount(source.pins),
+  };
+}
+
 export function normalizeMatchContactSharing(value) {
   if (
     value === MATCH_CONTACT_SHARING.TRUE_EMAIL ||
@@ -62,6 +97,7 @@ export function normalizeUserPreferences(data) {
     return {
       ...DEFAULT_USER_PREFERENCES,
       matchLanes: { ...DEFAULT_MATCH_LANES },
+      matchKeep: { ...DEFAULT_MATCH_KEEP_BY_LANE },
     };
   }
 
@@ -73,6 +109,7 @@ export function normalizeUserPreferences(data) {
         ? data.matchingOptOut
         : DEFAULT_USER_PREFERENCES.matchingOptOut,
     matchLanes: normalizeMatchLanes(data.matchLanes),
+    matchKeep: normalizeMatchKeep(data.matchKeep),
     matchContactSharing: normalizeMatchContactSharing(data.matchContactSharing),
     tradingEmail: normalizeOptionalString(data.tradingEmail, MAX_TRADING_EMAIL_LENGTH),
     discordHandle: normalizeOptionalString(data.discordHandle, MAX_DISCORD_HANDLE_LENGTH),

@@ -27,6 +27,7 @@ describe("userPreferences normalization", () => {
     ).toEqual({
       matchingOptOut: true,
       matchLanes: { dun: true, foil: true, pins: true },
+      matchKeep: { dun: 1, foil: 1, pins: 1 },
       matchContactSharing: MATCH_CONTACT_SHARING.TRADING_EMAIL,
       tradingEmail: "trade@example.com",
       discordHandle: "stormlight",
@@ -43,10 +44,28 @@ describe("userPreferences normalization", () => {
     ).toEqual({
       matchingOptOut: false,
       matchLanes: { dun: true, foil: true, pins: true },
+      matchKeep: { dun: 1, foil: 1, pins: 1 },
       matchContactSharing: MATCH_CONTACT_SHARING.TRUE_EMAIL,
       tradingEmail: "",
       discordHandle: "",
       discordChannel: DEFAULT_DISCORD_CHANNEL,
+    });
+  });
+
+  it("defaults missing match keep to 1 and clamps values outside 1 to 3", () => {
+    expect(normalizeUserPreferences({}).matchKeep).toEqual({
+      dun: 1,
+      foil: 1,
+      pins: 1,
+    });
+    expect(
+      normalizeUserPreferences({
+        matchKeep: { dun: 2, foil: 0, pins: 9 },
+      }).matchKeep,
+    ).toEqual({
+      dun: 2,
+      foil: 1,
+      pins: 1,
     });
   });
 

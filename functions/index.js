@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
 const {
+  buildKeepByUserId,
   buildLanePrefsByUserId,
   buildMatchesForCaller,
   buildUserSkuTotals,
@@ -87,12 +88,14 @@ exports.getTradeMatches = onCall(async (request) => {
   const preferenceUserIds = [callerUid, ...userSkuTotals.keys()];
   const preferencesByUserId = await loadPreferencesByUserId(db, preferenceUserIds);
   const lanePrefsByUserId = buildLanePrefsByUserId(preferencesByUserId);
+  const keepByUserId = buildKeepByUserId(preferencesByUserId);
 
   const { isCallerOptedOut, matches } = buildMatchesForCaller({
     callerUid,
     userSkuTotals,
     optedOutUserIds,
     lanePrefsByUserId,
+    keepByUserId,
   });
 
   if (isCallerOptedOut) {

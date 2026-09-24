@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
-import { ACCOUNT_MATCHING_HELP } from "../../lib/matchHelpCopy.js";
+import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
 import {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_USER_PREFERENCES,
   isValidTradingEmail,
   MATCH_CONTACT_SHARING,
+  MATCH_KEEP_OPTIONS,
   MATCH_LANE_IDS,
   MAX_DISCORD_CHANNEL_LENGTH,
   MAX_DISCORD_HANDLE_LENGTH,
   MAX_TRADING_EMAIL_LENGTH,
+  normalizeMatchKeep,
   subscribeUserPreferences,
   updateUserPreferences,
 } from "../../lib/userPreferences";
@@ -24,6 +26,9 @@ function AccountPage() {
   const [matchLanes, setMatchLanes] = useState(() => ({
     ...DEFAULT_USER_PREFERENCES.matchLanes,
   }));
+  const [matchKeep, setMatchKeep] = useState(() =>
+    normalizeMatchKeep(DEFAULT_USER_PREFERENCES.matchKeep),
+  );
   const [matchContactSharing, setMatchContactSharing] = useState(
     DEFAULT_USER_PREFERENCES.matchContactSharing,
   );
@@ -47,6 +52,7 @@ function AccountPage() {
     if (!user?.uid) {
       setMatchingOptOut(DEFAULT_USER_PREFERENCES.matchingOptOut);
       setMatchLanes({ ...DEFAULT_USER_PREFERENCES.matchLanes });
+      setMatchKeep(normalizeMatchKeep(DEFAULT_USER_PREFERENCES.matchKeep));
       setMatchContactSharing(DEFAULT_USER_PREFERENCES.matchContactSharing);
       setTradingEmail(DEFAULT_USER_PREFERENCES.tradingEmail);
       setDiscordHandle(DEFAULT_USER_PREFERENCES.discordHandle);
@@ -71,6 +77,7 @@ function AccountPage() {
           ...DEFAULT_USER_PREFERENCES.matchLanes,
           ...preferences.matchLanes,
         });
+        setMatchKeep(normalizeMatchKeep(preferences.matchKeep));
         setMatchContactSharing(preferences.matchContactSharing);
         setTradingEmail(preferences.tradingEmail);
         setDiscordHandle(preferences.discordHandle);
@@ -175,6 +182,19 @@ function AccountPage() {
     setMatchLanes(nextLanes);
     await persistPreferences({ matchLanes: nextLanes }, () => {
       setMatchLanes(previousLanes);
+    });
+  };
+
+  const handleMatchKeepChange = async (laneId, nextCount) => {
+    if (!MATCH_KEEP_OPTIONS.includes(nextCount) || matchKeep[laneId] === nextCount) {
+      return;
+    }
+
+    const previousKeep = matchKeep;
+    const nextKeep = { ...matchKeep, [laneId]: nextCount };
+    setMatchKeep(nextKeep);
+    await persistPreferences({ matchKeep: nextKeep }, () => {
+      setMatchKeep(previousKeep);
     });
   };
 
@@ -381,15 +401,34 @@ function AccountPage() {
             <fieldset className="account-match-lanes" disabled={controlsDisabled || matchingOptOut}>
               <legend className="visually-hidden">Match lanes</legend>
               {MATCH_LANE_IDS.map((laneId) => (
-                <label key={laneId} className="account-toggle account-toggle--nested">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(matchLanes[laneId])}
-                    onChange={(event) => handleMatchLaneChange(laneId, event)}
-                  />
-                  {matchLaneLabels[laneId]}
-                </label>
+                <div key={laneId} className="account-lane-row">
+                  <label className="account-toggle account-toggle--nested">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(matchLanes[laneId])}
+                      onChange={(event) => handleMatchLaneChange(laneId, event)}
+                    />
+                    {matchLaneLabels[laneId]}
+                  </label>
+                  <label className="account-keep-control">
+                    <span aria-hidden="true">Keep</span>
+                    <select
+                      aria-label={`Keep ${matchLaneLabels[laneId]}`}
+                      value={matchKeep[laneId]}
+                      onChange={(event) =>
+                        handleMatchKeepChange(laneId, Number(event.target.value))
+                      }
+                    >
+                      {MATCH_KEEP_OPTIONS.map((count) => (
+                        <option key={count} value={count}>
+                          {count}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               ))}
+              <p className="account-hint account-keep-help">{MATCH_KEEP_HELP}</p>
             </fieldset>
 
             <fieldset

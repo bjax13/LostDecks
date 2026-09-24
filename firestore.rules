@@ -35,9 +35,23 @@ service cloud.firestore {
           && (!("pins" in data.matchLanes) || data.matchLanes.pins is bool));
     }
 
+    function validMatchKeepCount(value) {
+      return value is int && value >= 1 && value <= 3;
+    }
+
+    function validMatchKeep(data) {
+      return !("matchKeep" in data)
+        || (data.matchKeep is map
+          && data.matchKeep.keys().hasOnly(["dun", "foil", "pins"])
+          && (!("dun" in data.matchKeep) || validMatchKeepCount(data.matchKeep.dun))
+          && (!("foil" in data.matchKeep) || validMatchKeepCount(data.matchKeep.foil))
+          && (!("pins" in data.matchKeep) || validMatchKeepCount(data.matchKeep.pins)));
+    }
+
     function validUserPreferences(data) {
       return (!("matchingOptOut" in data) || data.matchingOptOut is bool)
         && validMatchLanes(data)
+        && validMatchKeep(data)
         && (!("matchContactSharing" in data)
           || data.matchContactSharing in ["trueEmail", "tradingEmail", "discord"])
         && (!("tradingEmail" in data)

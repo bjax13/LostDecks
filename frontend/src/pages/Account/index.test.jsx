@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ACCOUNT_MATCHING_HELP } from "../../lib/matchHelpCopy.js";
+import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
@@ -23,10 +23,17 @@ vi.mock("../../lib/userPreferences", () => ({
   DEFAULT_USER_PREFERENCES: {
     matchingOptOut: false,
     matchLanes: { dun: true, foil: true, pins: true },
+    matchKeep: { dun: 1, foil: 1, pins: 1 },
     matchContactSharing: "trueEmail",
     tradingEmail: "",
     discordHandle: "",
     discordChannel: "Sanderson Collectors Guild",
+  },
+  MATCH_KEEP_OPTIONS: [1, 2, 3],
+  normalizeMatchKeep: (value) => {
+    const source = value && typeof value === "object" ? value : {};
+    const count = (entry) => (entry === 1 || entry === 2 || entry === 3 ? entry : 1);
+    return { dun: count(source.dun), foil: count(source.foil), pins: count(source.pins) };
   },
   MATCH_CONTACT_SHARING: {
     TRUE_EMAIL: "trueEmail",
@@ -208,6 +215,84 @@ describe("AccountPage", () => {
     expect(screen.getByRole("checkbox", { name: "Dun cards" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Pins" })).toBeChecked();
+  });
+
+  it("defaults each lane keep to 1 and shares one help line", () => {
+    renderAccountPage();
+
+    for (const laneName of ["Dun cards", "Foil cards", "Pins"]) {
+      const checkbox = screen.getByRole("checkbox", { name: laneName });
+      const keep = screen.getByRole("combobox", { name: `Keep ${laneName}` });
+      expect(checkbox.closest(".account-lane-row")).toContainElement(keep);
+      expect(keep).toHaveValue("1");
+      expect(
+        within(keep)
+          .getAllByRole("option")
+          .map((option) => option.textContent),
+      ).toEqual(["1", "2", "3"]);
+    }
+
+    expect(screen.getByText(MATCH_KEEP_HELP)).toBeInTheDocument();
+  });
+
+  it("persists a per-lane keep change", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    const dunKeep = screen.getByRole("combobox", { name: "Keep Dun cards" });
+    await user.selectOptions(dunKeep, "2");
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchKeep: { dun: 2, foil: 1, pins: 1 },
+    });
+    expect(dunKeep).toHaveValue("2");
+    expect(screen.getByRole("combobox", { name: "Keep Foil cards" })).toHaveValue("1");
+  });
+
+  it("loads a saved keep above 1", () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchKeep: { dun: 1, foil: 3, pins: 2 },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(screen.getByRole("combobox", { name: "Keep Foil cards" })).toHaveValue("3");
+    expect(screen.getByRole("combobox", { name: "Keep Pins" })).toHaveValue("2");
+    expect(screen.getByRole("combobox", { name: "Keep Dun cards" })).toHaveValue("1");
+  });
+
+  it("disables keep controls while excluded from matching", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: true,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchKeep: { dun: 1, foil: 1, pins: 1 },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    const pinsKeep = screen.getByRole("combobox", { name: "Keep Pins" });
+    expect(pinsKeep).toBeDisabled();
+    await user.selectOptions(pinsKeep, "3");
+
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalled();
+    expect(pinsKeep).toHaveValue("1");
   });
 
   it("does not persist lane changes while excluded from matching", async () => {
