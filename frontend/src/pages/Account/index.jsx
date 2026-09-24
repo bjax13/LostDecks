@@ -401,39 +401,35 @@ function AccountPage() {
             <fieldset className="account-match-lanes" disabled={controlsDisabled || matchingOptOut}>
               <legend className="visually-hidden">Match lanes</legend>
               {MATCH_LANE_IDS.map((laneId) => (
-                <label key={laneId} className="account-toggle account-toggle--nested">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(matchLanes[laneId])}
-                    onChange={(event) => handleMatchLaneChange(laneId, event)}
-                  />
-                  {matchLaneLabels[laneId]}
-                </label>
+                <div key={laneId} className="account-lane-row">
+                  <label className="account-toggle account-toggle--nested">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(matchLanes[laneId])}
+                      onChange={(event) => handleMatchLaneChange(laneId, event)}
+                    />
+                    {matchLaneLabels[laneId]}
+                  </label>
+                  <label className="account-keep-control">
+                    <span aria-hidden="true">Keep</span>
+                    <select
+                      aria-label={`Keep ${matchLaneLabels[laneId]}`}
+                      value={matchKeep[laneId]}
+                      onChange={(event) =>
+                        handleMatchKeepChange(laneId, Number(event.target.value))
+                      }
+                    >
+                      {MATCH_KEEP_OPTIONS.map((count) => (
+                        <option key={count} value={count}>
+                          {count}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               ))}
+              <p className="account-hint account-keep-help">{MATCH_KEEP_HELP}</p>
             </fieldset>
-            <fieldset className="account-match-keep" disabled={controlsDisabled || matchingOptOut}>
-              <legend className="visually-hidden">How many to keep</legend>
-              {MATCH_LANE_IDS.map((laneId) => (
-                <fieldset key={laneId} className="account-keep-row">
-                  <legend>Keep this many {matchLaneLabels[laneId]}</legend>
-                  <div className="account-keep-options">
-                    {MATCH_KEEP_OPTIONS.map((count) => (
-                      <label key={count} className="account-keep-option">
-                        <input
-                          type="radio"
-                          name={`match-keep-${laneId}`}
-                          value={count}
-                          checked={matchKeep[laneId] === count}
-                          onChange={() => handleMatchKeepChange(laneId, count)}
-                        />
-                        {count}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              ))}
-            </fieldset>
-            <p className="account-hint">{MATCH_KEEP_HELP}</p>
 
             <fieldset
               key={contactSharingResetKey}

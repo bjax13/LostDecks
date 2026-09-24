@@ -221,10 +221,15 @@ describe("AccountPage", () => {
     renderAccountPage();
 
     for (const laneName of ["Dun cards", "Foil cards", "Pins"]) {
-      const group = screen.getByRole("group", { name: `Keep this many ${laneName}` });
-      expect(within(group).getByRole("radio", { name: "1" })).toBeChecked();
-      expect(within(group).getByRole("radio", { name: "2" })).not.toBeChecked();
-      expect(within(group).getByRole("radio", { name: "3" })).not.toBeChecked();
+      const checkbox = screen.getByRole("checkbox", { name: laneName });
+      const keep = screen.getByRole("combobox", { name: `Keep ${laneName}` });
+      expect(checkbox.closest(".account-lane-row")).toContainElement(keep);
+      expect(keep).toHaveValue("1");
+      expect(
+        within(keep)
+          .getAllByRole("option")
+          .map((option) => option.textContent),
+      ).toEqual(["1", "2", "3"]);
     }
 
     expect(screen.getByText(MATCH_KEEP_HELP)).toBeInTheDocument();
@@ -234,18 +239,14 @@ describe("AccountPage", () => {
     const user = userEvent.setup();
     renderAccountPage();
 
-    const dunKeep = screen.getByRole("group", { name: "Keep this many Dun cards" });
-    await user.click(within(dunKeep).getByRole("radio", { name: "2" }));
+    const dunKeep = screen.getByRole("combobox", { name: "Keep Dun cards" });
+    await user.selectOptions(dunKeep, "2");
 
     expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
       matchKeep: { dun: 2, foil: 1, pins: 1 },
     });
-    expect(within(dunKeep).getByRole("radio", { name: "2" })).toBeChecked();
-    expect(
-      within(screen.getByRole("group", { name: "Keep this many Foil cards" })).getByRole("radio", {
-        name: "1",
-      }),
-    ).toBeChecked();
+    expect(dunKeep).toHaveValue("2");
+    expect(screen.getByRole("combobox", { name: "Keep Foil cards" })).toHaveValue("1");
   });
 
   it("loads a saved keep above 1", () => {
@@ -264,16 +265,9 @@ describe("AccountPage", () => {
 
     renderAccountPage();
 
-    expect(
-      within(screen.getByRole("group", { name: "Keep this many Foil cards" })).getByRole("radio", {
-        name: "3",
-      }),
-    ).toBeChecked();
-    expect(
-      within(screen.getByRole("group", { name: "Keep this many Pins" })).getByRole("radio", {
-        name: "2",
-      }),
-    ).toBeChecked();
+    expect(screen.getByRole("combobox", { name: "Keep Foil cards" })).toHaveValue("3");
+    expect(screen.getByRole("combobox", { name: "Keep Pins" })).toHaveValue("2");
+    expect(screen.getByRole("combobox", { name: "Keep Dun cards" })).toHaveValue("1");
   });
 
   it("disables keep controls while excluded from matching", async () => {
@@ -293,12 +287,12 @@ describe("AccountPage", () => {
 
     renderAccountPage();
 
-    const pinsKeep = screen.getByRole("group", { name: "Keep this many Pins" });
-    expect(within(pinsKeep).getByRole("radio", { name: "3" })).toBeDisabled();
-    await user.click(within(pinsKeep).getByRole("radio", { name: "3" }));
+    const pinsKeep = screen.getByRole("combobox", { name: "Keep Pins" });
+    expect(pinsKeep).toBeDisabled();
+    await user.selectOptions(pinsKeep, "3");
 
     expect(mockUpdateUserPreferences).not.toHaveBeenCalled();
-    expect(within(pinsKeep).getByRole("radio", { name: "1" })).toBeChecked();
+    expect(pinsKeep).toHaveValue("1");
   });
 
   it("does not persist lane changes while excluded from matching", async () => {
