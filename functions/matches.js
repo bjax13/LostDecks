@@ -16,6 +16,14 @@ const DEFAULT_MATCH_LANES = Object.freeze({
   foil: true,
   pins: true,
 });
+const DEFAULT_MATCH_KEEP = 1;
+const MIN_MATCH_KEEP = 1;
+const MAX_MATCH_KEEP = 3;
+const DEFAULT_MATCH_KEEP_BY_LANE = Object.freeze({
+  dun: DEFAULT_MATCH_KEEP,
+  foil: DEFAULT_MATCH_KEEP,
+  pins: DEFAULT_MATCH_KEEP,
+});
 const DEFAULT_PILE_ITEM_LIMIT = 100;
 
 function normalizeQuantity(value) {
@@ -51,11 +59,36 @@ function buildUserSkuTotals(collectionDocs) {
   return userSkuTotals;
 }
 
-function buildUserMatchProfile(skuTotals) {
+function normalizeMatchKeepCount(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT_MATCH_KEEP;
+  }
+
+  const count = Math.floor(value);
+  if (count < MIN_MATCH_KEEP || count > MAX_MATCH_KEEP) {
+    return DEFAULT_MATCH_KEEP;
+  }
+
+  return count;
+}
+
+function normalizeMatchKeep(value) {
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    dun: normalizeMatchKeepCount(source.dun),
+    foil: normalizeMatchKeepCount(source.foil),
+    pins: normalizeMatchKeepCount(source.pins),
+  };
+}
+
+function buildUserMatchProfile(skuTotals, keepByLane) {
   const extras = new Set();
+  const keep = normalizeMatchKeep(keepByLane);
 
   for (const [skuId, owned] of skuTotals.entries()) {
-    if (owned > 1) {
+    const lane = laneForSkuId(skuId);
+    const threshold = lane ? keep[lane] : DEFAULT_MATCH_KEEP;
+    if (owned > threshold) {
       extras.add(skuId);
     }
   }
@@ -81,12 +114,22 @@ function laneForSkuId(skuId) {
   return null;
 }
 
-function buildPileItems(extras, ownerTotals, recipientTotals, lane, itemLimit) {
+function buildPileItems(
+  extras,
+  ownerTotals,
+  recipientTotals,
+  lane,
+  senderKeep,
+  recipientKeep,
+  itemLimit,
+) {
   const items = [];
   const limit =
     typeof itemLimit === "number" && Number.isFinite(itemLimit) && itemLimit > 0
       ? Math.floor(itemLimit)
       : DEFAULT_PILE_ITEM_LIMIT;
+  const keep = normalizeMatchKeepCount(senderKeep);
+  const needBelow = normalizeMatchKeepCount(recipientKeep);
 
   for (const skuId of extras) {
     if (laneForSkuId(skuId) !== lane) {
@@ -94,15 +137,20 @@ function buildPileItems(extras, ownerTotals, recipientTotals, lane, itemLimit) {
     }
 
     const owned = ownerTotals.get(skuId) || 0;
+    const extraCount = owned - keep;
+    if (extraCount <= 0) {
+      continue;
+    }
+
     const recipientOwned = recipientTotals.get(skuId) || 0;
-    if (owned <= 1 || recipientOwned > 0) {
+    if (recipientOwned >= needBelow) {
       continue;
     }
 
     items.push({
       skuId,
       owned,
-      extras: owned - 1,
+      extras: extraCount,
     });
   }
 
@@ -139,6 +187,22 @@ function buildLanePrefsByUserId(preferencesByUserId) {
   return lanePrefsByUserId;
 }
 
+function buildKeepByUserId(preferencesByUserId) {
+  const keepByUserId = new Map();
+  if (!preferencesByUserId) {
+    return keepByUserId;
+  }
+
+  for (const [userId, preferences] of preferencesByUserId.entries()) {
+    if (!userId) {
+      continue;
+    }
+    keepByUserId.set(userId, normalizeMatchKeep(preferences?.matchKeep));
+  }
+
+  return keepByUserId;
+}
+
 function buildLanesForCounterparty({
   callerTotals,
   callerExtras,
@@ -146,17 +210,37 @@ function buildLanesForCounterparty({
   otherExtras,
   callerLanePrefs,
   otherLanePrefs,
+  callerKeep,
+  otherKeep,
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   const lanes = [];
+  const normalizedCallerKeep = normalizeMatchKeep(callerKeep);
+  const normalizedOtherKeep = normalizeMatchKeep(otherKeep);
 
   for (const lane of MATCH_LANE_IDS) {
     if (!isMatchLaneEnabled(callerLanePrefs, lane) || !isMatchLaneEnabled(otherLanePrefs, lane)) {
       continue;
     }
 
-    const theyCanSend = buildPileItems(otherExtras, otherTotals, callerTotals, lane, itemLimit);
-    const youCanSend = buildPileItems(callerExtras, callerTotals, otherTotals, lane, itemLimit);
+    const theyCanSend = buildPileItems(
+      otherExtras,
+      otherTotals,
+      callerTotals,
+      lane,
+      normalizedOtherKeep[lane],
+      normalizedCallerKeep[lane],
+      itemLimit,
+    );
+    const youCanSend = buildPileItems(
+      callerExtras,
+      callerTotals,
+      otherTotals,
+      lane,
+      normalizedCallerKeep[lane],
+      normalizedOtherKeep[lane],
+      itemLimit,
+    );
     if (!theyCanSend.length || !youCanSend.length) {
       continue;
     }
@@ -176,6 +260,7 @@ function buildMatchesForCaller({
   userSkuTotals,
   optedOutUserIds = new Set(),
   lanePrefsByUserId = new Map(),
+  keepByUserId = new Map(),
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   if (optedOutUserIds.has(callerUid)) {
@@ -183,7 +268,8 @@ function buildMatchesForCaller({
   }
 
   const callerTotals = userSkuTotals.get(callerUid) || new Map();
-  const callerProfile = buildUserMatchProfile(callerTotals);
+  const callerKeep = normalizeMatchKeep(keepByUserId.get(callerUid));
+  const callerProfile = buildUserMatchProfile(callerTotals, callerKeep);
   const callerLanePrefs = lanePrefsByUserId.get(callerUid);
   const matches = [];
 
@@ -192,7 +278,8 @@ function buildMatchesForCaller({
       continue;
     }
 
-    const otherProfile = buildUserMatchProfile(otherTotals);
+    const otherKeep = normalizeMatchKeep(keepByUserId.get(otherUid));
+    const otherProfile = buildUserMatchProfile(otherTotals, otherKeep);
     const lanes = buildLanesForCounterparty({
       callerTotals,
       callerExtras: callerProfile.extras,
@@ -200,6 +287,8 @@ function buildMatchesForCaller({
       otherExtras: otherProfile.extras,
       callerLanePrefs,
       otherLanePrefs: lanePrefsByUserId.get(otherUid),
+      callerKeep,
+      otherKeep,
       itemLimit,
     });
 
@@ -327,12 +416,17 @@ function resolveMatchContact({ preferences, trueEmail }) {
 
 module.exports = {
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_KEEP,
+  DEFAULT_MATCH_KEEP_BY_LANE,
   DEFAULT_MATCH_LANES,
   DEFAULT_MATCH_PAGE_SIZE,
   DEFAULT_PILE_ITEM_LIMIT,
   MATCH_CONTACT_SHARING,
   MATCH_LANE_IDS,
+  MAX_MATCH_KEEP,
   MAX_MATCH_PAGE_SIZE,
+  MIN_MATCH_KEEP,
+  buildKeepByUserId,
   buildLanePrefsByUserId,
   buildLanesForCounterparty,
   buildMatchesForCaller,
@@ -342,6 +436,7 @@ module.exports = {
   laneForSkuId,
   normalizeMatchContactSharing,
   normalizeMatchCursor,
+  normalizeMatchKeep,
   normalizeMatchLanes,
   normalizeMatchPageSize,
   normalizeQuantity,

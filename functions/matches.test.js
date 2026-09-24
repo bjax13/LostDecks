@@ -3,16 +3,19 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  buildKeepByUserId,
   buildLanePrefsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
   DEFAULT_DISCORD_CHANNEL,
+  DEFAULT_MATCH_KEEP_BY_LANE,
   DEFAULT_MATCH_LANES,
   DEFAULT_MATCH_PAGE_SIZE,
   laneForSkuId,
   MAX_MATCH_PAGE_SIZE,
   normalizeMatchCursor,
+  normalizeMatchKeep,
   normalizeMatchLanes,
   normalizeMatchPageSize,
   normalizeQuantity,
@@ -162,6 +165,139 @@ test("buildMatchesForCaller does not match across lanes", () => {
   });
 
   assert.deepEqual(result.matches, []);
+});
+
+test("missing per-lane keep defaults to 1 and preserves reciprocal extras", () => {
+  assert.deepEqual(normalizeMatchKeep(undefined), { ...DEFAULT_MATCH_KEEP_BY_LANE });
+  assert.deepEqual(normalizeMatchKeep({ dun: 2, foil: 0, pins: 4, heralds: 3 }), {
+    dun: 2,
+    foil: 1,
+    pins: 1,
+  });
+  assert.deepEqual(
+    buildKeepByUserId(
+      new Map([
+        ["me", {}],
+        ["other", { matchKeep: { pins: 3 } }],
+      ]),
+    ).get("me"),
+    { dun: 1, foil: 1, pins: 1 },
+  );
+
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals: new Map([
+      ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+      ["other", new Map([["LT24-HLD-01-DUN", 2]])],
+    ]),
+    optedOutUserIds: new Set(),
+    keepByUserId: buildKeepByUserId(
+      new Map([
+        ["me", {}],
+        ["other", { matchKeep: {} }],
+      ]),
+    ),
+  });
+
+  assert.deepEqual(result.matches[0].lanes, [
+    {
+      id: "dun",
+      theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 2, extras: 1 }],
+      youCanSend: [{ skuId: "LT24-ELS-01-DUN", owned: 2, extras: 1 }],
+    },
+  ]);
+});
+
+test("keep 2 treats qty 1 as a need and qty 2 as not tradable", () => {
+  const keptAtTwo = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals: new Map([
+      ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+      ["other", new Map([["LT24-HLD-01-DUN", 2]])],
+    ]),
+    optedOutUserIds: new Set(),
+    keepByUserId: new Map([["me", { dun: 2, foil: 1, pins: 1 }]]),
+  });
+  assert.deepEqual(keptAtTwo.matches, []);
+
+  const qtyOneIsNeed = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals: new Map([
+      [
+        "me",
+        new Map([
+          ["LT24-ELS-01-DUN", 1],
+          ["LT24-HLD-01-DUN", 2],
+          ["LT24-CHM-01-DUN", 3],
+        ]),
+      ],
+      ["other", new Map([["LT24-ELS-01-DUN", 2]])],
+    ]),
+    optedOutUserIds: new Set(),
+    keepByUserId: new Map([
+      ["me", { dun: 2, foil: 1, pins: 1 }],
+      ["other", { dun: 1, foil: 1, pins: 1 }],
+    ]),
+  });
+
+  assert.deepEqual(qtyOneIsNeed.matches, [
+    {
+      userId: "other",
+      lanes: [
+        {
+          id: "dun",
+          theyCanSend: [{ skuId: "LT24-ELS-01-DUN", owned: 2, extras: 1 }],
+          youCanSend: [{ skuId: "LT24-CHM-01-DUN", owned: 3, extras: 1 }],
+        },
+      ],
+    },
+  ]);
+});
+
+test("reciprocal piles use each collector's keep for that lane", () => {
+  const result = buildMatchesForCaller({
+    callerUid: "me",
+    userSkuTotals: new Map([
+      [
+        "me",
+        new Map([
+          ["LT24-ELS-01-DUN", 4],
+          ["LT24-ELS-02-DUN", 2],
+          ["LT24-ELS-03-DUN", 3],
+          ["LT24-HLD-01-DUN", 1],
+          ["LT24-ELS-01-FOIL", 2],
+        ]),
+      ],
+      [
+        "other",
+        new Map([
+          ["LT24-HLD-01-DUN", 5],
+          ["LT24-CHM-01-DUN", 3],
+          ["LT24-ELS-01-DUN", 2],
+          ["LT24-ELS-03-DUN", 3],
+          ["LT24-HLD-01-FOIL", 2],
+        ]),
+      ],
+    ]),
+    optedOutUserIds: new Set(),
+    keepByUserId: new Map([
+      ["me", { dun: 2, foil: 2, pins: 1 }],
+      ["other", { dun: 3, foil: 1, pins: 1 }],
+    ]),
+  });
+
+  assert.deepEqual(result.matches, [
+    {
+      userId: "other",
+      lanes: [
+        {
+          id: "dun",
+          theyCanSend: [{ skuId: "LT24-HLD-01-DUN", owned: 5, extras: 2 }],
+          youCanSend: [{ skuId: "LT24-ELS-01-DUN", owned: 4, extras: 2 }],
+        },
+      ],
+    },
+  ]);
 });
 
 test("buildMatchesForCaller treats qty 1 as neither extra nor need", () => {

@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
+import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseTradeMatches = vi.hoisted(() => vi.fn());
@@ -180,7 +180,9 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Foil cards" })).not.toBeInTheDocument();
     expect(screen.getByText("Jezrien (DUN)")).toBeInTheDocument();
-    expect(screen.getAllByText("they have 2+").length).toBe(2);
+    expect(screen.getByText(MATCHES_KEEP_TIP)).toBeInTheDocument();
+    expect(screen.queryByText(/2\+/)).not.toBeInTheDocument();
+    expect(screen.getAllByText("1 extra").length).toBe(2);
     expect(screen.getByText("Elsecaller #01 (DUN)")).toBeInTheDocument();
     expect(screen.getByText("you own 3")).toBeInTheDocument();
     expect(screen.getAllByText("you own 2").length).toBe(2);

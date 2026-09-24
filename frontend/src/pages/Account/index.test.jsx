@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ACCOUNT_MATCHING_HELP } from "../../lib/matchHelpCopy.js";
+import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
@@ -23,10 +23,17 @@ vi.mock("../../lib/userPreferences", () => ({
   DEFAULT_USER_PREFERENCES: {
     matchingOptOut: false,
     matchLanes: { dun: true, foil: true, pins: true },
+    matchKeep: { dun: 1, foil: 1, pins: 1 },
     matchContactSharing: "trueEmail",
     tradingEmail: "",
     discordHandle: "",
     discordChannel: "Sanderson Collectors Guild",
+  },
+  MATCH_KEEP_OPTIONS: [1, 2, 3],
+  normalizeMatchKeep: (value) => {
+    const source = value && typeof value === "object" ? value : {};
+    const count = (entry) => (entry === 1 || entry === 2 || entry === 3 ? entry : 1);
+    return { dun: count(source.dun), foil: count(source.foil), pins: count(source.pins) };
   },
   MATCH_CONTACT_SHARING: {
     TRUE_EMAIL: "trueEmail",
@@ -208,6 +215,90 @@ describe("AccountPage", () => {
     expect(screen.getByRole("checkbox", { name: "Dun cards" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Foil cards" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Pins" })).toBeChecked();
+  });
+
+  it("defaults each lane keep to 1 and shares one help line", () => {
+    renderAccountPage();
+
+    for (const laneName of ["Dun cards", "Foil cards", "Pins"]) {
+      const group = screen.getByRole("group", { name: `Keep this many ${laneName}` });
+      expect(within(group).getByRole("radio", { name: "1" })).toBeChecked();
+      expect(within(group).getByRole("radio", { name: "2" })).not.toBeChecked();
+      expect(within(group).getByRole("radio", { name: "3" })).not.toBeChecked();
+    }
+
+    expect(screen.getByText(MATCH_KEEP_HELP)).toBeInTheDocument();
+  });
+
+  it("persists a per-lane keep change", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    const dunKeep = screen.getByRole("group", { name: "Keep this many Dun cards" });
+    await user.click(within(dunKeep).getByRole("radio", { name: "2" }));
+
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchKeep: { dun: 2, foil: 1, pins: 1 },
+    });
+    expect(within(dunKeep).getByRole("radio", { name: "2" })).toBeChecked();
+    expect(
+      within(screen.getByRole("group", { name: "Keep this many Foil cards" })).getByRole("radio", {
+        name: "1",
+      }),
+    ).toBeChecked();
+  });
+
+  it("loads a saved keep above 1", () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchKeep: { dun: 1, foil: 3, pins: 2 },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(
+      within(screen.getByRole("group", { name: "Keep this many Foil cards" })).getByRole("radio", {
+        name: "3",
+      }),
+    ).toBeChecked();
+    expect(
+      within(screen.getByRole("group", { name: "Keep this many Pins" })).getByRole("radio", {
+        name: "2",
+      }),
+    ).toBeChecked();
+  });
+
+  it("disables keep controls while excluded from matching", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: true,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchKeep: { dun: 1, foil: 1, pins: 1 },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    const pinsKeep = screen.getByRole("group", { name: "Keep this many Pins" });
+    expect(within(pinsKeep).getByRole("radio", { name: "3" })).toBeDisabled();
+    await user.click(within(pinsKeep).getByRole("radio", { name: "3" }));
+
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalled();
+    expect(within(pinsKeep).getByRole("radio", { name: "1" })).toBeChecked();
   });
 
   it("does not persist lane changes while excluded from matching", async () => {

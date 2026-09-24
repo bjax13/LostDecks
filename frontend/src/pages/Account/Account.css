@@ -186,6 +186,48 @@
   opacity: 0.55;
 }
 
+.account-match-keep {
+  margin: 0.85rem 0 0;
+  margin-left: 1.7rem;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.account-keep-row {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.9rem;
+}
+
+.account-keep-row legend {
+  padding: 0;
+  color: #e6dcff;
+  font-weight: 500;
+}
+
+.account-keep-options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.account-keep-option {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #e6dcff;
+}
+
+.account-match-keep:disabled {
+  opacity: 0.55;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

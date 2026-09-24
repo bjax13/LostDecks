@@ -3,7 +3,7 @@ import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
-import { MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
+import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
 import { isValidTradingEmail, MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
 import MatchesToolbar from "./components/MatchesToolbar";
 import { matchLaneLabels } from "./constants";
@@ -28,18 +28,23 @@ function formatSkuLabel(skuId) {
   return `${cardName}${finishLabel}`;
 }
 
-function formatPileQty(side, owned) {
+function formatExtras(extras) {
+  const count = Number.isFinite(extras) ? Math.max(0, Math.floor(extras)) : 0;
+  return count === 1 ? "1 extra" : `${count} extras`;
+}
+
+function formatPileQty(side, item) {
   if (side === "they") {
-    return "they have 2+";
+    return formatExtras(item.extras);
   }
-  return `you own ${owned}`;
+  return `you own ${item.owned}`;
 }
 
 function PileItem({ item, side }) {
   return (
     <li className="matches-pile-item">
       <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
-      <span className="matches-pile-item-qty">{formatPileQty(side, item.owned)}</span>
+      <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
     </li>
   );
 }
@@ -246,9 +251,7 @@ function MatchesContent() {
           <h1>Matches</h1>
           <InfoBubble label="How matching works">{MATCHES_PAGE_HELP}</InfoBubble>
         </div>
-        <p className="matches-hint">
-          Find collectors with extras you need, and extras they need from you.
-        </p>
+        <p className="matches-hint">{MATCHES_KEEP_TIP}</p>
       </header>
 
       {loading ? <p>Finding possible matches…</p> : null}

@@ -65,11 +65,11 @@ function normalizePileItem(item) {
   }
 
   const owned = Number.isFinite(item?.owned) ? Math.max(0, Math.floor(item.owned)) : 0;
-  if (owned < 2) {
+  const extras = Number.isFinite(item?.extras) ? Math.max(0, Math.floor(item.extras)) : 0;
+  if (extras < 1) {
     return null;
   }
 
-  const extras = Number.isFinite(item?.extras) ? Math.max(0, Math.floor(item.extras)) : owned - 1;
   return { skuId, owned, extras };
 }
 
