@@ -7,6 +7,7 @@ import {
   formatIsoUftPost,
   getDefaultExcludedIds,
 } from "../utils/isoUftPost";
+import PublicTradeListToggle, { refreshPublicListOnCopy } from "./PublicTradeListToggle.jsx";
 
 const PREFS_STORAGE_KEY = "isoUftPostPrefs";
 
@@ -173,6 +174,10 @@ export default function IsoUftPostModal({
   onCopyError,
   matchKeep = DEFAULT_MATCH_KEEP_BY_LANE,
   shareId = null,
+  ownerUid = null,
+  displayName = "",
+  discordHandle = "",
+  onShareIdChange,
 }) {
   const [excludedIds, setExcludedIds] = useState(() => new Set());
   const [collapsedIds, setCollapsedIds] = useState(() => new Set());
@@ -261,6 +266,20 @@ export default function IsoUftPostModal({
 
     try {
       await copyTextToClipboard(previewText);
+      if (shareId && ownerUid) {
+        try {
+          await refreshPublicListOnCopy({
+            ownerUid,
+            publicShareId: shareId,
+            displayName,
+            discordHandle,
+            entries,
+            matchKeep,
+          });
+        } catch (refreshErr) {
+          console.error("Failed to refresh public trade list on copy", refreshErr);
+        }
+      }
       captureEvent("iso_uft_copied", { format, includeLink });
       onCopied({ skippedEntries });
       onClose();
@@ -332,6 +351,17 @@ export default function IsoUftPostModal({
                 <span>Classic</span>
               </label>
             </fieldset>
+            {ownerUid ? (
+              <PublicTradeListToggle
+                ownerUid={ownerUid}
+                displayName={displayName}
+                discordHandle={discordHandle}
+                entries={entries}
+                matchKeep={matchKeep}
+                publicShareId={shareId}
+                onShareIdChange={onShareIdChange}
+              />
+            ) : null}
           </div>
 
           <div className="collection-bulk-post-modal__body">
