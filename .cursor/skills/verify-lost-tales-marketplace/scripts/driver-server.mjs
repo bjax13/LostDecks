@@ -59,6 +59,21 @@ function send(res, status, body) {
   res.end(payload);
 }
 
+async function clickLocator(loc) {
+  const meta = await loc.evaluate((el) => ({
+    tag: el.tagName,
+    type: (el.getAttribute("type") || "").toLowerCase(),
+  }));
+  if (meta.tag === "INPUT" && (meta.type === "radio" || meta.type === "checkbox")) {
+    const label = loc.locator("xpath=ancestor::label[1]");
+    if ((await label.count()) > 0) {
+      await label.click();
+      return;
+    }
+  }
+  await loc.click();
+}
+
 function locatorFor(spec) {
   let root = page;
   if (spec.scope === "nav") {
@@ -117,7 +132,7 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    await clickLocator(locatorFor(cmd));
     return pageInfo();
   }
   if (action === "fill") {

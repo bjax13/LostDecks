@@ -84,7 +84,9 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 | `--text` | `getByText` |
 | `--scope nav` | Restrict to `navigation` named `Primary` |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name. Required when a shorter name is contained in another heading, such as `Your Collection` inside `Bulk update your collection`, or modal `Sign In` inside `Sign in to ShardStash` |
+
+`click` on a radio or checkbox activates its wrapping label when one exists. Getting Started profile cards clip the input itself; the label is the visible card a collector clicks.
 
 Stable handles from this repo:
 
