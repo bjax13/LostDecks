@@ -346,7 +346,7 @@ describe("CollectionSummary", () => {
     expect(within(region).getByText("Categories")).toBeInTheDocument();
   });
 
-  it("renders the ChasmFriends Pins subset heading when pin progress is present", () => {
+  it("renders the Pins subset heading when pin progress is present", () => {
     const summary = {
       uniqueCardCount: 0,
       uniqueSkuCount: 1,
@@ -370,7 +370,7 @@ describe("CollectionSummary", () => {
     };
 
     render(<CollectionSummary summary={summary} />);
-    expect(screen.getByRole("heading", { name: "ChasmFriends Pins" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
     expect(screen.getByText("Pins owned")).toBeInTheDocument();
   });
 
