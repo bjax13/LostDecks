@@ -69,8 +69,23 @@ describe("collectibles (unit)", () => {
       expect(rec?.category).toBe("pin");
       expect(rec?.displayName).toBe("Shreadad");
       expect(rec?.storyTitle).toBe("ChasmFriends");
+      expect(rec?.series).toBe("ChasmFriends");
+      expect(rec?.setName).toBe("ChasmFriends Pins");
       expect(rec?.detail).toBe("ChasmFriends enamel pin");
       expect(rec?.finishes).toEqual([]);
+    });
+
+    it("returns blue-book pin records grouped by series", () => {
+      const rec = getCollectibleRecord("PIN-CPS1-00");
+      expect(rec).not.toBeNull();
+      expect(rec?.collectibleType).toBe("pin");
+      expect(rec?.displayName).toBe("Brandon");
+      expect(rec?.storyTitle).toBe("Character Pin Series 1");
+      expect(rec?.series).toBe("Character Pin Series 1");
+      expect(rec?.setName).toBe("Sanderson Collectors Guild Pins");
+      expect(rec?.country).toBe("US");
+      expect(rec?.number).toBe(0);
+      expect(resolveSkuId(rec)).toBe("PIN-CPS1-00");
     });
 
     it("returns null for unknown card id", () => {

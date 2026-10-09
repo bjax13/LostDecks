@@ -1,0 +1,3144 @@
+{
+  "meta": {
+    "setId": "PINS",
+    "setName": "Pins",
+    "totalUniquePins": 171,
+    "totalSkus": 171,
+    "sources": [
+      {
+        "id": "ChasmFriends",
+        "name": "ChasmFriends Pins",
+        "pinCount": 5
+      },
+      {
+        "id": "SCG",
+        "name": "Sanderson Collectors Guild Pins",
+        "pinCount": 166,
+        "sheetTitle": "Sanderson Collectors Guild Pin List",
+        "sheetGid": "788070872",
+        "dataAsOf": "2026-09-28"
+      }
+    ],
+    "series": [
+      "ChasmFriends",
+      "Character Pin Series 1",
+      "Character Pin Series 2",
+      "Character Pin Series 3",
+      "Character Pin Series 4",
+      "Knight Radiant Order",
+      "Knight Radiant Order Glitter",
+      "Convention",
+      "Cosmere",
+      "Cytoverse",
+      "Cytoverse Spanish Slugs",
+      "Cytoverse Defiant Ships",
+      "Sandershelf",
+      "Roshar",
+      "Logo Pins",
+      "Worldhopper Pins",
+      "Mistborn Word Art",
+      "Cosplay",
+      "Scadrial",
+      "Scene Pin",
+      "Reckoners",
+      "Worldhopper Ball",
+      "Campaign Pin",
+      "Event Pins",
+      "Other"
+    ],
+    "groupings": {
+      "series": "Primary browse/onboarding group (sheet Set column / ChasmFriends).",
+      "catalog": "Source catalog: ChasmFriends vs Sanderson Collectors Guild.",
+      "country": "Availability region from the blue book."
+    },
+    "notes": [
+      "Extends ChasmFriends pins; does not replace them.",
+      "Blue-book rows imported from Sanderson Collectors Guild Pin List (gid=788070872).",
+      "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
+      "Each pin has a single SKU with no DUN/FOIL finish variants.",
+      "Image URLs from the sheet are omitted until a product decision on asset hosting."
+    ]
+  },
+  "pins": [
+    {
+      "id": "PIN-CF-01",
+      "name": "Shreadad",
+      "series": "ChasmFriends",
+      "catalog": "ChasmFriends",
+      "catalogName": "ChasmFriends Pins",
+      "number": 1,
+      "detail": "ChasmFriends enamel pin",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CF-02",
+      "name": "Howlerina",
+      "series": "ChasmFriends",
+      "catalog": "ChasmFriends",
+      "catalogName": "ChasmFriends Pins",
+      "number": 2,
+      "detail": "ChasmFriends enamel pin",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CF-03",
+      "name": "Burp Slurper",
+      "series": "ChasmFriends",
+      "catalog": "ChasmFriends",
+      "catalogName": "ChasmFriends Pins",
+      "number": 3,
+      "detail": "ChasmFriends enamel pin",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CF-04",
+      "name": "Darren",
+      "series": "ChasmFriends",
+      "catalog": "ChasmFriends",
+      "catalogName": "ChasmFriends Pins",
+      "number": 4,
+      "detail": "ChasmFriends enamel pin",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CF-05",
+      "name": "Cleverclaws",
+      "series": "ChasmFriends",
+      "catalog": "ChasmFriends",
+      "catalogName": "ChasmFriends Pins",
+      "number": 5,
+      "detail": "ChasmFriends enamel pin",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS1-00",
+      "name": "Brandon",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 0,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 00 - Brandon"
+    },
+    {
+      "id": "PIN-CPS1-01",
+      "name": "Vin",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 01 - Vin"
+    },
+    {
+      "id": "PIN-CPS1-02",
+      "name": "Hoid",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 02 - Hoid"
+    },
+    {
+      "id": "PIN-CPS1-03",
+      "name": "Steris",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 03 - Steris"
+    },
+    {
+      "id": "PIN-CPS1-04",
+      "name": "Vasher",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 04 - Vasher"
+    },
+    {
+      "id": "PIN-CPS1-05",
+      "name": "Wax",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 05 - Wax"
+    },
+    {
+      "id": "PIN-CPS1-06",
+      "name": "Raoden",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 06 - Raoden"
+    },
+    {
+      "id": "PIN-CPS1-07",
+      "name": "Shallan",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 07 - Shallan"
+    },
+    {
+      "id": "PIN-CPS1-08",
+      "name": "Khriss",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 08 - Khriss"
+    },
+    {
+      "id": "PIN-CPS1-09",
+      "name": "Vivenna",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 09 - Vivenna"
+    },
+    {
+      "id": "PIN-CPS1-10",
+      "name": "Kaladin",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 10 - Kaladin"
+    },
+    {
+      "id": "PIN-CPS1-11",
+      "name": "Syl",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 11 - Syl"
+    },
+    {
+      "id": "PIN-CPS1-12",
+      "name": "Kelsier",
+      "series": "Character Pin Series 1",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 1 · US",
+      "country": "US",
+      "release": "Year of Sanderson Box, later Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 12 - Kelsier"
+    },
+    {
+      "id": "PIN-CPS2-00",
+      "name": "Queen Emily",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 0,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Dragonsteel Nexus 2024",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 000 - Queen Emily"
+    },
+    {
+      "id": "PIN-CPS2-01",
+      "name": "Honorspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 01 - Honorspren"
+    },
+    {
+      "id": "PIN-CPS2-02",
+      "name": "Highspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 02 - Highspren"
+    },
+    {
+      "id": "PIN-CPS2-03",
+      "name": "Ashspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 03 - Ashspren"
+    },
+    {
+      "id": "PIN-CPS2-04",
+      "name": "Cultivationspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 04 - Cultivationspren"
+    },
+    {
+      "id": "PIN-CPS2-05",
+      "name": "Mistspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 05 - Mistspren"
+    },
+    {
+      "id": "PIN-CPS2-06",
+      "name": "Cryptic",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 06 - Cryptic"
+    },
+    {
+      "id": "PIN-CPS2-07",
+      "name": "Inkspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 07 - Inkspren"
+    },
+    {
+      "id": "PIN-CPS2-08",
+      "name": "Reacher",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 08 - Reacher"
+    },
+    {
+      "id": "PIN-CPS2-09",
+      "name": "Peakspren",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 09 - Peakspren"
+    },
+    {
+      "id": "PIN-CPS2-10",
+      "name": "Stormfather",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 10 - Stormfather"
+    },
+    {
+      "id": "PIN-CPS2-11",
+      "name": "Dalinar",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 11 - Dalinar"
+    },
+    {
+      "id": "PIN-CPS2-12",
+      "name": "Adolin",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 12 - Adolin"
+    },
+    {
+      "id": "PIN-CPS2-13",
+      "name": "Tress",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 13,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 13 - Tress"
+    },
+    {
+      "id": "PIN-CPS2-14",
+      "name": "Mervin",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 14,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 14 - Mervin"
+    },
+    {
+      "id": "PIN-CPS2-15",
+      "name": "Yumi",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 15,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 15 - Yumi"
+    },
+    {
+      "id": "PIN-CPS2-16",
+      "name": "Nomad",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 16,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 16 - Nomad"
+    },
+    {
+      "id": "PIN-CPS2-17",
+      "name": "Spensa",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 17,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 1 - Pin 17 - Spensa"
+    },
+    {
+      "id": "PIN-CPS2-18",
+      "name": "Szeth",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 18,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "WaT Book Bundle",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 18 - Szeth"
+    },
+    {
+      "id": "PIN-CPS2-19",
+      "name": "Painter",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 19,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at DSNX24",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 19 - Painter"
+    },
+    {
+      "id": "PIN-CPS2-20",
+      "name": "Cursed Hoid",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 20,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at DSNX24",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 20 - Cursed Hoid"
+    },
+    {
+      "id": "PIN-CPS2-21",
+      "name": "Renarin",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 21,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 13 - Renarin"
+    },
+    {
+      "id": "PIN-CPS2-22",
+      "name": "Jasnah",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 22,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 14 - Jasnah"
+    },
+    {
+      "id": "PIN-CPS2-23",
+      "name": "Navani",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 23,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 15 - Navani"
+    },
+    {
+      "id": "PIN-CPS2-24",
+      "name": "Venli",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 24,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 16 - Venli"
+    },
+    {
+      "id": "PIN-CPS2-25",
+      "name": "Lift",
+      "series": "Character Pin Series 2",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 25,
+      "detail": "Character Pin Series 2 · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 2 - Pin 17 - Lift"
+    },
+    {
+      "id": "PIN-CPS3-00",
+      "name": "Peter Ahlstrom",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 0,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 0 - Peter Ahlstrom"
+    },
+    {
+      "id": "PIN-CPS3-01",
+      "name": "Emperor Elend",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 1 - Emperor Elend"
+    },
+    {
+      "id": "PIN-CPS3-02",
+      "name": "Shai",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 2 - Shai"
+    },
+    {
+      "id": "PIN-CPS3-03",
+      "name": "Marasi",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": "Series 3 - Pin 3 - Marasi"
+    },
+    {
+      "id": "PIN-CPS3-04",
+      "name": "Rysn",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": "Series 3 - Pin 4 - Rysn"
+    },
+    {
+      "id": "PIN-CPS3-05",
+      "name": "Hrathen",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": "Series 3 - Pin 5 - Hrathen"
+    },
+    {
+      "id": "PIN-CPS3-06",
+      "name": "Sixth of the Dusk",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released with Emberdark preorders, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 6 - Sixth of the Dusk"
+    },
+    {
+      "id": "PIN-CPS3-07",
+      "name": "Lightsong",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": "Series 3 - Pin 7 - Lightsong"
+    },
+    {
+      "id": "PIN-CPS3-08",
+      "name": "Blushweaver",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": "Series 3 - Pin 8 - Blushweaver"
+    },
+    {
+      "id": "PIN-CPS3-09",
+      "name": "Wayne",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at FanX 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 9 - Wayne"
+    },
+    {
+      "id": "PIN-CPS3-10",
+      "name": "Human Form Starling",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 10 - Human Form Starling"
+    },
+    {
+      "id": "PIN-CPS3-11",
+      "name": "Draconic Form Starling",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 11 - Draconic Form Starling"
+    },
+    {
+      "id": "PIN-CPS3-12",
+      "name": "Worldhopper Hoid",
+      "series": "Character Pin Series 3",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 3 · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 3 - Pin 12 - Worldhopper Hoid"
+    },
+    {
+      "id": "PIN-CPS4-01",
+      "name": "Sazed",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": "Released at MCM London 2026, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 4 - Pin 1 - Sazed"
+    },
+    {
+      "id": "PIN-CPS4-02",
+      "name": "Sarene",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": "Released at MCM London 2026, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 4 - Pin 2 - Sarene"
+    },
+    {
+      "id": "PIN-CPS4-03",
+      "name": "Series 4 - Pin 3 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-04",
+      "name": "Series 4 - Pin 4 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-05",
+      "name": "Series 4 - Pin 5 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-06",
+      "name": "Series 4 - Pin 6 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-07",
+      "name": "Maya",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": "Released at Gen Con 2026, later on Dragonsteel store",
+      "notes": null,
+      "sourceName": "Series 4 - Pin 7 - Maya"
+    },
+    {
+      "id": "PIN-CPS4-08",
+      "name": "Series 4 - Pin 8 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-09",
+      "name": "Series 4 - Pin 9 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-10",
+      "name": "Series 4 - Pin 10 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-11",
+      "name": "Series 4 - Pin 11 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-12",
+      "name": "Series 4 - Pin 12 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-13",
+      "name": "Series 4 - Pin 0 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 13,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-01",
+      "name": "Bondsmith Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-02",
+      "name": "Dustbringer Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-03",
+      "name": "Edgedancer Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-04",
+      "name": "Elsecaller Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-05",
+      "name": "Lightweaver Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-06",
+      "name": "Skybreaker Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-07",
+      "name": "Stoneward Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-08",
+      "name": "Truthwatcher Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-09",
+      "name": "Willshaper Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KRO-10",
+      "name": "Windrunner Standard",
+      "series": "Knight Radiant Order",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Knight Radiant Order · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KROG-01",
+      "name": "Windrunner Glitter",
+      "series": "Knight Radiant Order Glitter",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Knight Radiant Order Glitter · US",
+      "country": "US",
+      "release": "The Way of Kings Release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KROG-02",
+      "name": "Lightweaver Glitter",
+      "series": "Knight Radiant Order Glitter",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Knight Radiant Order Glitter · US",
+      "country": "US",
+      "release": "Words of Radiance Release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KROG-03",
+      "name": "Bondsmith Glitter",
+      "series": "Knight Radiant Order Glitter",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Knight Radiant Order Glitter · US",
+      "country": "US",
+      "release": "Oathbringer Release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KROG-04",
+      "name": "Willshaper Glitter",
+      "series": "Knight Radiant Order Glitter",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Knight Radiant Order Glitter · US",
+      "country": "US",
+      "release": "Rhythm of War Release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-KROG-05",
+      "name": "Skybreaker Glitter",
+      "series": "Knight Radiant Order Glitter",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Knight Radiant Order Glitter · US",
+      "country": "US",
+      "release": "Wind and Truth Release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-01",
+      "name": "Dragonsteel 2021",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Dragonsteel 2021 and later the store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-02",
+      "name": "Dragonsteel 2022",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Dragonsteel 2022 and later the store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-03",
+      "name": "Dragonsteel 2022 - VIP",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Dragonsteel 2022 VIP bundle",
+      "notes": "Shiny orange bits alternate version",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-04",
+      "name": "Dragonsteel 2023",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Dragonsteel 2023 and later the store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-05",
+      "name": "Dragonsteel 2023 - VIP",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Dragonsteel 2023 VIP bundle",
+      "notes": "Shiny alternate version of pin",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-06",
+      "name": "Dragonsteel Nexus 2024",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "DSNX24 and later the store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-07",
+      "name": "Dragonsteel Nexus 2024 - VIP",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "DSNX24 VIP bundle",
+      "notes": "Alternate VIP version of pin",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-08",
+      "name": "Dragonsteel Nexus 2025",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "DSNX25 and later the store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CONV-09",
+      "name": "Dragonsteel Nexus 2025- Premium",
+      "series": "Convention",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Convention · US",
+      "country": "US",
+      "release": "Sold with the Premium Swag bundle for Dragonsteel Nexus 2025",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-COSM-01",
+      "name": "Cosmere",
+      "series": "Cosmere",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cosmere · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-COSM-02",
+      "name": "Hoid was here",
+      "series": "Cosmere",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Cosmere · Spain",
+      "country": "Spain",
+      "release": "Spanish release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-01",
+      "name": "DDF Two-Tone",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-02",
+      "name": "DDF Two-Tone",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-03",
+      "name": "DDF UK",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Cytoverse · UK",
+      "country": "UK",
+      "release": "UK release",
+      "notes": "Shiny, much rarer than the other",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-04",
+      "name": "Doom Slug",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "Starsight release",
+      "notes": "Dragonsteel 2024",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-05",
+      "name": "Hesho's Mask",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "Part of the Defiant release bundle and later sold in store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-06",
+      "name": "M-Bot",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-07",
+      "name": "M-Bot Drone",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-08",
+      "name": "M-Bot Mini",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": "DSNX 21 game prize",
+      "notes": "Smaller version of the M-Bot pin, much rarer",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-09",
+      "name": "M-Bot (Dutch)",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Cytoverse · Netherlands",
+      "country": "Netherlands",
+      "release": "So Many Pages.nl Sub Box",
+      "notes": "From the special edition box from Dutch publisher Iceberg/So Many Pages subscription box",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-01",
+      "name": "Boom Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-02",
+      "name": "Comm Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-03",
+      "name": "Doom Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-04",
+      "name": "Grey Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-05",
+      "name": "Inhibitor Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTSS-06",
+      "name": "Rainbow Slug",
+      "series": "Cytoverse Spanish Slugs",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Cytoverse Spanish Slugs · Spain",
+      "country": "Spain",
+      "release": "Spanish Defiant release",
+      "notes": "Random one of 6 given out with each purchase",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTDS-01",
+      "name": "Kitsen Ship",
+      "series": "Cytoverse Defiant Ships",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cytoverse Defiant Ships · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTDS-02",
+      "name": "Largo Ship",
+      "series": "Cytoverse Defiant Ships",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Cytoverse Defiant Ships · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTDS-03",
+      "name": "Poco Ship",
+      "series": "Cytoverse Defiant Ships",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Cytoverse Defiant Ships · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTDS-04",
+      "name": "Scout Ship",
+      "series": "Cytoverse Defiant Ships",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Cytoverse Defiant Ships · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTDS-05",
+      "name": "UrDail Ship",
+      "series": "Cytoverse Defiant Ships",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Cytoverse Defiant Ships · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-01",
+      "name": "Sandershelf - Pin 1 - Tress",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-02",
+      "name": "Sandershelf - Pin 2 - Way of Kings",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-03",
+      "name": "Sandershelf - Pin 3 - Elantris",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at MCM London 2026, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-04",
+      "name": "Sandershelf - Pin 4 - Yumi",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-05",
+      "name": "Sandershelf - Pin 5 - Mistborn Era 1",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-06",
+      "name": "Sandershelf - Pin 6 - Emerdark",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at FanX 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-07",
+      "name": "Sandershelf - Pin 7 - Skyward",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-08",
+      "name": "Sandershelf - Pin 8 - Warbreaker",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SHELF-09",
+      "name": "Sandershelf - Pin 9 - Sunlit Man",
+      "series": "Sandershelf",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Sandershelf · US",
+      "country": "US",
+      "release": "Released at MCM London 2026, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-01",
+      "name": "Bridge Four",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Roshar · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-02",
+      "name": "Chiri Chiri",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Roshar · Spain",
+      "country": "Spain",
+      "release": "Spanish release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-03",
+      "name": "Double Eye",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Roshar · US",
+      "country": "US",
+      "release": "WoK LB Kickstarter Backer pin",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-04",
+      "name": "Oathbringer",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Roshar · UK",
+      "country": "UK",
+      "release": "UK release",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-05",
+      "name": "Wind and Truth - Australian",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Roshar · Australia",
+      "country": "Australia",
+      "release": "Australian version of Wind and Truth pin",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-06",
+      "name": "Wind and Truth - Gollancz",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Roshar · US",
+      "country": "US",
+      "release": "Gollancz version of Wind and Truth pin",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-07",
+      "name": "Wind and Truth - Spanish",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Roshar · Spain",
+      "country": "Spain",
+      "release": "Spanish release version of Wind and Truth pin",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-ROSH-08",
+      "name": "Wind and Truth - Tor",
+      "series": "Roshar",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Roshar · US",
+      "country": "US",
+      "release": "Handed out at Tor booth at NYCC 2024",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-01",
+      "name": "Bridge Four",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-02",
+      "name": "Cosmere",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-03",
+      "name": "Dragonsteel Logo- Red",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-04",
+      "name": "Ghostbloods",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-05",
+      "name": "Scadrial",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-06",
+      "name": "Space-Age Stormlight",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-LOGO-07",
+      "name": "Stormlight",
+      "series": "Logo Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Logo Pins · US",
+      "country": "US",
+      "release": "Released at C2E2 2025, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-WHOP-01",
+      "name": "C2E2 Worldhopper",
+      "series": "Worldhopper Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Worldhopper Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at C2E2 2025",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-WHOP-02",
+      "name": "Celsius Worldhopper",
+      "series": "Worldhopper Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Worldhopper Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at Celsius 232 2025",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-WHOP-03",
+      "name": "DSNX Worldhopper",
+      "series": "Worldhopper Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Worldhopper Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at Dragonsteel Nexus 2025",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-WHOP-04",
+      "name": "FanX Worldhopper",
+      "series": "Worldhopper Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Worldhopper Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at FanX 2025",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-MBWA-01",
+      "name": "Hemalurgy",
+      "series": "Mistborn Word Art",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Mistborn Word Art · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Mistborn World art pin set of 3 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-MBWA-02",
+      "name": "Keep Calm",
+      "series": "Mistborn Word Art",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Mistborn Word Art · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Mistborn World art pin set of 3 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-MBWA-03",
+      "name": "There's Always Another Secret",
+      "series": "Mistborn Word Art",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Mistborn Word Art · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": "Part of the Mistborn World art pin set of 3 pins",
+      "sourceName": null
+    },
+    {
+      "id": "PIN-COSP-01",
+      "name": "Shalash Cosplay",
+      "series": "Cosplay",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cosplay · US",
+      "country": "US",
+      "release": "Brandon hands out to cosplayers starting at TBCC 2023",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-COSP-02",
+      "name": "Wayne Cosplay",
+      "series": "Cosplay",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Cosplay · US",
+      "country": "US",
+      "release": "Brandon hands out to cosplayers starting at DSNX'25",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SCAD-01",
+      "name": "Harmonium",
+      "series": "Scadrial",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Scadrial · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SCAD-02",
+      "name": "Marewill Flower",
+      "series": "Scadrial",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Scadrial · US",
+      "country": "US",
+      "release": "Dragonsteel Minicon 2022",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SCENE-01",
+      "name": "Worldhopper Ball 2024 Scene Pin: Adolin and Shallan",
+      "series": "Scene Pin",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Scene Pin · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-SCENE-02",
+      "name": "Worldhopper Ball 2025 Scene Pin: Vin and Elend",
+      "series": "Scene Pin",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Scene Pin · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-RECK-01",
+      "name": "Reckoners",
+      "series": "Reckoners",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Reckoners · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-WHBALL-01",
+      "name": "Worldhopper Ball 2025 Commemorative Pin",
+      "series": "Worldhopper Ball",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Worldhopper Ball · US",
+      "country": "US",
+      "release": "Released at DSNX25, later on the Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CAMP-01",
+      "name": "Fires of December",
+      "series": "Campaign Pin",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Campaign Pin · US",
+      "country": "US",
+      "release": "Released with the Hoid Storybook Backerkit campaign Fires of December bundle",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-EVENT-01",
+      "name": "StoryCon Event Pin",
+      "series": "Event Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Event Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at StoryCon 2026",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-EVENT-02",
+      "name": "Jordan Con Event Pin",
+      "series": "Event Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Event Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at Jordan Con 2026",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-EVENT-03",
+      "name": "MCM London Event Pin",
+      "series": "Event Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Event Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at MCM London 2026",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-EVENT-04",
+      "name": "Gen Con Event Pin",
+      "series": "Event Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Event Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at Gen Con 2026",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-EVENT-05",
+      "name": "FanX Event Pin",
+      "series": "Event Pins",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Event Pins · US",
+      "country": "US",
+      "release": "Convention exclusive at FanX 2026",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-01",
+      "name": "Ascendant Warrior",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-02",
+      "name": "Aviar- Emberdark",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 2,
+      "detail": "Other · Spain",
+      "country": "Spain",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-03",
+      "name": "Dragonsteel Logo",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Was originally only for employees.  Then sold at DSNX 21-24",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-04",
+      "name": "DSNX24 Blackout",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Given out for fully completing the con game at DSNX24",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-05",
+      "name": "DSNX24 Squire",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 5,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Given to volunteers at DSNX24",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-06",
+      "name": "DSNX25 Squire",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Given to volunteers at DSNX25",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-07",
+      "name": "Frugal Wizard",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 7,
+      "detail": "Other · Brazil",
+      "country": "Brazil",
+      "release": "First 500 people who purhcased Frugal Wizard in Brazil",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-08",
+      "name": "Silverlight Key Cloak Pin",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Released at DSNX25, Later sold in Dragonsteel store",
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-09",
+      "name": "The Lightweaver Foundation",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Other · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-OTHER-10",
+      "name": "WoR Backer Pin",
+      "series": "Other",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Other · US",
+      "country": "US",
+      "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": null
+    }
+  ],
+  "skus": [
+    {
+      "skuId": "PIN-CF-01",
+      "cardId": "PIN-CF-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-02",
+      "cardId": "PIN-CF-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-03",
+      "cardId": "PIN-CF-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-04",
+      "cardId": "PIN-CF-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CF-05",
+      "cardId": "PIN-CF-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-00",
+      "cardId": "PIN-CPS1-00",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-01",
+      "cardId": "PIN-CPS1-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-02",
+      "cardId": "PIN-CPS1-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-03",
+      "cardId": "PIN-CPS1-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-04",
+      "cardId": "PIN-CPS1-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-05",
+      "cardId": "PIN-CPS1-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-06",
+      "cardId": "PIN-CPS1-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-07",
+      "cardId": "PIN-CPS1-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-08",
+      "cardId": "PIN-CPS1-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-09",
+      "cardId": "PIN-CPS1-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-10",
+      "cardId": "PIN-CPS1-10",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-11",
+      "cardId": "PIN-CPS1-11",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS1-12",
+      "cardId": "PIN-CPS1-12",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-00",
+      "cardId": "PIN-CPS2-00",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-01",
+      "cardId": "PIN-CPS2-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-02",
+      "cardId": "PIN-CPS2-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-03",
+      "cardId": "PIN-CPS2-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-04",
+      "cardId": "PIN-CPS2-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-05",
+      "cardId": "PIN-CPS2-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-06",
+      "cardId": "PIN-CPS2-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-07",
+      "cardId": "PIN-CPS2-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-08",
+      "cardId": "PIN-CPS2-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-09",
+      "cardId": "PIN-CPS2-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-10",
+      "cardId": "PIN-CPS2-10",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-11",
+      "cardId": "PIN-CPS2-11",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-12",
+      "cardId": "PIN-CPS2-12",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-13",
+      "cardId": "PIN-CPS2-13",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-14",
+      "cardId": "PIN-CPS2-14",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-15",
+      "cardId": "PIN-CPS2-15",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-16",
+      "cardId": "PIN-CPS2-16",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-17",
+      "cardId": "PIN-CPS2-17",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-18",
+      "cardId": "PIN-CPS2-18",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-19",
+      "cardId": "PIN-CPS2-19",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-20",
+      "cardId": "PIN-CPS2-20",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-21",
+      "cardId": "PIN-CPS2-21",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-22",
+      "cardId": "PIN-CPS2-22",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-23",
+      "cardId": "PIN-CPS2-23",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-24",
+      "cardId": "PIN-CPS2-24",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS2-25",
+      "cardId": "PIN-CPS2-25",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-00",
+      "cardId": "PIN-CPS3-00",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-01",
+      "cardId": "PIN-CPS3-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-02",
+      "cardId": "PIN-CPS3-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-03",
+      "cardId": "PIN-CPS3-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-04",
+      "cardId": "PIN-CPS3-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-05",
+      "cardId": "PIN-CPS3-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-06",
+      "cardId": "PIN-CPS3-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-07",
+      "cardId": "PIN-CPS3-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-08",
+      "cardId": "PIN-CPS3-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-09",
+      "cardId": "PIN-CPS3-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-10",
+      "cardId": "PIN-CPS3-10",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-11",
+      "cardId": "PIN-CPS3-11",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS3-12",
+      "cardId": "PIN-CPS3-12",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-01",
+      "cardId": "PIN-CPS4-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-02",
+      "cardId": "PIN-CPS4-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-03",
+      "cardId": "PIN-CPS4-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-04",
+      "cardId": "PIN-CPS4-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-05",
+      "cardId": "PIN-CPS4-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-06",
+      "cardId": "PIN-CPS4-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-07",
+      "cardId": "PIN-CPS4-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-08",
+      "cardId": "PIN-CPS4-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-09",
+      "cardId": "PIN-CPS4-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-10",
+      "cardId": "PIN-CPS4-10",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-11",
+      "cardId": "PIN-CPS4-11",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-12",
+      "cardId": "PIN-CPS4-12",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CPS4-13",
+      "cardId": "PIN-CPS4-13",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-01",
+      "cardId": "PIN-KRO-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-02",
+      "cardId": "PIN-KRO-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-03",
+      "cardId": "PIN-KRO-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-04",
+      "cardId": "PIN-KRO-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-05",
+      "cardId": "PIN-KRO-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-06",
+      "cardId": "PIN-KRO-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-07",
+      "cardId": "PIN-KRO-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-08",
+      "cardId": "PIN-KRO-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-09",
+      "cardId": "PIN-KRO-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KRO-10",
+      "cardId": "PIN-KRO-10",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KROG-01",
+      "cardId": "PIN-KROG-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KROG-02",
+      "cardId": "PIN-KROG-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KROG-03",
+      "cardId": "PIN-KROG-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KROG-04",
+      "cardId": "PIN-KROG-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-KROG-05",
+      "cardId": "PIN-KROG-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-01",
+      "cardId": "PIN-CONV-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-02",
+      "cardId": "PIN-CONV-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-03",
+      "cardId": "PIN-CONV-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-04",
+      "cardId": "PIN-CONV-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-05",
+      "cardId": "PIN-CONV-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-06",
+      "cardId": "PIN-CONV-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-07",
+      "cardId": "PIN-CONV-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-08",
+      "cardId": "PIN-CONV-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CONV-09",
+      "cardId": "PIN-CONV-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-COSM-01",
+      "cardId": "PIN-COSM-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-COSM-02",
+      "cardId": "PIN-COSM-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-01",
+      "cardId": "PIN-CYTO-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-02",
+      "cardId": "PIN-CYTO-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-03",
+      "cardId": "PIN-CYTO-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-04",
+      "cardId": "PIN-CYTO-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-05",
+      "cardId": "PIN-CYTO-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-06",
+      "cardId": "PIN-CYTO-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-07",
+      "cardId": "PIN-CYTO-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-08",
+      "cardId": "PIN-CYTO-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTO-09",
+      "cardId": "PIN-CYTO-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-01",
+      "cardId": "PIN-CYTSS-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-02",
+      "cardId": "PIN-CYTSS-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-03",
+      "cardId": "PIN-CYTSS-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-04",
+      "cardId": "PIN-CYTSS-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-05",
+      "cardId": "PIN-CYTSS-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTSS-06",
+      "cardId": "PIN-CYTSS-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTDS-01",
+      "cardId": "PIN-CYTDS-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTDS-02",
+      "cardId": "PIN-CYTDS-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTDS-03",
+      "cardId": "PIN-CYTDS-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTDS-04",
+      "cardId": "PIN-CYTDS-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CYTDS-05",
+      "cardId": "PIN-CYTDS-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-01",
+      "cardId": "PIN-SHELF-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-02",
+      "cardId": "PIN-SHELF-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-03",
+      "cardId": "PIN-SHELF-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-04",
+      "cardId": "PIN-SHELF-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-05",
+      "cardId": "PIN-SHELF-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-06",
+      "cardId": "PIN-SHELF-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-07",
+      "cardId": "PIN-SHELF-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-08",
+      "cardId": "PIN-SHELF-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SHELF-09",
+      "cardId": "PIN-SHELF-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-01",
+      "cardId": "PIN-ROSH-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-02",
+      "cardId": "PIN-ROSH-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-03",
+      "cardId": "PIN-ROSH-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-04",
+      "cardId": "PIN-ROSH-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-05",
+      "cardId": "PIN-ROSH-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-06",
+      "cardId": "PIN-ROSH-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-07",
+      "cardId": "PIN-ROSH-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-ROSH-08",
+      "cardId": "PIN-ROSH-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-01",
+      "cardId": "PIN-LOGO-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-02",
+      "cardId": "PIN-LOGO-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-03",
+      "cardId": "PIN-LOGO-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-04",
+      "cardId": "PIN-LOGO-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-05",
+      "cardId": "PIN-LOGO-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-06",
+      "cardId": "PIN-LOGO-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-LOGO-07",
+      "cardId": "PIN-LOGO-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-WHOP-01",
+      "cardId": "PIN-WHOP-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-WHOP-02",
+      "cardId": "PIN-WHOP-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-WHOP-03",
+      "cardId": "PIN-WHOP-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-WHOP-04",
+      "cardId": "PIN-WHOP-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-MBWA-01",
+      "cardId": "PIN-MBWA-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-MBWA-02",
+      "cardId": "PIN-MBWA-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-MBWA-03",
+      "cardId": "PIN-MBWA-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-COSP-01",
+      "cardId": "PIN-COSP-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-COSP-02",
+      "cardId": "PIN-COSP-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SCAD-01",
+      "cardId": "PIN-SCAD-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SCAD-02",
+      "cardId": "PIN-SCAD-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SCENE-01",
+      "cardId": "PIN-SCENE-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-SCENE-02",
+      "cardId": "PIN-SCENE-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-RECK-01",
+      "cardId": "PIN-RECK-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-WHBALL-01",
+      "cardId": "PIN-WHBALL-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-CAMP-01",
+      "cardId": "PIN-CAMP-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-EVENT-01",
+      "cardId": "PIN-EVENT-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-EVENT-02",
+      "cardId": "PIN-EVENT-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-EVENT-03",
+      "cardId": "PIN-EVENT-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-EVENT-04",
+      "cardId": "PIN-EVENT-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-EVENT-05",
+      "cardId": "PIN-EVENT-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-01",
+      "cardId": "PIN-OTHER-01",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-02",
+      "cardId": "PIN-OTHER-02",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-03",
+      "cardId": "PIN-OTHER-03",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-04",
+      "cardId": "PIN-OTHER-04",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-05",
+      "cardId": "PIN-OTHER-05",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-06",
+      "cardId": "PIN-OTHER-06",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-07",
+      "cardId": "PIN-OTHER-07",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-08",
+      "cardId": "PIN-OTHER-08",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-09",
+      "cardId": "PIN-OTHER-09",
+      "finish": null
+    },
+    {
+      "skuId": "PIN-OTHER-10",
+      "cardId": "PIN-OTHER-10",
+      "finish": null
+    }
+  ]
+}
