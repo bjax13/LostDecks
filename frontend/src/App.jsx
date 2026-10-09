@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-do
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
 import { SITE_NAME } from "./brand.js";
 import FeedbackFab from "./components/FeedbackFab.jsx";
+import RouteErrorBoundary from "./components/RouteErrorBoundary.jsx";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
@@ -113,23 +114,25 @@ function App() {
       <PostHogPageviews />
       <MainNav />
       <hr />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/collectibles" element={<CollectiblesPage />} />
-        <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
-        <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
-        <Route path="/collections" element={<CollectionPage />} />
-        <Route path="/getting-started" element={<GettingStartedPage />} />
-        <Route path="/matches" element={<MatchesPage />} />
-        <Route path="/account" element={<AccountPage />} />
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/register" element={<Register />} />
-        <Route path="/auth/forgot" element={<ForgotPassword />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <RouteErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/collectibles" element={<CollectiblesPage />} />
+          <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
+          <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
+          <Route path="/collections" element={<CollectionPage />} />
+          <Route path="/getting-started" element={<GettingStartedPage />} />
+          <Route path="/matches" element={<MatchesPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/auth/login" element={<Login />} />
+          <Route path="/auth/register" element={<Register />} />
+          <Route path="/auth/forgot" element={<ForgotPassword />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </RouteErrorBoundary>
       <SiteFeedback />
       <FeedbackFab />
     </BrowserRouter>

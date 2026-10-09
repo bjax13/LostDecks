@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const initMock = vi.fn();
 const captureMock = vi.fn();
+const captureExceptionMock = vi.fn();
 const identifyMock = vi.fn();
 const resetMock = vi.fn();
 const displaySurveyMock = vi.fn();
@@ -13,6 +14,7 @@ vi.mock("posthog-js", () => ({
   default: {
     init: initMock,
     capture: captureMock,
+    captureException: captureExceptionMock,
     identify: identifyMock,
     reset: resetMock,
     displaySurvey: displaySurveyMock,
@@ -27,6 +29,7 @@ describe("posthog analytics", () => {
     vi.unstubAllEnvs();
     initMock.mockClear();
     captureMock.mockClear();
+    captureExceptionMock.mockClear();
     identifyMock.mockClear();
     resetMock.mockClear();
     displaySurveyMock.mockClear();
@@ -53,10 +56,28 @@ describe("posthog analytics", () => {
       expect.objectContaining({
         api_host: "https://us.i.posthog.com",
         capture_pageview: false,
+        capture_exceptions: true,
         disable_surveys_automatic_display: true,
         advanced_enable_surveys: true,
       }),
     );
+  });
+
+  it("captures exceptions only after init", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { initPostHog, capturePostHogException } = await import("./posthog.js");
+    const err = new Error("boom");
+    initPostHog();
+    capturePostHogException(err, { source: "test" });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog: init2, capturePostHogException: capture2 } = await import("./posthog.js");
+    init2();
+    capture2(err, { source: "test" });
+    expect(captureExceptionMock).toHaveBeenCalledWith(err, { source: "test" });
   });
 
   it("opens the configured feedback survey via displaySurvey", async () => {

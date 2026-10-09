@@ -28,6 +28,11 @@ vi.mock("./contexts/AuthModalContext.jsx", () => ({
   AuthModalProvider: ({ children }) => <div data-testid="auth-modal-provider">{children}</div>,
 }));
 
+vi.mock("./analytics/posthog.js", () => ({
+  initPostHog: vi.fn(),
+  capturePostHogException: vi.fn(),
+}));
+
 async function loadMain() {
   vi.resetModules();
   await import("./main.jsx");
@@ -44,12 +49,18 @@ describe("main.jsx (entry)", () => {
     mockRender.mockClear();
   });
 
-  it("creates a root on #root and renders the provider tree under StrictMode", async () => {
+  it("creates a root on #root with React error hooks and renders the provider tree", async () => {
     const rootEl = document.getElementById("root");
     await loadMain();
 
     expect(mockCreateRoot).toHaveBeenCalledTimes(1);
-    expect(mockCreateRoot).toHaveBeenCalledWith(rootEl);
+    expect(mockCreateRoot).toHaveBeenCalledWith(
+      rootEl,
+      expect.objectContaining({
+        onUncaughtError: expect.any(Function),
+        onCaughtError: expect.any(Function),
+      }),
+    );
     expect(mockRender).toHaveBeenCalledTimes(1);
 
     const tree = mockRender.mock.calls[0][0];
@@ -66,7 +77,13 @@ describe("main.jsx (entry)", () => {
     await loadMain();
 
     expect(getById).toHaveBeenCalledWith("root");
-    expect(mockCreateRoot).toHaveBeenCalledWith(document.getElementById("root"));
+    expect(mockCreateRoot).toHaveBeenCalledWith(
+      document.getElementById("root"),
+      expect.objectContaining({
+        onUncaughtError: expect.any(Function),
+        onCaughtError: expect.any(Function),
+      }),
+    );
     getById.mockRestore();
   });
 });
