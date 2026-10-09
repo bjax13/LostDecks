@@ -133,4 +133,23 @@ describe("posthog analytics", () => {
     reset2();
     expect(resetMock).toHaveBeenCalled();
   });
+
+  it("captures custom events only after init", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { initPostHog, captureEvent } = await import("./posthog.js");
+    initPostHog();
+    captureEvent("iso_uft_copied", { format: "shorthand" });
+    expect(captureMock).not.toHaveBeenCalled();
+
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog: init2, captureEvent: capture2 } = await import("./posthog.js");
+    init2();
+    capture2("iso_uft_copied", { format: "shorthand", includeLink: true });
+    expect(captureMock).toHaveBeenCalledWith("iso_uft_copied", {
+      format: "shorthand",
+      includeLink: true,
+    });
+  });
 });

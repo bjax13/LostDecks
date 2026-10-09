@@ -1,4 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  DEFAULT_MATCH_KEEP_BY_LANE,
+  subscribeUserPreferences,
+} from "../../../lib/userPreferences.js";
 import {
   applyBulkCollectionUpdate,
   createStoryDeckCollectionCsv,
@@ -68,6 +72,17 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
+  const [matchKeep, setMatchKeep] = useState(() => ({ ...DEFAULT_MATCH_KEEP_BY_LANE }));
+
+  useEffect(() => {
+    if (!ownerUid) {
+      setMatchKeep({ ...DEFAULT_MATCH_KEEP_BY_LANE });
+      return undefined;
+    }
+    return subscribeUserPreferences(ownerUid, (prefs) => {
+      setMatchKeep(prefs.matchKeep);
+    });
+  }, [ownerUid]);
   const [lastFileName, setLastFileName] = useState("");
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
@@ -292,6 +307,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         entries={existingEntries}
         onCopied={handlePostCopied}
         onCopyError={handlePostCopyError}
+        matchKeep={matchKeep}
       />
       <VisualBulkCollectionEditorModal
         isOpen={isVisualEditorOpen}

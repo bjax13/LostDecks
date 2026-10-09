@@ -1,5 +1,38 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildIsoUftPostTree, formatIsoUftPost, getDefaultExcludedIds } from "../utils/isoUftPost";
+import { captureEvent } from "../../../analytics/posthog.js";
+import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
+import {
+  buildIsoUftPostTree,
+  buildShareUrl,
+  formatIsoUftPost,
+  getDefaultExcludedIds,
+} from "../utils/isoUftPost";
+
+const PREFS_STORAGE_KEY = "isoUftPostPrefs";
+
+function readStoredPrefs() {
+  try {
+    const raw = localStorage.getItem(PREFS_STORAGE_KEY);
+    if (!raw) {
+      return { format: "shorthand", includeLink: true };
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      format: parsed.format === "classic" ? "classic" : "shorthand",
+      includeLink: parsed.includeLink !== false,
+    };
+  } catch {
+    return { format: "shorthand", includeLink: true };
+  }
+}
+
+function writeStoredPrefs(prefs) {
+  try {
+    localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(prefs));
+  } catch {
+    // Ignore quota / private-mode failures.
+  }
+}
 
 function getAllDescendantIds(node) {
   const ids = [];
@@ -132,18 +165,41 @@ async function copyTextToClipboard(text) {
   document.body.removeChild(textarea);
 }
 
-export default function IsoUftPostModal({ isOpen, onClose, entries, onCopied, onCopyError }) {
+export default function IsoUftPostModal({
+  isOpen,
+  onClose,
+  entries,
+  onCopied,
+  onCopyError,
+  matchKeep = DEFAULT_MATCH_KEEP_BY_LANE,
+  shareId = null,
+}) {
   const [excludedIds, setExcludedIds] = useState(() => new Set());
   const [collapsedIds, setCollapsedIds] = useState(() => new Set());
+  const [format, setFormat] = useState(() => readStoredPrefs().format);
+  const [includeLink, setIncludeLink] = useState(() => readStoredPrefs().includeLink);
 
-  const { tree, skippedEntries } = useMemo(() => buildIsoUftPostTree(entries ?? []), [entries]);
+  const { tree, skippedEntries } = useMemo(
+    () => buildIsoUftPostTree(entries ?? [], { matchKeep, format }),
+    [entries, matchKeep, format],
+  );
+
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
+      const prefs = readStoredPrefs();
+      setFormat(prefs.format);
+      setIncludeLink(prefs.includeLink);
       setExcludedIds(getDefaultExcludedIds());
       setCollapsedIds(getDefaultCollapsedIds(tree));
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, tree]);
+
+  useEffect(() => {
+    writeStoredPrefs({ format, includeLink });
+  }, [format, includeLink]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -160,7 +216,12 @@ export default function IsoUftPostModal({ isOpen, onClose, entries, onCopied, on
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  const previewText = useMemo(() => formatIsoUftPost(tree, excludedIds), [tree, excludedIds]);
+  const footerUrl = includeLink ? buildShareUrl({ shareId }) : null;
+
+  const previewText = useMemo(
+    () => formatIsoUftPost(tree, excludedIds, { format, footerUrl }),
+    [tree, excludedIds, format, footerUrl],
+  );
 
   const handleToggleCollapse = (nodeId) => {
     setCollapsedIds((prev) => {
@@ -200,6 +261,7 @@ export default function IsoUftPostModal({ isOpen, onClose, entries, onCopied, on
 
     try {
       await copyTextToClipboard(previewText);
+      captureEvent("iso_uft_copied", { format, includeLink });
       onCopied({ skippedEntries });
       onClose();
     } catch (err) {
@@ -236,6 +298,40 @@ export default function IsoUftPostModal({ isOpen, onClose, entries, onCopied, on
           <div className="collection-bulk-post-modal__header">
             <h2>ISO/UFT post preview</h2>
             <p>Select sections to include, then copy the formatted post to your clipboard.</p>
+          </div>
+
+          <div className="collection-bulk-post-modal__options">
+            <label className="collection-bulk-post-modal__option">
+              <input
+                type="checkbox"
+                checked={includeLink}
+                onChange={(event) => setIncludeLink(event.target.checked)}
+              />
+              <span>Include link to ShardStash</span>
+            </label>
+            <fieldset className="collection-bulk-post-modal__format">
+              <legend>Format</legend>
+              <label className="collection-bulk-post-modal__option">
+                <input
+                  type="radio"
+                  name="iso-uft-format"
+                  value="shorthand"
+                  checked={format === "shorthand"}
+                  onChange={() => setFormat("shorthand")}
+                />
+                <span>Community shorthand</span>
+              </label>
+              <label className="collection-bulk-post-modal__option">
+                <input
+                  type="radio"
+                  name="iso-uft-format"
+                  value="classic"
+                  checked={format === "classic"}
+                  onChange={() => setFormat("classic")}
+                />
+                <span>Classic</span>
+              </label>
+            </fieldset>
           </div>
 
           <div className="collection-bulk-post-modal__body">

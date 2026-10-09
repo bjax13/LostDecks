@@ -81,3 +81,10 @@ export function resetPostHogUser() {
   }
   posthog.reset();
 }
+
+export function captureEvent(eventName, properties = {}) {
+  if (!initialized || !eventName) {
+    return;
+  }
+  posthog.capture(eventName, properties);
+}
