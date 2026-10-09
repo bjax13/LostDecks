@@ -21,15 +21,19 @@ const collectiblesState = vi.hoisted(() => ({
   cardById: {},
 }));
 
-vi.mock("../../../data/collectibles", () => ({
-  get datasetSkus() {
-    return collectiblesState.skus;
-  },
-  get datasetStories() {
-    return collectiblesState.stories;
-  },
-  getCollectibleRecord: (cardId) => collectiblesState.cardById[cardId] ?? null,
-}));
+vi.mock("../../../data/collectibles", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    get datasetSkus() {
+      return collectiblesState.skus;
+    },
+    get datasetStories() {
+      return collectiblesState.stories;
+    },
+    getCollectibleRecord: (cardId) => collectiblesState.cardById[cardId] ?? null,
+  };
+});
 
 describe("BulkCollectionTools", () => {
   const ownerUid = "user-abc";
