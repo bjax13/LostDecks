@@ -26,6 +26,14 @@ test.describe("public routes (e2e)", () => {
     await expect(page.getByRole("contentinfo").getByRole("link", { name: "About" })).toBeVisible();
   });
 
+  test("missing public trade list shows unavailable state signed out", async ({ page }) => {
+    await page.goto("/t/does-not-exist");
+    await expect(page.getByRole("heading", { name: /isn't shared anymore/i })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /see if you can trade — add your cards or pins/i }),
+    ).toBeVisible();
+  });
+
   test("footer feedback modal shows shared email and Discord contacts", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("contentinfo").getByRole("button", { name: "Feedback" }).click();

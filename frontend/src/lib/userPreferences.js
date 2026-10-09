@@ -33,6 +33,8 @@ export const DEFAULT_MATCH_KEEP_BY_LANE = Object.freeze({
 
 export const MATCH_KEEP_OPTIONS = Object.freeze([1, 2, 3]);
 
+export const MAX_PUBLIC_SHARE_ID_LENGTH = 32;
+
 export const DEFAULT_USER_PREFERENCES = Object.freeze({
   matchingOptOut: false,
   matchLanes: DEFAULT_MATCH_LANES,
@@ -41,6 +43,7 @@ export const DEFAULT_USER_PREFERENCES = Object.freeze({
   tradingEmail: "",
   discordHandle: "",
   discordChannel: DEFAULT_DISCORD_CHANNEL,
+  publicShareId: "",
 });
 
 function normalizeOptionalString(value, maxLength) {
@@ -114,6 +117,7 @@ export function normalizeUserPreferences(data) {
     tradingEmail: normalizeOptionalString(data.tradingEmail, MAX_TRADING_EMAIL_LENGTH),
     discordHandle: normalizeOptionalString(data.discordHandle, MAX_DISCORD_HANDLE_LENGTH),
     discordChannel: discordChannel || DEFAULT_DISCORD_CHANNEL,
+    publicShareId: normalizeOptionalString(data.publicShareId, MAX_PUBLIC_SHARE_ID_LENGTH),
   };
 }
 

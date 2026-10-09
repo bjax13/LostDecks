@@ -32,6 +32,7 @@ describe("userPreferences normalization", () => {
       tradingEmail: "trade@example.com",
       discordHandle: "stormlight",
       discordChannel: "Cosmere Trades",
+      publicShareId: "",
     });
   });
 
@@ -49,7 +50,14 @@ describe("userPreferences normalization", () => {
       tradingEmail: "",
       discordHandle: "",
       discordChannel: DEFAULT_DISCORD_CHANNEL,
+      publicShareId: "",
     });
+  });
+
+  it("normalizes publicShareId", () => {
+    expect(normalizeUserPreferences({ publicShareId: "  Abc123XYZ999  " }).publicShareId).toBe(
+      "Abc123XYZ999",
+    );
   });
 
   it("defaults missing match keep to 1 and clamps values outside 1 to 3", () => {
