@@ -4,7 +4,42 @@ const key = import.meta.env.VITE_POSTHOG_KEY?.trim() ?? "";
 const host = import.meta.env.VITE_POSTHOG_HOST?.trim() || "https://us.i.posthog.com";
 const feedbackSurveyId = import.meta.env.VITE_POSTHOG_SURVEY_ID?.trim() ?? "";
 
+const POSTHOG_UID_KEY = "shardstash.posthogUid";
+
 let initialized = false;
+
+function readStoredPostHogUid() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+  try {
+    return window.localStorage.getItem(POSTHOG_UID_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredPostHogUid(uid) {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+  try {
+    window.localStorage.setItem(POSTHOG_UID_KEY, uid);
+  } catch {
+    // Ignore quota / private-mode failures; identify still runs.
+  }
+}
+
+function clearStoredPostHogUid() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+  try {
+    window.localStorage.removeItem(POSTHOG_UID_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+}
 
 export function isPostHogConfigured() {
   return Boolean(key);
@@ -62,18 +97,41 @@ export function capturePostHogPageView() {
   });
 }
 
+export function captureEvent(name, properties = {}) {
+  if (!initialized) {
+    return;
+  }
+  posthog.capture(name, properties);
+}
+
+export function resetPostHogUser() {
+  if (!initialized) {
+    clearStoredPostHogUid();
+    return;
+  }
+  posthog.reset();
+  clearStoredPostHogUid();
+}
+
 export function syncPostHogUser(firebaseUser) {
   if (!initialized) {
     return;
   }
-  if (firebaseUser?.uid) {
-    posthog.identify(firebaseUser.uid, {
-      email: firebaseUser.email ?? undefined,
-      name: firebaseUser.displayName ?? undefined,
-    });
-  } else {
+  if (!firebaseUser?.uid) {
+    // Keep the anonymous distinct id across signed-out page loads.
+    return;
+  }
+
+  const previousUid = readStoredPostHogUid();
+  if (previousUid && previousUid !== firebaseUser.uid) {
     posthog.reset();
   }
+
+  posthog.identify(firebaseUser.uid, {
+    email: firebaseUser.email ?? undefined,
+    name: firebaseUser.displayName ?? undefined,
+  });
+  writeStoredPostHogUid(firebaseUser.uid);
 }
 
 /** Reset PostHog identity after account deletion (or explicit sign-out flows that need it). */
