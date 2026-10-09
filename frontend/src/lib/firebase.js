@@ -1,4 +1,5 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
   browserLocalPersistence,
   connectAuthEmulator,
@@ -29,18 +30,36 @@ if (!hasFirebaseConfig) {
   );
 }
 
+const useEmulators = String(import.meta.env.VITE_USE_EMULATORS || "").toLowerCase() === "true";
+const appCheckSiteKey = import.meta.env.VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY?.trim() ?? "";
+
 const app = hasFirebaseConfig
   ? getApps().length
     ? getApp()
     : initializeApp(firebaseConfig)
   : null;
+
+let appCheck = null;
+if (app && (appCheckSiteKey || useEmulators)) {
+  try {
+    if (useEmulators) {
+      self.FIREBASE_APPCHECK_DEBUG_TOKEN = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
+    }
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey || "debug"),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (err) {
+    console.warn("Firebase App Check initialization skipped", err);
+    appCheck = null;
+  }
+}
+
 const auth = app ? getAuth(app) : null;
 const db = app ? getFirestore(app) : null;
 const functions = app ? getFunctions(app) : null;
 
 // --- Local Emulator support (Auth + Firestore + Functions) ---
-const useEmulators = String(import.meta.env.VITE_USE_EMULATORS || "").toLowerCase() === "true";
-
 if (useEmulators && auth && db && functions) {
   const authUrl = import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL || "http://127.0.0.1:9099";
   const fsHost = import.meta.env.VITE_FIRESTORE_EMULATOR_HOST || "127.0.0.1";
@@ -79,4 +98,4 @@ if (googleProvider) {
   googleProvider.setCustomParameters({ prompt: "select_account" });
 }
 
-export { app, auth, db, functions, googleProvider, hasFirebaseConfig };
+export { app, appCheck, auth, db, functions, googleProvider, hasFirebaseConfig };

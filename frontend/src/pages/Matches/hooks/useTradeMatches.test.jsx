@@ -288,6 +288,23 @@ describe("useTradeMatches cache + cooldown", () => {
     expect(readMatchesCache("uid-1")).toBeNull();
   });
 
+  it("surfaces a friendly message for resource-exhausted callable errors", async () => {
+    const rateLimitError = new Error("Too many requests");
+    rateLimitError.code = "functions/resource-exhausted";
+    fetchMock.mockRejectedValue(rateLimitError);
+
+    const { result } = renderHook(() => useTradeMatches("uid-1"));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error?.message).toBe(
+      "You're refreshing too fast, try again in a few seconds",
+    );
+    expect(readMatchesCache("uid-1")).toBeNull();
+  });
+
   it("syncs fresh cache updates from other tabs via storage events", async () => {
     const { result } = renderHook(() => useTradeMatches("uid-1"));
 

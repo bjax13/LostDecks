@@ -12,10 +12,16 @@ const {
   resolveMatchContact,
   resolvePublicDisplayName,
 } = require("./matches");
+const { enforceCallCooldown } = require("./rateLimit");
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
+const RUNNING_IN_EMULATOR = process.env.FUNCTIONS_EMULATOR === "true";
+// Ship with enforcement off until App Check metrics show ~100% verified requests.
+// Set ENFORCE_APP_CHECK=true in functions/.env.storydeck-16 and redeploy to flip.
+const ENFORCE_APP_CHECK = process.env.ENFORCE_APP_CHECK === "true" && !RUNNING_IN_EMULATOR;
 
 async function resolveAuthProfiles(userIds) {
   if (!userIds.length) {
@@ -63,83 +69,94 @@ function uidOrEmpty(value) {
   return typeof value === "string" ? value : "";
 }
 
-exports.getTradeMatches = onCall(async (request) => {
-  const callerUid = uidOrEmpty(request.auth?.uid);
-  if (!callerUid) {
-    throw new HttpsError("unauthenticated", "You must be signed in to view trade matches.");
-  }
+exports.getTradeMatches = onCall(
+  {
+    enforceAppCheck: ENFORCE_APP_CHECK,
+    maxInstances: 5,
+    timeoutSeconds: 60,
+    // Do not add concurrency > 1 without also setting cpu >= 1 (gen2 rejects it on small instances).
+  },
+  async (request) => {
+    const callerUid = uidOrEmpty(request.auth?.uid);
+    if (!callerUid) {
+      throw new HttpsError("unauthenticated", "You must be signed in to view trade matches.");
+    }
 
-  const pageSize = normalizeMatchPageSize(request.data?.pageSize, {
-    defaultSize: DEFAULT_MATCH_PAGE_SIZE,
-  });
-  const cursor = normalizeMatchCursor(request.data?.cursor);
+    console.info(request.app ? "appcheck:ok" : "appcheck:missing");
 
-  const db = admin.firestore();
-  const [collectionsSnapshot, optedOutSnapshot] = await Promise.all([
-    db.collection("collections").get(),
-    db.collection("userPreferences").where("matchingOptOut", "==", true).get(),
-  ]);
+    const pageSize = normalizeMatchPageSize(request.data?.pageSize, {
+      defaultSize: DEFAULT_MATCH_PAGE_SIZE,
+    });
+    const cursor = normalizeMatchCursor(request.data?.cursor);
 
-  const collectionDocs = collectionsSnapshot.docs.map((snapshot) => snapshot.data());
-  const userSkuTotals = buildUserSkuTotals(collectionDocs);
-  const optedOutUserIds = new Set(
-    optedOutSnapshot.docs.map((snapshot) => uidOrEmpty(snapshot.id)).filter(Boolean),
-  );
-  const preferenceUserIds = [callerUid, ...userSkuTotals.keys()];
-  const preferencesByUserId = await loadPreferencesByUserId(db, preferenceUserIds);
-  const lanePrefsByUserId = buildLanePrefsByUserId(preferencesByUserId);
-  const keepByUserId = buildKeepByUserId(preferencesByUserId);
+    const db = admin.firestore();
+    await enforceCallCooldown(db, callerUid);
+    const [collectionsSnapshot, optedOutSnapshot] = await Promise.all([
+      db.collection("collections").get(),
+      db.collection("userPreferences").where("matchingOptOut", "==", true).get(),
+    ]);
 
-  const { isCallerOptedOut, matches } = buildMatchesForCaller({
-    callerUid,
-    userSkuTotals,
-    optedOutUserIds,
-    lanePrefsByUserId,
-    keepByUserId,
-  });
+    const collectionDocs = collectionsSnapshot.docs.map((snapshot) => snapshot.data());
+    const userSkuTotals = buildUserSkuTotals(collectionDocs);
+    const optedOutUserIds = new Set(
+      optedOutSnapshot.docs.map((snapshot) => uidOrEmpty(snapshot.id)).filter(Boolean),
+    );
+    const preferenceUserIds = [callerUid, ...userSkuTotals.keys()];
+    const preferencesByUserId = await loadPreferencesByUserId(db, preferenceUserIds);
+    const lanePrefsByUserId = buildLanePrefsByUserId(preferencesByUserId);
+    const keepByUserId = buildKeepByUserId(preferencesByUserId);
 
-  if (isCallerOptedOut) {
-    return {
-      callerOptedOut: true,
-      matches: [],
-      pageSize,
-      nextCursor: null,
-      hasMore: false,
-      totalOnPage: 0,
-    };
-  }
+    const { isCallerOptedOut, matches } = buildMatchesForCaller({
+      callerUid,
+      userSkuTotals,
+      optedOutUserIds,
+      lanePrefsByUserId,
+      keepByUserId,
+    });
 
-  const page = paginateMatches(matches, { pageSize, cursor });
-  const counterpartyIds = page.matches.map((match) => match.userId);
-  const profilesByUserId = await resolveAuthProfiles(counterpartyIds);
+    if (isCallerOptedOut) {
+      return {
+        callerOptedOut: true,
+        matches: [],
+        pageSize,
+        nextCursor: null,
+        hasMore: false,
+        totalOnPage: 0,
+      };
+    }
 
-  const payload = page.matches.map((match) => {
-    const profile = profilesByUserId.get(match.userId) || {
-      displayName: match.userId,
-      email: "",
-    };
-    const contact = resolveMatchContact({
-      preferences: preferencesByUserId.get(match.userId) || {},
-      trueEmail: profile.email,
+    const page = paginateMatches(matches, { pageSize, cursor });
+    const counterpartyIds = page.matches.map((match) => match.userId);
+    const profilesByUserId = await resolveAuthProfiles(counterpartyIds);
+
+    const payload = page.matches.map((match) => {
+      const profile = profilesByUserId.get(match.userId) || {
+        displayName: match.userId,
+        email: "",
+      };
+      const contact = resolveMatchContact({
+        preferences: preferencesByUserId.get(match.userId) || {},
+        trueEmail: profile.email,
+      });
+
+      return {
+        userId: match.userId,
+        displayName: profile.displayName,
+        lanes: match.lanes,
+        contact,
+      };
     });
 
     return {
-      userId: match.userId,
-      displayName: profile.displayName,
-      lanes: match.lanes,
-      contact,
+      callerOptedOut: false,
+      matches: payload,
+      pageSize: page.pageSize,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      totalOnPage: page.totalOnPage,
     };
-  });
-
-  return {
-    callerOptedOut: false,
-    matches: payload,
-    pageSize: page.pageSize,
-    nextCursor: page.nextCursor,
-    hasMore: page.hasMore,
-    totalOnPage: page.totalOnPage,
-  };
-});
+  },
+);
 
 exports.__test = {
   loadPreferencesByUserId,

@@ -439,7 +439,11 @@ export function useTradeMatches(
         setNextCursor(null);
         setHasMore(false);
         setTotalOnPage(0);
-        setError(err);
+        const rateLimited =
+          err?.code === "functions/resource-exhausted" || err?.code === "resource-exhausted";
+        setError(
+          rateLimited ? new Error("You're refreshing too fast, try again in a few seconds") : err,
+        );
         setLoading(false);
       });
 

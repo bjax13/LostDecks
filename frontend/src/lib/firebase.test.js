@@ -5,12 +5,14 @@ const m = vi.hoisted(() => {
   const mockAuth = { _auth: true };
   const mockDb = { _db: true };
   const mockFunctions = { _fn: true };
+  const mockAppCheck = { _appCheck: true };
 
   return {
     mockApp,
     mockAuth,
     mockDb,
     mockFunctions,
+    mockAppCheck,
     initializeApp: vi.fn(() => mockApp),
     getApps: vi.fn(() => []),
     getApp: vi.fn(() => mockApp),
@@ -24,6 +26,10 @@ const m = vi.hoisted(() => {
     browserLocalPersistence: "LOCAL",
     GoogleAuthProvider: vi.fn(function GoogleAuthProvider() {
       this.setCustomParameters = vi.fn();
+    }),
+    initializeAppCheck: vi.fn(() => mockAppCheck),
+    ReCaptchaEnterpriseProvider: vi.fn(function ReCaptchaEnterpriseProvider(siteKey) {
+      this.siteKey = siteKey;
     }),
   };
 });
@@ -52,6 +58,11 @@ vi.mock("firebase/functions", () => ({
   getFunctions: m.getFunctions,
 }));
 
+vi.mock("firebase/app-check", () => ({
+  initializeAppCheck: m.initializeAppCheck,
+  ReCaptchaEnterpriseProvider: m.ReCaptchaEnterpriseProvider,
+}));
+
 function stubValidFirebaseEnv() {
   vi.stubEnv("VITE_FIREBASE_API_KEY", "key");
   vi.stubEnv("VITE_FIREBASE_AUTH_DOMAIN", "example.test");
@@ -77,6 +88,8 @@ function clearFirebaseEnv() {
     "VITE_FIRESTORE_EMULATOR_PORT",
     "VITE_FUNCTIONS_EMULATOR_HOST",
     "VITE_FUNCTIONS_EMULATOR_PORT",
+    "VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY",
+    "VITE_APPCHECK_DEBUG_TOKEN",
   ]) {
     vi.stubEnv(key, "");
   }
@@ -110,6 +123,9 @@ describe("firebase module", () => {
     m.getFunctions.mockClear().mockImplementation(() => m.mockFunctions);
     m.setPersistence.mockClear().mockImplementation(() => Promise.resolve());
     m.GoogleAuthProvider.mockClear();
+    m.initializeAppCheck.mockClear().mockImplementation(() => m.mockAppCheck);
+    m.ReCaptchaEnterpriseProvider.mockClear();
+    delete self.FIREBASE_APPCHECK_DEBUG_TOKEN;
   });
 
   afterEach(() => {
@@ -281,5 +297,62 @@ describe("firebase module", () => {
 
     const googleInstance = m.GoogleAuthProvider.mock.results[0]?.value;
     expect(googleInstance?.setCustomParameters).toHaveBeenCalledWith({ prompt: "select_account" });
+  });
+
+  it("skips App Check when no site key and not using emulators", async () => {
+    stubValidFirebaseEnv();
+    vi.stubEnv("VITE_USE_EMULATORS", "false");
+    vi.stubEnv("VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY", "");
+
+    const mod = await import("./firebase.js");
+
+    expect(m.initializeAppCheck).not.toHaveBeenCalled();
+    expect(mod.appCheck).toBeNull();
+  });
+
+  it("initializes App Check with the configured site key", async () => {
+    stubValidFirebaseEnv();
+    vi.stubEnv("VITE_USE_EMULATORS", "false");
+    vi.stubEnv("VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY", "site-key-abc");
+
+    const mod = await import("./firebase.js");
+
+    expect(m.ReCaptchaEnterpriseProvider).toHaveBeenCalledWith("site-key-abc");
+    expect(m.initializeAppCheck).toHaveBeenCalledWith(m.mockApp, {
+      provider: expect.objectContaining({ siteKey: "site-key-abc" }),
+      isTokenAutoRefreshEnabled: true,
+    });
+    expect(mod.appCheck).toBe(m.mockAppCheck);
+    expect(self.FIREBASE_APPCHECK_DEBUG_TOKEN).toBeUndefined();
+  });
+
+  it("sets App Check debug token when using emulators", async () => {
+    stubValidFirebaseEnv();
+    vi.stubEnv("VITE_USE_EMULATORS", "true");
+    vi.stubEnv("VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY", "");
+    vi.stubEnv("VITE_APPCHECK_DEBUG_TOKEN", "debug-token-xyz");
+
+    const mod = await import("./firebase.js");
+
+    expect(self.FIREBASE_APPCHECK_DEBUG_TOKEN).toBe("debug-token-xyz");
+    expect(m.ReCaptchaEnterpriseProvider).toHaveBeenCalledWith("debug");
+    expect(m.initializeAppCheck).toHaveBeenCalled();
+    expect(mod.appCheck).toBe(m.mockAppCheck);
+  });
+
+  it("warns and continues when App Check initialization throws", async () => {
+    stubValidFirebaseEnv();
+    vi.stubEnv("VITE_USE_EMULATORS", "false");
+    vi.stubEnv("VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY", "site-key-abc");
+    const err = new Error("app check blocked");
+    m.initializeAppCheck.mockImplementation(() => {
+      throw err;
+    });
+
+    const mod = await import("./firebase.js");
+
+    expect(warnSpy).toHaveBeenCalledWith("Firebase App Check initialization skipped", err);
+    expect(mod.appCheck).toBeNull();
+    expect(mod.app).toBe(m.mockApp);
   });
 });
