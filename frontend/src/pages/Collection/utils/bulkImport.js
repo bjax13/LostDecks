@@ -1,5 +1,9 @@
 import { collection, doc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { datasetSkus, getSkuRecord, toSkuId } from "../../../data/collectibles";
+import {
+  MAX_COLLECTION_NOTES_LENGTH,
+  MAX_COLLECTION_QUANTITY,
+} from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
 
 const csvHeaders = ["skuId", "quantity", "notes"];
@@ -336,6 +340,14 @@ export async function applyBulkCollectionUpdate({
     }
 
     const normalizedQuantity = Math.max(0, Math.round(quantityNumber));
+    if (normalizedQuantity > MAX_COLLECTION_QUANTITY) {
+      issues.push({
+        line,
+        message: `Quantity ${normalizedQuantity} exceeds the maximum of ${MAX_COLLECTION_QUANTITY}.`,
+      });
+      return;
+    }
+
     const existingGroup = existingBySku.get(skuId);
     const existingDocs = existingGroup?.docs ?? [];
 
@@ -359,7 +371,7 @@ export async function applyBulkCollectionUpdate({
       updatedAt: serverTimestamp(),
     };
     if (typeof row.notes === "string" && row.notes.trim().length > 0) {
-      payload.notes = row.notes.trim();
+      payload.notes = row.notes.trim().slice(0, MAX_COLLECTION_NOTES_LENGTH);
     }
 
     operations.push({ type: "set", ref: docRef, data: payload, merge: true });

@@ -5,13 +5,37 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function validSkuId(v) {
+      return v is string && v.size() <= 64
+        && v.matches('^(LT[0-9]{2}-(ELS|LOP|CHM|HLD)-[0-9]{2}-(DUN|FOIL)|LT[0-9]{2}-NS-(ELS|LOP|CHM)-[0-9]{2}-(DUN|FOIL)(-[A-Z]+)?|PIN-[A-Z]{2}-[0-9]{2})$');
+    }
+    function validQuantity(v) { return v is int && v >= 0 && v <= 999; }
+    function validNotes(d) { return !("notes" in d) || (d.notes is string && d.notes.size() <= 500); }
+    function validCollectionEntry(d) {
+      return d.keys().hasOnly(["ownerUid", "skuId", "quantity", "updatedAt", "notes"])
+        && d.keys().hasAll(["ownerUid", "skuId", "quantity", "updatedAt"])
+        && d.ownerUid is string
+        && validSkuId(d.skuId)
+        && validQuantity(d.quantity)
+        && d.updatedAt is timestamp
+        && validNotes(d);
+    }
+
     // Collections collection - user's card collection entries
     match /collections/{entryId} {
       allow read: if signedIn() && request.auth.uid == resource.data.ownerUid;
-      allow create: if signedIn() && request.auth.uid == request.resource.data.ownerUid;
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.ownerUid
+        && validCollectionEntry(request.resource.data);
       allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
-        && request.auth.uid == request.resource.data.ownerUid;
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.skuId == resource.data.skuId
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(["quantity", "updatedAt", "notes", "skuId", "ownerUid"])
+        && validQuantity(request.resource.data.quantity)
+        && request.resource.data.updatedAt is timestamp
+        && validNotes(request.resource.data);
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
