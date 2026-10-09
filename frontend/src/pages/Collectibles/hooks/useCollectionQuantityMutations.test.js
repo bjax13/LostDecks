@@ -32,6 +32,11 @@ vi.mock("../../../contexts/AuthContext", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+const mockCaptureEvent = vi.fn();
+vi.mock("../../../analytics/posthog.js", () => ({
+  captureEvent: (...args) => mockCaptureEvent(...args),
+}));
+
 const mockResolveSkuId = vi.fn((card, finish) => {
   if (!card?.id) return null;
   if (card.collectibleType === "pin" || card.category === "pin") return card.id;
@@ -79,6 +84,60 @@ describe("useCollectionQuantityMutations", () => {
     expect(typeof result.current.decrementFromCollection).toBe("function");
     expect(typeof result.current.removeFromCollection).toBe("function");
     expect(typeof result.current.purgeZeroQuantityEntries).toBe("function");
+  });
+
+  describe("addToCollection", () => {
+    it("creates a new entry and captures item_added", async () => {
+      mockGetDocs.mockResolvedValueOnce(makeExistingDocs([]));
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.addToCollection({
+          card,
+          finish: "DUN",
+          quantity: 2,
+        });
+      });
+
+      expect(mockAddDoc).toHaveBeenCalled();
+      expect(payload).toEqual(
+        expect.objectContaining({
+          skuId: "LT24-ELS-01-DUN",
+          quantity: 2,
+        }),
+      );
+      expect(mockCaptureEvent).toHaveBeenCalledWith("item_added", {
+        skuId: "LT24-ELS-01-DUN",
+        quantity: 2,
+        source: "collectibles",
+      });
+    });
+
+    it("increments an existing entry and captures the added quantity", async () => {
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "existing-1", data: { quantity: 3 } }]),
+      );
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      await act(async () => {
+        await result.current.addToCollection({
+          card,
+          finish: "DUN",
+          quantity: 1,
+        });
+      });
+
+      expect(mockUpdateDoc).toHaveBeenCalledWith(
+        { id: "existing-1" },
+        expect.objectContaining({ quantity: 4 }),
+      );
+      expect(mockCaptureEvent).toHaveBeenCalledWith("item_added", {
+        skuId: "LT24-ELS-01-DUN",
+        quantity: 1,
+        source: "collectibles",
+      });
+    });
   });
 
   describe("decrementFromCollection", () => {
