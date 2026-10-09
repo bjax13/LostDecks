@@ -239,6 +239,23 @@ body {
   gap: 1rem;
 }
 
+.signup-consent {
+  margin: 0;
+  color: rgba(224, 224, 224, 0.8);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.signup-consent__link {
+  color: #cfa8ff;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.signup-consent__link:hover {
+  color: #ffffff;
+}
+
 .auth-page__links a {
   color: #cfa8ff;
   text-decoration: underline;

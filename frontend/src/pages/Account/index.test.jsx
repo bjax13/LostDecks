@@ -2,10 +2,15 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
+import { TestMemoryRouter } from "../../test/router.jsx";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
 const mockUpdateUserPreferences = vi.hoisted(() => vi.fn());
+const mockHttpsCallable = vi.hoisted(() => vi.fn());
+const mockDeleteMyAccount = vi.hoisted(() => vi.fn());
+const mockResetPostHogUser = vi.hoisted(() => vi.fn());
+const mockLogout = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
@@ -16,6 +21,18 @@ vi.mock("../../components/Auth/AuthGuard", () => ({
     const { loading } = mockUseAuth();
     return loading ? fallback : children;
   },
+}));
+
+vi.mock("firebase/functions", () => ({
+  httpsCallable: mockHttpsCallable,
+}));
+
+vi.mock("../../lib/firebase", () => ({
+  functions: {},
+}));
+
+vi.mock("../../analytics/posthog.js", () => ({
+  resetPostHogUser: mockResetPostHogUser,
 }));
 
 vi.mock("../../lib/userPreferences", () => ({
@@ -60,18 +77,26 @@ const MOCK_USER = {
 
 const mockUpdateDisplayName = vi.hoisted(() => vi.fn());
 
-function renderAccountPage() {
-  return render(<AccountPage />);
+function renderAccountPage(initialEntries = ["/account"]) {
+  return render(
+    <TestMemoryRouter initialEntries={initialEntries}>
+      <AccountPage />
+    </TestMemoryRouter>,
+  );
 }
 
 describe("AccountPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUpdateDisplayName.mockResolvedValue(undefined);
+    mockLogout.mockResolvedValue(undefined);
+    mockDeleteMyAccount.mockResolvedValue({ data: { deleted: true } });
+    mockHttpsCallable.mockReturnValue(mockDeleteMyAccount);
     mockUseAuth.mockReturnValue({
       user: MOCK_USER,
       loading: false,
       updateDisplayName: mockUpdateDisplayName,
+      logout: mockLogout,
     });
     mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
       onNext({
@@ -578,5 +603,43 @@ describe("AccountPage", () => {
       discordHandle: "",
       matchContactSharing: "trueEmail",
     });
+  });
+
+  it("deletes the account after typing DELETE and calls the callable", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    expect(screen.getByRole("heading", { name: "Danger zone" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Delete my account" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Delete your account?" });
+    const confirmInput = within(dialog).getByLabelText("Type DELETE to confirm");
+    const confirmButton = within(dialog).getByRole("button", { name: "Delete my account" });
+    expect(confirmButton).toBeDisabled();
+
+    await user.type(confirmInput, "DELETE");
+    expect(confirmButton).toBeEnabled();
+    await user.click(confirmButton);
+
+    expect(mockHttpsCallable).toHaveBeenCalledWith({}, "deleteMyAccount");
+    expect(mockDeleteMyAccount).toHaveBeenCalledWith({ confirm: "DELETE" });
+    expect(mockResetPostHogUser).toHaveBeenCalled();
+    expect(mockLogout).toHaveBeenCalled();
+  });
+
+  it("shows an inline error when account deletion fails", async () => {
+    const user = userEvent.setup();
+    mockDeleteMyAccount.mockRejectedValueOnce(new Error("Nope"));
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    renderAccountPage();
+
+    await user.click(screen.getByRole("button", { name: "Delete my account" }));
+    const dialog = screen.getByRole("dialog", { name: "Delete your account?" });
+    await user.type(within(dialog).getByLabelText("Type DELETE to confirm"), "DELETE");
+    await user.click(within(dialog).getByRole("button", { name: "Delete my account" }));
+
+    expect(within(dialog).getByText("Nope")).toBeInTheDocument();
+    expect(mockLogout).not.toHaveBeenCalled();
+    errSpy.mockRestore();
   });
 });

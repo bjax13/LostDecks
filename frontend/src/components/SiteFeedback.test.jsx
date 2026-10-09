@@ -19,7 +19,7 @@ function renderFooter() {
 }
 
 describe("SiteFeedback", () => {
-  it("shows a document-end footer with About and Feedback without opening the panel", () => {
+  it("shows a document-end footer with About, Privacy, Terms, and Feedback without opening the panel", () => {
     renderFooter();
 
     const footer = screen.getByRole("contentinfo");
@@ -27,6 +27,8 @@ describe("SiteFeedback", () => {
     expect(window.getComputedStyle(footer).position).not.toBe("fixed");
     expect(window.getComputedStyle(footer).position).not.toBe("sticky");
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+    expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Send site feedback" })).not.toBeInTheDocument();
   });

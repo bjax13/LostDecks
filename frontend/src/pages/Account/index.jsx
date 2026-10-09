@@ -1,7 +1,11 @@
+import { httpsCallable } from "firebase/functions";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { resetPostHogUser } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
+import { functions } from "../../lib/firebase";
 import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
 import {
   DEFAULT_DISCORD_CHANNEL,
@@ -21,7 +25,8 @@ import { matchLaneLabels } from "../Matches/constants";
 import "./Account.css";
 
 function AccountPage() {
-  const { user, updateDisplayName } = useAuth();
+  const { user, updateDisplayName, logout } = useAuth();
+  const navigate = useNavigate();
   const [matchingOptOut, setMatchingOptOut] = useState(DEFAULT_USER_PREFERENCES.matchingOptOut);
   const [matchLanes, setMatchLanes] = useState(() => ({
     ...DEFAULT_USER_PREFERENCES.matchLanes,
@@ -47,6 +52,10 @@ function AccountPage() {
   const [discordError, setDiscordError] = useState(null);
   const [contactSharingError, setContactSharingError] = useState(null);
   const [contactSharingResetKey, setContactSharingResetKey] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
     if (!user?.uid) {
@@ -314,6 +323,59 @@ function AccountPage() {
     await persistPreferences({ discordChannel: nextChannel });
   };
 
+  const openDeleteDialog = () => {
+    setDeleteConfirmText("");
+    setDeleteError(null);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteSubmitting) {
+      return;
+    }
+    setDeleteDialogOpen(false);
+    setDeleteConfirmText("");
+    setDeleteError(null);
+  };
+
+  const handleDeleteAccount = async (event) => {
+    event.preventDefault();
+    if (deleteConfirmText !== "DELETE") {
+      setDeleteError(new Error("Type DELETE to confirm."));
+      return;
+    }
+    if (!functions) {
+      setDeleteError(
+        new Error(
+          "Account deletion is unavailable because Firebase is not configured in this environment.",
+        ),
+      );
+      return;
+    }
+
+    setDeleteSubmitting(true);
+    setDeleteError(null);
+
+    try {
+      const deleteMyAccount = httpsCallable(functions, "deleteMyAccount");
+      await deleteMyAccount({ confirm: "DELETE" });
+      resetPostHogUser();
+      navigate("/", {
+        replace: true,
+        state: { flash: "Your account was deleted" },
+      });
+      try {
+        await logout();
+      } catch {
+        // Auth user is already gone server-side.
+      }
+    } catch (err) {
+      console.error("Failed to delete account", err);
+      setDeleteError(err);
+      setDeleteSubmitting(false);
+    }
+  };
+
   const controlsDisabled = preferencesLoading;
 
   return (
@@ -558,6 +620,71 @@ function AccountPage() {
             {preferencesSaving ? <p className="account-status">Saving preference…</p> : null}
             {preferencesError ? (
               <p className="account-error">Could not update preferences. Please try again.</p>
+            ) : null}
+          </section>
+        ) : null}
+
+        {user ? (
+          <section className="account-section account-section--danger">
+            <h2>Danger zone</h2>
+            <p className="account-hint">
+              Permanently delete your account, collection data, and match preferences. This cannot
+              be undone.
+            </p>
+            <button type="button" className="account-danger-button" onClick={openDeleteDialog}>
+              Delete my account
+            </button>
+            {deleteDialogOpen ? (
+              // biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismisses on pointer click
+              // biome-ignore lint/a11y/useKeyWithClickEvents: Escape is not required; Cancel closes
+              <div className="account-delete-modal__backdrop" onClick={closeDeleteDialog}>
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: click only stops backdrop dismiss */}
+                <div
+                  className="account-delete-modal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="account-delete-title"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <h3 id="account-delete-title">Delete your account?</h3>
+                  <p className="account-hint">
+                    Type <strong>DELETE</strong> to confirm. Your Auth user and Firestore data for
+                    this account will be removed.
+                  </p>
+                  <form className="account-delete-form" onSubmit={handleDeleteAccount}>
+                    <label>
+                      <span className="visually-hidden">Type DELETE to confirm</span>
+                      <input
+                        type="text"
+                        name="confirmDelete"
+                        autoComplete="off"
+                        value={deleteConfirmText}
+                        onChange={(event) => setDeleteConfirmText(event.target.value)}
+                        placeholder="DELETE"
+                        disabled={deleteSubmitting}
+                        aria-label="Type DELETE to confirm"
+                      />
+                    </label>
+                    <div className="account-delete-actions">
+                      <button type="button" onClick={closeDeleteDialog} disabled={deleteSubmitting}>
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="account-danger-button"
+                        disabled={deleteSubmitting || deleteConfirmText !== "DELETE"}
+                      >
+                        {deleteSubmitting ? "Deleting…" : "Delete my account"}
+                      </button>
+                    </div>
+                  </form>
+                  {deleteError ? (
+                    <p className="account-error">
+                      {deleteError.message || "Could not delete account. Please try again."}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             ) : null}
           </section>
         ) : null}

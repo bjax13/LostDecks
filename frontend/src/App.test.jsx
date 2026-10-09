@@ -39,6 +39,8 @@ describe("App (integration)", () => {
     expect(window.getComputedStyle(footer).position).not.toBe("fixed");
     expect(window.getComputedStyle(footer).position).not.toBe("sticky");
     expect(screen.getByRole("link", { name: "About" })).toHaveAttribute("href", "/about");
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+    expect(screen.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
     expect(screen.getByRole("button", { name: "Feedback" })).toBeInTheDocument();
   });
 

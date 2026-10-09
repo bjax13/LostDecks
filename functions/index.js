@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
+const { deleteMyAccount, __test: deleteAccountTest } = require("./deleteAccount");
 const {
   buildKeepByUserId,
   buildLanePrefsByUserId,
@@ -158,8 +159,11 @@ exports.getTradeMatches = onCall(
   },
 );
 
+exports.deleteMyAccount = deleteMyAccount;
+
 exports.__test = {
   loadPreferencesByUserId,
   resolveAuthProfiles,
   resolveMatchContact,
+  ...deleteAccountTest,
 };

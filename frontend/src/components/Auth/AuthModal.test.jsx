@@ -33,7 +33,11 @@ function renderModal(props = {}) {
   const onClose = props.onClose ?? vi.fn();
   return {
     onClose,
-    ...render(<AuthModal isOpen={props.isOpen ?? true} onClose={onClose} />),
+    ...render(
+      <TestMemoryRouter>
+        <AuthModal isOpen={props.isOpen ?? true} onClose={onClose} />
+      </TestMemoryRouter>,
+    ),
   };
 }
 
@@ -53,16 +57,28 @@ describe("AuthModal (unit)", () => {
   });
 
   it("renders nothing when closed", () => {
-    render(<AuthModal isOpen={false} onClose={vi.fn()} />);
+    render(
+      <TestMemoryRouter>
+        <AuthModal isOpen={false} onClose={vi.fn()} />
+      </TestMemoryRouter>,
+    );
     expect(document.querySelector(".auth-modal__backdrop")).not.toBeInTheDocument();
   });
 
   it("calls clearError when isOpen becomes false", () => {
     const onClose = vi.fn();
-    const { rerender } = render(<AuthModal isOpen onClose={onClose} />);
+    const { rerender } = render(
+      <TestMemoryRouter>
+        <AuthModal isOpen onClose={onClose} />
+      </TestMemoryRouter>,
+    );
     expect(screen.getByRole("heading", { name: "Sign In" })).toBeInTheDocument();
     mockClearError.mockClear();
-    rerender(<AuthModal isOpen={false} onClose={onClose} />);
+    rerender(
+      <TestMemoryRouter>
+        <AuthModal isOpen={false} onClose={onClose} />
+      </TestMemoryRouter>,
+    );
     expect(mockClearError).toHaveBeenCalled();
   });
 
@@ -122,6 +138,19 @@ describe("AuthModal (unit)", () => {
     expect(screen.getByLabelText(/^Display Name$/i)).toBeInTheDocument();
     const password = screen.getByLabelText(/^Password$/i);
     expect(password).toHaveAttribute("autocomplete", "new-password");
+  });
+
+  it("shows Terms and Privacy Policy consent links in register mode", async () => {
+    const { onClose } = renderModal();
+    await user.click(screen.getByRole("button", { name: /Need an account/i }));
+    const termsLinks = screen.getAllByRole("link", { name: "Terms" });
+    const privacyLinks = screen.getAllByRole("link", { name: "Privacy Policy" });
+    expect(termsLinks.length).toBeGreaterThanOrEqual(1);
+    expect(privacyLinks.length).toBeGreaterThanOrEqual(1);
+    expect(termsLinks[0]).toHaveAttribute("href", "/terms");
+    expect(privacyLinks[0]).toHaveAttribute("href", "/privacy");
+    await user.click(termsLinks[0]);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("switches from register back to login via switcher", async () => {

@@ -119,4 +119,20 @@ describe("posthog analytics", () => {
     syncPostHogUser(null);
     expect(resetMock).toHaveBeenCalled();
   });
+
+  it("resetPostHogUser calls reset after init and no-ops before", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { initPostHog, resetPostHogUser } = await import("./posthog.js");
+    initPostHog();
+    resetPostHogUser();
+    expect(resetMock).not.toHaveBeenCalled();
+
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog: init2, resetPostHogUser: reset2 } = await import("./posthog.js");
+    init2();
+    reset2();
+    expect(resetMock).toHaveBeenCalled();
+  });
 });

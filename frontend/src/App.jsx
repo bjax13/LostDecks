@@ -16,6 +16,8 @@ import CollectiblesPage from "./pages/Collectibles";
 import CollectionPage from "./pages/Collection";
 import GettingStartedPage from "./pages/GettingStarted";
 import Home from "./pages/Home";
+import PrivacyPolicy from "./pages/Legal/PrivacyPolicy.jsx";
+import Terms from "./pages/Legal/Terms.jsx";
 import MatchesPage from "./pages/Matches";
 import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
@@ -124,6 +126,8 @@ function App() {
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/forgot" element={<ForgotPassword />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <SiteFeedback />

@@ -32,6 +32,12 @@ export default function SiteFeedback() {
       <Link to="/about" className="site-footer__link">
         About
       </Link>
+      <Link to="/privacy" className="site-footer__link">
+        Privacy
+      </Link>
+      <Link to="/terms" className="site-footer__link">
+        Terms
+      </Link>
       <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
         Feedback
       </button>
