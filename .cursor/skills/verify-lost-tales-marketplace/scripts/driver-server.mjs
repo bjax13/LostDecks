@@ -117,7 +117,16 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    const loc = locatorFor(cmd);
+    const options = {};
+    // Getting Started radios overlay the input with visible label text; force-click the control.
+    if (cmd.force === true || cmd.role === "radio") {
+      options.force = true;
+    }
+    if (cmd.timeout != null) {
+      options.timeout = Number(cmd.timeout);
+    }
+    await loc.click(options);
     return pageInfo();
   }
   if (action === "fill") {
@@ -144,7 +153,11 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "expect") {
-    await locatorFor(cmd).waitFor({ state: cmd.state || "visible" });
+    const waitOptions = { state: cmd.state || "visible" };
+    if (cmd.timeout != null) {
+      waitOptions.timeout = Number(cmd.timeout);
+    }
+    await locatorFor(cmd).waitFor(waitOptions);
     return pageInfo();
   }
   if (action === "expect-url") {
