@@ -288,6 +288,24 @@ body {
   background: rgba(138, 43, 226, 0.35);
 }
 
+.social-login-buttons--primary .social-login-buttons__group button {
+  width: 100%;
+  border: none;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  font-weight: 600;
+}
+
+.social-login-buttons--primary .social-login-buttons__group button:hover {
+  background: linear-gradient(135deg, #7b24cb 0%, #c964c5 100%);
+}
+
+.auth-modal__divider {
+  margin: 0;
+  text-align: center;
+  color: rgba(224, 224, 224, 0.65);
+  font-size: 0.85rem;
+}
+
 .auth-modal__backdrop {
   position: fixed;
   inset: 0;

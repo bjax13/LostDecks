@@ -12,7 +12,13 @@ vi.mock("./contexts/AuthContext", () => ({
 
 // Home (and other routes) still call useAuthModal; MainNav no longer does.
 vi.mock("./contexts/AuthModalContext.jsx", () => ({
+  AuthModalProvider: ({ children }) => children,
   useAuthModal: mockUseAuthModal,
+}));
+
+vi.mock("./hooks/useApplyPendingPicks.js", () => ({
+  PendingPicksApplier: () => null,
+  useApplyPendingPicks: () => {},
 }));
 
 describe("App (hook mocks)", () => {

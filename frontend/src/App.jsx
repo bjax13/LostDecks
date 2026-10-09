@@ -6,6 +6,8 @@ import FeedbackFab from "./components/FeedbackFab.jsx";
 import RouteErrorBoundary from "./components/RouteErrorBoundary.jsx";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
+import { AuthModalProvider } from "./contexts/AuthModalContext.jsx";
+import { PendingPicksApplier } from "./hooks/useApplyPendingPicks.js";
 import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
 import AdminPage from "./pages/Admin";
@@ -106,32 +108,36 @@ function MainNav() {
 function App() {
   return (
     <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
-      <PostHogPageviews />
-      <MainNav />
-      <hr />
-      <RouteErrorBoundary>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/collectibles" element={<CollectiblesPage />} />
-          <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
-          <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
-          <Route path="/collections" element={<CollectionPage />} />
-          <Route path="/getting-started" element={<GettingStartedPage />} />
-          <Route path="/matches" element={<MatchesPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:uid" element={<AdminPage />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forgot" element={<ForgotPassword />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </RouteErrorBoundary>
-      <SiteFeedback />
-      <FeedbackFab />
+      {/* AuthModal (SignupConsent Links) must render inside the router. */}
+      <AuthModalProvider>
+        <PostHogPageviews />
+        <PendingPicksApplier />
+        <MainNav />
+        <hr />
+        <RouteErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/collectibles" element={<CollectiblesPage />} />
+            <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
+            <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
+            <Route path="/collections" element={<CollectionPage />} />
+            <Route path="/getting-started" element={<GettingStartedPage />} />
+            <Route path="/matches" element={<MatchesPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/:uid" element={<AdminPage />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth/forgot" element={<ForgotPassword />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </RouteErrorBoundary>
+        <SiteFeedback />
+        <FeedbackFab />
+      </AuthModalProvider>
     </BrowserRouter>
   );
 }

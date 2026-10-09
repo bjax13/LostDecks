@@ -106,6 +106,12 @@ describe("Register (unit)", () => {
     });
   });
 
+  it("preserves redirect query when linking to login", () => {
+    renderRegister("/auth/register?redirect=/matches");
+    const signIn = screen.getByRole("link", { name: /Already have an account/i });
+    expect(signIn).toHaveAttribute("href", "/auth/login?redirect=/matches");
+  });
+
   it("navigates to home after successful Google registration sign-in", async () => {
     renderRegister();
     await user.click(screen.getByRole("button", { name: "Google" }));

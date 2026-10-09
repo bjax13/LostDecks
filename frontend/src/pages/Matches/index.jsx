@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { MATCHES_VIEWED } from "../../analytics/events.js";
 import { captureEvent } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
@@ -6,7 +7,11 @@ import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
-import { isValidTradingEmail, MATCH_CONTACT_SHARING } from "../../lib/userPreferences";
+import {
+  isValidTradingEmail,
+  MATCH_CONTACT_SHARING,
+  subscribeUserPreferences,
+} from "../../lib/userPreferences";
 import MatchesToolbar from "./components/MatchesToolbar";
 import { matchLaneLabels } from "./constants";
 import { useMatchesExplorer } from "./hooks/useMatchesExplorer";
@@ -179,7 +184,10 @@ function formatFreshnessMessage({
 
 function MatchesContent() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [showMayRefreshMessage, setShowMayRefreshMessage] = useState(false);
+  const [pinsLaneEnabled, setPinsLaneEnabled] = useState(true);
+  const welcome = searchParams.get("welcome") === "1";
   const matchesViewedKeyRef = useRef(null);
   const {
     cacheAgeSeconds,
@@ -246,6 +254,16 @@ function MatchesContent() {
     };
   }, [cacheAgeSeconds, error, loading, refreshAvailableInSeconds]);
 
+  useEffect(() => {
+    if (!user?.uid) {
+      setPinsLaneEnabled(true);
+      return undefined;
+    }
+    return subscribeUserPreferences(user.uid, (preferences) => {
+      setPinsLaneEnabled(preferences.matchLanes?.pins !== false);
+    });
+  }, [user?.uid]);
+
   const freshnessMessage = formatFreshnessMessage({
     cacheAgeSeconds,
     refreshAvailableInSeconds,
@@ -272,6 +290,30 @@ function MatchesContent() {
         </div>
         <p className="matches-hint">{MATCHES_KEEP_TIP}</p>
       </header>
+
+      {welcome ? (
+        <section className="matches-panel matches-welcome">
+          <h2>You&apos;re in!</h2>
+          <p>
+            We&apos;ll match you with collectors who have spares of what you need. You&apos;ll get
+            more matches if you mark spares.
+          </p>
+          <div className="matches-welcome-actions">
+            <Link className="matches-contact-button" to="/getting-started?collect=pins">
+              Add spares
+            </Link>
+            <span className="matches-welcome-share" title="Coming soon">
+              Share your list
+            </span>
+          </div>
+        </section>
+      ) : null}
+
+      {!pinsLaneEnabled ? (
+        <section className="matches-panel">
+          <p>Pin matching is off in Account.</p>
+        </section>
+      ) : null}
 
       {loading ? <p>Finding possible matches…</p> : null}
       {error ? (
@@ -324,7 +366,11 @@ function MatchesContent() {
       {showEmptyMatches ? (
         <section className="matches-panel">
           <h2>No reciprocal matches yet</h2>
-          <p>Collect copies above what you keep, then check back as more collectors join.</p>
+          <p>
+            {welcome
+              ? "We'll match you with collectors who have spares of what you need. You'll get more matches if you mark spares."
+              : "Collect copies above what you keep, then check back as more collectors join."}
+          </p>
         </section>
       ) : null}
 

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   GETTING_STARTED_SAVED,
   GETTING_STARTED_STEP,
@@ -11,6 +11,7 @@ import CollectionReviewEditor from "../../components/CollectionReviewEditor/Coll
 import { useCollectionReviewEditor } from "../../components/CollectionReviewEditor/useCollectionReviewEditor.js";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAuthModal } from "../../contexts/AuthModalContext.jsx";
+import { mergePickRows, savePendingPicks } from "../../lib/pendingPicks.js";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
@@ -25,6 +26,7 @@ import {
   includesPins,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
+import QuickPinPicker from "./QuickPinPicker.jsx";
 
 const COLLECTIBLE_OPTIONS = [
   {
@@ -57,6 +59,12 @@ const PROFILE_OPTIONS = [
     description: "Start with zero selected, then mark the groups or cards you already own.",
   },
 ];
+
+const VALID_COLLECT_PARAMS = new Set([
+  COLLECTIBLE_TYPE_PINS,
+  COLLECTIBLE_TYPE_CARDS,
+  COLLECTIBLE_TYPE_BOTH,
+]);
 
 function StepIndicator({ step, profile, collectibleType, onSelectStep }) {
   const spreadsheet = profile === "spreadsheet";
@@ -124,6 +132,9 @@ export default function GettingStartedPage() {
   const [quantities, setQuantities] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const urlBootstrappedRef = useRef(false);
+  const pendingSaveRef = useRef(false);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -228,10 +239,35 @@ export default function GettingStartedPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: bootstrap once from collect URL param
+  useEffect(() => {
+    if (urlBootstrappedRef.current) return;
+    const collect = searchParams.get("collect");
+    if (!VALID_COLLECT_PARAMS.has(collect)) {
+      return;
+    }
+    urlBootstrappedRef.current = true;
+    setCollectibleType(collect);
+    setProfile("manual");
+    setError(null);
+    if (collect === COLLECTIBLE_TYPE_PINS) {
+      goToStep("quick", collect);
+      return;
+    }
+    beginManualReview(collect);
+  }, [searchParams]);
+
   const handleSave = async () => {
     if (!user) {
+      pendingSaveRef.current = true;
       captureEvent(SIGN_IN_PROMPTED, { reason: "getting-started-save" });
-      openAuthModal({ reason: "getting-started-save" });
+      openAuthModal({
+        reason: "getting-started-save",
+        initialMode: "register",
+        onSuccess: () => {
+          pendingSaveRef.current = true;
+        },
+      });
       return;
     }
 
@@ -257,6 +293,7 @@ export default function GettingStartedPage() {
           }, saveTimeoutMs);
         }),
       ]);
+      pendingSaveRef.current = false;
       captureEvent(GETTING_STARTED_SAVED, {
         collectibleType,
         created: result?.created ?? 0,
@@ -275,6 +312,51 @@ export default function GettingStartedPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retry save once after auth modal success
+  useEffect(() => {
+    if (!user || !pendingSaveRef.current || saving || collectionLoading) {
+      return;
+    }
+    pendingSaveRef.current = false;
+    void handleSave();
+  }, [user, saving, collectionLoading]);
+
+  const handleQuickPickerSubmit = async (pickQuantities) => {
+    const source = {
+      utm_source: searchParams.get("utm_source"),
+      utm_campaign: searchParams.get("utm_campaign"),
+    };
+
+    if (!user) {
+      savePendingPicks(pickQuantities, source);
+      openAuthModal({
+        reason: "qr-picks",
+        initialMode: "register",
+      });
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    try {
+      const rows = mergePickRows(pickQuantities, entries);
+      if (rows.length > 0) {
+        await applyBulkCollectionUpdate({
+          ownerUid: user.uid,
+          rows,
+          existingEntries: entries,
+          allowPins: true,
+        });
+      }
+      navigate("/matches?welcome=1");
+    } catch (saveError) {
+      console.error("Quick pin picker save failed", saveError);
+      setError(saveError.message ?? "We could not update your collection. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const reviewHeading =
     collectibleType === COLLECTIBLE_TYPE_PINS
       ? "Review your pins"
@@ -286,6 +368,8 @@ export default function GettingStartedPage() {
       ? "All and None are set to 1 and 0, but can be expanded for more granular edits. Selecting Some will proactively open the granular view."
       : "All and None are set to 1 and 0, but can be expanded for more granular edits. Selecting Some will proactively open the granular view.";
 
+  const isQuickStep = step === "quick";
+
   return (
     <main className="getting-started">
       <header className="getting-started__header">
@@ -293,20 +377,39 @@ export default function GettingStartedPage() {
           Back to home
         </Link>
         <p className="getting-started__eyebrow">{SITE_NAME} setup</p>
-        <h1>Build your collection without entering every card.</h1>
+        <h1>
+          {isQuickStep
+            ? "Mark what you have, then find trades."
+            : "Build your collection without entering every card."}
+        </h1>
         <p>
-          Tell us roughly what you own. We will only ask about the cards that need a closer look.
+          {isQuickStep
+            ? "Scan the QR, mark Need / Have / Have spares, and jump into Matches after you sign up."
+            : "Tell us roughly what you own. We will only ask about the cards that need a closer look."}
         </p>
       </header>
 
-      <StepIndicator
-        step={step}
-        profile={profile}
-        collectibleType={collectibleType}
-        onSelectStep={selectStep}
-      />
+      {!isQuickStep ? (
+        <StepIndicator
+          step={step}
+          profile={profile}
+          collectibleType={collectibleType}
+          onSelectStep={selectStep}
+        />
+      ) : null}
 
       <section className="getting-started__workspace" aria-live="polite">
+        {isQuickStep ? (
+          <QuickPinPicker
+            entries={entries}
+            collectionLoading={collectionLoading}
+            saving={saving}
+            error={error}
+            isSignedIn={Boolean(user)}
+            onSubmit={handleQuickPickerSubmit}
+          />
+        ) : null}
+
         {step === "profile" ? (
           <>
             <div className="getting-started__section-heading">
