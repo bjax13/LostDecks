@@ -46,4 +46,5 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Collectibles](./collectibles.md) covers catalog search, filters, grid/table, and collectible detail.
 - [Sign in](./auth.md) covers login, register, the quick-sign-in modal, and auth-gated redirects.
 - [Collection](./collection.md) covers the signed-in collection, getting-started save, and bulk tools.
-- [Matches](./matches.md) covers reciprocal trade matches and the Account matching opt-out.
+- [Matches](./matches.md) covers reciprocal trade matches, keep counts, and the Account matching opt-out.
+- [About and feedback](./site.md) covers the footer About page and the site-feedback dialog.

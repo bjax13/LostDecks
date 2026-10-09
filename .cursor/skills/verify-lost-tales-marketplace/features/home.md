@@ -4,10 +4,10 @@ Home is the signed-out landing page: a hero that sends collectors into getting s
 
 ## Sub-features
 
-- `home-load` shows the ShardStash heading and primary navigation.
+- `home-load` shows the hero heading, the ShardStash brand link, and primary navigation. The document title is ShardStash.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
 - `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
-- `home-supported` opens the catalog from Story Deck and ChasmFriends pin tiles.
+- `home-supported` opens the catalog from the Story Deck Cards and ChasmFriends Pins tiles.
 - `home-snapshot-signed-out` shows Collection Snapshot values as placeholders with Sign in hints.
 
 ## How to get to it (user POV)
