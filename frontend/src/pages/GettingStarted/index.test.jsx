@@ -31,9 +31,9 @@ function setupUser() {
   return userEvent.setup({ delay: null });
 }
 
-function renderPage() {
+function renderPage(path = "/getting-started") {
   return render(
-    <TestMemoryRouter initialEntries={["/getting-started"]}>
+    <TestMemoryRouter initialEntries={[path]}>
       <GettingStartedPage />
     </TestMemoryRouter>,
   );
@@ -115,6 +115,20 @@ beforeEach(() => {
 
 // Coverage + GitHub-hosted runners can push these large-tree interactions past Vitest's 5s default.
 describe("GettingStartedPage", { timeout: 20_000 }, () => {
+  it("opens the quick pin picker from collect=pins", () => {
+    renderPage("/getting-started?collect=pins&utm_source=qr&utm_campaign=nexus-2026");
+    expect(screen.getByRole("heading", { name: /Which pins do you have/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find my trades" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /what best describes you/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("skips step 1 into card review for collect=cards", () => {
+    renderPage("/getting-started?collect=cards");
+    expect(screen.getByRole("heading", { name: /Review your cards/i })).toBeInTheDocument();
+  });
+
   it("asks collectible type then the collector profile question first", () => {
     renderPage();
 
@@ -864,7 +878,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
     await user.click(within(pinsCoverage).getByRole("button", { name: "All" }));
     expect(
-      getSkuQuantityGroup(new RegExp(`${pinsTitle} Shreadad quantity, 1$`, "i")),
+      getSkuQuantityGroup(new RegExp(`${pinsTitle} Shredhead quantity, 1$`, "i")),
     ).toBeInTheDocument();
     expect(pinsGroup.skus).toHaveLength(5);
   });

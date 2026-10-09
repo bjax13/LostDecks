@@ -6,6 +6,7 @@ import FeedbackFab from "./components/FeedbackFab.jsx";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import { useAuthModal } from "./contexts/AuthModalContext.jsx";
+import { PendingPicksApplier } from "./hooks/useApplyPendingPicks.js";
 import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
@@ -111,6 +112,7 @@ function App() {
   return (
     <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
       <PostHogPageviews />
+      <PendingPicksApplier />
       <MainNav />
       <hr />
       <Routes>

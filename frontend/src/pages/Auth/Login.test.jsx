@@ -120,6 +120,12 @@ describe("Login (unit)", () => {
     expect(screen.getByText("Home page")).toBeInTheDocument();
   });
 
+  it("preserves redirect query and state when linking to register", () => {
+    renderLogin("/auth/login?redirect=/matches");
+    const signUp = screen.getByRole("link", { name: /Need an account/i });
+    expect(signUp).toHaveAttribute("href", "/auth/register?redirect=/matches");
+  });
+
   it("shows error when provided", () => {
     mockError = new Error("Invalid credentials");
     renderLogin();

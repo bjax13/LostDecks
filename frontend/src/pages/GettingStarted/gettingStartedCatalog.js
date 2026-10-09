@@ -154,7 +154,7 @@ function isPinSku(sku) {
 }
 
 export function formatSkuNumberLabel(sku) {
-  // Pins are identified by name (Shreadad, etc.), not catalog numbers.
+  // Pins are identified by name (Shredhead, etc.), not catalog numbers.
   if (isPinSku(sku)) {
     return sku.label || sku.card?.displayName || sku.card?.name || "Pin";
   }

@@ -90,7 +90,7 @@ describe("CollectionBackupDownload", () => {
     expect(csv).toContain(
       "story_card,Stormlight Lost Tales — Story Deck,LT24-ELS-01-DUN,Elsecaller #01,DUN,3,,2026-09-03T23:34:00.000Z",
     );
-    expect(csv).toContain("pin,ChasmFriends Pins,PIN-CF-01,Shreadad,,2,,2026-09-03T23:34:00.000Z");
+    expect(csv).toContain("pin,ChasmFriends Pins,PIN-CF-01,Shredhead,,2,,2026-09-03T23:34:00.000Z");
     expect(csv).not.toContain("PIN-CF-02");
     expect(csv).not.toContain("skuId,quantity,notes");
 

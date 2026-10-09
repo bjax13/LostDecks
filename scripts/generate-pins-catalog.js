@@ -45,9 +45,9 @@ const SERIES_PIN_RE = /^Series\s+(\d+)\s*-\s*Pin\s+(\d+)\s*-\s*(.+)$/i;
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
 
 const CHASM_FRIENDS = [
-  { id: "PIN-CF-01", name: "Shreadad", number: 1 },
+  { id: "PIN-CF-01", name: "Shredhead", number: 1 },
   { id: "PIN-CF-02", name: "Howlerina", number: 2 },
-  { id: "PIN-CF-03", name: "Burp Slurper", number: 3 },
+  { id: "PIN-CF-03", name: "Burpslurper", number: 3 },
   { id: "PIN-CF-04", name: "Darren", number: 4 },
   { id: "PIN-CF-05", name: "Cleverclaws", number: 5 },
 ];

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { SITE_NAME } from "../../brand.js";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
@@ -11,6 +11,7 @@ function Login() {
   const [formState, setFormState] = useState({ email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
   const redirectAfterAuth = usePostAuthRedirect();
+  const location = useLocation();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -64,7 +65,9 @@ function Login() {
       </form>
       <div className="auth-page__links">
         <Link to="/auth/forgot">Forgot password?</Link>
-        <Link to="/auth/register">Need an account? Sign up</Link>
+        <Link to={{ pathname: "/auth/register", search: location.search }} state={location.state}>
+          Need an account? Sign up
+        </Link>
       </div>
       <SocialLoginButtons onSuccess={redirectAfterAuth} />
     </section>

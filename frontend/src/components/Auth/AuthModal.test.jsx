@@ -22,10 +22,13 @@ vi.mock("../../contexts/AuthContext", () => ({
 }));
 
 vi.mock("./SocialLoginButtons", () => ({
-  default: ({ onSuccess }) => (
-    <button type="button" data-testid="social-mock-success" onClick={() => onSuccess?.()}>
-      Social success
-    </button>
+  default: ({ onSuccess, leadIn = "Or continue with" }) => (
+    <div>
+      <p>{leadIn}</p>
+      <button type="button" data-testid="social-mock-success" onClick={() => onSuccess?.()}>
+        Social success
+      </button>
+    </div>
   ),
 }));
 
@@ -35,7 +38,7 @@ function renderModal(props = {}) {
     onClose,
     ...render(
       <TestMemoryRouter>
-        <AuthModal isOpen={props.isOpen ?? true} onClose={onClose} />
+        <AuthModal isOpen={props.isOpen ?? true} onClose={onClose} context={props.context ?? null} />
       </TestMemoryRouter>,
     ),
   };
@@ -258,6 +261,28 @@ describe("AuthModal (unit)", () => {
     const { onClose } = renderModal();
     await user.click(screen.getByTestId("social-mock-success"));
     expect(mockClearError).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens in register mode when context.initialMode is register", () => {
+    renderModal({ context: { initialMode: "register" } });
+    expect(screen.getByRole("heading", { name: "Create Account" })).toBeInTheDocument();
+    expect(screen.getByText("Continue with Google")).toBeInTheDocument();
+    expect(screen.getByText("Or use email")).toBeInTheDocument();
+  });
+
+  it("calls context.onSuccess before closing after register", async () => {
+    const onSuccess = vi.fn();
+    const { onClose } = renderModal({ context: { initialMode: "register", onSuccess } });
+    mockRegister.mockResolvedValueOnce(undefined);
+    await user.click(screen.getByLabelText(/^Display Name$/i));
+    await user.paste("Sam");
+    await user.click(screen.getByLabelText(/^Email$/i));
+    await user.paste("sam@example.com");
+    await user.click(screen.getByLabelText(/^Password$/i));
+    await user.paste("pw123456");
+    await user.click(screen.getByRole("button", { name: "Sign Up" }));
+    expect(onSuccess).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

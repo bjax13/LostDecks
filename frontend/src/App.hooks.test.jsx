@@ -14,6 +14,11 @@ vi.mock("./contexts/AuthModalContext.jsx", () => ({
   useAuthModal: mockUseAuthModal,
 }));
 
+vi.mock("./hooks/useApplyPendingPicks.js", () => ({
+  PendingPicksApplier: () => null,
+  useApplyPendingPicks: () => {},
+}));
+
 function setupAuthModal() {
   const openAuthModal = vi.fn();
   mockUseAuthModal.mockReturnValue({ openAuthModal });

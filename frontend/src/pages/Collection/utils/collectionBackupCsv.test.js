@@ -81,7 +81,7 @@ describe("collectionBackupCsv", () => {
     expect(linesOf(csv)).toEqual([
       HEADER,
       "story_card,Stormlight Lost Tales — Story Deck,LT24-ELS-01-DUN,Elsecaller #01,DUN,3,new,2026-09-03T23:34:00.000Z",
-      "pin,ChasmFriends Pins,PIN-CF-01,Shreadad,,2,,2026-09-03T23:34:00.000Z",
+      "pin,ChasmFriends Pins,PIN-CF-01,Shredhead,,2,,2026-09-03T23:34:00.000Z",
     ]);
     expect(csv).not.toContain("skuId,quantity,notes");
     expect(csv).not.toContain("LT24-ELS-01-FOIL");
@@ -106,7 +106,7 @@ describe("collectionBackupCsv", () => {
       "story_card,Stormlight Lost Tales — Story Deck,LT24-NS-ELS-02-FOIL,",
     );
     expect(lines[2]).toContain(",FOIL,2,,");
-    expect(lines[3]).toBe("pin,ChasmFriends Pins,PIN-CF-01,Shreadad,,1,,");
+    expect(lines[3]).toBe("pin,ChasmFriends Pins,PIN-CF-01,Shredhead,,1,,");
     expect(lines[4]).toBe(',,CUSTOM-1,,,1,"say ""hi"", friend",');
     expect(lines.filter((line) => line.startsWith("story_card"))).toHaveLength(2);
   });
@@ -122,7 +122,7 @@ describe("collectionBackupCsv", () => {
     });
 
     expect(linesOf(csv)[1]).toBe(
-      "pin,ChasmFriends Pins,PIN-CF-01,Shreadad,,2,bag,2026-08-02T00:00:00.000Z",
+      "pin,ChasmFriends Pins,PIN-CF-01,Shredhead,,2,bag,2026-08-02T00:00:00.000Z",
     );
   });
 
@@ -137,7 +137,7 @@ describe("collectionBackupCsv", () => {
     });
 
     expect(linesOf(csv)[1]).toBe(
-      "pin,ChasmFriends Pins,PIN-CF-01,Shreadad,,2,,2026-08-02T00:00:00.000Z",
+      "pin,ChasmFriends Pins,PIN-CF-01,Shredhead,,2,,2026-08-02T00:00:00.000Z",
     );
   });
 
@@ -160,7 +160,7 @@ describe("collectionBackupCsv", () => {
     const lines = linesOf(csv);
 
     expect(lines).toHaveLength(3);
-    expect(lines[1]).toContain("PIN-CF-01,Shreadad,,2,");
+    expect(lines[1]).toContain("PIN-CF-01,Shredhead,,2,");
     expect(lines[2]).toContain("PIN-CF-02,Howlerina,,4,");
     expect(csv).not.toContain("PIN-CF-03");
   });
