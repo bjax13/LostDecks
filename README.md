@@ -7,9 +7,69 @@ wireframe has been created to outline navigation and page structure.
 
 ## Getting Started
 
-### Frontend (Vite + React)
+### One-command local stack (recommended)
 
-The `frontend` directory contains a Vite-powered React application.
+From the **repo / worktree root** (the directory that contains this `README.md`
+and `package.json` — Cursor worktrees are often under
+`~/.cursor/worktrees/LostDecks/<name>`):
+
+```bash
+# Fresh worktree: install deps in root, frontend/, and functions/
+npm install && npm install --prefix frontend && npm install --prefix functions
+
+# Starts Firebase emulators, waits for "All emulators ready", then Vite
+npm run dev:local
+```
+
+`npm run dev:local` prints the absolute worktree path, creates or repairs
+`frontend/.env` from `frontend/.env.emulator.example`, installs missing
+`node_modules` when needed, waits for emulators, then starts Vite on
+http://localhost:5173/ (Emulator UI: http://127.0.0.1:4000/).
+
+You can also run each side independently:
+
+```bash
+npm run dev:local:emulators   # wait for "All emulators ready" before the next steps
+npm run dev:local:frontend
+```
+
+#### `frontend/.env` for emulators (common Auth pitfall)
+
+Sign-in fails with
+`Authentication is not configured. Set VITE_FIREBASE_*…` when `.env` is
+incomplete. Emulator **host flags alone are not enough** — Auth init requires
+**all seven** non-empty `VITE_FIREBASE_*` SDK keys (including
+`VITE_FIREBASE_MEASUREMENT_ID`; an empty string blocks init the same way) plus
+`VITE_USE_EMULATORS=true`. Copy the **full** example (it now ships those SDK
+placeholders):
+
+```bash
+cp frontend/.env.emulator.example frontend/.env
+```
+
+Vite only reads `.env` at process start: **restart Vite** after writing or
+editing it. Prefer `frontend/.env.example` only for real/production-shaped
+Firebase config.
+
+### Local emulator seed data (Matches testing)
+
+With emulators running:
+
+```bash
+# from repo root
+npm run seed:local:wipe
+```
+
+Credentials come from `functions/seed.local.json` (gitignored), or
+`functions/seed.local.example.json` when that file is missing. Example:
+
+- `collector.one@example.com` / `replace-me-local-only`
+- `collector.two@example.com` / `replace-me-local-only`
+
+**Matches cooldown smoke:** sign in, open `/matches` so `getTradeMatches` succeeds,
+then refresh Matches again quickly — not a refresh on the login page.
+
+### Frontend only (no emulators)
 
 ```bash
 cd frontend
@@ -17,9 +77,8 @@ npm install
 npm run dev
 ```
 
-#### Firebase configuration
+#### Firebase configuration (production-shaped)
 
-The frontend expects Firebase configuration via Vite environment variables.
 Copy `frontend/.env.example` to `frontend/.env` and fill in your Firebase
 project credentials:
 
@@ -45,42 +104,6 @@ This command fetches `apps:sdkconfig`, injects `VITE_FIREBASE_*` for the build,
 creates the `shardstash` Hosting site if it is missing, and deploys Hosting to
 that site. The default `storydeck-16.web.app` site is not deleted and may go
 stale.
-
-### Local emulator seed data (Matches testing)
-
-You can seed local Auth + Firestore data for manual Matches testing.
-
-```bash
-# from repo root
-npm run seed:local:wipe
-```
-
-This runs `functions/seed-local.js`, which:
-- upserts local emulator auth users
-- writes `collections` entries
-- writes `userPreferences/{uid}` match settings (`matchingOptOut`, contact sharing fields)
-
-Local seed credentials are read from `functions/seed.local.json` (gitignored).
-If that file is missing, the script falls back to `functions/seed.local.example.json`.
-
-### One-command local startup
-
-From the repo root:
-
-```bash
-npm run dev:local
-```
-
-This starts Firebase emulators and then the Vite frontend once emulators are ready.
-If Java is not already configured in your PATH, the script attempts common local JDK
-install paths automatically.
-
-You can also run each side independently:
-
-```bash
-npm run dev:local:emulators
-npm run dev:local:frontend
-```
 
 ### Planning docs
 
