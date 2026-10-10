@@ -441,8 +441,13 @@ export function useTradeMatches(
         setTotalOnPage(0);
         const rateLimited =
           err?.code === "functions/resource-exhausted" || err?.code === "resource-exhausted";
+        // Always set a user-safe message; MatchesPage renders error.message.
         setError(
-          rateLimited ? new Error("You're refreshing too fast, try again in a few seconds") : err,
+          new Error(
+            rateLimited
+              ? "You're refreshing too fast, try again in a few seconds"
+              : "Could not load matches right now.",
+          ),
         );
         setLoading(false);
       });

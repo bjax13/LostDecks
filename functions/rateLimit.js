@@ -1,6 +1,6 @@
 "use strict";
 
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const { HttpsError } = require("firebase-functions/v2/https");
 
 const DEFAULT_MIN_INTERVAL_MS = 3000;
@@ -102,9 +102,11 @@ async function enforceCallCooldown(db, uid, opts = {}) {
       );
     }
 
+    // Use modular Timestamp — the Functions emulator can replace admin.firestore with a
+    // bare factory, which drops admin.firestore.Timestamp and crashes on fromMillis.
     tx.set(ref, {
-      lastCallAt: admin.firestore.Timestamp.fromMillis(nextState.lastCallAt),
-      windowStart: admin.firestore.Timestamp.fromMillis(nextState.windowStart),
+      lastCallAt: Timestamp.fromMillis(nextState.lastCallAt),
+      windowStart: Timestamp.fromMillis(nextState.windowStart),
       windowCount: nextState.windowCount,
     });
   });

@@ -284,7 +284,7 @@ describe("useTradeMatches cache + cooldown", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.error).toBeTruthy();
+    expect(result.current.error?.message).toBe("Could not load matches right now.");
     expect(readMatchesCache("uid-1")).toBeNull();
   });
 
