@@ -37,5 +37,5 @@ Preconditions:
 
 - `Getting Started` appears in the hero and again in the footer. Use `--nth 0` for the hero and do not assume a single link.
 - `Collection`, `Matches`, and `Account` in the nav are visible while signed out; following them redirects to `/auth/login`. That redirect is auth-gate behavior, not a broken home link.
-- `Quick sign in` opens the modal instead of `/auth/login`. Do not treat the modal heading `Sign In` as the login page heading.
+- Home hero `Sign In` opens the auth modal instead of `/auth/login`. Nav `Sign in` goes to the login page. Do not treat the modal heading `Sign In` as the login page heading.
 - Collection Snapshot loading skeletons disappear; wait for the `Collection Snapshot` heading and the `Sign in` hints, not a fixed sleep.

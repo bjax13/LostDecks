@@ -5,7 +5,6 @@ import { SITE_NAME } from "./brand.js";
 import FeedbackFab from "./components/FeedbackFab.jsx";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
-import { useAuthModal } from "./contexts/AuthModalContext.jsx";
 import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
@@ -24,7 +23,6 @@ import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function MainNav() {
   const { user, logout, loading } = useAuth();
-  const { openAuthModal } = useAuthModal();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -94,12 +92,7 @@ function MainNav() {
               </button>
             </>
           ) : (
-            <>
-              <Link to="/auth/login">Sign in</Link>
-              <button type="button" onClick={() => openAuthModal()}>
-                Quick sign in
-              </button>
-            </>
+            <Link to="/auth/login">Sign in</Link>
           )}
         </div>
       </div>
