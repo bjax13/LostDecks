@@ -257,7 +257,11 @@ function MatchesContent() {
       {loading ? <p>Finding possible matches…</p> : null}
       {error ? (
         <section className="matches-panel">
-          <p className="matches-error">Could not load matches right now.</p>
+          <p className="matches-error">
+            {typeof error?.message === "string" && error.message.trim()
+              ? error.message
+              : "Could not load matches right now."}
+          </p>
           <button type="button" onClick={reload} disabled={refreshDisabled}>
             Retry
           </button>

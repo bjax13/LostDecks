@@ -125,6 +125,22 @@ describe("MatchesPage", () => {
     vi.useRealTimers();
   });
 
+  it("renders the hook error message including cooldown copy", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [],
+        error: new Error("You're refreshing too fast, try again in a few seconds"),
+      }),
+    );
+
+    render(<MatchesPage />);
+
+    expect(
+      screen.getByText("You're refreshing too fast, try again in a few seconds"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+  });
+
   it("shows only Pins when the payload has a pins-only reciprocal lane", () => {
     mockUseTradeMatches.mockReturnValue(
       defaultMatchesHook({

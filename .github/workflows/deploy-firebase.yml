@@ -47,7 +47,8 @@ jobs:
       - name: Deploy Hosting, Firestore, and Functions
         run: npm run deploy:firebase
         env:
-          # PostHog is baked into the Vite build; deploy-production.js forwards process.env.
+          # App Check + PostHog are baked into the Vite build; deploy-production.js forwards process.env.
+          VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY: ${{ secrets.VITE_APPCHECK_RECAPTCHA_ENTERPRISE_SITE_KEY }}
           VITE_POSTHOG_KEY: ${{ secrets.VITE_POSTHOG_KEY }}
           VITE_POSTHOG_HOST: ${{ secrets.VITE_POSTHOG_HOST }}
           VITE_POSTHOG_SURVEY_ID: ${{ secrets.VITE_POSTHOG_SURVEY_ID }}

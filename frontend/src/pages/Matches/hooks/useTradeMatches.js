@@ -439,7 +439,16 @@ export function useTradeMatches(
         setNextCursor(null);
         setHasMore(false);
         setTotalOnPage(0);
-        setError(err);
+        const rateLimited =
+          err?.code === "functions/resource-exhausted" || err?.code === "resource-exhausted";
+        // Always set a user-safe message; MatchesPage renders error.message.
+        setError(
+          new Error(
+            rateLimited
+              ? "You're refreshing too fast, try again in a few seconds"
+              : "Could not load matches right now.",
+          ),
+        );
         setLoading(false);
       });
 
