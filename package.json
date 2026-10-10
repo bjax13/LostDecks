@@ -15,6 +15,7 @@
     "build:frontend": "npm run build --prefix frontend",
     "build:frontend:production": "cross-env VITE_USE_EMULATORS=false npm run build --prefix frontend",
     "test:scripts": "node --test scripts/*.test.js",
+    "verify:google-auth-host": "node scripts/verifyGoogleAuthRedirectHost.js",
     "deploy:hosting:raw": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting:shardstash --project storydeck-16 --non-interactive",
     "deploy:firebase:raw": "npm run build:frontend:production && npx --yes firebase-tools@15 deploy --only hosting:shardstash,firestore,functions --project storydeck-16 --non-interactive",
     "deploy:hosting": "node scripts/deploy-production.js --only=hosting",
