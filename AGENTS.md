@@ -17,9 +17,13 @@ ShardStash is a single-product Vite + React 18 SPA (`frontend/`) backed by Fireb
 
 ### Setup
 
+Work from the **repo / worktree root** (directory with root `package.json` / `README.md`). Cursor worktrees are often `~/.cursor/worktrees/LostDecks/<name>` — `npm run dev:local` prints the absolute path at startup.
+
 1. **Repo root** (Biome + Husky): `npm install` — installs Biome, Husky, and lint-staged; enables the pre-commit hook that runs Biome on staged files. Skipping root install means hooks and `npm run ci` are unavailable.
-2. **Frontend**: `cd frontend && npm install`
-3. **Functions** (if you change or debug callable code with the emulator): `cd functions && npm install`
+2. **Frontend**: `cd frontend && npm install` (or `npm install --prefix frontend`)
+3. **Functions** (emulator / seed / callable work): `cd functions && npm install` (or `npm install --prefix functions`)
+
+Fresh worktrees need all three installs. `npm run dev:local` installs any missing `node_modules` automatically.
 
 Before `git commit`, run `npm run check` from the repo root (same as `biome check --write .`). That mirrors the local pre-commit hook intent without relying on Husky in the VM.
 
@@ -27,21 +31,23 @@ Default Firebase project id matches `.firebaserc`: `storydeck-16`.
 
 ### Running locally
 
-Two processes are needed for full local development:
+**Preferred:** one command from the repo root — starts emulators, waits for `All emulators ready`, then Vite:
+
+```bash
+npm run dev:local
+```
+
+That helper also creates or repairs `frontend/.env` from `frontend/.env.emulator.example`. Split processes: `npm run dev:local:emulators` and `npm run dev:local:frontend`.
+
+Manual equivalent (two processes):
 
 1. **Firebase Emulators** (Auth on 9099, Firestore on 8080, Functions on 5001, UI on 4000):
-
-   ```bash
-   firebase emulators:start --project storydeck-16
-   ```
-
-   If the Firebase CLI is not installed globally, use:
 
    ```bash
    npx firebase-tools emulators:start --project storydeck-16
    ```
 
-   Requires Java 11+ (pre-installed in the VM). The emulators take ~10–15 s to start; wait for the "All emulators ready" banner before interacting.
+   Requires Java 11+ (pre-installed in the VM). Wait for the **All emulators ready** banner (~10–15 s) before seeding or opening the app.
 
 2. **Vite Dev Server** (port 5173):
 
@@ -49,7 +55,25 @@ Two processes are needed for full local development:
    cd frontend && npm run dev -- --host 0.0.0.0
    ```
 
-The frontend `.env` must have `VITE_USE_EMULATORS=true` and dummy `VITE_FIREBASE_*` values so the Firebase SDK initializes and connects to the local emulators. A working `.env` is created during setup; if it is missing, copy `frontend/.env.emulator.example` to `frontend/.env` and add placeholder values for the required `VITE_FIREBASE_*` keys (any non-empty string works with emulators). For production-shaped config, start from `frontend/.env.example`.
+#### Emulator `frontend/.env` (Auth pitfall)
+
+Copy the **full** `frontend/.env.emulator.example` (it includes SDK placeholders **and** emulator host flags — host flags alone are not enough):
+
+```bash
+cp frontend/.env.emulator.example frontend/.env
+```
+
+`frontend/src/lib/firebase.js` initializes Auth only when **every** `VITE_FIREBASE_*` SDK value is a non-empty trimmed string, including `VITE_FIREBASE_MEASUREMENT_ID`. An empty `MEASUREMENT_ID=` produces the same UI error as a missing `.env`: `Authentication is not configured. Set VITE_FIREBASE_*…`. You also need `VITE_USE_EMULATORS=true`. Any non-empty placeholder works with emulators. **Restart Vite** after editing `.env` (Vite reads env only at process start). For production-shaped config, start from `frontend/.env.example` instead.
+
+#### Seed users + Matches cooldown smoke
+
+With emulators up:
+
+```bash
+npm run seed:local:wipe
+```
+
+Credentials: `functions/seed.local.json` (gitignored) or fallback `functions/seed.local.example.json` (e.g. `collector.one@example.com` / `replace-me-local-only`). Cooldown smoke requires a **signed-in** session on `/matches` (refresh Matches, not the login page).
 
 ### Lint / Test / Build
 

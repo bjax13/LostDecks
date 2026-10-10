@@ -1,6 +1,11 @@
 const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const {
+  ensureFrontendEmulatorEnv,
+  formatStartupBanner,
+  packagesNeedingInstall,
+} = require("./devLocalEnv");
 
 const repoRoot = path.resolve(__dirname, "..");
 const projectId = process.env.FIREBASE_PROJECT_ID || "storydeck-16";
@@ -74,6 +79,58 @@ function spawnCommand(command, args, options = {}) {
   return child;
 }
 
+function runNpmInstall(packageRel) {
+  const npmCmd = isWindows ? "npm.cmd" : "npm";
+  const cwd = path.join(repoRoot, packageRel);
+  console.log(`Installing dependencies in ${packageRel === "." ? "repo root" : packageRel}...`);
+  const result = spawnSync(npmCmd, ["install"], {
+    cwd,
+    env: process.env,
+    stdio: "inherit",
+    shell: false,
+  });
+  if (result.status !== 0) {
+    console.error(`npm install failed in ${cwd} (exit ${result.status ?? 1}).`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+function ensureDependencies() {
+  const missing = packagesNeedingInstall(repoRoot);
+  if (missing.length === 0) {
+    return;
+  }
+  console.log(`Fresh worktree detected — missing node_modules in: ${missing.join(", ")}`);
+  for (const rel of missing) {
+    runNpmInstall(rel);
+  }
+}
+
+function ensureEnv() {
+  const result = ensureFrontendEmulatorEnv(repoRoot);
+  if (result.action === "created") {
+    console.log(`Created ${path.relative(repoRoot, result.envPath)} from .env.emulator.example`);
+  } else if (result.action === "repaired") {
+    console.log(
+      `Repaired ${path.relative(repoRoot, result.envPath)} — filled missing/empty VITE_FIREBASE_* (and set VITE_USE_EMULATORS=true).`,
+    );
+    console.log("Vite only reads .env at process start; this run starts Vite after the repair.");
+  }
+  if (!result.validation.ok) {
+    console.error(
+      [
+        "frontend/.env is still incomplete for emulator auth.",
+        "Copy the FULL frontend/.env.emulator.example → frontend/.env",
+        "(all seven VITE_FIREBASE_* placeholders must be non-empty, including MEASUREMENT_ID,",
+        "plus VITE_USE_EMULATORS=true), then restart Vite.",
+        `Missing: ${result.validation.missingKeys.join(", ") || "(none)"}`,
+        `Empty: ${result.validation.emptyKeys.join(", ") || "(none)"}`,
+      ].join("\n"),
+    );
+    process.exit(1);
+  }
+}
+
 function startEmulators(options = {}) {
   const env = withJavaEnv(process.env);
   if (!hasJavaInPath(env)) {
@@ -95,11 +152,22 @@ function startFrontend() {
   return spawnCommand(npmCmd, ["run", "dev", "--prefix", "frontend", "--", "--host", "0.0.0.0"]);
 }
 
+function printBanner() {
+  process.stdout.write(
+    formatStartupBanner({
+      repoRoot,
+      projectId,
+    }),
+  );
+}
+
 const emulatorsOnly = process.argv.includes("--emulators-only");
 const frontendOnly = process.argv.includes("--frontend-only");
+const skipInstall = process.argv.includes("--skip-install");
 
 const children = [];
 let frontendChild = null;
+let bannerPrinted = false;
 
 function stopAllChildren() {
   for (const child of children) {
@@ -119,27 +187,45 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
+printBanner();
+if (!skipInstall) {
+  ensureDependencies();
+}
+ensureEnv();
+
 if (frontendOnly) {
-  console.log("Starting frontend only...");
+  console.log("Starting frontend only (emulators must already be running)...");
   const child = startFrontend();
   children.push(child);
 } else if (emulatorsOnly) {
   console.log("Starting emulators only...");
+  console.log('Wait for the "All emulators ready" banner before seeding or opening the app.');
   const child = startEmulators();
   children.push(child);
 } else {
   console.log(`Starting Firebase emulators for project ${projectId}...`);
+  console.log('Vite starts automatically after "All emulators ready" (~10–15s).');
   const emulatorChild = startEmulators({ pipeOutput: true });
   children.push(emulatorChild);
 
-  emulatorChild.stdout?.on?.("data", (chunk) => {
+  const onChunk = (chunk) => {
     const text = chunk.toString();
     if (!frontendChild && text.includes("All emulators ready")) {
-      console.log("Starting frontend dev server...");
+      if (!bannerPrinted) {
+        bannerPrinted = true;
+        console.log("Emulators ready. Starting frontend (http://localhost:5173/)...");
+        console.log(
+          "Seed when ready: npm run seed:local:wipe  (see banner above for credentials).",
+        );
+      }
       frontendChild = startFrontend();
       children.push(frontendChild);
     }
-  });
+  };
+
+  emulatorChild.stdout?.on?.("data", onChunk);
+  // firebase-tools may print the ready banner on stderr depending on version/TTY
+  emulatorChild.stderr?.on?.("data", onChunk);
 
   emulatorChild.on("exit", (code) => {
     if (!frontendChild) {

@@ -12,6 +12,13 @@ This Vite-powered React application implements the ShardStash experience, includ
 
 ## Setup
 
+For local Firebase emulators + Vite from a fresh worktree, prefer the repo-root
+helper (`npm run dev:local`) documented in the root `README.md` / `AGENTS.md`.
+That path copies the full `frontend/.env.emulator.example` (SDK placeholders +
+`VITE_USE_EMULATORS=true`), installs missing deps, and waits for emulators.
+**Restart Vite** after any `.env` edit. Empty `VITE_FIREBASE_MEASUREMENT_ID`
+blocks Auth the same as a missing config.
+
 1. Install dependencies:
 
    ```bash
