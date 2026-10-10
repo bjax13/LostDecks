@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAuthErrorMessage } from "../../lib/authErrorMessage";
+import SignupConsent from "./SignupConsent";
 import SocialLoginButtons from "./SocialLoginButtons";
 
 const modes = {
@@ -133,6 +134,7 @@ function AuthModal({ isOpen, onClose }) {
               />
             </label>
           )}
+          {mode === modes.REGISTER ? <SignupConsent onNavigate={handleClose} /> : null}
           <button type="submit" className="auth-modal__submit">
             {mode === modes.LOGIN && "Sign In"}
             {mode === modes.REGISTER && "Sign Up"}
@@ -162,6 +164,7 @@ function AuthModal({ isOpen, onClose }) {
         </div>
 
         <SocialLoginButtons onSuccess={handleClose} />
+        {mode === modes.REGISTER ? <SignupConsent onNavigate={handleClose} /> : null}
       </div>
     </div>
   );

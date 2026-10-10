@@ -75,3 +75,11 @@ export function syncPostHogUser(firebaseUser) {
     posthog.reset();
   }
 }
+
+/** Reset PostHog identity after account deletion (or explicit sign-out flows that need it). */
+export function resetPostHogUser() {
+  if (!initialized) {
+    return;
+  }
+  posthog.reset();
+}

@@ -65,6 +65,16 @@ describe("Register (unit)", () => {
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
   });
 
+  it("shows Terms and Privacy Policy consent links on the sign-up surface", () => {
+    renderRegister();
+    const termsLinks = screen.getAllByRole("link", { name: "Terms" });
+    const privacyLinks = screen.getAllByRole("link", { name: "Privacy Policy" });
+    expect(termsLinks.length).toBeGreaterThanOrEqual(1);
+    expect(privacyLinks.length).toBeGreaterThanOrEqual(1);
+    expect(termsLinks[0]).toHaveAttribute("href", "/terms");
+    expect(privacyLinks[0]).toHaveAttribute("href", "/privacy");
+  });
+
   it("calls register on submit", async () => {
     mockRegister.mockResolvedValue(undefined);
     renderRegister();

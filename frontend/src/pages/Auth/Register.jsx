@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SITE_NAME } from "../../brand.js";
+import SignupConsent from "../../components/Auth/SignupConsent";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
 import { useAuth } from "../../contexts/AuthContext";
 import { getAuthErrorMessage } from "../../lib/authErrorMessage";
@@ -69,6 +70,7 @@ function Register() {
             required
           />
         </label>
+        <SignupConsent />
         <button type="submit" disabled={submitting}>
           {submitting ? "Creating account…" : "Sign Up"}
         </button>
@@ -77,6 +79,7 @@ function Register() {
         <Link to="/auth/login">Already have an account? Sign in</Link>
       </div>
       <SocialLoginButtons onSuccess={redirectAfterAuth} />
+      <SignupConsent />
     </section>
   );
 }

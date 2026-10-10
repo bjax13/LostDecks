@@ -11,6 +11,16 @@
   gap: 3rem;
 }
 
+.home-page__flash {
+  margin: 1.5rem 0 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(132, 105, 221, 0.45);
+  border-radius: 12px;
+  background: rgba(24, 18, 45, 0.88);
+  color: #e8dcff;
+  line-height: 1.5;
+}
+
 /* Hero */
 .home-hero {
   padding-top: 2rem;

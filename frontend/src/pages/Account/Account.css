@@ -369,6 +369,99 @@
   font-size: 0.9rem;
 }
 
+.account-section--danger {
+  border-color: rgba(220, 80, 120, 0.55);
+}
+
+.account-danger-button {
+  align-self: flex-start;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid rgba(255, 120, 160, 0.65);
+  border-radius: 10px;
+  background: rgba(90, 20, 45, 0.85);
+  color: #ffd6e4;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-danger-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.account-danger-button:not(:disabled):hover {
+  background: rgba(120, 30, 60, 0.95);
+}
+
+.account-delete-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(3, 2, 6, 0.75);
+}
+
+.account-delete-modal {
+  width: min(100%, 26rem);
+  padding: 1.25rem 1.35rem 1.1rem;
+  border: 1px solid rgba(220, 80, 120, 0.55);
+  border-radius: 12px;
+  background: rgba(24, 18, 45, 0.98);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.account-delete-modal h3 {
+  margin: 0;
+  color: #ffe0ea;
+  font-size: 1.15rem;
+}
+
+.account-delete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.account-delete-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(132, 105, 221, 0.45);
+  border-radius: 8px;
+  background: rgba(12, 8, 24, 0.9);
+  color: #f4f1ff;
+  font: inherit;
+}
+
+.account-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: flex-end;
+}
+
+.account-delete-actions button {
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(132, 105, 221, 0.45);
+  background: rgba(45, 31, 82, 0.85);
+  color: #e8dcff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.account-delete-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .account-page {
     padding: 1.75rem clamp(0.75rem, 3vw, 1.25rem) 2.5rem;
