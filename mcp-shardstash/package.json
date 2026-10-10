@@ -1,0 +1,22 @@
+{
+  "name": "mcp-shardstash",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PoC MCP server for Grok/Cursor bot access to ShardStash catalog, collection, and matches",
+  "bin": {
+    "mcp-shardstash": "./src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "smoke": "node src/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "firebase-admin": "13.10.0",
+    "zod": "3.25.76"
+  }
+}
