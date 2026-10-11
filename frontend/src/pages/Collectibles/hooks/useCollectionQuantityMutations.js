@@ -12,6 +12,7 @@ import {
 import { useCallback, useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import { resolveSkuId } from "../../../data/collectibles";
+import { MAX_COLLECTION_QUANTITY } from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
 
 const COLLECTIONS_PATH = "collections";
@@ -116,6 +117,11 @@ export function useCollectionQuantityMutations() {
         const { collectionRef, existingDocs } = await loadExistingDocs(user.uid, skuId);
 
         if (existingDocs.length === 0) {
+          if (addQuantity > MAX_COLLECTION_QUANTITY) {
+            throw new Error(
+              `Quantity cannot exceed ${MAX_COLLECTION_QUANTITY} for a single collection entry.`,
+            );
+          }
           const payload = {
             ownerUid: user.uid,
             skuId,
@@ -131,6 +137,11 @@ export function useCollectionQuantityMutations() {
 
         const keeper = existingDocs[0];
         const nextQuantity = sumQuantities(existingDocs) + addQuantity;
+        if (nextQuantity > MAX_COLLECTION_QUANTITY) {
+          throw new Error(
+            `Quantity cannot exceed ${MAX_COLLECTION_QUANTITY} for a single collection entry.`,
+          );
+        }
         const updatePayload = {
           quantity: nextQuantity,
           updatedAt: serverTimestamp(),

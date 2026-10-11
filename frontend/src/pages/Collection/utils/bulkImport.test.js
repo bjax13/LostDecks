@@ -287,5 +287,35 @@ describe("bulkImport (unit)", () => {
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
     });
+
+    it("skips rows with quantity above the max and reports an issue", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "1000" }],
+        existingEntries: [],
+      });
+      expect(result.issues).toContainEqual({
+        line: 2,
+        message: "Quantity 1000 exceeds the maximum of 999.",
+      });
+      expect(result.created).toBe(0);
+      expect(mockBatchCommit).not.toHaveBeenCalled();
+    });
+
+    it("truncates notes longer than 500 characters", async () => {
+      const longNotes = "n".repeat(520);
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "1", notes: longNotes }],
+        existingEntries: [],
+      });
+      expect(result.created).toBe(1);
+      expect(result.issues).toHaveLength(0);
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "new-doc" },
+        expect.objectContaining({ notes: "n".repeat(500) }),
+        { merge: true },
+      );
+    });
   });
 });
