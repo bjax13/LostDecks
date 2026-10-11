@@ -88,7 +88,7 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 
 Stable handles from this repo:
 
-- Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` and `Quick sign in`; signed-in `Sign out` and `Hi, <name>`
+- Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` (link to `/auth/login`); signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
 - Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
 - Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`

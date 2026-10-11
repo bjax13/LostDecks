@@ -52,7 +52,7 @@ blocks Auth the same as a missing config.
 - Centralized `AuthProvider` context wraps the app and exposes helpers for login, registration, password reset, and social sign-in.
 - Dedicated pages for login, registration, and password resets with graceful error handling.
 - `AuthGuard` component and utility hooks (`useRequireAuth`, `useAuthGuard`) for protecting authenticated routes.
-- Modal-based quick sign-in experience with email/password and social login shortcuts.
+- Modal-based sign-in (`AuthModal`) for in-page CTAs (Home hero, Collectibles add, Getting Started) with email/password and social login shortcuts; primary nav uses the `/auth/login` link.
 
 ## Protected Routes
 
