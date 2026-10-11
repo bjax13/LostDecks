@@ -31,8 +31,10 @@ Record here after first run:
 
 | Field | Value |
 |-------|--------|
-| `locationId` | _fill from `databases describe` (e.g. `nam5`, `us-central1`)_ |
-| PITR | _`POINT_IN_TIME_RECOVERY_ENABLED` after step 1_ |
+| `locationId` | `nam5` |
+| PITR | `POINT_IN_TIME_RECOVERY_ENABLED` (enabled 2026-10-11, `versionRetentionPeriod: 604800s`) |
+| Daily schedule | `a3348d3d-a9b0-4e6c-91ae-08e81a1161db` (retention `1209600s` = 14d) |
+| Weekly schedule | `cbad203d-808b-4592-99ae-33ac3fe4d808` (Sunday, retention `7862400s` = 13w) |
 
 ## Enable PITR
 
@@ -140,10 +142,10 @@ Practical paths:
 
 Do these yourself (agent does not run them):
 
-1. [ ] `gcloud auth login` and `gcloud config set project storydeck-16`
-2. [ ] `databases describe` — record `locationId` in the table above
-3. [ ] Enable PITR (`--enable-pitr`); confirm `POINT_IN_TIME_RECOVERY_ENABLED`
-4. [ ] Create daily (14d) and weekly Sunday (13w) backup schedules; confirm with `schedules list`
+1. [x] `gcloud auth login` and `gcloud config set project storydeck-16`
+2. [x] `databases describe` — record `locationId` in the table above
+3. [x] Enable PITR (`--enable-pitr`); confirm `POINT_IN_TIME_RECOVERY_ENABLED`
+4. [x] Create daily (14d) and weekly Sunday (13w) backup schedules; confirm with `schedules list`
 5. [ ] After first backup exists: restore to `restore-test-YYYYMMDD` (never onto `(default)`)
 6. [ ] Verify `collections` + `userPreferences` and compare counts with `(default)`
 7. [ ] Fill **Last restore test** in this file (follow-up commit or PR)
