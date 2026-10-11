@@ -155,7 +155,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(
       screen.getByText("You're refreshing too fast, try again in a few seconds"),

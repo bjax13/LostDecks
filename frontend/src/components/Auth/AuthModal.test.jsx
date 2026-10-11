@@ -38,7 +38,11 @@ function renderModal(props = {}) {
     onClose,
     ...render(
       <TestMemoryRouter>
-        <AuthModal isOpen={props.isOpen ?? true} onClose={onClose} context={props.context ?? null} />
+        <AuthModal
+          isOpen={props.isOpen ?? true}
+          onClose={onClose}
+          context={props.context ?? null}
+        />
       </TestMemoryRouter>,
     ),
   };
