@@ -84,7 +84,33 @@ service cloud.firestore {
           || (data.discordHandle is string && data.discordHandle.size() <= 100))
         && (!("discordChannel" in data)
           || (data.discordChannel is string && data.discordChannel.size() <= 100))
+        && (!("publicShareId" in data)
+          || (data.publicShareId is string && data.publicShareId.size() <= 32))
         && contactSharingComplete(data);
+    }
+
+    function validPublicTradeList(data) {
+      return data.keys().hasOnly([
+          "ownerUid", "displayName", "discordHandle", "region",
+          "iso", "uft", "updatedAt", "version"
+        ])
+        && data.keys().hasAll(["ownerUid", "displayName", "iso", "uft", "updatedAt", "version"])
+        && data.ownerUid is string
+        && data.ownerUid.size() > 0
+        && data.ownerUid.size() <= 128
+        && data.displayName is string
+        && data.displayName.size() > 0
+        && data.displayName.size() <= 60
+        && (!("discordHandle" in data)
+          || (data.discordHandle is string && data.discordHandle.size() <= 100))
+        && (!("region" in data)
+          || (data.region is string && data.region.size() <= 60))
+        && data.iso is list
+        && data.iso.size() <= 500
+        && data.uft is list
+        && data.uft.size() <= 500
+        && data.updatedAt is timestamp
+        && data.version == 1;
     }
 
     // User preferences (single per-user doc)
@@ -99,6 +125,20 @@ service cloud.firestore {
     // Server-only (Admin SDK). Clients never read or write rate-limit state.
     match /rateLimits/{userId} {
       allow read, write: if false;
+    }
+
+    // Opt-in public ISO/UFT snapshots (shareId is not the owner uid)
+    match /publicTradeLists/{shareId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.ownerUid
+        && validPublicTradeList(request.resource.data);
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.ownerUid
+        && request.auth.uid == request.resource.data.ownerUid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && validPublicTradeList(request.resource.data);
+      allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
     match /{document=**} {

@@ -100,7 +100,12 @@ function CollectionContent() {
       ) : null}
 
       <div className="collection-page__body">
-        <BulkCollectionTools ownerUid={ownerUid} entries={entries} disabled={loading} />
+        <BulkCollectionTools
+          ownerUid={ownerUid}
+          entries={entries}
+          disabled={loading}
+          displayName={user?.displayName || ""}
+        />
         {loading ? (
           <div className="collection-page__loading">
             <div className="collection-page__loading-spinner" aria-hidden="true" />

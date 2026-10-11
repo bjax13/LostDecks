@@ -67,20 +67,26 @@ function downloadCsv(filename, csv) {
   URL.revokeObjectURL(url);
 }
 
-export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
+export default function BulkCollectionTools({ ownerUid, entries, disabled, displayName = "" }) {
   const [processing, setProcessing] = useState(false);
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
   const [matchKeep, setMatchKeep] = useState(() => ({ ...DEFAULT_MATCH_KEEP_BY_LANE }));
+  const [publicShareId, setPublicShareId] = useState("");
+  const [discordHandle, setDiscordHandle] = useState("");
 
   useEffect(() => {
     if (!ownerUid) {
       setMatchKeep({ ...DEFAULT_MATCH_KEEP_BY_LANE });
+      setPublicShareId("");
+      setDiscordHandle("");
       return undefined;
     }
     return subscribeUserPreferences(ownerUid, (prefs) => {
       setMatchKeep(prefs.matchKeep);
+      setPublicShareId(prefs.publicShareId || "");
+      setDiscordHandle(prefs.discordHandle || "");
     });
   }, [ownerUid]);
   const [lastFileName, setLastFileName] = useState("");
@@ -308,6 +314,11 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         onCopied={handlePostCopied}
         onCopyError={handlePostCopyError}
         matchKeep={matchKeep}
+        shareId={publicShareId || null}
+        ownerUid={ownerUid}
+        displayName={displayName}
+        discordHandle={discordHandle}
+        onShareIdChange={setPublicShareId}
       />
       <VisualBulkCollectionEditorModal
         isOpen={isVisualEditorOpen}

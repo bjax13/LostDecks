@@ -21,6 +21,7 @@ import PrivacyPolicy from "./pages/Legal/PrivacyPolicy.jsx";
 import Terms from "./pages/Legal/Terms.jsx";
 import MatchesPage from "./pages/Matches";
 import NotFound from "./pages/NotFound";
+import PublicTradeListPage from "./pages/PublicTradeList";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function MainNav() {
@@ -125,6 +126,7 @@ function App() {
           <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
           <Route path="/collections" element={<CollectionPage />} />
           <Route path="/getting-started" element={<GettingStartedPage />} />
+          <Route path="/t/:shareId" element={<PublicTradeListPage />} />
           <Route path="/matches" element={<MatchesPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/auth/login" element={<Login />} />
