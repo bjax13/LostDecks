@@ -10,20 +10,15 @@ vi.mock("./contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
 }));
 
+// Home (and other routes) still call useAuthModal; MainNav no longer does.
 vi.mock("./contexts/AuthModalContext.jsx", () => ({
   useAuthModal: mockUseAuthModal,
 }));
 
-function setupAuthModal() {
-  const openAuthModal = vi.fn();
-  mockUseAuthModal.mockReturnValue({ openAuthModal });
-  return { openAuthModal };
-}
-
 describe("App (hook mocks)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    setupAuthModal();
+    mockUseAuthModal.mockReturnValue({ openAuthModal: vi.fn() });
     mockUseAuth.mockReturnValue({
       user: null,
       logout: vi.fn(),
@@ -91,19 +86,10 @@ describe("App (hook mocks)", () => {
     errSpy.mockRestore();
   });
 
-  it("opens the auth modal when Quick sign in is clicked", async () => {
-    const user = userEvent.setup();
-    const { openAuthModal } = setupAuthModal();
-    render(<App />);
-    await user.click(screen.getByRole("button", { name: "Quick sign in" }));
-    expect(openAuthModal).toHaveBeenCalledTimes(1);
-    expect(openAuthModal).toHaveBeenCalledWith();
-  });
-
   it("renders sign-in navigation for a signed-out user", () => {
     render(<App />);
     expect(screen.getByRole("link", { name: "ShardStash" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /sign in/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quick sign in" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign in/i })).toHaveAttribute("href", "/auth/login");
+    expect(screen.queryByRole("button", { name: "Quick sign in" })).not.toBeInTheDocument();
   });
 });

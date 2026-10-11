@@ -1,21 +1,20 @@
 # Sign in
 
-Sign in lets a collector create a session with email and password, register a new account, reset a password, or use the quick-sign-in modal, then reach auth-gated pages.
+Sign in lets a collector create a session with email and password, register a new account, reset a password, or use the in-page auth modal, then reach auth-gated pages.
 
 ## Sub-features
 
 - `auth-login-page` signs in from `/auth/login` and shows a signed-in nav.
 - `auth-login-redirect` sends Collection, Matches, and Account visitors to login, then back after success.
-- `auth-modal` opens from Quick sign in or Home Sign In and closes on success without leaving the current page.
+- `auth-modal` opens from Home Sign In (and Collectibles add / Getting Started CTAs) and closes on success without leaving the current page.
 - `auth-register` creates an account from `/auth/register` and lands on Home.
 - `auth-forgot` submits the reset form on `/auth/forgot`.
 - `auth-logout` returns the primary nav to Sign in.
 
 ## How to get to it (user POV)
 
-- Choose `Sign in` in the primary navigation.
-- Choose `Quick sign in` in the primary navigation.
-- Choose `Sign In` on the Home hero (signed out).
+- Choose `Sign in` in the primary navigation (goes to `/auth/login`).
+- Choose `Sign In` on the Home hero (signed out; opens AuthModal).
 - Follow Collection, Matches, or Account while signed out (redirect to `/auth/login`).
 - Choose `Need an account? Sign up` on the login page.
 - Choose `Forgot password?` on the login page.
@@ -34,7 +33,7 @@ Preconditions:
 - **Successful login.** Submit the seeded collector. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`. Primary nav shows `Hi, Collector One` and a `Sign out` button. Default landing is `/` with heading `Track your collectibles in one place.`
 - **Logout.** Sign out. Run `$VERIFY drive logout`. Primary nav shows `Sign in` again.
 - **Gated redirect.** Choose Collection while signed out. Run `$VERIFY drive click --role link --name Collection --scope nav`. The login heading is visible (not Collection). After `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, heading `Your Collection` appears.
-- **Quick sign in modal.** Sign out, then open the modal. Run `$VERIFY drive logout`, `$VERIFY drive click --role button --name "Quick sign in" --scope nav`. Heading `Sign In` is visible (modal, not the login page h1). Close with `$VERIFY drive click --role button --name ×`.
+- **Auth modal (Home hero).** Sign out, go home, then open the modal. Run `$VERIFY drive logout`, `$VERIFY drive goto --path /`, `$VERIFY drive click --role button --name "Sign In"`. Heading `Sign In` is visible (modal, not the login page h1). Close with `$VERIFY drive click --role button --name ×`.
 - **Register page.** Open sign up. Run `$VERIFY drive goto --path /auth/register`. The heading `Create your ShardStash account` is visible with Display Name, Email, and Password.
 - **Forgot password.** Open reset. Run `$VERIFY drive goto --path /auth/forgot`. The heading `Reset your password` is visible. Fill `$VERIFY drive fill --label Email --value collector.one@example.com` and `$VERIFY drive click --role button --name "Send reset email"`. The page shows `Check your inbox for a password reset link.` (emulator does not deliver mail; the in-app confirmation is the proof).
 - **Proof.** Capture the signed-in home landing after login. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/auth/signed-in-home.png --full-page`, and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/auth/signed-in-home.aria.txt`. Artifacts show `Hi, Collector One`, `Sign out`, and `Track your collectibles in one place.`
