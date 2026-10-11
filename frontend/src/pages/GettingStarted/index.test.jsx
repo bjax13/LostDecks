@@ -645,6 +645,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
 
     expect(input).toHaveAttribute("min", "0");
+    expect(input).toHaveAttribute("max", "999");
     expect(input).toHaveAttribute("step", "1");
 
     await user.clear(input);
@@ -653,7 +654,9 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(input).toHaveValue(-5);
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(applyAll).toBeDisabled();
-    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
+    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(
+      /quantity must be between 0 and 999/i,
+    );
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
 
     fireEvent.change(input, { target: { value: "-5" } });
@@ -666,6 +669,34 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 2$/i)).toBeInTheDocument();
     expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
     expect(within(bulkActions).getByRole("button", { name: "Apply all" })).toBeEnabled();
+  });
+
+  it("clamps bulk custom quantity above 999 so Apply all cannot set more than the collection ceiling", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const bulkActions = screen.getByRole("toolbar", {
+      name: /bulk action for elsecaller story foils/i,
+    });
+    const input = within(bulkActions).getByLabelText(/custom quantity for/i);
+    const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+
+    fireEvent.change(input, { target: { value: "1000" } });
+    expect(input).toHaveValue(999);
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(applyAll).toBeEnabled();
+    expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
+
+    fireEvent.input(input, { target: { value: "9999" } });
+    expect(input).toHaveValue(999);
+
+    await user.click(applyAll);
+    expect(
+      getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 999$/i),
+    ).toBeInTheDocument();
   });
 
   it("moves All coverage to Some when one SKU is set to zero", async () => {
