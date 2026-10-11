@@ -1,4 +1,10 @@
-import { isPostHogConfigured, openPostHogFeedbackSurvey } from "../analytics/posthog.js";
+import { useEffect, useState } from "react";
+import {
+  fetchPostHogFeedbackSurveyAvailability,
+  getPostHogFeedbackSurveyId,
+  isPostHogConfigured,
+  openPostHogFeedbackSurvey,
+} from "../analytics/posthog.js";
 
 function MegaphoneIcon() {
   return (
@@ -26,7 +32,27 @@ function MegaphoneIcon() {
 }
 
 export default function FeedbackFab() {
-  if (!isPostHogConfigured()) {
+  const [surveyAvailable, setSurveyAvailable] = useState(false);
+
+  useEffect(() => {
+    if (!isPostHogConfigured() || !getPostHogFeedbackSurveyId()) {
+      setSurveyAvailable(false);
+      return;
+    }
+
+    let cancelled = false;
+    fetchPostHogFeedbackSurveyAvailability().then((available) => {
+      if (!cancelled) {
+        setSurveyAvailable(available);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!surveyAvailable) {
     return null;
   }
 

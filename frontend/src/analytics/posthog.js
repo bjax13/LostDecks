@@ -14,6 +14,51 @@ export function getPostHogFeedbackSurveyId() {
   return feedbackSurveyId;
 }
 
+/** True when the survey is present and has not been stopped (end_date in the past). */
+export function isActiveFeedbackSurvey(survey) {
+  if (!survey || survey.id !== feedbackSurveyId) {
+    return false;
+  }
+  if (survey.start_date) {
+    const start = new Date(survey.start_date);
+    if (!Number.isNaN(start.getTime()) && start.getTime() > Date.now()) {
+      return false;
+    }
+  }
+  if (survey.end_date) {
+    const end = new Date(survey.end_date);
+    if (!Number.isNaN(end.getTime()) && end.getTime() <= Date.now()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Resolves true when PostHog still serves the configured feedback survey as active.
+ * Use this to hide the FAB after PostHog stops the survey (e.g. responses_limit).
+ */
+export function fetchPostHogFeedbackSurveyAvailability() {
+  return new Promise((resolve) => {
+    if (!initialized || !feedbackSurveyId) {
+      resolve(false);
+      return;
+    }
+
+    const resolveFromList = (surveys) => {
+      resolve((surveys ?? []).some(isActiveFeedbackSurvey));
+    };
+
+    posthog.getSurveys((surveys, context) => {
+      if (context?.isLoaded) {
+        resolveFromList(surveys);
+        return;
+      }
+      posthog.getSurveys((fresh) => resolveFromList(fresh), true);
+    });
+  });
+}
+
 export function initPostHog() {
   if (initialized || !key) {
     return;
@@ -36,7 +81,10 @@ export function openPostHogFeedbackSurvey() {
     return;
   }
 
-  const display = () => {
+  const displayIfActive = (surveys) => {
+    if (!(surveys ?? []).some(isActiveFeedbackSurvey)) {
+      return;
+    }
     posthog.displaySurvey(feedbackSurveyId, {
       displayType: DisplaySurveyType.Popover,
       ignoreConditions: true,
@@ -45,11 +93,11 @@ export function openPostHogFeedbackSurvey() {
   };
 
   posthog.getSurveys((surveys, context) => {
-    if (context?.isLoaded && surveys.some((survey) => survey.id === feedbackSurveyId)) {
-      display();
+    if (context?.isLoaded) {
+      displayIfActive(surveys);
       return;
     }
-    posthog.getSurveys(() => display(), true);
+    posthog.getSurveys((fresh) => displayIfActive(fresh), true);
   });
 }
 

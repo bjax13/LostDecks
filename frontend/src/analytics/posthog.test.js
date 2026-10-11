@@ -84,6 +84,33 @@ describe("posthog analytics", () => {
     expect(displaySurveyMock).not.toHaveBeenCalled();
   });
 
+  it("does not open a stopped or missing feedback survey", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    vi.stubEnv("VITE_POSTHOG_SURVEY_ID", "survey-test-id");
+    getSurveysMock.mockImplementation((callback) => {
+      callback([{ id: "survey-test-id", end_date: "2020-01-01T00:00:00.000Z" }], {
+        isLoaded: true,
+      });
+    });
+    const { initPostHog, openPostHogFeedbackSurvey } = await import("./posthog.js");
+    initPostHog();
+    openPostHogFeedbackSurvey();
+    expect(displaySurveyMock).not.toHaveBeenCalled();
+  });
+
+  it("reports feedback survey availability from getSurveys", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    vi.stubEnv("VITE_POSTHOG_SURVEY_ID", "survey-test-id");
+    const { initPostHog, fetchPostHogFeedbackSurveyAvailability } = await import("./posthog.js");
+    initPostHog();
+    await expect(fetchPostHogFeedbackSurveyAvailability()).resolves.toBe(true);
+
+    getSurveysMock.mockImplementation((callback) => {
+      callback([], { isLoaded: true });
+    });
+    await expect(fetchPostHogFeedbackSurveyAvailability()).resolves.toBe(false);
+  });
+
   it("captures pageviews only after init", async () => {
     vi.stubEnv("VITE_POSTHOG_KEY", "");
     const { initPostHog, capturePostHogPageView } = await import("./posthog.js");
