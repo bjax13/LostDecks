@@ -6,6 +6,7 @@ const mockUnsubscribe = vi.fn();
 
 const authFns = vi.hoisted(() => ({
   createUserWithEmailAndPassword: vi.fn(),
+  getAdditionalUserInfo: vi.fn(),
   onAuthStateChanged: vi.fn((_auth, callback) => {
     callback(null);
     return mockUnsubscribe;
@@ -19,9 +20,17 @@ const authFns = vi.hoisted(() => ({
 
 vi.mock("firebase/auth", () => authFns);
 
+const posthogMocks = vi.hoisted(() => ({
+  syncPostHogUser: vi.fn(),
+  resetPostHogUser: vi.fn(),
+  captureEvent: vi.fn(),
+}));
+
+vi.mock("../analytics/posthog.js", () => posthogMocks);
+
 const fb = vi.hoisted(() => ({
   auth: { __tag: "auth" },
-  googleProvider: { __tag: "google" },
+  googleProvider: { providerId: "google.com", __tag: "google" },
   hasFirebaseConfig: true,
 }));
 
@@ -32,6 +41,7 @@ import { AuthProvider, useAuth } from "./AuthContext.jsx";
 afterEach(() => {
   vi.restoreAllMocks();
   authFns.createUserWithEmailAndPassword.mockReset();
+  authFns.getAdditionalUserInfo.mockReset();
   authFns.onAuthStateChanged.mockReset();
   authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
     callback(null);
@@ -42,9 +52,12 @@ afterEach(() => {
   authFns.signInWithPopup.mockReset();
   authFns.signOut.mockReset();
   authFns.updateProfile.mockReset();
+  posthogMocks.syncPostHogUser.mockReset();
+  posthogMocks.resetPostHogUser.mockReset();
+  posthogMocks.captureEvent.mockReset();
   mockUnsubscribe.mockClear();
   fb.auth = { __tag: "auth" };
-  fb.googleProvider = { __tag: "google" };
+  fb.googleProvider = { providerId: "google.com", __tag: "google" };
   fb.hasFirebaseConfig = true;
 });
 
@@ -193,13 +206,38 @@ describe("AuthProvider", () => {
     });
   });
 
-  it("logout calls signOut", async () => {
+  it("logout calls signOut and resets PostHog", async () => {
     authFns.signOut.mockResolvedValue(undefined);
     const user = userEvent.setup();
     renderAuth();
     await user.click(screen.getByRole("button", { name: "logout" }));
     await waitFor(() => {
       expect(authFns.signOut).toHaveBeenCalledWith(fb.auth);
+    });
+    expect(posthogMocks.resetPostHogUser).toHaveBeenCalled();
+  });
+
+  it("login captures login_completed after password sign-in", async () => {
+    authFns.signInWithEmailAndPassword.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-email" }));
+    await waitFor(() => {
+      expect(posthogMocks.captureEvent).toHaveBeenCalledWith("login_completed", {
+        method: "password",
+      });
+    });
+  });
+
+  it("register captures signup_completed after password registration", async () => {
+    authFns.createUserWithEmailAndPassword.mockResolvedValue({ user: { uid: "x" } });
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "register-no-name" }));
+    await waitFor(() => {
+      expect(posthogMocks.captureEvent).toHaveBeenCalledWith("signup_completed", {
+        method: "password",
+      });
     });
   });
 
@@ -236,12 +274,29 @@ describe("AuthProvider", () => {
   });
 
   it("loginWithGoogle uses signInWithPopup with google provider", async () => {
-    authFns.signInWithPopup.mockResolvedValue(undefined);
+    authFns.signInWithPopup.mockResolvedValue({ user: { uid: "g1" } });
+    authFns.getAdditionalUserInfo.mockReturnValue({ isNewUser: false });
     const user = userEvent.setup();
     renderAuth();
     await user.click(screen.getByRole("button", { name: "login-google" }));
     await waitFor(() => {
       expect(authFns.signInWithPopup).toHaveBeenCalledWith(fb.auth, fb.googleProvider);
+    });
+    expect(posthogMocks.captureEvent).toHaveBeenCalledWith("login_completed", {
+      method: "google.com",
+    });
+  });
+
+  it("loginWithGoogle captures signup_completed for new Google users", async () => {
+    authFns.signInWithPopup.mockResolvedValue({ user: { uid: "g-new" } });
+    authFns.getAdditionalUserInfo.mockReturnValue({ isNewUser: true });
+    const user = userEvent.setup();
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: "login-google" }));
+    await waitFor(() => {
+      expect(posthogMocks.captureEvent).toHaveBeenCalledWith("signup_completed", {
+        method: "google.com",
+      });
     });
   });
 

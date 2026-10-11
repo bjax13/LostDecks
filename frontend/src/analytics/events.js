@@ -1,0 +1,9 @@
+export const SIGNUP_COMPLETED = "signup_completed";
+export const LOGIN_COMPLETED = "login_completed";
+export const GETTING_STARTED_STEP = "getting_started_step_viewed";
+export const GETTING_STARTED_SAVED = "getting_started_saved";
+export const ITEM_ADDED = "item_added";
+export const BULK_IMPORT_APPLIED = "bulk_import_applied";
+export const MATCHES_VIEWED = "matches_viewed";
+export const ISO_UFT_COPIED = "iso_uft_copied";
+export const SIGN_IN_PROMPTED = "sign_in_prompted";

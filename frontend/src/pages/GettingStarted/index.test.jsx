@@ -15,6 +15,7 @@ const mockOpenAuthModal = vi.hoisted(() => vi.fn());
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseUserCollection = vi.hoisted(() => vi.fn());
 const mockApplyBulkCollectionUpdate = vi.hoisted(() => vi.fn());
+const mockCaptureEvent = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({ useAuth: () => mockUseAuth() }));
 vi.mock("../../contexts/AuthModalContext.jsx", () => ({
@@ -25,6 +26,9 @@ vi.mock("../Collection/hooks/useUserCollection", () => ({
 }));
 vi.mock("../Collection/utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
+}));
+vi.mock("../../analytics/posthog.js", () => ({
+  captureEvent: (...args) => mockCaptureEvent(...args),
 }));
 
 function setupUser() {
@@ -904,10 +908,20 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       loading: false,
       error: null,
     });
+    mockApplyBulkCollectionUpdate.mockResolvedValue({
+      created: 0,
+      updated: 2,
+      deleted: 1,
+      issues: [],
+    });
     const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
+    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_step_viewed", {
+      step: "manual",
+      collectibleType: "both",
+    });
     await user.click(screen.getByRole("button", { name: "Save collection" }));
 
     expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledWith({
@@ -916,6 +930,26 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       existingEntries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
       allowPins: true,
     });
+    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_saved", {
+      collectibleType: "both",
+      created: 0,
+      updated: 2,
+      deleted: 1,
+    });
+  });
+
+  it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await user.click(screen.getByRole("button", { name: "Sign in and save" }));
+
+    expect(mockCaptureEvent).toHaveBeenCalledWith("sign_in_prompted", {
+      reason: "getting-started-save",
+    });
+    expect(mockOpenAuthModal).toHaveBeenCalledWith({ reason: "getting-started-save" });
+    expect(mockApplyBulkCollectionUpdate).not.toHaveBeenCalled();
   });
 
   it("saves cards-only collectors without allowing pin updates", async () => {

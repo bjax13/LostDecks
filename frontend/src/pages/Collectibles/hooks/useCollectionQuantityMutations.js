@@ -10,6 +10,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useCallback, useState } from "react";
+import { ITEM_ADDED } from "../../../analytics/events.js";
+import { captureEvent } from "../../../analytics/posthog.js";
 import { useAuth } from "../../../contexts/AuthContext";
 import { resolveSkuId } from "../../../data/collectibles";
 import { db } from "../../../lib/firebase";
@@ -126,6 +128,11 @@ export function useCollectionQuantityMutations() {
             payload.notes = notes.trim();
           }
           await addDoc(collectionRef, payload);
+          captureEvent(ITEM_ADDED, {
+            skuId,
+            quantity: addQuantity,
+            source: "collectibles",
+          });
           return payload;
         }
 
@@ -151,6 +158,11 @@ export function useCollectionQuantityMutations() {
         if (updatePayload.notes) {
           payload.notes = updatePayload.notes;
         }
+        captureEvent(ITEM_ADDED, {
+          skuId,
+          quantity: addQuantity,
+          source: "collectibles",
+        });
         return payload;
       });
     },

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MATCHES_VIEWED } from "../../analytics/events.js";
+import { captureEvent } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
 import { useAuth } from "../../contexts/AuthContext";
@@ -178,6 +180,7 @@ function formatFreshnessMessage({
 function MatchesContent() {
   const { user } = useAuth();
   const [showMayRefreshMessage, setShowMayRefreshMessage] = useState(false);
+  const matchesViewedKeyRef = useRef(null);
   const {
     cacheAgeSeconds,
     callerOptedOut,
@@ -210,6 +213,22 @@ function MatchesContent() {
     setSortDirection,
     resetFilters,
   } = useMatchesExplorer({ matches });
+
+  useEffect(() => {
+    if (loading || error || isUsingCachedResult) {
+      return;
+    }
+    const key = `${pageIndex}:${matches.length}:${callerOptedOut}`;
+    if (matchesViewedKeyRef.current === key) {
+      return;
+    }
+    matchesViewedKeyRef.current = key;
+    captureEvent(MATCHES_VIEWED, {
+      matchCount: matches.length,
+      callerOptedOut,
+      pageIndex,
+    });
+  }, [callerOptedOut, error, isUsingCachedResult, loading, matches.length, pageIndex]);
 
   useEffect(() => {
     if (loading || error || cacheAgeSeconds == null || refreshAvailableInSeconds > 0) {
