@@ -106,7 +106,7 @@ describe("gettingStartedCatalog", () => {
 
     const pinSku = gettingStartedTree.find((section) => section.id === "pins").children[0].skus[0];
     expect(pinSku.finish).toBeNull();
-    expect(pinSku.label).toBe("Shreadad");
+    expect(pinSku.label).toBe("Shredhead");
   });
 
   it("starts many-card collectors at all and few-card collectors at none", () => {
@@ -128,18 +128,18 @@ describe("gettingStartedCatalog", () => {
   it("formats pin review labels by name instead of number", () => {
     const pinSkus = gettingStartedTree.find((section) => section.id === "pins").children[0].skus;
     expect(pinSkus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
-      "Shreadad",
+      "Shredhead",
       "Howlerina",
-      "Burp Slurper",
+      "Burpslurper",
       "Darren",
       "Cleverclaws",
     ]);
     expect(
       formatSkuQuantityAriaLabel({
         groupTitle: "ChasmFriends Pins",
-        numberLabel: "Shreadad",
+        numberLabel: "Shredhead",
       }),
-    ).toBe("ChasmFriends Pins Shreadad quantity");
+    ).toBe("ChasmFriends Pins Shredhead quantity");
     const brandon = gettingStartedTree
       .find((section) => section.id === "pins")
       .children.find((group) => group.label === "Character Pin Series 1")

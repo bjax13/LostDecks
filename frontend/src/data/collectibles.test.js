@@ -67,7 +67,7 @@ describe("collectibles (unit)", () => {
       expect(rec).not.toBeNull();
       expect(rec?.collectibleType).toBe("pin");
       expect(rec?.category).toBe("pin");
-      expect(rec?.displayName).toBe("Shreadad");
+      expect(rec?.displayName).toBe("Shredhead");
       expect(rec?.storyTitle).toBe("ChasmFriends");
       expect(rec?.series).toBe("ChasmFriends");
       expect(rec?.setName).toBe("ChasmFriends Pins");
@@ -108,7 +108,7 @@ describe("collectibles (unit)", () => {
       expect(rec).not.toBeNull();
       expect(rec?.finish).toBeNull();
       expect(rec?.card?.collectibleType).toBe("pin");
-      expect(rec?.card?.displayName).toBe("Shreadad");
+      expect(rec?.card?.displayName).toBe("Shredhead");
     });
 
     it("returns null for unknown sku", () => {

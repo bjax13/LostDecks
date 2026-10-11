@@ -1,6 +1,6 @@
 import { useAuth } from "../../contexts/AuthContext";
 
-function SocialLoginButtons({ onSuccess }) {
+function SocialLoginButtons({ onSuccess, emphasis = "default", leadIn = "Or continue with" }) {
   const { loginWithGoogle } = useAuth();
 
   const handleGoogleLogin = async () => {
@@ -14,9 +14,14 @@ function SocialLoginButtons({ onSuccess }) {
     }
   };
 
+  const className =
+    emphasis === "primary"
+      ? "social-login-buttons social-login-buttons--primary"
+      : "social-login-buttons";
+
   return (
-    <div className="social-login-buttons">
-      <p>Or continue with</p>
+    <div className={className}>
+      <p>{leadIn}</p>
       <div className="social-login-buttons__group">
         <button type="button" onClick={handleGoogleLogin}>
           Google

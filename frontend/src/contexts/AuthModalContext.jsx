@@ -30,7 +30,7 @@ export function AuthModalProvider({ children }) {
   return (
     <AuthModalContext.Provider value={value}>
       {children}
-      <AuthModal isOpen={isOpen} onClose={closeAuthModal} />
+      <AuthModal isOpen={isOpen} onClose={closeAuthModal} context={context} />
     </AuthModalContext.Provider>
   );
 }

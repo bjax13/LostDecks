@@ -13,16 +13,16 @@ vi.mock("./lib/firebase", () => ({
   hasFirebaseConfig: false,
 }));
 
+vi.mock("./hooks/useApplyPendingPicks.js", () => ({
+  PendingPicksApplier: () => null,
+  useApplyPendingPicks: () => {},
+}));
+
 import App from "./App.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
-import { AuthModalProvider } from "./contexts/AuthModalContext.jsx";
 
 function renderWithAppProviders(ui) {
-  return render(
-    <AuthProvider>
-      <AuthModalProvider>{ui}</AuthModalProvider>
-    </AuthProvider>,
-  );
+  return render(<AuthProvider>{ui}</AuthProvider>);
 }
 
 describe("App (integration)", () => {

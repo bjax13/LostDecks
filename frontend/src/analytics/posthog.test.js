@@ -112,10 +112,8 @@ describe("posthog analytics", () => {
       email: "a@b.c",
       displayName: "Ada",
     });
-    expect(identifyMock).toHaveBeenCalledWith("u1", {
-      email: "a@b.c",
-      name: "Ada",
-    });
+    expect(identifyMock).toHaveBeenCalledWith("u1");
+    expect(identifyMock).toHaveBeenCalledTimes(1);
     syncPostHogUser(null);
     expect(resetMock).toHaveBeenCalled();
   });

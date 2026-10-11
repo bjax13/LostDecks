@@ -35,6 +35,25 @@
   line-height: 1.6;
 }
 
+.matches-welcome p {
+  margin: 0.5rem 0 0;
+  color: #d7ceff;
+  line-height: 1.55;
+}
+
+.matches-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.matches-welcome-share {
+  color: rgba(224, 224, 224, 0.55);
+  font-size: 0.9rem;
+}
+
 .matches-toolbar.cards-toolbar {
   margin-top: 0;
   padding: 1.75rem;
