@@ -1,4 +1,9 @@
-import { datasetSkus, datasetStories, getCollectibleRecord } from "../../data/collectibles";
+import {
+  datasetSkus,
+  datasetStories,
+  getCollectibleRecord,
+  pinDatasetMeta,
+} from "../../data/collectibles";
 
 export const DEFAULT_MANUAL_QUANTITY = 0;
 
@@ -41,6 +46,9 @@ const SECTION_DEFINITIONS = [
 ];
 
 const storyOrder = new Map(datasetStories.map((story, index) => [story.title, index]));
+const pinSeriesOrder = new Map(
+  (pinDatasetMeta.series ?? []).map((seriesLabel, index) => [seriesLabel, index]),
+);
 
 function compareCards(a, b) {
   if (a.card.number !== b.card.number) {
@@ -49,7 +57,13 @@ function compareCards(a, b) {
   return a.card.displayName.localeCompare(b.card.displayName);
 }
 
-function compareGroups(a, b) {
+function compareGroups(a, b, sectionId) {
+  if (sectionId === "pins") {
+    const rankA = pinSeriesOrder.get(a.label) ?? Number.MAX_SAFE_INTEGER;
+    const rankB = pinSeriesOrder.get(b.label) ?? Number.MAX_SAFE_INTEGER;
+    if (rankA !== rankB) return rankA - rankB;
+    return a.label.localeCompare(b.label);
+  }
   const rankA = storyOrder.get(a.label) ?? Number.MAX_SAFE_INTEGER;
   const rankB = storyOrder.get(b.label) ?? Number.MAX_SAFE_INTEGER;
   if (rankA !== rankB) return rankA - rankB;
@@ -84,7 +98,7 @@ function buildGettingStartedTree() {
         label,
         skus: skus.sort(compareCards),
       }))
-      .sort(compareGroups);
+      .sort((a, b) => compareGroups(a, b, section.id));
 
     return { id: section.id, label: section.label, children };
   });
@@ -140,7 +154,7 @@ function isPinSku(sku) {
 }
 
 export function formatSkuNumberLabel(sku) {
-  // Pins are identified by name (Shreadad, etc.), not catalog numbers.
+  // Pins are identified by name (Shredhead, etc.), not catalog numbers.
   if (isPinSku(sku)) {
     return sku.label || sku.card?.displayName || sku.card?.name || "Pin";
   }
@@ -215,7 +229,11 @@ export function getSkuFinishLabel(sku) {
 
 export function formatReviewGroupLabel(group, section) {
   if (section.id === "pins") {
-    // Section header is generic ("Pin Collections"); group keeps the product name.
+    // Section header is generic ("Pin Collections"); series names that already say
+    // "Pin"/"Pins" stay as-is (e.g. Character Pin Series 1), others get " Pins".
+    if (/\bpin/i.test(group.label)) {
+      return group.label;
+    }
     return `${group.label} Pins`;
   }
   return `${group.label} ${section.label}`;

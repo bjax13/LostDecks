@@ -31,9 +31,9 @@ function setupUser() {
   return userEvent.setup({ delay: null });
 }
 
-function renderPage() {
+function renderPage(path = "/getting-started") {
   return render(
-    <TestMemoryRouter initialEntries={["/getting-started"]}>
+    <TestMemoryRouter initialEntries={[path]}>
       <GettingStartedPage />
     </TestMemoryRouter>,
   );
@@ -115,6 +115,20 @@ beforeEach(() => {
 
 // Coverage + GitHub-hosted runners can push these large-tree interactions past Vitest's 5s default.
 describe("GettingStartedPage", { timeout: 20_000 }, () => {
+  it("opens the quick pin picker from collect=pins", () => {
+    renderPage("/getting-started?collect=pins&utm_source=qr&utm_campaign=nexus-2026");
+    expect(screen.getByRole("heading", { name: /Which pins do you have/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find my trades" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /what best describes you/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("skips step 1 into card review for collect=cards", () => {
+    renderPage("/getting-started?collect=cards");
+    expect(screen.getByRole("heading", { name: /Review your cards/i })).toBeInTheDocument();
+  });
+
   it("asks collectible type then the collector profile question first", () => {
     renderPage();
 
@@ -123,7 +137,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(
       screen.getByText(/tell us what you collect, then choose how you want to start/i),
     ).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /^chasmfriends pins$/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^pins$/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /^story deck cards$/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /^both$/i })).toBeInTheDocument();
     expect(
@@ -146,7 +160,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
 
-    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    await chooseCollectibleType(user, /^pins$/i);
     expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeDisabled();
     expect(
       screen.getByRole("radio", { name: /collection is not in a spreadsheet/i }),
@@ -165,7 +179,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
     expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeChecked();
 
-    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    await chooseCollectibleType(user, /^pins$/i);
     const spreadsheetOption = screen.getByRole("radio", {
       name: /collection is in a spreadsheet/i,
     });
@@ -363,7 +377,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Story Deck card rows are supported here; add ChasmFriends pins later from your collection/i,
+        /Story Deck card rows are supported here; add pins later from your collection/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/export as csv and upload/i)).toBeInTheDocument();
@@ -864,7 +878,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
     await user.click(within(pinsCoverage).getByRole("button", { name: "All" }));
     expect(
-      getSkuQuantityGroup(new RegExp(`${pinsTitle} Shreadad quantity, 1$`, "i")),
+      getSkuQuantityGroup(new RegExp(`${pinsTitle} Shredhead quantity, 1$`, "i")),
     ).toBeInTheDocument();
     expect(pinsGroup.skus).toHaveLength(5);
   });
@@ -874,7 +888,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     renderPage();
 
     await goToCardReview(user, {
-      collectiblePattern: /^chasmfriends pins$/i,
+      collectiblePattern: /^pins$/i,
       reviewHeading: /review your pins/i,
     });
 

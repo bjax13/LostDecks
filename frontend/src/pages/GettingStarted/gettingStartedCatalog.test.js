@@ -50,10 +50,10 @@ describe("gettingStartedCatalog", () => {
     expect(treeSkuIds).toHaveLength(catalogSkuIds.length);
   });
 
-  it("groups ChasmFriends Pins under Pin Collections with a ChasmFriends group title", () => {
+  it("groups pins under Pin Collections by series (ChasmFriends first, then blue-book Sets)", () => {
     const pinsSection = gettingStartedTree.find((section) => section.id === "pins");
     expect(pinsSection?.label).toBe("Pin Collections");
-    expect(pinsSection?.children).toHaveLength(1);
+    expect(pinsSection?.children.length).toBeGreaterThan(1);
     expect(pinsSection?.children[0].label).toBe("ChasmFriends");
     expect(pinsSection?.children[0].skus.map((sku) => sku.skuId)).toEqual([
       "PIN-CF-01",
@@ -63,6 +63,13 @@ describe("gettingStartedCatalog", () => {
       "PIN-CF-05",
     ]);
     expect(formatReviewGroupLabel(pinsSection.children[0], pinsSection)).toBe("ChasmFriends Pins");
+
+    const characterSeries1 = pinsSection.children.find(
+      (group) => group.label === "Character Pin Series 1",
+    );
+    expect(characterSeries1).toBeDefined();
+    expect(characterSeries1.skus.some((sku) => sku.skuId === "PIN-CPS1-00")).toBe(true);
+    expect(formatReviewGroupLabel(characterSeries1, pinsSection)).toBe("Character Pin Series 1");
   });
 
   it("filters the review tree by collectible type", () => {
@@ -99,7 +106,7 @@ describe("gettingStartedCatalog", () => {
 
     const pinSku = gettingStartedTree.find((section) => section.id === "pins").children[0].skus[0];
     expect(pinSku.finish).toBeNull();
-    expect(pinSku.label).toBe("Shreadad");
+    expect(pinSku.label).toBe("Shredhead");
   });
 
   it("starts many-card collectors at all and few-card collectors at none", () => {
@@ -108,7 +115,7 @@ describe("gettingStartedCatalog", () => {
 
     const pinsTree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
     const pinsCoverage = createCoverageState("none", pinsTree);
-    expect(Object.keys(pinsCoverage)).toEqual([pinsTree[0].children[0].id]);
+    expect(Object.keys(pinsCoverage)).toEqual(pinsTree[0].children.map((group) => group.id));
   });
 
   it("formats compact review labels without SKU ids", () => {
@@ -121,18 +128,23 @@ describe("gettingStartedCatalog", () => {
   it("formats pin review labels by name instead of number", () => {
     const pinSkus = gettingStartedTree.find((section) => section.id === "pins").children[0].skus;
     expect(pinSkus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
-      "Shreadad",
+      "Shredhead",
       "Howlerina",
-      "Burp Slurper",
+      "Burpslurper",
       "Darren",
       "Cleverclaws",
     ]);
     expect(
       formatSkuQuantityAriaLabel({
         groupTitle: "ChasmFriends Pins",
-        numberLabel: "Shreadad",
+        numberLabel: "Shredhead",
       }),
-    ).toBe("ChasmFriends Pins Shreadad quantity");
+    ).toBe("ChasmFriends Pins Shredhead quantity");
+    const brandon = gettingStartedTree
+      .find((section) => section.id === "pins")
+      .children.find((group) => group.label === "Character Pin Series 1")
+      .skus.find((sku) => sku.skuId === "PIN-CPS1-00");
+    expect(formatSkuNumberLabel(brandon)).toBe("Brandon");
   });
 
   it("disambiguates nonsense SKUs that share a card number within a group", () => {
@@ -409,12 +421,15 @@ describe("gettingStartedCatalog", () => {
     const pinsTree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
     const pinsCoverage = createCoverageState("all", pinsTree);
     const pinRows = buildCollectionRows(pinsCoverage, {}, DEFAULT_MANUAL_QUANTITY, pinsTree);
-    expect(pinRows.map((row) => row.skuId)).toEqual([
+    const pinSkuIds = pinRows.map((row) => row.skuId);
+    expect(pinSkuIds.slice(0, 5)).toEqual([
       "PIN-CF-01",
       "PIN-CF-02",
       "PIN-CF-03",
       "PIN-CF-04",
       "PIN-CF-05",
     ]);
+    expect(pinSkuIds).toContain("PIN-CPS1-00");
+    expect(pinSkuIds.length).toBeGreaterThan(5);
   });
 });

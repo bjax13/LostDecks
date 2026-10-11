@@ -1,4 +1,4 @@
-import pinDataset from "../storyData/chasmfriends-pins.json";
+import pinDataset from "../storyData/pins-catalog.json";
 import dataset from "../storyData/storydeck-lt24-with-skus.json";
 
 const storyTitleByCode = dataset.stories.reduce((acc, story) => {
@@ -135,20 +135,34 @@ function formatNonsenseCard(card) {
 function formatPinCollectible(pin) {
   const seriesTitle = pin.series ?? "Pins";
   const displayName = pin.name;
+  const catalogName = pin.catalogName ?? pinDataset.meta.setName;
+  const country = pin.country ?? null;
+  const release = pin.release ?? null;
+  const notes = pin.notes ?? null;
   return {
     id: pin.id,
     collectibleType: "pin",
-    setName: pinDataset.meta.setName,
+    setName: catalogName,
+    catalog: pin.catalog ?? null,
+    catalogName,
     category: "pin",
     story: null,
     storyTitle: seriesTitle,
+    series: seriesTitle,
     number: pin.number ?? null,
     rarity: null,
     binder: null,
     displayName,
     detail: pin.detail ?? "Enamel pin",
+    country,
+    release,
+    notes,
+    sourceName: pin.sourceName ?? null,
     finishes: toFinishList(pin.id),
-    searchTokens: [pin.id, displayName, seriesTitle, "pin"].join(" ").toLowerCase(),
+    searchTokens: [pin.id, displayName, seriesTitle, catalogName, country, release, "pin"]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
   };
 }
 

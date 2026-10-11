@@ -81,6 +81,51 @@ describe("useCollectionQuantityMutations", () => {
     expect(typeof result.current.purgeZeroQuantityEntries).toBe("function");
   });
 
+  describe("addToCollection", () => {
+    it("creates a new entry when none exists", async () => {
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.addToCollection({
+          card,
+          finish: "DUN",
+          quantity: 2,
+        });
+      });
+
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        "collections-ref",
+        expect.objectContaining({
+          ownerUid: "user-123",
+          skuId: "LT24-ELS-01-DUN",
+          quantity: 2,
+        }),
+      );
+      expect(payload.quantity).toBe(2);
+    });
+
+    it("throws a user-facing error when next quantity would exceed 999", async () => {
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "existing-1", data: { quantity: 990 } }]),
+      );
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      await act(async () => {
+        await expect(
+          result.current.addToCollection({
+            card,
+            finish: "DUN",
+            quantity: 20,
+          }),
+        ).rejects.toThrow("Quantity cannot exceed 999 for a single collection entry.");
+      });
+
+      expect(mockUpdateDoc).not.toHaveBeenCalled();
+      expect(mockAddDoc).not.toHaveBeenCalled();
+    });
+  });
+
   describe("decrementFromCollection", () => {
     it("decrements quantity on an existing SKU", async () => {
       mockGetDocs.mockResolvedValueOnce(
