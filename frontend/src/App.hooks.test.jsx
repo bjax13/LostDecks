@@ -11,6 +11,7 @@ vi.mock("./contexts/AuthContext", () => ({
 }));
 
 vi.mock("./contexts/AuthModalContext.jsx", () => ({
+  AuthModalProvider: ({ children }) => children,
   useAuthModal: mockUseAuthModal,
 }));
 
