@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MAX_COLLECTION_QUANTITY } from "../../lib/collectionLimits";
 import {
   DEFAULT_MANUAL_QUANTITY,
   formatCollectionQuantitySummary,
@@ -12,7 +13,10 @@ function parseBulkQuantity(value) {
   if (value === "") return { valid: false };
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 0) return { valid: false };
-  return { valid: true, quantity: Math.floor(parsed) };
+  return {
+    valid: true,
+    quantity: Math.min(MAX_COLLECTION_QUANTITY, Math.floor(parsed)),
+  };
 }
 
 export function useCollectionReviewEditor({
