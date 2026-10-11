@@ -23,8 +23,8 @@ import "./GettingStarted.css";
 const COLLECTIBLE_OPTIONS = [
   {
     id: COLLECTIBLE_TYPE_PINS,
-    title: "ChasmFriends Pins",
-    description: "I only collect ChasmFriends pins.",
+    title: "Pins",
+    description: "I only collect enamel pins.",
   },
   {
     id: COLLECTIBLE_TYPE_CARDS,
@@ -427,7 +427,7 @@ export default function GettingStartedPage() {
                 The importer uses a CSV so it can match every row to a {SITE_NAME} SKU before
                 saving.
                 {includesPins(collectibleType)
-                  ? " Story Deck card rows are supported here; add ChasmFriends pins later from your collection or by restarting Getting Started with Pins."
+                  ? " Story Deck card rows are supported here; add pins later from your collection or by restarting Getting Started with Pins."
                   : null}
               </p>
             </div>

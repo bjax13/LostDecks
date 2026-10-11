@@ -141,10 +141,10 @@ describe("Home page", () => {
         .getByRole("heading", { name: "Collection Snapshot" })
         .closest("section");
       expect(snapshot).toBeTruthy();
-      expect(within(snapshot).getByText("ChasmFriends Pins")).toBeInTheDocument();
+      expect(within(snapshot).getByText("Pins")).toBeInTheDocument();
       expect(within(snapshot).getByText("2 / 215")).toBeInTheDocument();
       expect(within(snapshot).getByText("1 / 215")).toBeInTheDocument();
-      expect(within(snapshot).getByText("0 / 5")).toBeInTheDocument();
+      expect(within(snapshot).getByText("0 / 171")).toBeInTheDocument();
     });
 
     it("shows Get Started as View Collection link", () => {
@@ -167,10 +167,10 @@ describe("Home page", () => {
       .getByRole("heading", { name: "Supported Collections" })
       .closest("section");
     expect(section).toBeTruthy();
-    const pinsTile = within(section).getByRole("link", { name: /ChasmFriends Pins/ });
+    const pinsTile = within(section).getByRole("link", { name: /^Pins/ });
     expect(pinsTile).toHaveAttribute("href", "/collectibles");
-    expect(within(pinsTile).getAllByText("ChasmFriends Pins")).toHaveLength(2);
-    expect(pinDatasetMeta.setName).toBe("ChasmFriends Pins");
+    expect(within(pinsTile).getAllByText("Pins")).toHaveLength(2);
+    expect(pinDatasetMeta.setName).toBe("Pins");
     expect(within(pinsTile).getByText("Browse pins")).toBeInTheDocument();
     expect(within(pinsTile).queryByText("Coming soon")).not.toBeInTheDocument();
   });

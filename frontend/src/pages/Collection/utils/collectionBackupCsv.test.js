@@ -30,11 +30,12 @@ describe("collectionBackupCsv", () => {
     expect(backupSetNameForCollectible(getSkuRecord("LT24-ELS-01-DUN").card)).toBe(
       datasetMeta.setName,
     );
-    expect(backupSetNameForCollectible(getSkuRecord("PIN-CF-01").card)).toBe(
-      pinDatasetMeta.setName,
+    expect(backupSetNameForCollectible(getSkuRecord("PIN-CF-01").card)).toBe("ChasmFriends Pins");
+    expect(backupSetNameForCollectible(getSkuRecord("PIN-CPS1-00").card)).toBe(
+      "Sanderson Collectors Guild Pins",
     );
     expect(datasetMeta.setName).toBe("Stormlight Lost Tales — Story Deck");
-    expect(pinDatasetMeta.setName).toBe("ChasmFriends Pins");
+    expect(pinDatasetMeta.setName).toBe("Pins");
   });
 
   it("exports a header-only file when nothing is owned", () => {

@@ -38,7 +38,7 @@ const SECTIONS = [
     predicate: ({ card, finish }) => card.category === "nonsense" && finish === "FOIL",
   },
   {
-    title: "ChasmFriends Pins",
+    title: "Pins",
     slug: "pins",
     groupSuffix: "Pins",
     predicate: ({ card }) => card.collectibleType === "pin" || card.category === "pin",
