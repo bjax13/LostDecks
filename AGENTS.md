@@ -124,7 +124,7 @@ Credentials: `functions/seed.local.json` (gitignored) or fallback `functions/see
    `firebase deploy --only hosting:shardstash,firestore,functions` publishes the Vite build from `frontend/dist` to https://shardstash.web.app, plus Firestore rules/indexes and Cloud Functions. It does not deploy other Google Cloud resources, and it does not overwrite the default `storydeck-16` Hosting site. If site id `shardstash` is taken globally, the deploy helper tries `shard-stash` then `shardstash-app`.
 
 4. **After deploy**  
-   Consider **App Check**, error/monitoring dashboards, and Firestore **backup** policy for your risk tolerance.
+   Consider **App Check**, error/monitoring dashboards, and Firestore **backup** policy for your risk tolerance (Firestore backup policy → see `docs/ops/backups.md`).
 
 ### Gotchas
 
