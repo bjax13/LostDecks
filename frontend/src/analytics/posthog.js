@@ -23,12 +23,20 @@ export function initPostHog() {
     api_host: host,
     capture_pageview: false,
     capture_pageleave: true,
+    capture_exceptions: true,
     person_profiles: "identified_only",
     // Custom FAB triggers surveys; do not show PostHog's automatic survey chrome.
     disable_surveys_automatic_display: true,
     advanced_enable_surveys: true,
   });
   initialized = true;
+}
+
+export function capturePostHogException(error, properties = {}) {
+  if (!initialized) {
+    return;
+  }
+  posthog.captureException(error, properties);
 }
 
 export function openPostHogFeedbackSurvey() {
