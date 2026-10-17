@@ -1,11 +1,6 @@
 import { MemoryRouter } from "react-router-dom";
-import { ROUTER_FUTURE_FLAGS } from "../routerFuture.js";
 
-/** Use instead of raw `MemoryRouter` so tests match production router flags and stay warning-free. */
+/** Use instead of raw `MemoryRouter` so tests share one router wrapper. */
 export function TestMemoryRouter({ children, ...props }) {
-  return (
-    <MemoryRouter {...props} future={ROUTER_FUTURE_FLAGS}>
-      {children}
-    </MemoryRouter>
-  );
+  return <MemoryRouter {...props}>{children}</MemoryRouter>;
 }

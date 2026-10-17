@@ -77,6 +77,7 @@ Credentials: `functions/seed.local.json` (gitignored) or fallback `functions/see
 
 ### Lint / Test / Build
 
+- **Frontend typecheck** (`checkJs` via `frontend/jsconfig.json`; `*.test.*` excluded for now): `cd frontend && npm run typecheck` (or `npm run typecheck --prefix frontend` from the repo root). CI runs the same `tsc --noEmit` job as the other frontend checks.
 - **Biome** (format, lint, import organization) runs from the repo root after `npm install`:
   - `npm run format` — write formatting
   - `npm run lint` — lint only (no write)

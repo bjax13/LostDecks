@@ -11,7 +11,18 @@ import {
 } from "../../GettingStarted/gettingStartedCatalog";
 import { applyBulkCollectionUpdate } from "../utils/bulkImport";
 
-function VisualBulkCollectionEditorModalContent({ ownerUid, entries, onClose, onSaved }) {
+/** @type {import('react').FC<{
+ *   ownerUid: string,
+ *   entries: object[],
+ *   onClose: () => void,
+ *   onSaved: () => void,
+ * }>} */
+const VisualBulkCollectionEditorModalContent = function VisualBulkCollectionEditorModalContent({
+  ownerUid,
+  entries,
+  onClose,
+  onSaved,
+}) {
   const reviewTree = useMemo(
     () => filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_BOTH),
     [],
@@ -114,7 +125,7 @@ function VisualBulkCollectionEditorModalContent({ ownerUid, entries, onClose, on
       </div>
     </div>
   );
-}
+};
 
 export default function VisualBulkCollectionEditorModal({
   isOpen,

@@ -65,6 +65,7 @@ export function useCollectibleCollectionEntry(ownerUid, collectibleId, skuId) {
       collectionQuery,
       (snapshot) => {
         let matchedEntry = null;
+        /** @type {Array<{ id: string, skuId?: string, quantity?: number }>} */
         const docs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 
         if (skuId) {

@@ -19,7 +19,6 @@ import PrivacyPolicy from "./pages/Legal/PrivacyPolicy.jsx";
 import Terms from "./pages/Legal/Terms.jsx";
 import MatchesPage from "./pages/Matches";
 import NotFound from "./pages/NotFound";
-import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function MainNav() {
   const { user, logout, loading } = useAuth();
@@ -102,7 +101,7 @@ function MainNav() {
 
 function App() {
   return (
-    <BrowserRouter future={ROUTER_FUTURE_FLAGS}>
+    <BrowserRouter>
       <PostHogPageviews />
       <MainNav />
       <hr />

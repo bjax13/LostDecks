@@ -97,8 +97,7 @@ function escapeCsvValue(value) {
 }
 
 /**
- * @param {"zeros" | "ones" | "current"} mode
- * @param {Array} [entries] required for mode "current"
+ * @param {{ mode?: "zeros" | "ones" | "current", entries?: Array }} [options]
  */
 export function createStoryDeckCollectionCsv({ mode, entries = [] } = {}) {
   if (mode !== "zeros" && mode !== "ones" && mode !== "current") {
