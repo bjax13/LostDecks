@@ -33,6 +33,16 @@ export function formatOwnedQuantityLabel({ label, ownedQuantity, isPin = false }
   return `${label} · x${ownedQuantity}`;
 }
 
+/**
+ * @param {{
+ *   collectible?: object,
+ *   card?: object,
+ *   variant?: string,
+ *   ownedBySkuId?: Record<string, number>,
+ *   deleteWhenZero?: boolean,
+ *   onQuantityChange?: (payload: object) => void,
+ * }} props
+ */
 export default function AddToCollectionButton({
   collectible,
   card,

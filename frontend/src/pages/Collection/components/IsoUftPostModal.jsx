@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { buildIsoUftPostTree, formatIsoUftPost, getDefaultExcludedIds } from "../utils/isoUftPost";
 
 function getAllDescendantIds(node) {
@@ -69,7 +69,22 @@ function IndeterminateCheckbox({ id, checkState, label, onChange }) {
   );
 }
 
-function PostTreeNode({ node, excludedIds, collapsedIds, onToggle, onToggleCollapse, depth = 1 }) {
+/** @type {import('react').FC<{
+ *   node: object,
+ *   excludedIds: Set<string>,
+ *   collapsedIds: Set<string>,
+ *   onToggle: (node: object) => void,
+ *   onToggleCollapse: (nodeId: string) => void,
+ *   depth?: number,
+ * }>} */
+const PostTreeNode = function PostTreeNode({
+  node,
+  excludedIds,
+  collapsedIds,
+  onToggle,
+  onToggleCollapse,
+  depth = 1,
+}) {
   const checkState = getNodeCheckState(node, excludedIds);
   const hasChildren = node.children && node.children.length > 0;
   const isExpanded = hasChildren && !collapsedIds.has(node.id);
@@ -100,21 +115,22 @@ function PostTreeNode({ node, excludedIds, collapsedIds, onToggle, onToggleColla
       {hasChildren && isExpanded ? (
         <div className="collection-bulk-post-modal__tree-children">
           {node.children.map((child) => (
-            <PostTreeNode
-              key={child.id}
-              node={child}
-              excludedIds={excludedIds}
-              collapsedIds={collapsedIds}
-              onToggle={onToggle}
-              onToggleCollapse={onToggleCollapse}
-              depth={depth + 1}
-            />
+            <Fragment key={child.id}>
+              <PostTreeNode
+                node={child}
+                excludedIds={excludedIds}
+                collapsedIds={collapsedIds}
+                onToggle={onToggle}
+                onToggleCollapse={onToggleCollapse}
+                depth={depth + 1}
+              />
+            </Fragment>
           ))}
         </div>
       ) : null}
     </div>
   );
-}
+};
 
 async function copyTextToClipboard(text) {
   if (navigator.clipboard?.writeText) {
