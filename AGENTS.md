@@ -4,7 +4,7 @@
 
 ### Project overview
 
-ShardStash is a single-product Vite + React 18 SPA (`frontend/`) backed by Firebase (Auth, Firestore, Cloud Functions in `functions/`). There is no custom backend server; all server-side logic runs as Firebase callable Cloud Functions.
+ShardStash is a single-product Vite + React 19 SPA (`frontend/`) backed by Firebase (Auth, Firestore, Cloud Functions in `functions/`). There is no custom backend server; all server-side logic runs as Firebase callable Cloud Functions.
 
 ### Repository layout
 
@@ -83,7 +83,7 @@ Credentials: `functions/seed.local.json` (gitignored) or fallback `functions/see
   - `npm run check` — format, lint, and organize imports (writes fixes)
   - `npm run ci` — read-only check for CI (`biome ci .`)
 - **Unit & integration tests**: Vitest + Testing Library (`cd frontend && npm run test`, or `npm run test` from the repo root). Tests live next to source as `*.test.{js,jsx}`; setup is `frontend/src/test/setup.js`. Prefer queries from [Testing Library priority](https://testing-library.com/docs/queries/about#priority) (role, label, placeholder, text) and `userEvent` over `fireEvent` where it reflects real interaction.
-- **Coverage**: `cd frontend && npm run test:coverage` enforces branch/function/line thresholds (90%) for files included in the coverage report; several Firebase-heavy and page-level modules are excluded in `frontend/vite.config.js` (see the comment there). GitHub Actions runs this after `npm run build`.
+- **Coverage**: `cd frontend && npm run test:coverage` enforces global thresholds defined in `frontend/vite.config.js` (`test.coverage`). GitHub Actions runs this after `npm run build`.
 - **Cloud Functions tests**: `cd functions && npm test` — Node’s built-in test runner (`*.test.js` next to source).
 - **Deploy helper tests**: `npm run test:scripts` from the repo root (`scripts/*.test.js`).
 - **End-to-end tests**: Playwright (`cd frontend && npm run test:e2e`). Locally the config builds then previews the production bundle on port 4173. In CI, the workflow builds once and sets `PLAYWRIGHT_SKIP_BUILD=1` so Playwright only runs preview. Specs live under `frontend/e2e/`.
@@ -129,6 +129,6 @@ Credentials: `functions/seed.local.json` (gitignored) or fallback `functions/see
 ### Gotchas
 
 - The `functions/` `package.json` declares `"node": "24"` in engines, but Node 22 works fine for local emulation; the Firebase CLI logs a warning and uses the host Node version.
-- Card metadata is a static JSON file bundled with the frontend (`frontend/src/data/storydeck-lt24-with-skus.json`), not stored in Firestore.
+- Card metadata is a static JSON file bundled with the frontend (`frontend/src/storyData/storydeck-lt24-with-skus.json`), not stored in Firestore.
 - Firestore emulator data is ephemeral — it resets on every emulator restart. Registered users and listings disappear.
 - The `firebase emulators:start` command prints an "Unable to look up project number" warning when not authenticated; this is harmless for local development.
