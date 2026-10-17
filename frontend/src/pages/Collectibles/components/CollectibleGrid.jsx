@@ -11,16 +11,24 @@ export default function CollectibleGrid({
   onQuantityChange,
 }) {
   return (
-    <div className="cards-grid">
+    <div className="cards-grid" data-testid="collectibles-grid">
       {collectibles.map((collectible) => (
-        <article key={collectible.id} className="card-tile">
+        <article
+          key={collectible.id}
+          className="card-tile"
+          data-testid={`collectible-tile-${collectible.id}`}
+        >
           <details className="card-details">
             <summary className="card-glance">
               <CategoryPill category={collectible.category} />
               <h2>{collectible.displayName}</h2>
             </summary>
             <div className="card-details__body">
-              <Link to={`/collectibles/${collectible.id}`} className="card-id mono">
+              <Link
+                to={`/collectibles/${collectible.id}`}
+                className="card-id mono"
+                data-testid={`collectible-detail-link-${collectible.id}`}
+              >
                 {collectible.id}
               </Link>
               {collectible.detail ? <p className="card-detail">{collectible.detail}</p> : null}

@@ -29,19 +29,19 @@ Preconditions:
 - Seed user `collector.one@example.com` / `replace-me-local-only` exists.
 - `doctor` reports `ok=true`.
 
-- **Login page.** Open sign in. Run `$VERIFY drive click --role link --name "Sign in" --scope nav`. The heading `Sign in to ShardStash` is visible with Email and Password fields.
-- **Successful login.** Submit the seeded collector. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`. Primary nav shows `Hi, Collector One` and a `Sign out` button. Default landing is `/` with heading `Track your collectibles in one place.`
-- **Logout.** Sign out. Run `$VERIFY drive logout`. Primary nav shows `Sign in` again.
-- **Gated redirect.** Choose Collection while signed out. Run `$VERIFY drive click --role link --name Collection --scope nav`. The login heading is visible (not Collection). After `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, heading `Your Collection` appears.
-- **Auth modal (Home hero).** Sign out, go home, then open the modal. Run `$VERIFY drive logout`, `$VERIFY drive goto --path /`, `$VERIFY drive click --role button --name "Sign In"`. Heading `Sign In` is visible (modal, not the login page h1). Close with `$VERIFY drive click --role button --name ×`.
+- **Login page.** Open sign in. Run `$VERIFY drive click --testid nav-sign-in`. The heading `Sign in to ShardStash` is visible with Email and Password fields.
+- **Successful login.** Submit the seeded collector. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`. Primary nav shows `Hi, Collector One` and `nav-sign-out`. Default landing is `/` with heading `Track your collectibles in one place.`
+- **Logout.** Sign out. Run `$VERIFY drive logout`. `nav-sign-in` is visible again.
+- **Gated redirect.** Choose Collection while signed out. Run `$VERIFY drive click --role link --name Collection --scope nav`. The login heading is visible (not Collection). After `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, run `$VERIFY drive expect --testid collection-page-heading`.
+- **Auth modal (Home hero).** Sign out, go home, then open the modal. Run `$VERIFY drive logout`, `$VERIFY drive goto --path /`, `$VERIFY drive click --testid home-sign-in`. Run `$VERIFY drive expect --testid auth-modal`. Close with `$VERIFY drive click --testid auth-modal-close`.
 - **Register page.** Open sign up. Run `$VERIFY drive goto --path /auth/register`. The heading `Create your ShardStash account` is visible with Display Name, Email, and Password.
 - **Forgot password.** Open reset. Run `$VERIFY drive goto --path /auth/forgot`. The heading `Reset your password` is visible. Fill `$VERIFY drive fill --label Email --value collector.one@example.com` and `$VERIFY drive click --role button --name "Send reset email"`. The page shows `Check your inbox for a password reset link.` (emulator does not deliver mail; the in-app confirmation is the proof).
 - **Proof.** Capture the signed-in home landing after login. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/auth/signed-in-home.png --full-page`, and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/auth/signed-in-home.aria.txt`. Artifacts show `Hi, Collector One`, `Sign out`, and `Track your collectibles in one place.`
 
 ## Gotchas
 
-- `$VERIFY drive login` fills `/auth/login` and presses `Sign In`. It is the same user path as the labeled steps, not an Auth REST shortcut.
-- Login `Sign In` and modal `Sign In` are different headings. After a gated redirect the page heading includes `ShardStash`; the modal heading is exactly `Sign In`.
+- `$VERIFY drive login` fills `/auth/login` and presses `login-submit` (`data-testid`). It is the same user path as the labeled steps, not an Auth REST shortcut.
+- Login page heading is `Sign in to ShardStash`. Modal uses `auth-modal` with h2 `Sign In`. Prefer `home-sign-in` and `auth-modal-submit` over substring `Sign In` button names.
 - Google is visible as `Google` under `Or continue with`. Skip it on emulators; the popup is not the email/password path.
 - Registering a new random email mutates emulator Auth. Prefer the seeded user unless proving `auth-register`. If you register, use a unique address and `$VERIFY seed` afterward.
-- Nav shows `Checking session…` briefly on load. Wait for `Sign in` or `Sign out` before clicking auth controls.
+- Nav shows `Checking session…` briefly on load. Wait for `nav-sign-in` or `nav-sign-out` before clicking auth controls.

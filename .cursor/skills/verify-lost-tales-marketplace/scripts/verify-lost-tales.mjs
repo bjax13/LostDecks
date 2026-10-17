@@ -87,6 +87,7 @@ Commands:
 
 Drive actions:
   goto --path /collectibles
+  click --testid collectible-detail-link-LT24-ELS-01
   click --role link --name Collectibles [--scope nav] [--nth 0] [--exact]
   fill --label Search --value Elsecaller
   select --label Category --value "Story cards"

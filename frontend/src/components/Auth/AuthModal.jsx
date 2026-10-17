@@ -78,9 +78,14 @@ function AuthModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="auth-modal__backdrop">
-      <div className="auth-modal">
-        <button type="button" className="auth-modal__close" onClick={handleClose}>
+    <div className="auth-modal__backdrop" data-testid="auth-modal-backdrop">
+      <div className="auth-modal" data-testid="auth-modal">
+        <button
+          type="button"
+          className="auth-modal__close"
+          data-testid="auth-modal-close"
+          onClick={handleClose}
+        >
           ×
         </button>
         <h2 className="auth-modal__title">
@@ -135,7 +140,7 @@ function AuthModal({ isOpen, onClose }) {
             </label>
           )}
           {mode === modes.REGISTER ? <SignupConsent onNavigate={handleClose} /> : null}
-          <button type="submit" className="auth-modal__submit">
+          <button type="submit" className="auth-modal__submit" data-testid="auth-modal-submit">
             {mode === modes.LOGIN && "Sign In"}
             {mode === modes.REGISTER && "Sign Up"}
             {mode === modes.FORGOT && "Send Reset Email"}

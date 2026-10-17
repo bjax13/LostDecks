@@ -55,7 +55,7 @@ function MainNav() {
   const panelClassName = menuOpen ? "main-nav__panel main-nav__panel--open" : "main-nav__panel";
 
   return (
-    <nav className="main-nav" aria-label="Primary">
+    <nav className="main-nav" aria-label="Primary" data-testid="primary-nav">
       <Link to="/" className="main-nav__brand">
         {SITE_NAME}
       </Link>
@@ -87,12 +87,14 @@ function MainNav() {
           ) : user ? (
             <>
               <span className="main-nav__welcome">Hi, {user.displayName || user.email}</span>
-              <button type="button" onClick={handleSignOut}>
+              <button type="button" onClick={handleSignOut} data-testid="nav-sign-out">
                 Sign out
               </button>
             </>
           ) : (
-            <Link to="/auth/login">Sign in</Link>
+            <Link to="/auth/login" data-testid="nav-sign-in">
+              Sign in
+            </Link>
           )}
         </div>
       </div>

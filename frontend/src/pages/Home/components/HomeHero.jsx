@@ -22,6 +22,7 @@ export default function HomeHero() {
             <button
               type="button"
               className="home-cta home-cta--secondary"
+              data-testid="home-sign-in"
               onClick={() => openAuthModal({ reason: "home-sign-in" })}
             >
               Sign In
