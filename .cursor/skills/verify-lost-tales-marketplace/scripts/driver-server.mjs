@@ -62,10 +62,17 @@ function send(res, status, body) {
 function locatorFor(spec) {
   let root = page;
   if (spec.scope === "nav") {
-    root = page.getByRole("navigation", { name: "Primary" });
+    root = page.getByTestId("primary-nav");
   }
 
   const exact = Boolean(spec.exact);
+  if (spec.testId) {
+    let loc = root.getByTestId(spec.testId);
+    if (spec.nth != null) {
+      loc = loc.nth(Number(spec.nth));
+    }
+    return loc;
+  }
   if (spec.role) {
     const options = {};
     if (spec.name != null) {
@@ -99,7 +106,7 @@ function locatorFor(spec) {
     }
     return loc;
   }
-  throw new Error("Need --role, --label, --placeholder, or --text to build a locator");
+  throw new Error("Need --testid, --role, --label, --placeholder, or --text to build a locator");
 }
 
 async function pageInfo() {
@@ -117,7 +124,10 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    const loc = locatorFor(cmd);
+    const force =
+      Boolean(cmd.force) || cmd.role === "radio" || cmd.role === "checkbox" || Boolean(cmd.testId);
+    await loc.click({ force });
     return pageInfo();
   }
   if (action === "fill") {
@@ -191,23 +201,15 @@ async function handleCommand(cmd) {
     await page.getByRole("heading", { name: /Sign in to ShardStash/i }).waitFor();
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill(password);
-    await page.getByRole("button", { name: "Sign In", exact: true }).click();
-    await page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("button", { name: "Sign out" })
-      .waitFor();
+    await page.getByTestId("login-submit").click();
+    await page.getByTestId("nav-sign-out").waitFor();
     return pageInfo();
   }
   if (action === "logout") {
-    const signOut = page
-      .getByRole("navigation", { name: "Primary" })
-      .getByRole("button", { name: "Sign out" });
+    const signOut = page.getByTestId("nav-sign-out");
     if ((await signOut.count()) > 0) {
       await signOut.click();
-      await page
-        .getByRole("navigation", { name: "Primary" })
-        .getByRole("link", { name: "Sign in" })
-        .waitFor();
+      await page.getByTestId("nav-sign-in").waitFor();
     }
     return pageInfo();
   }

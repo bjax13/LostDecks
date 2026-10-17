@@ -311,6 +311,7 @@ export default function GettingStartedPage() {
                       value={option.id}
                       checked={collectibleType === option.id}
                       aria-label={option.title}
+                      data-testid={`getting-started-type-${option.id}`}
                       onChange={() => selectCollectibleType(option.id)}
                     />
                     <span>
@@ -351,6 +352,7 @@ export default function GettingStartedPage() {
                           checked={profile === option.id}
                           disabled={optionDisabled}
                           aria-label={option.title}
+                          data-testid={`getting-started-profile-${option.id}`}
                           onChange={() => selectProfile(option.id)}
                         />
                         <span>
@@ -374,6 +376,7 @@ export default function GettingStartedPage() {
               <button
                 type="button"
                 className="getting-started__button is-primary"
+                data-testid="getting-started-continue"
                 disabled={!canContinueProfile}
                 onClick={beginProfile}
               >
@@ -399,6 +402,7 @@ export default function GettingStartedPage() {
                 <button
                   type="button"
                   className="getting-started__button"
+                  data-testid="getting-started-review-back"
                   onClick={() => setStep("profile")}
                 >
                   Back
@@ -460,6 +464,7 @@ export default function GettingStartedPage() {
               <button
                 type="button"
                 className="getting-started__button"
+                data-testid="getting-started-spreadsheet-back"
                 onClick={() => setStep("profile")}
               >
                 Back

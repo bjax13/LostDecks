@@ -80,7 +80,7 @@ function CollectionContent() {
   return (
     <section className="collection-page">
       <header className="collection-page__header">
-        <h1>Your Collection</h1>
+        <h1 data-testid="collection-page-heading">Your Collection</h1>
         <p>
           Track progress across the Stormlight Lost Tales deck. Your saved entries update in
           real-time as you add collectibles from Firebase.

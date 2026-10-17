@@ -5,9 +5,9 @@ test.describe("getting started bulk quantity (e2e)", () => {
     await page.goto("/getting-started");
     // Collectible type is asked first; Story Deck matches this card-review / bulk qty flow.
     // Click label text (same pattern as profile options) — the radio input is covered by the label span.
-    await page.getByText("Story Deck Cards", { exact: true }).click();
-    await page.getByText(/my collection is not in a spreadsheet/i).click();
-    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByTestId("getting-started-type-cards").click({ force: true });
+    await page.getByTestId("getting-started-profile-manual").click({ force: true });
+    await page.getByTestId("getting-started-continue").click();
     await expect(page.getByRole("heading", { name: /review your cards/i })).toBeVisible();
 
     await page.getByRole("button", { name: /^expand elsecaller story foils$/i }).click();

@@ -21,7 +21,11 @@ export default function CollectibleTable({
   };
 
   return (
-    <section className="cards-table-wrapper" aria-label="Collectibles table">
+    <section
+      className="cards-table-wrapper"
+      aria-label="Collectibles table"
+      data-testid="collectibles-table"
+    >
       <table className="cards-table">
         <thead>
           <tr>

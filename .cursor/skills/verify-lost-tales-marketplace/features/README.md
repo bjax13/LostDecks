@@ -15,7 +15,7 @@ This directory is the maintained source for verifying user-facing behavior of Sh
 
 - Harness: `VERIFY="node .cursor/skills/verify-lost-tales-marketplace/scripts/verify-lost-tales.mjs"` then `$VERIFY drive …`.
 - Start every recipe from the baseline (signed out, seeded backend) unless the feature lists other preconditions.
-- Prefer `--role` / `--label` / `--scope nav` over CSS, test ids, and coordinates.
+- Prefer committed `data-testid` hooks listed in `SKILL.md` (via `--testid`). Use `--role` / `--label` / `--scope nav` for everything else. Avoid copy-text-only selectors when a test id exists.
 - Treat every command as literal. Keep quoted names and flags unchanged.
 - After a mutation, restore baseline (`logout`, and `$VERIFY seed` if collection data changed) so the next feature starts clean.
 - Do not delete `/tmp/lost-tales-verify/artifacts/` during cleanup.
@@ -47,3 +47,4 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Sign in](./auth.md) covers login, register, the in-page auth modal, and auth-gated redirects.
 - [Collection](./collection.md) covers the signed-in collection, getting-started save, and bulk tools.
 - [Matches](./matches.md) covers reciprocal trade matches and the Account matching opt-out.
+- [Site footer](./site.md) covers About, Privacy, Terms, and footer feedback.

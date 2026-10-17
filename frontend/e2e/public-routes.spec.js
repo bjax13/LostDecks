@@ -3,7 +3,17 @@ import { expect, test } from "@playwright/test";
 test.describe("public routes (e2e)", () => {
   test("collectibles page shows catalog heading", async ({ page }) => {
     await page.goto("/collectibles");
-    await expect(page.getByRole("heading", { name: "Collectibles" })).toBeVisible();
+    await expect(page.getByTestId("collectibles-page-heading")).toBeVisible();
+  });
+
+  test("collectible detail opens from stable id link after tile expand", async ({ page }) => {
+    await page.goto("/collectibles");
+    await page.getByLabel("Search").fill("Elsecaller");
+    await page.getByRole("heading", { name: "Elsecaller #01" }).click();
+    await page.getByTestId("collectible-detail-link-LT24-ELS-01").click();
+    await expect(page).toHaveURL(/\/collectibles\/LT24-ELS-01$/);
+    await page.getByTestId("collectible-detail-back").click();
+    await expect(page.getByTestId("collectibles-page-heading")).toBeVisible();
   });
 
   test("login page renders sign-in heading", async ({ page }) => {
@@ -28,9 +38,9 @@ test.describe("public routes (e2e)", () => {
 
   test("footer feedback modal shows shared email and Discord contacts", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("contentinfo").getByRole("button", { name: "Feedback" }).click();
+    await page.getByTestId("site-feedback-open").click();
 
-    const dialog = page.getByRole("dialog", { name: "Send site feedback" });
+    const dialog = page.getByTestId("site-feedback-dialog");
     await expect(dialog).toContainText("not trade match contact");
     await expect(dialog.getByRole("link", { name: "shardstashinfo@gmail.com" })).toHaveAttribute(
       "href",

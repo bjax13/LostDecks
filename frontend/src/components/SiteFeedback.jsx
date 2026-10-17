@@ -28,7 +28,7 @@ export default function SiteFeedback() {
   const close = () => setOpen(false);
 
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-testid="site-footer">
       <Link to="/about" className="site-footer__link">
         About
       </Link>
@@ -38,7 +38,12 @@ export default function SiteFeedback() {
       <Link to="/terms" className="site-footer__link">
         Terms
       </Link>
-      <button type="button" className="site-footer__feedback" onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className="site-footer__feedback"
+        data-testid="site-feedback-open"
+        onClick={() => setOpen(true)}
+      >
         Feedback
       </button>
       {open ? (
@@ -49,6 +54,7 @@ export default function SiteFeedback() {
           <div
             ref={dialogRef}
             className="site-feedback-modal"
+            data-testid="site-feedback-dialog"
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}

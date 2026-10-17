@@ -172,7 +172,12 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const actionsDisabled = !ownerUid || disabled || processing;
 
   return (
-    <section id="bulk-import" className="collection-bulk" aria-label="Bulk update tools">
+    <section
+      id="bulk-import"
+      className="collection-bulk"
+      aria-label="Bulk update tools"
+      data-testid="collection-bulk-tools"
+    >
       <div className="collection-bulk__header">
         <h2>Bulk update your collection</h2>
         <p>
@@ -201,6 +206,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
               key={download.mode}
               type="button"
               className="collection-bulk__button"
+              data-testid={`bulk-download-${download.mode}`}
               onClick={() => handleDownloadCsv(download.mode, download.filename)}
               disabled={actionsDisabled}
             >
