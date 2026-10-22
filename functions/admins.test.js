@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const { ADMIN_EMAILS, callerIsSiteAdmin, planAdminClaimUpdates } = require("./admins");
 
 test("admin list is exactly the site creators", () => {
-  assert.deepEqual([...ADMIN_EMAILS], ["corbyagain@gmail.com", "bjax13@gmail.com"]);
+  assert.deepEqual([...ADMIN_EMAILS], ["corbyagain@gmail.com", "bjack13@gmail.com"]);
 });
 
 test("planAdminClaimUpdates grants the claim only to creator emails", () => {
@@ -17,7 +17,7 @@ test("planAdminClaimUpdates grants the claim only to creator emails", () => {
     },
     {
       uid: "bryan",
-      email: "bjax13@gmail.com",
+      email: "bjack13@gmail.com",
       customClaims: { admin: true, keep: 1 },
     },
     {
@@ -48,13 +48,13 @@ test("planAdminClaimUpdates reports creator emails that have no Auth user", () =
   ]);
 
   assert.deepEqual(updates, [{ uid: "other", email: "not-corbyagain@gmail.com", claims: {} }]);
-  assert.deepEqual(missing, ["corbyagain@gmail.com", "bjax13@gmail.com"]);
+  assert.deepEqual(missing, ["corbyagain@gmail.com", "bjack13@gmail.com"]);
 });
 
 test("planAdminClaimUpdates leaves matching claims untouched", () => {
   const { updates, missing } = planAdminClaimUpdates([
     { uid: "corby", email: "corbyagain@gmail.com", customClaims: { admin: true } },
-    { uid: "bryan", email: "bjax13@gmail.com", customClaims: { admin: true } },
+    { uid: "bryan", email: "bjack13@gmail.com", customClaims: { admin: true } },
     { uid: "plain", email: "plain@example.com", customClaims: {} },
   ]);
 
