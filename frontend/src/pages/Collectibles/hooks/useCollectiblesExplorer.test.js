@@ -54,6 +54,55 @@ describe("useCollectiblesExplorer (unit)", () => {
     expect(result.current.collectibles.every((c) => c.category === "herald")).toBe(true);
   });
 
+  it("exposes pin series as sub category options when Category is Pins", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setCategoryFilter("pin"));
+    expect(result.current.isPinSubCategory).toBe(true);
+    expect(result.current.stories.length).toBeGreaterThan(0);
+    expect(result.current.stories.every((s) => s.code && s.title === s.code)).toBe(true);
+    expect(result.current.storyFilter).toBe("all");
+  });
+
+  it("filters pins by series via Sub Category", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setCategoryFilter("pin"));
+    const series = result.current.stories[0]?.code;
+    expect(series).toBeTruthy();
+    act(() => result.current.setStoryFilter(series));
+    expect(result.current.collectibles.length).toBeGreaterThan(0);
+    expect(
+      result.current.collectibles.every(
+        (c) => c.category === "pin" && (c.series ?? c.storyTitle) === series,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps story list sub category options for All categories", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    expect(result.current.isPinSubCategory).toBe(false);
+    expect(result.current.stories.some((s) => s.code && s.title && s.code !== s.title)).toBe(true);
+  });
+
+  it("resets Sub Category when Category changes", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setCategoryFilter("pin"));
+    act(() => result.current.setStoryFilter(result.current.stories[0].code));
+    expect(result.current.storyFilter).not.toBe("all");
+    act(() => result.current.setCategoryFilter("story"));
+    expect(result.current.storyFilter).toBe("all");
+    expect(result.current.isPinSubCategory).toBe(false);
+  });
+
+  it("disables Sub Category and clears filter when Category is Heralds", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setStoryFilter(result.current.stories[0].code));
+    expect(result.current.storyFilter).not.toBe("all");
+    act(() => result.current.setCategoryFilter("herald"));
+    expect(result.current.subCategoryDisabled).toBe(true);
+    expect(result.current.storyFilter).toBe("all");
+    expect(result.current.collectibles.every((c) => c.category === "herald")).toBe(true);
+  });
+
   it("resets filters", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     act(() => result.current.setSearchTerm("test"));

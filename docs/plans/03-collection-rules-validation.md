@@ -24,10 +24,10 @@ Every client write path sends exactly `{ ownerUid, skuId, quantity, updatedAt: s
 - `frontend/src/pages/Collection/utils/bulkImport.js` (`applyBulkCollectionUpdate`, `batch.set(ref, payload, { merge: true })`, quantity = `Math.max(0, Math.round(n))`, notes trimmed, from CSV only).
 - `frontend/src/pages/Collectibles/hooks/useCollectionQuantityMutations.js` (`addDoc` create; `updateDoc` with `{ quantity, updatedAt[, notes] }`; `decrementFromCollection` can write `quantity: 0` when `deleteWhenZero` is false — "soft zero", cleaned by `usePurgeSoftZeroEntriesOnMount.js`).
 - `functions/seed-local.js` uses the Admin SDK (bypasses rules).
-SKU formats (all 435 SKUs in `frontend/src/storyData/storydeck-lt24-with-skus.json` + `chasmfriends-pins.json`, max length 28):
+SKU formats (Story Deck SKUs in `frontend/src/storyData/storydeck-lt24-with-skus.json` + pins in `pins-catalog.json`, max length 64):
 - Story/Herald: `LT24-ELS-01-DUN`, `LT24-HLD-09-FOIL` (stories `ELS`, `LOP`, `CHM`; heralds `HLD`)
 - Nonsense: `LT24-NS-ELS-02-DUN`, variants `LT24-NS-ELS-24-FOIL-DANCE`
-- Pins: `PIN-CF-01` … `PIN-CF-05`
+- Pins: `PIN-CF-01` … `PIN-CF-05` (ChasmFriends) and `PIN-{SETCODE}-{##|###}` (Sanderson Collectors Guild blue book)
 No app-wide max quantity exists (no `max=` on quantity inputs). No notes length cap. **No rules tests exist.**
 
 ## Changes
@@ -37,7 +37,7 @@ Add helpers above `match /collections/{entryId}`:
 ```
     function validSkuId(v) {
       return v is string && v.size() <= 64
-        && v.matches('^(LT[0-9]{2}-(ELS|LOP|CHM|HLD)-[0-9]{2}-(DUN|FOIL)|LT[0-9]{2}-NS-(ELS|LOP|CHM)-[0-9]{2}-(DUN|FOIL)(-[A-Z]+)?|PIN-[A-Z]{2}-[0-9]{2})$');
+        && v.matches('^(LT[0-9]{2}-(ELS|LOP|CHM|HLD)-[0-9]{2}-(DUN|FOIL)|LT[0-9]{2}-NS-(ELS|LOP|CHM)-[0-9]{2}-(DUN|FOIL)(-[A-Z]+)?|PIN-[A-Z0-9]{2,6}-[0-9]{2,3})$');
     }
     function validQuantity(v) { return v is int && v >= 0 && v <= 999; }
     function validNotes(d) { return !("notes" in d) || (d.notes is string && d.notes.size() <= 500); }

@@ -127,7 +127,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(
       screen.getByText(/tell us what you collect, then choose how you want to start/i),
     ).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /^chasmfriends pins$/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^pins$/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /^story deck cards$/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /^both$/i })).toBeInTheDocument();
     expect(
@@ -150,7 +150,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
 
-    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    await chooseCollectibleType(user, /^pins$/i);
     expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeDisabled();
     expect(
       screen.getByRole("radio", { name: /collection is not in a spreadsheet/i }),
@@ -169,7 +169,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     await user.click(screen.getByRole("radio", { name: /collection is in a spreadsheet/i }));
     expect(screen.getByRole("radio", { name: /collection is in a spreadsheet/i })).toBeChecked();
 
-    await chooseCollectibleType(user, /^chasmfriends pins$/i);
+    await chooseCollectibleType(user, /^pins$/i);
     const spreadsheetOption = screen.getByRole("radio", {
       name: /collection is in a spreadsheet/i,
     });
@@ -367,7 +367,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Story Deck card rows are supported here; add ChasmFriends pins later from your collection/i,
+        /Story Deck card rows are supported here; add pins later from your collection/i,
       ),
     ).toBeInTheDocument();
     expect(screen.getByText(/export as csv and upload/i)).toBeInTheDocument();
@@ -909,7 +909,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     renderPage();
 
     await goToCardReview(user, {
-      collectiblePattern: /^chasmfriends pins$/i,
+      collectiblePattern: /^pins$/i,
       reviewHeading: /review your pins/i,
     });
 

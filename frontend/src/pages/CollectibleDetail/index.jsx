@@ -164,7 +164,28 @@ export default function CollectibleDetailPage() {
               <dt>Number</dt>
               <dd>{card.number ?? "—"}</dd>
             </div>
-            {card.collectibleType !== "pin" ? (
+            {card.collectibleType === "pin" ? (
+              <>
+                {card.country ? (
+                  <div>
+                    <dt>Country</dt>
+                    <dd>{card.country}</dd>
+                  </div>
+                ) : null}
+                {card.release ? (
+                  <div>
+                    <dt>Release</dt>
+                    <dd>{card.release}</dd>
+                  </div>
+                ) : null}
+                {card.catalogName ? (
+                  <div>
+                    <dt>Catalog</dt>
+                    <dd>{card.catalogName}</dd>
+                  </div>
+                ) : null}
+              </>
+            ) : (
               <>
                 <div>
                   <dt>Rarity</dt>
@@ -186,7 +207,7 @@ export default function CollectibleDetailPage() {
                   </dd>
                 </div>
               </>
-            ) : null}
+            )}
             {skuId && (
               <div>
                 <dt>SKU</dt>

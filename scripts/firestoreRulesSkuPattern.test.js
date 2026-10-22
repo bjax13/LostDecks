@@ -6,7 +6,7 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const RULES_PATH = path.join(ROOT, "firestore.rules");
 const STORY_CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/storydeck-lt24-with-skus.json");
-const PINS_CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/chasmfriends-pins.json");
+const PINS_CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 
 function extractValidSkuIdRegex(rulesSource) {
   const match = rulesSource.match(/function validSkuId\(v\)\s*\{[\s\S]*?v\.matches\('([^']+)'\)/);
@@ -40,5 +40,9 @@ test("firestore validSkuId regex rejects malformed SKUs", () => {
 
   assert.equal(skuPattern.test("LT24-ELS-01"), false);
   assert.equal(skuPattern.test("pin-cf-01"), false);
+  assert.equal(skuPattern.test("PIN-TOOLONGCODE-01"), false);
   assert.equal(skuPattern.test("X".repeat(65)), false);
+  assert.equal(skuPattern.test("PIN-CF-01"), true);
+  assert.equal(skuPattern.test("PIN-CPS1-00"), true);
+  assert.equal(skuPattern.test("PIN-WHBALL-01"), true);
 });

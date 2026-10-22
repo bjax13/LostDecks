@@ -1,13 +1,23 @@
 import { useCallback, useMemo, useState } from "react";
-import { collectiblesIndex, datasetMeta, datasetStories } from "../../../data/collectibles";
+import {
+  collectiblesIndex,
+  datasetMeta,
+  datasetStories,
+  pinSeriesOptions,
+} from "../../../data/collectibles";
 import { defaultSort } from "../constants";
 import { compareCollectibles } from "../utils/compareCollectibles";
 
 const allCollectibles = collectiblesIndex;
 
+function pinSeriesMatches(collectible, seriesFilter) {
+  const series = collectible.series ?? collectible.storyTitle;
+  return series === seriesFilter;
+}
+
 export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState(initialCategoryFilter);
+  const [categoryFilter, setCategoryFilterState] = useState(initialCategoryFilter);
   const [storyFilter, setStoryFilter] = useState("all");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [sortField, setSortField] = useState(defaultSort.field);
@@ -21,15 +31,30 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     return Array.from(rarities).sort();
   }, []);
 
-  const stories = useMemo(() => datasetStories, []);
+  const isPinSubCategory = categoryFilter === "pin";
+  /** Heralds: Sub Category stays visible but disabled (NA); ignore any stale filter. */
+  const subCategoryDisabled = categoryFilter === "herald";
+
+  const stories = useMemo(
+    () => (isPinSubCategory ? pinSeriesOptions : datasetStories),
+    [isPinSubCategory],
+  );
+
+  const setCategoryFilter = useCallback((nextCategory) => {
+    setCategoryFilterState(nextCategory);
+    // Clear stale Sub Category whenever Category changes (esp. → Heralds / Pins).
+    setStoryFilter("all");
+  }, []);
 
   const filteredCollectibles = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
 
     let items = allCollectibles.filter((c) => {
       if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
-      if (storyFilter !== "all") {
-        if (storyFilter === "heralds") {
+      if (!subCategoryDisabled && storyFilter !== "all") {
+        if (isPinSubCategory) {
+          if (!pinSeriesMatches(c, storyFilter)) return false;
+        } else if (storyFilter === "heralds") {
           if (c.category !== "herald") return false;
         } else if (c.story !== storyFilter) {
           return false;
@@ -49,11 +74,20 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     items = items.sort((a, b) => compareCollectibles(a, b, sortField, sortDirection));
 
     return items;
-  }, [searchTerm, categoryFilter, storyFilter, rarityFilter, sortField, sortDirection]);
+  }, [
+    searchTerm,
+    categoryFilter,
+    storyFilter,
+    rarityFilter,
+    sortField,
+    sortDirection,
+    isPinSubCategory,
+    subCategoryDisabled,
+  ]);
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
-    setCategoryFilter("all");
+    setCategoryFilterState("all");
     setStoryFilter("all");
     setRarityFilter("all");
     setSortField(defaultSort.field);
@@ -66,6 +100,8 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     datasetMeta,
     rarityOptions,
     stories,
+    isPinSubCategory,
+    subCategoryDisabled,
     searchTerm,
     setSearchTerm,
     categoryFilter,
