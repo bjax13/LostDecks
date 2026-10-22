@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryLabels, sortOptions } from "./constants.js";
+import { categoryLabels, defaultSort, sortOptions } from "./constants.js";
 
 describe("collectibles constants", () => {
   it("exposes category labels", () => {
@@ -15,5 +15,18 @@ describe("collectibles constants", () => {
       expect(typeof opt.value).toBe("string");
       expect(typeof opt.label).toBe("string");
     }
+  });
+
+  it("defaults to grouped category, story, and card number", () => {
+    expect(defaultSort).toEqual({ field: "grouped", direction: "asc" });
+    expect(sortOptions.map((opt) => opt.value)).toEqual([
+      "grouped",
+      "number",
+      "id",
+      "category",
+      "story",
+      "rarity",
+    ]);
+    expect(sortOptions[0].label).toBe("Grouped");
   });
 });
