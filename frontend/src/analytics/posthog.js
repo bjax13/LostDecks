@@ -135,9 +135,7 @@ export function syncPostHogUser(firebaseUser) {
     posthog.reset();
   }
 
-  posthog.identify(firebaseUser.uid, {
-    email: firebaseUser.email ?? undefined,
-    name: firebaseUser.displayName ?? undefined,
-  });
+  // Identify by Firebase uid only — do not send email or display name.
+  posthog.identify(firebaseUser.uid);
   writeStoredPostHogUid(firebaseUser.uid);
 }

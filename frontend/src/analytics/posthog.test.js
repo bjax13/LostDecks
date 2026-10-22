@@ -134,10 +134,8 @@ describe("posthog analytics", () => {
       email: "a@b.c",
       displayName: "Ada",
     });
-    expect(identifyMock).toHaveBeenCalledWith("u1", {
-      email: "a@b.c",
-      name: "Ada",
-    });
+    expect(identifyMock).toHaveBeenCalledWith("u1");
+    expect(identifyMock).toHaveBeenCalledTimes(1);
     expect(window.localStorage.getItem("shardstash.posthogUid")).toBe("u1");
     syncPostHogUser(null);
     expect(resetMock).not.toHaveBeenCalled();
@@ -162,10 +160,7 @@ describe("posthog analytics", () => {
     identifyMock.mockClear();
     syncPostHogUser({ uid: "u2", email: "b@c.d", displayName: "Bob" });
     expect(resetMock).toHaveBeenCalledTimes(1);
-    expect(identifyMock).toHaveBeenCalledWith("u2", {
-      email: "b@c.d",
-      name: "Bob",
-    });
+    expect(identifyMock).toHaveBeenCalledWith("u2");
     expect(window.localStorage.getItem("shardstash.posthogUid")).toBe("u2");
   });
 

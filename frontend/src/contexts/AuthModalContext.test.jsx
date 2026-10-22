@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { AuthModalProvider, useAuthModal } from "./AuthModalContext.jsx";
 
 vi.mock("../components/Auth/AuthModal.jsx", () => ({
-  default: ({ isOpen, onClose }) =>
+  default: ({ isOpen, onClose, context }) =>
     isOpen ? (
-      <div data-testid="auth-modal">
+      <div data-testid="auth-modal" data-initial-mode={context?.initialMode ?? ""}>
         <button type="button" onClick={onClose}>
           Close
         </button>
@@ -48,6 +48,24 @@ describe("AuthModalContext (unit)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Open" }));
     expect(screen.getByTestId("auth-modal")).toBeInTheDocument();
     expect(screen.getByTestId("is-open")).toHaveTextContent("true");
+  });
+
+  it("passes openAuthModal options as AuthModal context", async () => {
+    function RegisterOpener() {
+      const { openAuthModal } = useAuthModal();
+      return (
+        <button type="button" onClick={() => openAuthModal({ initialMode: "register" })}>
+          Open register
+        </button>
+      );
+    }
+    render(
+      <AuthModalProvider>
+        <RegisterOpener />
+      </AuthModalProvider>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Open register" }));
+    expect(screen.getByTestId("auth-modal")).toHaveAttribute("data-initial-mode", "register");
   });
 
   it("closes modal when closeAuthModal called", async () => {

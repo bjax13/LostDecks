@@ -2,10 +2,12 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
+import { TestMemoryRouter } from "../../test/router.jsx";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseTradeMatches = vi.hoisted(() => vi.fn());
 const mockGetSkuRecord = vi.hoisted(() => vi.fn());
+const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
 const mockCaptureEvent = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({
@@ -29,11 +31,27 @@ vi.mock("./hooks/useTradeMatches", () => ({
   useTradeMatches: mockUseTradeMatches,
 }));
 
+vi.mock("../../lib/userPreferences", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    subscribeUserPreferences: (...args) => mockSubscribeUserPreferences(...args),
+  };
+});
+
 vi.mock("../../analytics/posthog.js", () => ({
   captureEvent: (...args) => mockCaptureEvent(...args),
 }));
 
 import MatchesPage from "./index.jsx";
+
+function renderMatches(path = "/matches") {
+  return render(
+    <TestMemoryRouter initialEntries={[path]}>
+      <MatchesPage />
+    </TestMemoryRouter>,
+  );
+}
 
 function testerLanes() {
   return [
@@ -117,13 +135,17 @@ describe("MatchesPage", () => {
         "LT24-ELS-01-DUN": "Elsecaller #01",
         "LT24-CHM-01-DUN": "The Chasmfriends get a Pet! #01",
         "PIN-CF-02": "Howlerina",
-        "PIN-CF-01": "Shreadad",
+        "PIN-CF-01": "Shredhead",
         "SKU-2": "SKU-2",
         "SKU-1": "SKU-1",
       };
       return skuCard(skuId, names[skuId] ?? skuId);
     });
     mockUseTradeMatches.mockReturnValue(defaultMatchesHook());
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext?.({ matchLanes: { dun: true, foil: true, pins: true } });
+      return () => {};
+    });
   });
 
   afterEach(() => {
@@ -138,7 +160,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(
       screen.getByText("You're refreshing too fast, try again in a few seconds"),
@@ -147,7 +169,7 @@ describe("MatchesPage", () => {
   });
 
   it("captures matches_viewed once for a fresh successful load", () => {
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(mockCaptureEvent).toHaveBeenCalledWith("matches_viewed", {
       matchCount: 1,
@@ -167,7 +189,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(mockCaptureEvent).not.toHaveBeenCalled();
   });
@@ -197,7 +219,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("heading", { name: "Lost Tester 2" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Pins" })).toBeInTheDocument();
@@ -207,7 +229,7 @@ describe("MatchesPage", () => {
 
   it("exposes matching help copy from an info bubble next to the heading", async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
-    render(<MatchesPage />);
+    renderMatches();
 
     const trigger = screen.getByRole("button", { name: "How matching works" });
     expect(trigger).toBeInTheDocument();
@@ -219,7 +241,7 @@ describe("MatchesPage", () => {
   });
 
   it("renders a person card with dun and pin piles and no sentence rows", () => {
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("heading", { name: "Matches" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Lost Tester 2" })).toBeInTheDocument();
@@ -236,7 +258,7 @@ describe("MatchesPage", () => {
     expect(screen.queryByText(/owned \d/)).not.toBeInTheDocument();
     expect(screen.getByText("The Chasmfriends get a Pet! #01 (DUN)")).toBeInTheDocument();
     expect(screen.getByText("Howlerina")).toBeInTheDocument();
-    expect(screen.getByText("Shreadad")).toBeInTheDocument();
+    expect(screen.getByText("Shredhead")).toBeInTheDocument();
     expect(screen.queryByText(/is available for trade for your/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Lost Tester 2" }).closest("details"),
@@ -287,7 +309,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     const testerTwoHeading = screen.getByRole("heading", { name: "Lost Tester 2" });
     const collectorThreeHeading = screen.getByRole("heading", { name: "Collector Three" });
@@ -320,7 +342,7 @@ describe("MatchesPage", () => {
       configurable: true,
       value: { writeText },
     });
-    render(<MatchesPage />);
+    renderMatches();
 
     await user.click(screen.getByRole("button", { name: "Copy email" }));
 
@@ -346,7 +368,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
@@ -371,7 +393,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("button", { name: "Copy email" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Email" })).not.toBeInTheDocument();
@@ -397,7 +419,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByText("Discord: kaladin in Sanderson Collectors Guild")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Copy email" })).not.toBeInTheDocument();
@@ -422,7 +444,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByText("Contact Lost Tester 2")).toBeInTheDocument();
     expect(screen.getByText("Contact details are unavailable.")).toBeInTheDocument();
@@ -441,7 +463,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("heading", { name: "No reciprocal matches yet" })).toBeInTheDocument();
     expect(
@@ -461,7 +483,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
     expect(screen.getByText("Matching is disabled for your account")).toBeInTheDocument();
   });
 
@@ -474,7 +496,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.queryByText(/Can refresh in/i)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Refresh" })).not.toBeInTheDocument();
@@ -492,7 +514,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByText("As of 8 seconds ago. Can refresh in 22 seconds.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Refresh" })).toBeDisabled();
@@ -511,7 +533,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByText("You may now refresh.")).toBeInTheDocument();
     const refreshButton = screen.getByRole("button", { name: "Refresh" });
@@ -538,7 +560,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByText("You may now refresh.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Refresh" })).toBeEnabled();
@@ -552,12 +574,12 @@ describe("MatchesPage", () => {
   });
 
   it("passes the signed-in user id into the matches hook", () => {
-    render(<MatchesPage />);
+    renderMatches();
     expect(mockUseTradeMatches).toHaveBeenCalledWith("me");
   });
 
   it("renders search and lane filter controls", () => {
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByLabelText("Search")).toBeInTheDocument();
     expect(screen.getByLabelText("Lane")).toHaveDisplayValue("All lanes");
@@ -582,7 +604,7 @@ describe("MatchesPage", () => {
       }),
     );
 
-    render(<MatchesPage />);
+    renderMatches();
 
     expect(screen.getByRole("navigation", { name: "Matches pagination" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
@@ -591,5 +613,22 @@ describe("MatchesPage", () => {
 
     await user.click(nextButton);
     expect(goToNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows welcome copy and pin-lane-off notice from query/prefs", () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext?.({ matchLanes: { dun: true, foil: true, pins: false } });
+      return () => {};
+    });
+    mockUseTradeMatches.mockReturnValue(defaultMatchesHook({ matches: [] }));
+
+    renderMatches("/matches?welcome=1");
+
+    expect(screen.getByRole("heading", { name: /You're in/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Add spares/i })).toHaveAttribute(
+      "href",
+      "/getting-started?collect=pins",
+    );
+    expect(screen.getByText(/Pin matching is off in Account/i)).toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ const modes = {
   FORGOT: "forgot",
 };
 
-function AuthModal({ isOpen, onClose }) {
+function AuthModal({ isOpen, onClose, context = null }) {
   const [mode, setMode] = useState(modes.LOGIN);
   const [formState, setFormState] = useState({ email: "", password: "", displayName: "" });
   const { login, register, resetPassword, error, clearError } = useAuth();
@@ -20,12 +20,36 @@ function AuthModal({ isOpen, onClose }) {
       setFormState({ email: "", password: "", displayName: "" });
       setMode(modes.LOGIN);
       clearError();
+      return;
     }
-  }, [isOpen, clearError]);
+    const initialMode = context?.initialMode;
+    if (
+      initialMode === modes.REGISTER ||
+      initialMode === modes.LOGIN ||
+      initialMode === modes.FORGOT
+    ) {
+      setMode(initialMode);
+    } else {
+      setMode(modes.LOGIN);
+    }
+    clearError();
+  }, [isOpen, context?.initialMode, clearError]);
 
   if (!isOpen) {
     return null;
   }
+
+  const handleClose = () => {
+    clearError();
+    setFormState({ email: "", password: "", displayName: "" });
+    setMode(modes.LOGIN);
+    onClose();
+  };
+
+  const finishSuccess = () => {
+    context?.onSuccess?.();
+    handleClose();
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -43,7 +67,7 @@ function AuthModal({ isOpen, onClose }) {
     if (mode === modes.LOGIN) {
       try {
         await login(formState.email, formState.password);
-        handleClose();
+        finishSuccess();
       } catch (err) {
         console.error("Login failed", err);
       }
@@ -53,7 +77,7 @@ function AuthModal({ isOpen, onClose }) {
     if (mode === modes.REGISTER) {
       try {
         await register(formState.email, formState.password, { displayName: formState.displayName });
-        handleClose();
+        finishSuccess();
       } catch (err) {
         console.error("Registration failed", err);
       }
@@ -70,12 +94,7 @@ function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  const handleClose = () => {
-    clearError();
-    setFormState({ email: "", password: "", displayName: "" });
-    setMode(modes.LOGIN);
-    onClose();
-  };
+  const isRegister = mode === modes.REGISTER;
 
   return (
     <div className="auth-modal__backdrop">
@@ -95,6 +114,17 @@ function AuthModal({ isOpen, onClose }) {
             })}
           </p>
         ) : null}
+
+        {isRegister ? (
+          <SocialLoginButtons
+            onSuccess={finishSuccess}
+            emphasis="primary"
+            leadIn="Continue with Google"
+          />
+        ) : null}
+
+        {isRegister ? <p className="auth-modal__divider">Or use email</p> : null}
+
         <form className="auth-modal__form" onSubmit={handleSubmit}>
           {mode === modes.REGISTER && (
             <label className="auth-modal__field">
@@ -163,8 +193,7 @@ function AuthModal({ isOpen, onClose }) {
           )}
         </div>
 
-        <SocialLoginButtons onSuccess={handleClose} />
-        {mode === modes.REGISTER ? <SignupConsent onNavigate={handleClose} /> : null}
+        {!isRegister ? <SocialLoginButtons onSuccess={finishSuccess} /> : null}
       </div>
     </div>
   );

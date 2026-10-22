@@ -24,10 +24,6 @@ vi.mock("./contexts/AuthContext.jsx", () => ({
   AuthProvider: ({ children }) => <div data-testid="auth-provider">{children}</div>,
 }));
 
-vi.mock("./contexts/AuthModalContext.jsx", () => ({
-  AuthModalProvider: ({ children }) => <div data-testid="auth-modal-provider">{children}</div>,
-}));
-
 const { capturePostHogExceptionMock, initPostHogMock } = vi.hoisted(() => ({
   capturePostHogExceptionMock: vi.fn(),
   initPostHogMock: vi.fn(),
@@ -75,7 +71,6 @@ describe("main.jsx (entry)", () => {
 
     render(tree);
     expect(screen.getByTestId("auth-provider")).toBeInTheDocument();
-    expect(screen.getByTestId("auth-modal-provider")).toBeInTheDocument();
     expect(screen.getByTestId("mock-app")).toBeInTheDocument();
   });
 

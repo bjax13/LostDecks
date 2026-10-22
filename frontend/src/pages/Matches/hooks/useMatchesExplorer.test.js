@@ -47,7 +47,7 @@ describe("useMatchesExplorer", () => {
         "LT24-HLD-01-DUN": "Jezrien",
         "LT24-ELS-01-DUN": "Elsecaller #01",
         "PIN-CF-02": "Howlerina",
-        "PIN-CF-01": "Shreadad",
+        "PIN-CF-01": "Shredhead",
       };
       return {
         skuId,

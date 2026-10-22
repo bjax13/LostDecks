@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { SITE_NAME } from "../../brand.js";
 import SignupConsent from "../../components/Auth/SignupConsent";
 import SocialLoginButtons from "../../components/Auth/SocialLoginButtons";
@@ -12,6 +12,7 @@ function Register() {
   const [formState, setFormState] = useState({ displayName: "", email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
   const redirectAfterAuth = usePostAuthRedirect();
+  const location = useLocation();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -38,6 +39,12 @@ function Register() {
       {error ? (
         <p className="auth-page__error">{getAuthErrorMessage(error, { operation: "register" })}</p>
       ) : null}
+      <SocialLoginButtons
+        onSuccess={redirectAfterAuth}
+        emphasis="primary"
+        leadIn="Continue with Google"
+      />
+      <p className="auth-modal__divider">Or use email</p>
       <form className="auth-page__form" onSubmit={handleSubmit}>
         <label>
           <span>Display Name</span>
@@ -76,10 +83,10 @@ function Register() {
         </button>
       </form>
       <div className="auth-page__links">
-        <Link to="/auth/login">Already have an account? Sign in</Link>
+        <Link to={{ pathname: "/auth/login", search: location.search }} state={location.state}>
+          Already have an account? Sign in
+        </Link>
       </div>
-      <SocialLoginButtons onSuccess={redirectAfterAuth} />
-      <SignupConsent />
     </section>
   );
 }
