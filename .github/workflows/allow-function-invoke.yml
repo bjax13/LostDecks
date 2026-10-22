@@ -1,0 +1,30 @@
+name: Allow public function invoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Cloud Run service name
+        required: true
+        type: string
+        default: listadmincollectors
+
+jobs:
+  allow-function-invoke:
+    name: Allow public function invoke
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Allow public invoke
+        run: gcloud run services add-iam-policy-binding "$SERVICE" --region=us-central1 --project=storydeck-16 --member=allUsers --role=roles/run.invoker
+        env:
+          SERVICE: ${{ inputs.service }}
