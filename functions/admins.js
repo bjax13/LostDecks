@@ -5,7 +5,7 @@
  * `node set-admin-claims.js` copies it onto the Auth custom claim `admin: true`.
  * Firestore rules and the admin callable both check that claim, not a second copy of these emails.
  */
-const ADMIN_EMAILS = Object.freeze(["corbyagain@gmail.com", "bjax13@gmail.com"]);
+const ADMIN_EMAILS = Object.freeze(["corbyagain@gmail.com", "bjack13@gmail.com"]);
 
 function normalizeEmail(email) {
   return typeof email === "string" ? email.trim().toLowerCase() : "";
