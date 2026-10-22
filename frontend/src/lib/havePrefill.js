@@ -2,7 +2,6 @@
 /** @typedef {string} SeriesId */
 
 /**
- * Sparse Have only. Keys = known catalog skuIds. Values 1..20. Absence = Need.
  * @typedef {Readonly<Record<SkuId, number>>} HaveQuantityMap
  */
 
@@ -27,11 +26,6 @@
 
 export const HAVE_QTY_MAX = 20;
 
-/**
- * @param {Readonly<Record<SkuId, number>>} base
- * @param {Readonly<Record<SkuId, number>>} overlay
- * @returns {Record<SkuId, number>}
- */
 function raiseMergeQuantities(base, overlay) {
   const next = { ...base };
   for (const [skuId, raw] of Object.entries(overlay ?? {})) {
@@ -58,12 +52,6 @@ export const emptyHavePrefill = Object.freeze({
   raiseMerge: raiseMergeQuantities,
 });
 
-/**
- * @param {"empty" | "applied" | "soft-failed"} status
- * @param {HaveQuantityMap} quantities
- * @param {readonly SeriesId[]} expandedSeriesIds
- * @returns {HavePrefillSeed}
- */
 function makeSeed(status, quantities, expandedSeriesIds) {
   return {
     quantities: Object.freeze({ ...quantities }),
@@ -73,10 +61,6 @@ function makeSeed(status, quantities, expandedSeriesIds) {
   };
 }
 
-/**
- * @param {string} text
- * @returns {string} lowercase hex digest
- */
 function sha256Hex(text) {
   const bytes = utf8Bytes(text);
   const hash = sha256Bytes(bytes);
@@ -87,10 +71,6 @@ function sha256Hex(text) {
   return out;
 }
 
-/**
- * @param {string} text
- * @returns {Uint8Array}
- */
 function utf8Bytes(text) {
   if (typeof TextEncoder !== "undefined") {
     return new TextEncoder().encode(text);
@@ -103,10 +83,6 @@ function utf8Bytes(text) {
   return bytes;
 }
 
-/**
- * @param {Uint8Array} message
- * @returns {Uint8Array}
- */
 function sha256Bytes(message) {
   const K = new Uint32Array([
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -200,18 +176,10 @@ function sha256Bytes(message) {
   return digest;
 }
 
-/**
- * @param {readonly SkuId[]} catalogSkuIds
- * @returns {string}
- */
 function catalogHash(catalogSkuIds) {
   return sha256Hex(catalogSkuIds.join("\n")).slice(0, 8);
 }
 
-/**
- * @param {string} suffix
- * @returns {number | null} qty 1..20, or null if invalid
- */
 function parseQtySuffix(suffix) {
   if (suffix === undefined || suffix === "") return 1;
   if (!/^\d{1,2}$/.test(suffix)) return null;
@@ -220,11 +188,6 @@ function parseQtySuffix(suffix) {
   return Math.min(HAVE_QTY_MAX, qty);
 }
 
-/**
- * @param {HaveQuantityMap} quantities
- * @param {HavePrefillContext["seriesList"]} seriesList
- * @returns {SeriesId[]}
- */
 function expandSeriesIds(quantities, seriesList) {
   const seeded = new Set(Object.keys(quantities));
   if (seeded.size === 0) return [];
@@ -238,13 +201,7 @@ function expandSeriesIds(quantities, seriesList) {
   return expanded;
 }
 
-/**
- * @param {string} raw
- * @param {ReadonlySet<SkuId>} knownSkuIds
- * @returns {HaveQuantityMap}
- */
 function decodeSkuCsv(raw, knownSkuIds) {
-  /** @type {Record<SkuId, number>} */
   const quantities = {};
   for (const token of raw.split(",")) {
     const trimmed = token.trim();
@@ -260,11 +217,6 @@ function decodeSkuCsv(raw, knownSkuIds) {
   return quantities;
 }
 
-/**
- * @param {string} raw
- * @param {readonly SkuId[]} catalogSkuIds
- * @returns {{ ok: true, quantities: HaveQuantityMap } | { ok: false, softFailed: boolean }}
- */
 function decodeOrdinalO1(raw, catalogSkuIds) {
   const body = raw.slice(3);
   const firstDot = body.indexOf(".");
@@ -281,7 +233,6 @@ function decodeOrdinalO1(raw, catalogSkuIds) {
     return { ok: false, softFailed: true };
   }
 
-  /** @type {Record<SkuId, number>} */
   const quantities = {};
   if (!itemsPart.trim()) {
     return { ok: true, quantities };
@@ -306,10 +257,6 @@ function decodeOrdinalO1(raw, catalogSkuIds) {
 }
 
 /**
- * Never throws. Hash mismatch → soft-failed empty seed (whole o1. payload).
- * Unknown SKU / OOB index → skip token. Bare ⇒ qty 1. `:qty` clamp 1..20.
- * Duplicate sku → last wins. Expand = series containing any seeded sku (seriesList order).
- *
  * @param {string | null | undefined} haveRaw
  * @param {HavePrefillContext} context
  * @returns {HavePrefillSeed}
