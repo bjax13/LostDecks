@@ -42,16 +42,18 @@ function formatPileQty(side, item) {
   return `you own ${item.owned}`;
 }
 
-function PileItem({ item, side }) {
+/** @type {import('react').FC<{ item: object, side: string }>} */
+const PileItem = function PileItem({ item, side }) {
   return (
     <li className="matches-pile-item">
       <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
       <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
     </li>
   );
-}
+};
 
-function TradeLane({ lane }) {
+/** @type {import('react').FC<{ lane: object }>} */
+const TradeLane = function TradeLane({ lane }) {
   return (
     <section className="matches-lane">
       <h3 className="matches-lane-title">{matchLaneLabels[lane.id] ?? lane.id}</h3>
@@ -75,7 +77,7 @@ function TradeLane({ lane }) {
       </div>
     </section>
   );
-}
+};
 
 function mailtoHref(email) {
   const trimmed = typeof email === "string" ? email.trim() : "";
@@ -129,7 +131,8 @@ function MatchContact({ contact, displayName }) {
   );
 }
 
-function MatchGroup({ counterparty }) {
+/** @type {import('react').FC<{ counterparty: object }>} */
+const MatchGroup = function MatchGroup({ counterparty }) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -147,7 +150,7 @@ function MatchGroup({ counterparty }) {
       <MatchContact contact={counterparty.contact} displayName={counterparty.displayName} />
     </details>
   );
-}
+};
 
 function formatFreshnessMessage({
   cacheAgeSeconds,

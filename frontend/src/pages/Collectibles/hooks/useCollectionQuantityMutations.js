@@ -32,9 +32,7 @@ export function normalizeQuantity(value) {
 
 function requireAuth(user) {
   if (!user) {
-    const authError = new Error("Authentication required");
-    authError.code = "auth-required";
-    throw authError;
+    throw Object.assign(new Error("Authentication required"), { code: "auth-required" });
   }
 }
 

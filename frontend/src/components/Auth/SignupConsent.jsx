@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 /**
  * Consent line shown on every sign-up surface (register page, auth modal register mode,
  * and under social login when creating an account).
+ *
+ * @param {{ onNavigate?: () => void }} [props]
  */
 export default function SignupConsent({ onNavigate } = {}) {
   const linkProps = onNavigate

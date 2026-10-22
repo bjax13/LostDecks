@@ -115,7 +115,15 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
   );
 }
 
-function CondensedSkuCell({
+/** @type {import('react').FC<{
+ *   shortLabel: string,
+ *   variantLabel?: string | null,
+ *   quantityLabel: string,
+ *   quantity: number,
+ *   onAdjust: (delta: number) => void,
+ *   usesNameLabel?: boolean,
+ * }>} */
+const CondensedSkuCell = function CondensedSkuCell({
   shortLabel,
   variantLabel = null,
   quantityLabel,
@@ -168,7 +176,7 @@ function CondensedSkuCell({
       </button>
     </div>
   );
-}
+};
 
 function NoneCoverageConfirmModal({ groupTitle, isOpen, onConfirm, onCancel }) {
   const dialogRef = useRef(null);
