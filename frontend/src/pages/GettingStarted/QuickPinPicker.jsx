@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { emptyHavePrefill } from "../../lib/havePrefill.js";
 import { gettingStartedTree } from "./gettingStartedCatalog";
 import "./QuickPinPicker.css";
 
@@ -47,6 +48,18 @@ function quantitiesFromEntries(entries, pinSkuIds) {
   return quantities;
 }
 
+function densifyZeros(allPinSkuIds, sparse) {
+  const quantities = {};
+  for (const skuId of allPinSkuIds) {
+    const raw = sparse?.[skuId];
+    quantities[skuId] =
+      typeof raw === "number" && Number.isFinite(raw)
+        ? Math.max(0, Math.min(MAX_QTY, Math.floor(raw)))
+        : 0;
+  }
+  return quantities;
+}
+
 /**
  * Scalable have/need picker for the full pin catalog (grouped by series).
  */
@@ -56,6 +69,7 @@ export default function QuickPinPicker({
   saving = false,
   error = null,
   isSignedIn = false,
+  prefill = emptyHavePrefill,
   onSubmit,
 }) {
   const seriesList = useMemo(() => buildSeriesFromTree(), []);
@@ -68,19 +82,19 @@ export default function QuickPinPicker({
   }, [seriesList]);
 
   const [quantities, setQuantities] = useState(() =>
-    Object.fromEntries([...allPinSkuIds].map((skuId) => [skuId, 0])),
+    densifyZeros(allPinSkuIds, prefill.quantities),
   );
   const [search, setSearch] = useState("");
-  const [expandedSeries, setExpandedSeries] = useState(() => new Set());
+  const [expandedSeries, setExpandedSeries] = useState(() => new Set(prefill.expandedSeriesIds));
   const [hydratedFromCollection, setHydratedFromCollection] = useState(false);
 
   useEffect(() => {
     if (collectionLoading || hydratedFromCollection || !isSignedIn) {
       return;
     }
-    setQuantities(quantitiesFromEntries(entries, allPinSkuIds));
+    setQuantities((prev) => prefill.raiseMerge(prev, quantitiesFromEntries(entries, allPinSkuIds)));
     setHydratedFromCollection(true);
-  }, [allPinSkuIds, collectionLoading, entries, hydratedFromCollection, isSignedIn]);
+  }, [allPinSkuIds, collectionLoading, entries, hydratedFromCollection, isSignedIn, prefill]);
 
   const normalizedSearch = search.trim().toLowerCase();
 

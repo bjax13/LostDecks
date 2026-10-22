@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { decodeHavePrefill } from "../../lib/havePrefill.js";
 import QuickPinPicker from "./QuickPinPicker.jsx";
 
 describe("QuickPinPicker", () => {
@@ -70,6 +71,47 @@ describe("QuickPinPicker", () => {
     render(
       <QuickPinPicker
         isSignedIn
+        entries={[
+          { skuId: "PIN-CF-01", quantity: 1 },
+          { skuId: "PIN-CF-02", quantity: 4 },
+        ]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+  });
+
+  it("seeds quantities and expands series from have= prefill", async () => {
+    const onSubmit = vi.fn();
+    const prefill = decodeHavePrefill("PIN-CF-01:2", {
+      catalogSkuIds: ["PIN-CF-01", "PIN-CF-02"],
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: ["PIN-CF-01", "PIN-CF-02"] }],
+    });
+
+    render(<QuickPinPicker prefill={prefill} onSubmit={onSubmit} />);
+
+    expect(screen.getByText(/1 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByText("Shredhead")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Find my trades" }));
+    expect(onSubmit.mock.calls[0][0]["PIN-CF-01"]).toBe(2);
+  });
+
+  it("raise-merges URL prefill with signed-in collection quantities", () => {
+    const prefill = decodeHavePrefill("PIN-CF-01:2", {
+      catalogSkuIds: ["PIN-CF-01", "PIN-CF-02"],
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: ["PIN-CF-01", "PIN-CF-02"] }],
+    });
+
+    render(
+      <QuickPinPicker
+        isSignedIn
+        prefill={prefill}
         entries={[
           { skuId: "PIN-CF-01", quantity: 1 },
           { skuId: "PIN-CF-02", quantity: 4 },

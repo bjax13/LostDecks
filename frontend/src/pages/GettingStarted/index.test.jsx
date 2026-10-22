@@ -128,6 +128,15 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).not.toBeInTheDocument();
   });
 
+  it("seeds the quick pin picker from have= SKU CSV", () => {
+    renderPage("/getting-started?collect=pins&have=PIN-CF-01:2,PIN-KROG-05");
+    expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+  });
+
   it("skips step 1 into card review for collect=cards", () => {
     renderPage("/getting-started?collect=cards");
     expect(screen.getByRole("heading", { name: /Review your cards/i })).toBeInTheDocument();
