@@ -32,8 +32,8 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
   }, []);
 
   const isPinSubCategory = categoryFilter === "pin";
-  /** Heralds have no subcategory; hide the control and ignore any stale filter. */
-  const showSubCategory = categoryFilter !== "herald";
+  /** Heralds: Sub Category stays visible but disabled (NA); ignore any stale filter. */
+  const subCategoryDisabled = categoryFilter === "herald";
 
   const stories = useMemo(
     () => (isPinSubCategory ? pinSeriesOptions : datasetStories),
@@ -51,7 +51,7 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
 
     let items = allCollectibles.filter((c) => {
       if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
-      if (showSubCategory && storyFilter !== "all") {
+      if (!subCategoryDisabled && storyFilter !== "all") {
         if (isPinSubCategory) {
           if (!pinSeriesMatches(c, storyFilter)) return false;
         } else if (storyFilter === "heralds") {
@@ -82,7 +82,7 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     sortField,
     sortDirection,
     isPinSubCategory,
-    showSubCategory,
+    subCategoryDisabled,
   ]);
 
   const resetFilters = useCallback(() => {
@@ -101,7 +101,7 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     rarityOptions,
     stories,
     isPinSubCategory,
-    showSubCategory,
+    subCategoryDisabled,
     searchTerm,
     setSearchTerm,
     categoryFilter,

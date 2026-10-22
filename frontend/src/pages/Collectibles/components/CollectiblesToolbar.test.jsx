@@ -211,10 +211,15 @@ describe("CollectiblesToolbar", () => {
       expect(props.onStoryChange).toHaveBeenCalledWith("ChasmFriends");
     });
 
-    it("hides Sub Category when Category is Heralds", () => {
-      renderToolbar({ categoryFilter: "herald" });
-      expect(screen.queryByLabelText("Sub Category")).not.toBeInTheDocument();
-      expect(screen.queryByRole("combobox", { name: "Sub Category" })).not.toBeInTheDocument();
+    it("shows disabled Sub Category as NA when Category is Heralds", () => {
+      renderToolbar({ categoryFilter: "herald", storyFilter: "red" });
+      const select = screen.getByLabelText("Sub Category");
+      expect(select).toBeDisabled();
+      expect(select).toHaveValue("na");
+      const options = within(select).getAllByRole("option");
+      expect(options).toHaveLength(1);
+      expect(options[0]).toHaveTextContent("NA");
+      expect(options[0]).toHaveValue("na");
     });
   });
 

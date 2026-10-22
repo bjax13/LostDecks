@@ -20,7 +20,7 @@ export default function CollectiblesToolbar({
   onReset,
 }) {
   const isPinSubCategory = categoryFilter === "pin";
-  const showSubCategory = categoryFilter !== "herald";
+  const subCategoryDisabled = categoryFilter === "herald";
 
   return (
     <section className="cards-toolbar">
@@ -51,24 +51,29 @@ export default function CollectiblesToolbar({
           </select>
         </div>
 
-        {showSubCategory ? (
-          <div className="filter-control">
-            <label htmlFor="story-filter">Sub Category</label>
-            <select
-              id="story-filter"
-              value={storyFilter}
-              onChange={(event) => onStoryChange(event.target.value)}
-            >
-              <option value="all">{isPinSubCategory ? "All series" : "All stories"}</option>
-              {stories.map((story) => (
-                <option key={story.code} value={story.code}>
-                  {story.title}
-                </option>
-              ))}
-              {!isPinSubCategory ? <option value="heralds">Heralds only</option> : null}
-            </select>
-          </div>
-        ) : null}
+        <div className="filter-control">
+          <label htmlFor="story-filter">Sub Category</label>
+          <select
+            id="story-filter"
+            value={subCategoryDisabled ? "na" : storyFilter}
+            onChange={(event) => onStoryChange(event.target.value)}
+            disabled={subCategoryDisabled}
+          >
+            {subCategoryDisabled ? (
+              <option value="na">NA</option>
+            ) : (
+              <>
+                <option value="all">{isPinSubCategory ? "All series" : "All stories"}</option>
+                {stories.map((story) => (
+                  <option key={story.code} value={story.code}>
+                    {story.title}
+                  </option>
+                ))}
+                {!isPinSubCategory ? <option value="heralds">Heralds only</option> : null}
+              </>
+            )}
+          </select>
+        </div>
 
         <div className="filter-control">
           <label htmlFor="rarity-filter">Rarity</label>

@@ -93,12 +93,12 @@ describe("useCollectiblesExplorer (unit)", () => {
     expect(result.current.isPinSubCategory).toBe(false);
   });
 
-  it("hides Sub Category and clears filter when Category is Heralds", () => {
+  it("disables Sub Category and clears filter when Category is Heralds", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     act(() => result.current.setStoryFilter(result.current.stories[0].code));
     expect(result.current.storyFilter).not.toBe("all");
     act(() => result.current.setCategoryFilter("herald"));
-    expect(result.current.showSubCategory).toBe(false);
+    expect(result.current.subCategoryDisabled).toBe(true);
     expect(result.current.storyFilter).toBe("all");
     expect(result.current.collectibles.every((c) => c.category === "herald")).toBe(true);
   });
