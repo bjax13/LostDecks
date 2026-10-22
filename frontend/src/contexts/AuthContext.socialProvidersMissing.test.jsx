@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authFns = vi.hoisted(() => ({
   createUserWithEmailAndPassword: vi.fn(),
+  getAdditionalUserInfo: vi.fn(),
   onAuthStateChanged: vi.fn((_auth, callback) => {
     callback(null);
     return vi.fn();
