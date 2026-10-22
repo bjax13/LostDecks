@@ -51,13 +51,13 @@ describe("CollectiblesToolbar", () => {
       const input = screen.getByLabelText("Search");
       expect(input).toHaveAttribute("id", "collectible-search");
       expect(input).toHaveAttribute("type", "search");
-      expect(input).toHaveAttribute("placeholder", "Search by ID, story, or variant");
+      expect(input).toHaveAttribute("placeholder", "Search by ID, story, series, or variant");
     });
 
     it("renders filter controls with correct ids for accessibility", () => {
       renderToolbar();
       expect(screen.getByLabelText("Category")).toHaveAttribute("id", "category-filter");
-      expect(screen.getByLabelText("Story")).toHaveAttribute("id", "story-filter");
+      expect(screen.getByLabelText("Sub Category")).toHaveAttribute("id", "story-filter");
       expect(screen.getByLabelText("Rarity")).toHaveAttribute("id", "rarity-filter");
       expect(screen.getByLabelText("Sort by")).toHaveAttribute("id", "sort-by");
     });
@@ -145,10 +145,10 @@ describe("CollectiblesToolbar", () => {
     });
   });
 
-  describe("story filter", () => {
-    it("renders dynamic story options plus static ones", () => {
+  describe("sub category filter", () => {
+    it("renders dynamic story options plus static ones for story-deck categories", () => {
       renderToolbar();
-      const select = screen.getByLabelText("Story");
+      const select = screen.getByLabelText("Sub Category");
       const options = within(select).getAllByRole("option");
 
       expect(options).toHaveLength(stories.length + 2);
@@ -158,16 +158,34 @@ describe("CollectiblesToolbar", () => {
       expect(options[options.length - 1]).toHaveTextContent("Heralds only");
     });
 
+    it("renders pin series options without Heralds when Category is Pins", () => {
+      const pinSeries = [
+        { code: "ChasmFriends", title: "ChasmFriends" },
+        { code: "Character Pin Series 1", title: "Character Pin Series 1" },
+      ];
+      renderToolbar({ categoryFilter: "pin", stories: pinSeries });
+      const select = screen.getByLabelText("Sub Category");
+      const options = within(select).getAllByRole("option");
+
+      expect(options.map((o) => o.value)).toEqual([
+        "all",
+        "ChasmFriends",
+        "Character Pin Series 1",
+      ]);
+      expect(options[0]).toHaveTextContent("All series");
+      expect(options.map((o) => o.textContent)).not.toContain("Heralds only");
+    });
+
     it("reflects the current story filter", () => {
       renderToolbar({ storyFilter: "snow" });
-      expect(screen.getByLabelText("Story")).toHaveValue("snow");
+      expect(screen.getByLabelText("Sub Category")).toHaveValue("snow");
     });
 
     it("calls onStoryChange when selection changes", async () => {
       const user = userEvent.setup();
       const props = renderToolbar();
 
-      await user.selectOptions(screen.getByLabelText("Story"), "red");
+      await user.selectOptions(screen.getByLabelText("Sub Category"), "red");
       expect(props.onStoryChange).toHaveBeenCalledWith("red");
     });
 
@@ -175,13 +193,28 @@ describe("CollectiblesToolbar", () => {
       const user = userEvent.setup();
       const props = renderToolbar();
 
-      await user.selectOptions(screen.getByLabelText("Story"), "heralds");
+      await user.selectOptions(screen.getByLabelText("Sub Category"), "heralds");
       expect(props.onStoryChange).toHaveBeenCalledWith("heralds");
     });
 
     it("reflects heralds filter when selected", () => {
       renderToolbar({ storyFilter: "heralds" });
-      expect(screen.getByLabelText("Story")).toHaveValue("heralds");
+      expect(screen.getByLabelText("Sub Category")).toHaveValue("heralds");
+    });
+
+    it("calls onStoryChange for a pin series option", async () => {
+      const user = userEvent.setup();
+      const pinSeries = [{ code: "ChasmFriends", title: "ChasmFriends" }];
+      const props = renderToolbar({ categoryFilter: "pin", stories: pinSeries });
+
+      await user.selectOptions(screen.getByLabelText("Sub Category"), "ChasmFriends");
+      expect(props.onStoryChange).toHaveBeenCalledWith("ChasmFriends");
+    });
+
+    it("hides Sub Category when Category is Heralds", () => {
+      renderToolbar({ categoryFilter: "herald" });
+      expect(screen.queryByLabelText("Sub Category")).not.toBeInTheDocument();
+      expect(screen.queryByRole("combobox", { name: "Sub Category" })).not.toBeInTheDocument();
     });
   });
 
@@ -322,7 +355,7 @@ describe("CollectiblesToolbar", () => {
     it("renders with empty stories and rarityOptions", () => {
       renderToolbar({ stories: [], rarityOptions: [] });
 
-      const storyOptions = within(screen.getByLabelText("Story")).getAllByRole("option");
+      const storyOptions = within(screen.getByLabelText("Sub Category")).getAllByRole("option");
       expect(storyOptions).toHaveLength(2);
 
       const rarityOpts = within(screen.getByLabelText("Rarity")).getAllByRole("option");
@@ -372,7 +405,7 @@ describe("CollectiblesToolbar", () => {
       await user.selectOptions(screen.getByLabelText("Category"), "story");
       expect(callbacks.onCategoryChange).toHaveBeenCalledWith("story");
 
-      await user.selectOptions(screen.getByLabelText("Story"), "red");
+      await user.selectOptions(screen.getByLabelText("Sub Category"), "red");
       expect(callbacks.onStoryChange).toHaveBeenCalledWith("red");
 
       await user.selectOptions(screen.getByLabelText("Rarity"), "Common");
