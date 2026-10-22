@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");
 const { HttpsError, onCall } = require("firebase-functions/v2/https");
+const { listAdminCollectorsHandler } = require("./adminCollections");
 const { deleteMyAccount, __test: deleteAccountTest } = require("./deleteAccount");
 const {
   buildKeepByUserId,
@@ -166,6 +167,15 @@ exports.getTradeMatches = onCall(
       throw new HttpsError("internal", "Could not load matches. Please try again.");
     }
   },
+);
+
+exports.listAdminCollectors = onCall(
+  {
+    enforceAppCheck: ENFORCE_APP_CHECK,
+    maxInstances: 2,
+    timeoutSeconds: 60,
+  },
+  (request) => listAdminCollectorsHandler(request),
 );
 
 exports.deleteMyAccount = deleteMyAccount;

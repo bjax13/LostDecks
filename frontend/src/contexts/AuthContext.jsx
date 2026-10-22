@@ -18,21 +18,59 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!auth) {
       setUser(null);
+      setIsAdmin(false);
+      setAdminLoading(false);
       setLoading(false);
       return undefined;
     }
 
+    let request = 0;
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      const current = ++request;
       setUser(firebaseUser);
       setLoading(false);
+
+      if (!firebaseUser || typeof firebaseUser.getIdTokenResult !== "function") {
+        setIsAdmin(false);
+        setAdminLoading(false);
+        return;
+      }
+
+      setAdminLoading(true);
+      firebaseUser
+        .getIdTokenResult(true)
+        .then((result) => {
+          if (current !== request) {
+            return;
+          }
+          setIsAdmin(result?.claims?.admin === true);
+        })
+        .catch((err) => {
+          console.error("Failed to read admin claim", err);
+          if (current !== request) {
+            return;
+          }
+          setIsAdmin(false);
+        })
+        .finally(() => {
+          if (current !== request) {
+            return;
+          }
+          setAdminLoading(false);
+        });
     });
 
-    return () => unsubscribe();
+    return () => {
+      request += 1;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -200,6 +238,8 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       loading,
+      isAdmin,
+      adminLoading,
       error,
       clearError,
       login,
@@ -213,6 +253,8 @@ export function AuthProvider({ children }) {
     [
       user,
       loading,
+      isAdmin,
+      adminLoading,
       error,
       clearError,
       login,

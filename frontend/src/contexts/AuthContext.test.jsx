@@ -66,6 +66,8 @@ function Harness() {
   return (
     <div>
       <span data-testid="loading">{String(ctx.loading)}</span>
+      <span data-testid="is-admin">{String(ctx.isAdmin)}</span>
+      <span data-testid="admin-loading">{String(ctx.adminLoading)}</span>
       <span data-testid="user-id">{ctx.user?.uid ?? "none"}</span>
       <span data-testid="error-msg">{ctx.error?.message ?? ""}</span>
       <span data-testid="display-name">{ctx.user?.displayName ?? ""}</span>
@@ -137,6 +139,50 @@ describe("AuthProvider", () => {
     });
     expect(screen.getByTestId("loading")).toHaveTextContent("false");
     expect(authFns.onAuthStateChanged).toHaveBeenCalledWith(fb.auth, expect.any(Function));
+  });
+
+  it("reads the admin custom claim from the ID token", async () => {
+    const mockUser = {
+      uid: "admin-1",
+      getIdTokenResult: vi.fn().mockResolvedValue({ claims: { admin: true } }),
+    };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      callback(mockUser);
+      return mockUnsubscribe;
+    });
+    renderAuth();
+    await waitFor(() => {
+      expect(screen.getByTestId("is-admin")).toHaveTextContent("true");
+    });
+    expect(screen.getByTestId("admin-loading")).toHaveTextContent("false");
+    expect(mockUser.getIdTokenResult).toHaveBeenCalledWith(true);
+  });
+
+  it("treats a missing or failed admin claim as not admin", async () => {
+    const mockUser = {
+      uid: "user-1",
+      getIdTokenResult: vi.fn().mockResolvedValue({ claims: { admin: "true" } }),
+    };
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      callback(mockUser);
+      return mockUnsubscribe;
+    });
+    renderAuth();
+    await waitFor(() => {
+      expect(screen.getByTestId("admin-loading")).toHaveTextContent("false");
+    });
+    expect(screen.getByTestId("is-admin")).toHaveTextContent("false");
+
+    mockUser.getIdTokenResult.mockRejectedValue(new Error("token failed"));
+    authFns.onAuthStateChanged.mockImplementation((_auth, callback) => {
+      callback(mockUser);
+      return mockUnsubscribe;
+    });
+    renderAuth();
+    await waitFor(() => {
+      expect(console.error).toHaveBeenCalledWith("Failed to read admin claim", expect.any(Error));
+    });
+    expect(screen.getAllByTestId("is-admin").at(-1)).toHaveTextContent("false");
   });
 
   it("unsubscribes on unmount", () => {

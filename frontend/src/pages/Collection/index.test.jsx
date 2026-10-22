@@ -472,6 +472,36 @@ describe("CollectionTable", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/collectibles/LT24-ELS-01");
   });
 
+  it("hides quantity controls and row navigation when readOnly", async () => {
+    const user = userEvent.setup({ delay: null });
+    const onIncrement = vi.fn();
+    const entry = {
+      ...baseEntry,
+      id: "r-readonly",
+      cardId: "LT24-ELS-01",
+      skuId: "LT24-ELS-01-DUN",
+      finish: "DUN",
+      quantity: 2,
+    };
+
+    render(
+      <TestMemoryRouter initialEntries={["/admin/someone"]}>
+        <CollectionTable entries={[entry]} onIncrement={onIncrement} readOnly />
+      </TestMemoryRouter>,
+    );
+
+    expect(screen.queryByRole("columnheader", { name: "Actions" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Increase quantity/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Decrease quantity/i })).not.toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+
+    const row = screen.getByText("Row Card").closest("tr");
+    expect(row).not.toHaveClass("collection-table__row--clickable");
+    await user.click(row);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(onIncrement).not.toHaveBeenCalled();
+  });
+
   it("invokes row action callbacks and does not navigate", async () => {
     const user = userEvent.setup({ delay: null });
     const onIncrement = vi.fn();
