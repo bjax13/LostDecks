@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { BULK_IMPORT_APPLIED, ISO_UFT_COPIED } from "../../../analytics/events.js";
+import { captureEvent } from "../../../analytics/posthog.js";
 import {
   applyBulkCollectionUpdate,
   createStoryDeckCollectionCsv,
@@ -118,6 +120,11 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         existingEntries,
       });
 
+      captureEvent(BULK_IMPORT_APPLIED, {
+        created: result.created ?? 0,
+        updated: result.updated ?? 0,
+        deleted: result.deleted ?? 0,
+      });
       setReport(result);
       setIssues(result.issues ?? []);
     } catch (err) {
@@ -142,6 +149,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   };
 
   const handlePostCopied = ({ skippedEntries }) => {
+    captureEvent(ISO_UFT_COPIED, { skippedEntries: skippedEntries ?? 0 });
     setPostStatus(
       skippedEntries > 0
         ? `Copied ISO/UFT post. ${skippedEntries} entries without a valid SKU were skipped.`

@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -8,7 +9,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { syncPostHogUser } from "../analytics/posthog.js";
+import { LOGIN_COMPLETED, SIGNUP_COMPLETED } from "../analytics/events.js";
+import { captureEvent, resetPostHogUser, syncPostHogUser } from "../analytics/posthog.js";
 import { auth, googleProvider, hasFirebaseConfig } from "../lib/firebase";
 
 const AuthContext = createContext(null);
@@ -95,6 +97,7 @@ export function AuthProvider({ children }) {
       clearError();
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        captureEvent(LOGIN_COMPLETED, { method: "password" });
       } catch (err) {
         handleError(err);
         throw err;
@@ -119,6 +122,7 @@ export function AuthProvider({ children }) {
         if (profile.displayName) {
           await updateProfile(credentials.user, { displayName: profile.displayName });
         }
+        captureEvent(SIGNUP_COMPLETED, { method: "password" });
       } catch (err) {
         handleError(err);
         throw err;
@@ -131,6 +135,7 @@ export function AuthProvider({ children }) {
     clearError();
     try {
       await signOut(auth);
+      resetPostHogUser();
     } catch (err) {
       handleError(err);
       throw err;
@@ -170,7 +175,11 @@ export function AuthProvider({ children }) {
 
       clearError();
       try {
-        await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(auth, provider);
+        const isNewUser = Boolean(getAdditionalUserInfo(result)?.isNewUser);
+        captureEvent(isNewUser ? SIGNUP_COMPLETED : LOGIN_COMPLETED, {
+          method: provider.providerId,
+        });
       } catch (err) {
         handleError(err);
         throw err;

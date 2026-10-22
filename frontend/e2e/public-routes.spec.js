@@ -51,4 +51,16 @@ test.describe("public routes (e2e)", () => {
     await page.goto("/terms");
     await expect(page.getByRole("heading", { name: "Terms of Use" })).toBeVisible();
   });
+
+  test("robots.txt and favicon.svg are real static files", async ({ request }) => {
+    const robots = await request.get("/robots.txt");
+    expect(robots.ok()).toBeTruthy();
+    const robotsBody = await robots.text();
+    expect(robotsBody).toContain("User-agent");
+    expect(robotsBody).toContain("Disallow: /account");
+
+    const favicon = await request.get("/favicon.svg");
+    expect(favicon.ok()).toBeTruthy();
+    expect(favicon.headers()["content-type"]).toMatch(/image\/svg\+xml/);
+  });
 });
