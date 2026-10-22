@@ -7,6 +7,7 @@ import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
 import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
+import AdminPage from "./pages/Admin";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -22,7 +23,7 @@ import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function MainNav() {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, isAdmin } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -80,6 +81,7 @@ function MainNav() {
           <Link to="/collections">Collection</Link>
           <Link to="/matches">Matches</Link>
           <Link to="/account">Account</Link>
+          {isAdmin ? <Link to="/admin">Admin</Link> : null}
         </div>
         <div className="main-nav__auth">
           {loading ? (
@@ -116,6 +118,8 @@ function App() {
         <Route path="/getting-started" element={<GettingStartedPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/account" element={<AccountPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/:uid" element={<AdminPage />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/forgot" element={<ForgotPassword />} />

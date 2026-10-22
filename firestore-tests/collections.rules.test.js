@@ -7,10 +7,15 @@ const {
   initializeTestEnvironment,
 } = require("@firebase/rules-unit-testing");
 const {
+  collection,
+  deleteDoc,
   doc,
   getDoc,
+  getDocs,
+  query,
   setDoc,
   updateDoc,
+  where,
   Timestamp,
   serverTimestamp,
 } = require("firebase/firestore");
@@ -163,6 +168,75 @@ test("reading another user's collection doc is rejected", async () => {
 
   const db = testEnv.authenticatedContext(OTHER).firestore();
   await assertFails(getDoc(doc(db, "collections/entry-1")));
+});
+
+test("owner can read their own collection doc and query", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(getDoc(doc(db, "collections/entry-1")));
+  await assertSucceeds(
+    getDocs(query(collection(db, "collections"), where("ownerUid", "==", OWNER))),
+  );
+});
+
+test("non-admin cannot list every collection or query another owner", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext(OTHER, { admin: false }).firestore();
+  await assertFails(getDocs(collection(db, "collections")));
+  await assertFails(getDocs(query(collection(db, "collections"), where("ownerUid", "==", OWNER))));
+});
+
+test("admin claim can read and query another user's collection", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext("admin-uid", { admin: true }).firestore();
+  await assertSucceeds(getDoc(doc(db, "collections/entry-1")));
+  await assertSucceeds(getDocs(collection(db, "collections")));
+  await assertSucceeds(
+    getDocs(query(collection(db, "collections"), where("ownerUid", "==", OWNER))),
+  );
+});
+
+test("admin claim cannot write or delete another user's collection", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext("admin-uid", { admin: true }).firestore();
+  await assertFails(setDoc(doc(db, "collections/entry-admin"), validEntry()));
+  await assertFails(
+    updateDoc(doc(db, "collections/entry-1"), {
+      quantity: 4,
+      updatedAt: serverTimestamp(),
+    }),
+  );
+  await assertFails(deleteDoc(doc(db, "collections/entry-1")));
+});
+
+test("admin claim can still create their own collection entry", async () => {
+  const db = testEnv.authenticatedContext("admin-uid", { admin: true }).firestore();
+  await assertSucceeds(
+    setDoc(doc(db, "collections/entry-admin"), validEntry({ ownerUid: "admin-uid" })),
+  );
+});
+
+test("admin claim cannot read another user's preferences", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), `userPreferences/${OWNER}`), {
+      matchingOptOut: false,
+    });
+  });
+
+  const db = testEnv.authenticatedContext("admin-uid", { admin: true }).firestore();
+  await assertFails(getDoc(doc(db, `userPreferences/${OWNER}`)));
 });
 
 test("userPreferences create still works (smoke)", async () => {

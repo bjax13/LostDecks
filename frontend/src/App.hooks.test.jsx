@@ -86,6 +86,33 @@ describe("App (hook mocks)", () => {
     errSpy.mockRestore();
   });
 
+  it("shows the Admin link only for an admin session", async () => {
+    const user = userEvent.setup();
+    mockUseAuth.mockReturnValue({
+      user: { displayName: "Corby", email: "corbyagain@gmail.com" },
+      logout: vi.fn(),
+      loading: false,
+      isAdmin: true,
+      adminLoading: false,
+    });
+    render(<App />);
+    expect(screen.queryByRole("link", { name: "Admin" })).toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: "Admin" }));
+    expect(screen.getByRole("heading", { name: "Admin" })).toBeInTheDocument();
+  });
+
+  it("hides Admin from a signed-in collector", () => {
+    mockUseAuth.mockReturnValue({
+      user: { displayName: "Collector", email: "collector.one@example.com" },
+      logout: vi.fn(),
+      loading: false,
+      isAdmin: false,
+      adminLoading: false,
+    });
+    render(<App />);
+    expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
+  });
+
   it("renders sign-in navigation for a signed-out user", () => {
     render(<App />);
     expect(screen.getByRole("link", { name: "ShardStash" })).toHaveAttribute("href", "/");

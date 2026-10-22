@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node --test",
     "seed:local": "node seed-local.js",
-    "seed:local:wipe": "node seed-local.js --wipe"
+    "seed:local:wipe": "node seed-local.js --wipe",
+    "admin:claims": "node set-admin-claims.js"
   },
   "dependencies": {
     "firebase-admin": "13.10.0",
