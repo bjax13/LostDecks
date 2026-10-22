@@ -993,7 +993,11 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(mockCaptureEvent).toHaveBeenCalledWith("sign_in_prompted", {
       reason: "getting-started-save",
     });
-    expect(mockOpenAuthModal).toHaveBeenCalledWith({ reason: "getting-started-save" });
+    expect(mockOpenAuthModal).toHaveBeenCalledWith({
+      reason: "getting-started-save",
+      initialMode: "register",
+      onSuccess: expect.any(Function),
+    });
     expect(mockApplyBulkCollectionUpdate).not.toHaveBeenCalled();
   });
 
