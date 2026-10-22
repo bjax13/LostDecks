@@ -1,6 +1,8 @@
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it } from "vitest";
+import { collectiblesIndex } from "../../../data/collectibles.js";
+import { compareCollectibles } from "../utils/compareCollectibles.js";
 import { useCollectiblesExplorer } from "./useCollectiblesExplorer.js";
 
 describe("useCollectiblesExplorer (unit)", () => {
@@ -56,10 +58,31 @@ describe("useCollectiblesExplorer (unit)", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     act(() => result.current.setSearchTerm("test"));
     act(() => result.current.setCategoryFilter("herald"));
+    act(() => result.current.setSortField("number"));
+    act(() => result.current.setSortDirection("desc"));
     act(() => result.current.resetFilters());
     expect(result.current.searchTerm).toBe("");
     expect(result.current.categoryFilter).toBe("all");
     expect(result.current.storyFilter).toBe("all");
+    expect(result.current.rarityFilter).toBe("all");
+    expect(result.current.sortField).toBe("grouped");
+    expect(result.current.sortDirection).toBe("asc");
+  });
+
+  it("sorts the catalog by category, story, and card number by default", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    const expected = [...collectiblesIndex].sort((a, b) =>
+      compareCollectibles(a, b, "grouped", "asc"),
+    );
+    const groupedIds = result.current.collectibles.map((collectible) => collectible.id);
+    expect(result.current.sortField).toBe("grouped");
+    expect(result.current.sortDirection).toBe("asc");
+    expect(groupedIds).toEqual(expected.map((collectible) => collectible.id));
+
+    act(() => result.current.setSortField("number"));
+    expect(result.current.collectibles.map((collectible) => collectible.id)).not.toEqual(
+      groupedIds,
+    );
   });
 
   it("sorts by different fields", () => {
