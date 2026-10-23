@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const initMock = vi.fn();
 const captureMock = vi.fn();
+const captureExceptionMock = vi.fn();
 const identifyMock = vi.fn();
 const resetMock = vi.fn();
 const displaySurveyMock = vi.fn();
@@ -13,6 +14,7 @@ vi.mock("posthog-js", () => ({
   default: {
     init: initMock,
     capture: captureMock,
+    captureException: captureExceptionMock,
     identify: identifyMock,
     reset: resetMock,
     displaySurvey: displaySurveyMock,
@@ -27,6 +29,7 @@ describe("posthog analytics", () => {
     vi.unstubAllEnvs();
     initMock.mockClear();
     captureMock.mockClear();
+    captureExceptionMock.mockClear();
     identifyMock.mockClear();
     resetMock.mockClear();
     displaySurveyMock.mockClear();
@@ -34,6 +37,7 @@ describe("posthog analytics", () => {
     getSurveysMock.mockImplementation((callback) => {
       callback([{ id: "survey-test-id" }], { isLoaded: true });
     });
+    window.localStorage.clear();
   });
 
   it("does not init when the project key is missing", async () => {
@@ -53,10 +57,28 @@ describe("posthog analytics", () => {
       expect.objectContaining({
         api_host: "https://us.i.posthog.com",
         capture_pageview: false,
+        capture_exceptions: true,
         disable_surveys_automatic_display: true,
         advanced_enable_surveys: true,
       }),
     );
+  });
+
+  it("captures exceptions only after init", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { initPostHog, capturePostHogException } = await import("./posthog.js");
+    const err = new Error("boom");
+    initPostHog();
+    capturePostHogException(err, { source: "test" });
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog: init2, capturePostHogException: capture2 } = await import("./posthog.js");
+    init2();
+    capture2(err, { source: "test" });
+    expect(captureExceptionMock).toHaveBeenCalledWith(err, { source: "test" });
   });
 
   it("opens the configured feedback survey via displaySurvey", async () => {
@@ -103,7 +125,7 @@ describe("posthog analytics", () => {
     );
   });
 
-  it("identifies or resets the user after init", async () => {
+  it("identifies signed-in users and does not reset on null", async () => {
     vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
     const { initPostHog, syncPostHogUser } = await import("./posthog.js");
     initPostHog();
@@ -114,8 +136,49 @@ describe("posthog analytics", () => {
     });
     expect(identifyMock).toHaveBeenCalledWith("u1");
     expect(identifyMock).toHaveBeenCalledTimes(1);
+    expect(window.localStorage.getItem("shardstash.posthogUid")).toBe("u1");
     syncPostHogUser(null);
+    expect(resetMock).not.toHaveBeenCalled();
+  });
+
+  it("resets when resetPostHogUser is called", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog, resetPostHogUser, syncPostHogUser } = await import("./posthog.js");
+    initPostHog();
+    syncPostHogUser({ uid: "u1", email: "a@b.c", displayName: "Ada" });
+    resetPostHogUser();
     expect(resetMock).toHaveBeenCalled();
+    expect(window.localStorage.getItem("shardstash.posthogUid")).toBeNull();
+  });
+
+  it("resets then identifies when switching accounts", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog, syncPostHogUser } = await import("./posthog.js");
+    initPostHog();
+    syncPostHogUser({ uid: "u1", email: "a@b.c", displayName: "Ada" });
+    resetMock.mockClear();
+    identifyMock.mockClear();
+    syncPostHogUser({ uid: "u2", email: "b@c.d", displayName: "Bob" });
+    expect(resetMock).toHaveBeenCalledTimes(1);
+    expect(identifyMock).toHaveBeenCalledWith("u2");
+    expect(window.localStorage.getItem("shardstash.posthogUid")).toBe("u2");
+  });
+
+  it("captureEvent no-ops before init and captures after", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { initPostHog, captureEvent } = await import("./posthog.js");
+    initPostHog();
+    captureEvent("signup_completed", { method: "password" });
+    expect(captureMock).not.toHaveBeenCalled();
+
+    vi.resetModules();
+    vi.unstubAllEnvs();
+    window.localStorage.clear();
+    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
+    const { initPostHog: init2, captureEvent: capture2 } = await import("./posthog.js");
+    init2();
+    capture2("signup_completed", { method: "password" });
+    expect(captureMock).toHaveBeenCalledWith("signup_completed", { method: "password" });
   });
 
   it("resetPostHogUser calls reset after init and no-ops before", async () => {
@@ -132,24 +195,5 @@ describe("posthog analytics", () => {
     init2();
     reset2();
     expect(resetMock).toHaveBeenCalled();
-  });
-
-  it("captures custom events only after init", async () => {
-    vi.stubEnv("VITE_POSTHOG_KEY", "");
-    const { initPostHog, captureEvent } = await import("./posthog.js");
-    initPostHog();
-    captureEvent("iso_uft_copied", { format: "shorthand" });
-    expect(captureMock).not.toHaveBeenCalled();
-
-    vi.resetModules();
-    vi.unstubAllEnvs();
-    vi.stubEnv("VITE_POSTHOG_KEY", "phc_test");
-    const { initPostHog: init2, captureEvent: capture2 } = await import("./posthog.js");
-    init2();
-    capture2("iso_uft_copied", { format: "shorthand", includeLink: true });
-    expect(captureMock).toHaveBeenCalledWith("iso_uft_copied", {
-      format: "shorthand",
-      includeLink: true,
-    });
   });
 });

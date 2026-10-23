@@ -9,10 +9,16 @@ const bulkImportMocks = vi.hoisted(() => ({
   applyBulkCollectionUpdate: vi.fn(),
 }));
 
+const mockCaptureEvent = vi.hoisted(() => vi.fn());
+
 vi.mock("../utils/bulkImport", () => ({
   createStoryDeckCollectionCsv: bulkImportMocks.createStoryDeckCollectionCsv,
   parseBulkCollectionCsv: bulkImportMocks.parseBulkCollectionCsv,
   applyBulkCollectionUpdate: bulkImportMocks.applyBulkCollectionUpdate,
+}));
+
+vi.mock("../../../analytics/posthog.js", () => ({
+  captureEvent: (...args) => mockCaptureEvent(...args),
 }));
 
 const collectiblesState = vi.hoisted(() => ({
@@ -234,6 +240,11 @@ describe("BulkCollectionTools", () => {
       }),
     );
     expect(bulkImportMocks.applyBulkCollectionUpdate.mock.calls[0][0].existingEntries).toEqual([]);
+    expect(mockCaptureEvent).toHaveBeenCalledWith("bulk_import_applied", {
+      created: 2,
+      updated: 0,
+      deleted: 0,
+    });
   });
 
   it("combines summary segments for multiple change types", async () => {
@@ -530,6 +541,11 @@ describe("BulkCollectionTools", () => {
     await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     expect(await screen.findByRole("status")).toHaveTextContent(/copied iso\/uft post/i);
+    expect(mockCaptureEvent).toHaveBeenCalledWith("iso_uft_copied", {
+      skippedEntries: expect.any(Number),
+      format: expect.any(String),
+      includeLink: expect.any(Boolean),
+    });
   });
 
   it("shows post copy error when clipboard writeText rejects", async () => {

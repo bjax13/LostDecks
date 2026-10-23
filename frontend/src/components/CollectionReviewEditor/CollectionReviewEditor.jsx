@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { MAX_COLLECTION_QUANTITY } from "../../lib/collectionLimits";
 import {
   COLLECTIBLE_TYPE_PINS,
   formatReviewGroupLabel,
@@ -20,7 +21,21 @@ function parseBulkQuantity(value) {
   if (value === "") return { valid: false };
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed < 0) return { valid: false };
-  return { valid: true, quantity: Math.floor(parsed) };
+  return {
+    valid: true,
+    quantity: Math.min(MAX_COLLECTION_QUANTITY, Math.floor(parsed)),
+  };
+}
+
+/** type=number ignores maxLength; clamp so values above the collection ceiling cannot stick. */
+function clampBulkQuantityInputValue(input) {
+  if (!input || input.value === "") return;
+  if (input.validity?.badInput) return;
+  const parsed = Number(input.value);
+  if (!Number.isFinite(parsed) || parsed < 0) return;
+  if (parsed > MAX_COLLECTION_QUANTITY) {
+    input.value = String(MAX_COLLECTION_QUANTITY);
+  }
 }
 
 function inspectBulkQuantityInput(input) {
@@ -43,11 +58,13 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
   const canApply = inputStatus === "ok";
 
   const syncFromInput = (input) => {
+    clampBulkQuantityInputValue(input);
     setInputStatus(inspectBulkQuantityInput(input).status);
   };
 
   const applyAll = () => {
     const input = inputRef.current;
+    clampBulkQuantityInputValue(input);
     const result = inspectBulkQuantityInput(input);
     setInputStatus(result.status);
     if (result.status !== "ok") return;
@@ -72,6 +89,7 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
               ref={inputRef}
               type="number"
               min="0"
+              max={MAX_COLLECTION_QUANTITY}
               step="1"
               inputMode="numeric"
               defaultValue="1"
@@ -88,7 +106,7 @@ function GroupBulkActions({ groupLabel, summary, onSetAll }) {
         </div>
         {hasInvalidQuantity ? (
           <p id={errorId} className="getting-started__bulk-actions-error" role="alert">
-            Quantity must be 0 or more.
+            Quantity must be between 0 and {MAX_COLLECTION_QUANTITY}.
           </p>
         ) : null}
       </div>

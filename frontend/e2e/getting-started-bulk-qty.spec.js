@@ -19,15 +19,21 @@ test.describe("getting started bulk quantity (e2e)", () => {
     const applyAll = bulkActions.getByRole("button", { name: "Apply all" });
 
     await expect(input).toHaveAttribute("min", "0");
+    await expect(input).toHaveAttribute("max", "999");
     await expect(input).toHaveAttribute("step", "1");
 
     await input.fill("-5");
 
     await expect(applyAll).toBeDisabled();
-    await expect(bulkActions.getByRole("alert")).toHaveText(/quantity must be 0 or more/i);
+    await expect(bulkActions.getByRole("alert")).toHaveText(/quantity must be between 0 and 999/i);
     await expect(
       page.getByRole("group", { name: /elsecaller story foils foil #1 quantity, 0$/i }),
     ).toBeVisible();
+
+    await input.fill("1000");
+    await expect(input).toHaveValue("999");
+    await expect(applyAll).toBeEnabled();
+    await expect(bulkActions.getByRole("alert")).toHaveCount(0);
 
     await input.fill("2");
     await expect(applyAll).toBeEnabled();

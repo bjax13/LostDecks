@@ -1,0 +1,40 @@
+name: Set admin claims
+
+# Sync Firebase Auth custom claim `admin` with functions/admins.js on storydeck-16.
+# Run manually after configuring repository secret FIREBASE_SERVICE_ACCOUNT_JSON.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: set-admin-claims-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  set-admin-claims:
+    name: Set admin claims
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            functions/package-lock.json
+
+      - name: Install Cloud Functions dependencies
+        run: npm ci --prefix functions
+
+      - name: Set admin claims
+        run: npm run admin:claims --prefix functions
+        env:
+          GOOGLE_CLOUD_PROJECT: storydeck-16

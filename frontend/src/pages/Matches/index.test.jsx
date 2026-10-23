@@ -8,6 +8,7 @@ const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseTradeMatches = vi.hoisted(() => vi.fn());
 const mockGetSkuRecord = vi.hoisted(() => vi.fn());
 const mockSubscribeUserPreferences = vi.hoisted(() => vi.fn());
+const mockCaptureEvent = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
@@ -37,6 +38,10 @@ vi.mock("../../lib/userPreferences", async (importOriginal) => {
     subscribeUserPreferences: (...args) => mockSubscribeUserPreferences(...args),
   };
 });
+
+vi.mock("../../analytics/posthog.js", () => ({
+  captureEvent: (...args) => mockCaptureEvent(...args),
+}));
 
 import MatchesPage from "./index.jsx";
 
@@ -161,6 +166,32 @@ describe("MatchesPage", () => {
       screen.getByText("You're refreshing too fast, try again in a few seconds"),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+  });
+
+  it("captures matches_viewed once for a fresh successful load", () => {
+    renderMatches();
+
+    expect(mockCaptureEvent).toHaveBeenCalledWith("matches_viewed", {
+      matchCount: 1,
+      callerOptedOut: false,
+      pageIndex: 1,
+    });
+    expect(mockCaptureEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not capture matches_viewed for cached results", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        isUsingCachedResult: true,
+        cacheAgeSeconds: 5,
+        showRefreshCountdown: true,
+        refreshAvailableInSeconds: 25,
+      }),
+    );
+
+    renderMatches();
+
+    expect(mockCaptureEvent).not.toHaveBeenCalled();
   });
 
   it("shows only Pins when the payload has a pins-only reciprocal lane", () => {

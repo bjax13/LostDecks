@@ -3,12 +3,14 @@ import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-do
 import { PostHogPageviews } from "./analytics/PostHogPageviews.jsx";
 import { SITE_NAME } from "./brand.js";
 import FeedbackFab from "./components/FeedbackFab.jsx";
+import RouteErrorBoundary from "./components/RouteErrorBoundary.jsx";
 import SiteFeedback from "./components/SiteFeedback.jsx";
 import { useAuth } from "./contexts/AuthContext";
-import { AuthModalProvider, useAuthModal } from "./contexts/AuthModalContext.jsx";
+import { AuthModalProvider } from "./contexts/AuthModalContext.jsx";
 import { PendingPicksApplier } from "./hooks/useApplyPendingPicks.js";
 import AboutPage from "./pages/About";
 import AccountPage from "./pages/Account";
+import AdminPage from "./pages/Admin";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -24,8 +26,7 @@ import NotFound from "./pages/NotFound";
 import { ROUTER_FUTURE_FLAGS } from "./routerFuture.js";
 
 function MainNav() {
-  const { user, logout, loading } = useAuth();
-  const { openAuthModal } = useAuthModal();
+  const { user, logout, loading, isAdmin } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -83,6 +84,7 @@ function MainNav() {
           <Link to="/collections">Collection</Link>
           <Link to="/matches">Matches</Link>
           <Link to="/account">Account</Link>
+          {isAdmin ? <Link to="/admin">Admin</Link> : null}
         </div>
         <div className="main-nav__auth">
           {loading ? (
@@ -95,12 +97,7 @@ function MainNav() {
               </button>
             </>
           ) : (
-            <>
-              <Link to="/auth/login">Sign in</Link>
-              <button type="button" onClick={() => openAuthModal()}>
-                Quick sign in
-              </button>
-            </>
+            <Link to="/auth/login">Sign in</Link>
           )}
         </div>
       </div>
@@ -117,23 +114,27 @@ function App() {
         <PendingPicksApplier />
         <MainNav />
         <hr />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/collectibles" element={<CollectiblesPage />} />
-          <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
-          <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
-          <Route path="/collections" element={<CollectionPage />} />
-          <Route path="/getting-started" element={<GettingStartedPage />} />
-          <Route path="/matches" element={<MatchesPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forgot" element={<ForgotPassword />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <RouteErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/collectibles" element={<CollectiblesPage />} />
+            <Route path="/collectibles/:collectibleId" element={<CollectibleDetailPage />} />
+            <Route path="/collectibles/:collectibleId/:skuId" element={<CollectibleDetailPage />} />
+            <Route path="/collections" element={<CollectionPage />} />
+            <Route path="/getting-started" element={<GettingStartedPage />} />
+            <Route path="/matches" element={<MatchesPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/:uid" element={<AdminPage />} />
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/register" element={<Register />} />
+            <Route path="/auth/forgot" element={<ForgotPassword />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </RouteErrorBoundary>
         <SiteFeedback />
         <FeedbackFab />
       </AuthModalProvider>

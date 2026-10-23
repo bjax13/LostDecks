@@ -24,6 +24,16 @@ vi.mock("./contexts/AuthContext.jsx", () => ({
   AuthProvider: ({ children }) => <div data-testid="auth-provider">{children}</div>,
 }));
 
+const { capturePostHogExceptionMock, initPostHogMock } = vi.hoisted(() => ({
+  capturePostHogExceptionMock: vi.fn(),
+  initPostHogMock: vi.fn(),
+}));
+
+vi.mock("./analytics/posthog.js", () => ({
+  initPostHog: (...args) => initPostHogMock(...args),
+  capturePostHogException: (...args) => capturePostHogExceptionMock(...args),
+}));
+
 async function loadMain() {
   vi.resetModules();
   await import("./main.jsx");
@@ -38,14 +48,22 @@ describe("main.jsx (entry)", () => {
     document.body.innerHTML = '<div id="root"></div>';
     mockCreateRoot.mockClear();
     mockRender.mockClear();
+    capturePostHogExceptionMock.mockClear();
+    initPostHogMock.mockClear();
   });
 
-  it("creates a root on #root and renders the provider tree under StrictMode", async () => {
+  it("creates a root on #root with React error hooks and renders the provider tree", async () => {
     const rootEl = document.getElementById("root");
     await loadMain();
 
     expect(mockCreateRoot).toHaveBeenCalledTimes(1);
-    expect(mockCreateRoot).toHaveBeenCalledWith(rootEl);
+    expect(mockCreateRoot).toHaveBeenCalledWith(
+      rootEl,
+      expect.objectContaining({
+        onUncaughtError: expect.any(Function),
+        onCaughtError: expect.any(Function),
+      }),
+    );
     expect(mockRender).toHaveBeenCalledTimes(1);
 
     const tree = mockRender.mock.calls[0][0];
@@ -61,7 +79,32 @@ describe("main.jsx (entry)", () => {
     await loadMain();
 
     expect(getById).toHaveBeenCalledWith("root");
-    expect(mockCreateRoot).toHaveBeenCalledWith(document.getElementById("root"));
+    expect(mockCreateRoot).toHaveBeenCalledWith(
+      document.getElementById("root"),
+      expect.objectContaining({
+        onUncaughtError: expect.any(Function),
+        onCaughtError: expect.any(Function),
+      }),
+    );
     getById.mockRestore();
+  });
+
+  it("reports React root errors to PostHog", async () => {
+    await loadMain();
+    expect(initPostHogMock).toHaveBeenCalled();
+
+    const options = mockCreateRoot.mock.calls[0][1];
+    const err = new Error("root boom");
+    options.onUncaughtError(err, { componentStack: "stack-u" });
+    options.onCaughtError(err, { componentStack: "stack-c" });
+
+    expect(capturePostHogExceptionMock).toHaveBeenCalledWith(err, {
+      componentStack: "stack-u",
+      source: "react-uncaught",
+    });
+    expect(capturePostHogExceptionMock).toHaveBeenCalledWith(err, {
+      componentStack: "stack-c",
+      source: "react-boundary",
+    });
   });
 });

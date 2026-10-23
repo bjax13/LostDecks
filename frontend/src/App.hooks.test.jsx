@@ -10,6 +10,7 @@ vi.mock("./contexts/AuthContext", () => ({
   useAuth: mockUseAuth,
 }));
 
+// Home (and other routes) still call useAuthModal; MainNav no longer does.
 vi.mock("./contexts/AuthModalContext.jsx", () => ({
   AuthModalProvider: ({ children }) => children,
   useAuthModal: mockUseAuthModal,
@@ -20,16 +21,10 @@ vi.mock("./hooks/useApplyPendingPicks.js", () => ({
   useApplyPendingPicks: () => {},
 }));
 
-function setupAuthModal() {
-  const openAuthModal = vi.fn();
-  mockUseAuthModal.mockReturnValue({ openAuthModal });
-  return { openAuthModal };
-}
-
 describe("App (hook mocks)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    setupAuthModal();
+    mockUseAuthModal.mockReturnValue({ openAuthModal: vi.fn() });
     mockUseAuth.mockReturnValue({
       user: null,
       logout: vi.fn(),
@@ -97,19 +92,37 @@ describe("App (hook mocks)", () => {
     errSpy.mockRestore();
   });
 
-  it("opens the auth modal when Quick sign in is clicked", async () => {
+  it("shows the Admin link only for an admin session", async () => {
     const user = userEvent.setup();
-    const { openAuthModal } = setupAuthModal();
+    mockUseAuth.mockReturnValue({
+      user: { displayName: "Corby", email: "corbyagain@gmail.com" },
+      logout: vi.fn(),
+      loading: false,
+      isAdmin: true,
+      adminLoading: false,
+    });
     render(<App />);
-    await user.click(screen.getByRole("button", { name: "Quick sign in" }));
-    expect(openAuthModal).toHaveBeenCalledTimes(1);
-    expect(openAuthModal).toHaveBeenCalledWith();
+    expect(screen.queryByRole("link", { name: "Admin" })).toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: "Admin" }));
+    expect(screen.getByRole("heading", { name: "Admin" })).toBeInTheDocument();
+  });
+
+  it("hides Admin from a signed-in collector", () => {
+    mockUseAuth.mockReturnValue({
+      user: { displayName: "Collector", email: "collector.one@example.com" },
+      logout: vi.fn(),
+      loading: false,
+      isAdmin: false,
+      adminLoading: false,
+    });
+    render(<App />);
+    expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
   });
 
   it("renders sign-in navigation for a signed-out user", () => {
     render(<App />);
     expect(screen.getByRole("link", { name: "ShardStash" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /sign in/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quick sign in" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign in/i })).toHaveAttribute("href", "/auth/login");
+    expect(screen.queryByRole("button", { name: "Quick sign in" })).not.toBeInTheDocument();
   });
 });

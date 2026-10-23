@@ -19,6 +19,9 @@ export default function CollectiblesToolbar({
   totalCount,
   onReset,
 }) {
+  const isPinSubCategory = categoryFilter === "pin";
+  const subCategoryDisabled = categoryFilter === "herald";
+
   return (
     <section className="cards-toolbar">
       <div className="search-control">
@@ -26,7 +29,7 @@ export default function CollectiblesToolbar({
         <input
           id="collectible-search"
           type="search"
-          placeholder="Search by ID, story, or variant"
+          placeholder="Search by ID, story, series, or variant"
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}
         />
@@ -49,19 +52,26 @@ export default function CollectiblesToolbar({
         </div>
 
         <div className="filter-control">
-          <label htmlFor="story-filter">Story</label>
+          <label htmlFor="story-filter">Sub Category</label>
           <select
             id="story-filter"
-            value={storyFilter}
+            value={subCategoryDisabled ? "na" : storyFilter}
             onChange={(event) => onStoryChange(event.target.value)}
+            disabled={subCategoryDisabled}
           >
-            <option value="all">All stories</option>
-            {stories.map((story) => (
-              <option key={story.code} value={story.code}>
-                {story.title}
-              </option>
-            ))}
-            <option value="heralds">Heralds only</option>
+            {subCategoryDisabled ? (
+              <option value="na">NA</option>
+            ) : (
+              <>
+                <option value="all">{isPinSubCategory ? "All series" : "All stories"}</option>
+                {stories.map((story) => (
+                  <option key={story.code} value={story.code}>
+                    {story.title}
+                  </option>
+                ))}
+                {!isPinSubCategory ? <option value="heralds">Heralds only</option> : null}
+              </>
+            )}
           </select>
         </div>
 

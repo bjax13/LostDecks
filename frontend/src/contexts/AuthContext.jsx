@@ -1,5 +1,6 @@
 import {
   createUserWithEmailAndPassword,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -8,7 +9,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { syncPostHogUser } from "../analytics/posthog.js";
+import { LOGIN_COMPLETED, SIGNUP_COMPLETED } from "../analytics/events.js";
+import { captureEvent, resetPostHogUser, syncPostHogUser } from "../analytics/posthog.js";
 import { auth, googleProvider, hasFirebaseConfig } from "../lib/firebase";
 
 const AuthContext = createContext(null);
@@ -16,21 +18,59 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!auth) {
       setUser(null);
+      setIsAdmin(false);
+      setAdminLoading(false);
       setLoading(false);
       return undefined;
     }
 
+    let request = 0;
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      const current = ++request;
       setUser(firebaseUser);
       setLoading(false);
+
+      if (!firebaseUser || typeof firebaseUser.getIdTokenResult !== "function") {
+        setIsAdmin(false);
+        setAdminLoading(false);
+        return;
+      }
+
+      setAdminLoading(true);
+      firebaseUser
+        .getIdTokenResult(true)
+        .then((result) => {
+          if (current !== request) {
+            return;
+          }
+          setIsAdmin(result?.claims?.admin === true);
+        })
+        .catch((err) => {
+          console.error("Failed to read admin claim", err);
+          if (current !== request) {
+            return;
+          }
+          setIsAdmin(false);
+        })
+        .finally(() => {
+          if (current !== request) {
+            return;
+          }
+          setAdminLoading(false);
+        });
     });
 
-    return () => unsubscribe();
+    return () => {
+      request += 1;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -57,6 +97,7 @@ export function AuthProvider({ children }) {
       clearError();
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        captureEvent(LOGIN_COMPLETED, { method: "password" });
       } catch (err) {
         handleError(err);
         throw err;
@@ -81,6 +122,7 @@ export function AuthProvider({ children }) {
         if (profile.displayName) {
           await updateProfile(credentials.user, { displayName: profile.displayName });
         }
+        captureEvent(SIGNUP_COMPLETED, { method: "password" });
       } catch (err) {
         handleError(err);
         throw err;
@@ -93,6 +135,7 @@ export function AuthProvider({ children }) {
     clearError();
     try {
       await signOut(auth);
+      resetPostHogUser();
     } catch (err) {
       handleError(err);
       throw err;
@@ -132,7 +175,11 @@ export function AuthProvider({ children }) {
 
       clearError();
       try {
-        await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(auth, provider);
+        const isNewUser = Boolean(getAdditionalUserInfo(result)?.isNewUser);
+        captureEvent(isNewUser ? SIGNUP_COMPLETED : LOGIN_COMPLETED, {
+          method: provider.providerId,
+        });
       } catch (err) {
         handleError(err);
         throw err;
@@ -191,6 +238,8 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       loading,
+      isAdmin,
+      adminLoading,
       error,
       clearError,
       login,
@@ -204,6 +253,8 @@ export function AuthProvider({ children }) {
     [
       user,
       loading,
+      isAdmin,
+      adminLoading,
       error,
       clearError,
       login,

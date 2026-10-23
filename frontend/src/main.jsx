@@ -1,16 +1,30 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import { initPostHog } from "./analytics/posthog.js";
+import { capturePostHogException, initPostHog } from "./analytics/posthog.js";
+import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import "../styles.css";
 
 initPostHog();
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById("root"), {
+  onUncaughtError: (error, info) =>
+    capturePostHogException(error, {
+      componentStack: info?.componentStack,
+      source: "react-uncaught",
+    }),
+  onCaughtError: (error, info) =>
+    capturePostHogException(error, {
+      componentStack: info?.componentStack,
+      source: "react-boundary",
+    }),
+}).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <AppErrorBoundary>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </AppErrorBoundary>
   </React.StrictMode>,
 );

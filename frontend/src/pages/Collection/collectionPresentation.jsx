@@ -223,7 +223,13 @@ export function CollectionSummary({ summary }) {
   );
 }
 
-export function CollectionTable({ entries, onIncrement, onDecrement, busySkuId = null }) {
+export function CollectionTable({
+  entries,
+  onIncrement,
+  onDecrement,
+  busySkuId = null,
+  readOnly = false,
+}) {
   const navigate = useNavigate();
 
   const handleRowClick = (entry, event) => {
@@ -253,15 +259,17 @@ export function CollectionTable({ entries, onIncrement, onDecrement, busySkuId =
             <th scope="col">Finish</th>
             <th scope="col">Quantity</th>
             <th scope="col">Last Updated</th>
-            <th scope="col">Actions</th>
+            {readOnly ? null : <th scope="col">Actions</th>}
           </tr>
         </thead>
         <tbody>
           {entries.map((entry) => (
             <tr
               key={entry.id}
-              className={entry.cardId || entry.skuId ? "collection-table__row--clickable" : ""}
-              onClick={(e) => handleRowClick(entry, e)}
+              className={
+                !readOnly && (entry.cardId || entry.skuId) ? "collection-table__row--clickable" : ""
+              }
+              onClick={readOnly ? undefined : (event) => handleRowClick(entry, event)}
             >
               <td data-label="Card">
                 <div className="collection-table__card">
@@ -302,28 +310,30 @@ export function CollectionTable({ entries, onIncrement, onDecrement, busySkuId =
                   ) : null}
                 </div>
               </td>
-              <td data-label="Actions">
-                <div className="collection-table__actions">
-                  <button
-                    type="button"
-                    className="collection-table__action-button"
-                    disabled={!canMutate(entry) || isBusy(entry) || entry.quantity <= 0}
-                    onClick={() => onDecrement?.(entry)}
-                    aria-label={`Decrease quantity for ${entry.displayName}`}
-                  >
-                    −1
-                  </button>
-                  <button
-                    type="button"
-                    className="collection-table__action-button"
-                    disabled={!canMutate(entry) || isBusy(entry)}
-                    onClick={() => onIncrement?.(entry)}
-                    aria-label={`Increase quantity for ${entry.displayName}`}
-                  >
-                    +1
-                  </button>
-                </div>
-              </td>
+              {readOnly ? null : (
+                <td data-label="Actions">
+                  <div className="collection-table__actions">
+                    <button
+                      type="button"
+                      className="collection-table__action-button"
+                      disabled={!canMutate(entry) || isBusy(entry) || entry.quantity <= 0}
+                      onClick={() => onDecrement?.(entry)}
+                      aria-label={`Decrease quantity for ${entry.displayName}`}
+                    >
+                      −1
+                    </button>
+                    <button
+                      type="button"
+                      className="collection-table__action-button"
+                      disabled={!canMutate(entry) || isBusy(entry)}
+                      onClick={() => onIncrement?.(entry)}
+                      aria-label={`Increase quantity for ${entry.displayName}`}
+                    >
+                      +1
+                    </button>
+                  </div>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

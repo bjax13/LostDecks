@@ -133,6 +133,11 @@
   cursor: pointer;
 }
 
+.filter-control select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .search-control input:focus,
 .filter-control select:focus {
   outline: none;

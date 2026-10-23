@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { captureEvent } from "../../../analytics/posthog.js";
 import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
 import {
   buildIsoUftPostTree,
@@ -261,8 +260,7 @@ export default function IsoUftPostModal({
 
     try {
       await copyTextToClipboard(previewText);
-      captureEvent("iso_uft_copied", { format, includeLink });
-      onCopied({ skippedEntries });
+      onCopied({ skippedEntries, format, includeLink });
       onClose();
     } catch (err) {
       console.error("Failed to copy ISO/UFT post", err);

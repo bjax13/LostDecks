@@ -268,6 +268,11 @@ const storiesByCode = { ...storyTitleByCode };
 export const datasetMeta = dataset.meta;
 export const pinDatasetMeta = pinDataset.meta;
 export const datasetStories = dataset.stories;
+/** Pin series as toolbar options ({ code, title }); code === series label for filtering. */
+export const pinSeriesOptions = (pinDataset.meta.series ?? []).map((series) => ({
+  code: series,
+  title: series,
+}));
 export const datasetSkus = allRawSkus;
 export const collectiblesIndex = collectibleRecords;
 export const collectionProgressTargets = {

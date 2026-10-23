@@ -15,6 +15,7 @@ const mockOpenAuthModal = vi.hoisted(() => vi.fn());
 const mockUseAuth = vi.hoisted(() => vi.fn());
 const mockUseUserCollection = vi.hoisted(() => vi.fn());
 const mockApplyBulkCollectionUpdate = vi.hoisted(() => vi.fn());
+const mockCaptureEvent = vi.hoisted(() => vi.fn());
 
 vi.mock("../../contexts/AuthContext", () => ({ useAuth: () => mockUseAuth() }));
 vi.mock("../../contexts/AuthModalContext.jsx", () => ({
@@ -25,6 +26,9 @@ vi.mock("../Collection/hooks/useUserCollection", () => ({
 }));
 vi.mock("../Collection/utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
+}));
+vi.mock("../../analytics/posthog.js", () => ({
+  captureEvent: (...args) => mockCaptureEvent(...args),
 }));
 
 function setupUser() {
@@ -122,6 +126,15 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(
       screen.queryByRole("heading", { name: /what best describes you/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("seeds the quick pin picker from have= SKU CSV", () => {
+    renderPage("/getting-started?collect=pins&have=PIN-CF-01:2,PIN-KROG-05");
+    expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 
   it("skips step 1 into card review for collect=cards", () => {
@@ -659,6 +672,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
 
     expect(input).toHaveAttribute("min", "0");
+    expect(input).toHaveAttribute("max", "999");
     expect(input).toHaveAttribute("step", "1");
 
     await user.clear(input);
@@ -667,7 +681,9 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(input).toHaveValue(-5);
     expect(input).toHaveAttribute("aria-invalid", "true");
     expect(applyAll).toBeDisabled();
-    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(/quantity must be 0 or more/i);
+    expect(within(bulkActions).getByRole("alert")).toHaveTextContent(
+      /quantity must be between 0 and 999/i,
+    );
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 1$/i)).toBeInTheDocument();
 
     fireEvent.change(input, { target: { value: "-5" } });
@@ -680,6 +696,34 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 2$/i)).toBeInTheDocument();
     expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
     expect(within(bulkActions).getByRole("button", { name: "Apply all" })).toBeEnabled();
+  });
+
+  it("clamps bulk custom quantity above 999 so Apply all cannot set more than the collection ceiling", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const bulkActions = screen.getByRole("toolbar", {
+      name: /bulk action for elsecaller story foils/i,
+    });
+    const input = within(bulkActions).getByLabelText(/custom quantity for/i);
+    const applyAll = within(bulkActions).getByRole("button", { name: "Apply all" });
+
+    fireEvent.change(input, { target: { value: "1000" } });
+    expect(input).toHaveValue(999);
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(applyAll).toBeEnabled();
+    expect(within(bulkActions).queryByRole("alert")).not.toBeInTheDocument();
+
+    fireEvent.input(input, { target: { value: "9999" } });
+    expect(input).toHaveValue(999);
+
+    await user.click(applyAll);
+    expect(
+      getSkuQuantityGroup(/elsecaller story foils foil #1 quantity, 999$/i),
+    ).toBeInTheDocument();
   });
 
   it("moves All coverage to Some when one SKU is set to zero", async () => {
@@ -918,10 +962,20 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       loading: false,
       error: null,
     });
+    mockApplyBulkCollectionUpdate.mockResolvedValue({
+      created: 0,
+      updated: 2,
+      deleted: 1,
+      issues: [],
+    });
     const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
+    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_step_viewed", {
+      step: "manual",
+      collectibleType: "both",
+    });
     await user.click(screen.getByRole("button", { name: "Save collection" }));
 
     expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledWith({
@@ -930,6 +984,30 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       existingEntries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
       allowPins: true,
     });
+    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_saved", {
+      collectibleType: "both",
+      created: 0,
+      updated: 2,
+      deleted: 1,
+    });
+  });
+
+  it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await user.click(screen.getByRole("button", { name: "Sign in and save" }));
+
+    expect(mockCaptureEvent).toHaveBeenCalledWith("sign_in_prompted", {
+      reason: "getting-started-save",
+    });
+    expect(mockOpenAuthModal).toHaveBeenCalledWith({
+      reason: "getting-started-save",
+      initialMode: "register",
+      onSuccess: expect.any(Function),
+    });
+    expect(mockApplyBulkCollectionUpdate).not.toHaveBeenCalled();
   });
 
   it("saves cards-only collectors without allowing pin updates", async () => {

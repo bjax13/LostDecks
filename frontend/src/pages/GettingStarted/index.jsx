@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  GETTING_STARTED_SAVED,
+  GETTING_STARTED_STEP,
+  SIGN_IN_PROMPTED,
+} from "../../analytics/events.js";
+import { captureEvent } from "../../analytics/posthog.js";
 import { SITE_NAME } from "../../brand.js";
 import CollectionReviewEditor from "../../components/CollectionReviewEditor/CollectionReviewEditor.jsx";
 import { useCollectionReviewEditor } from "../../components/CollectionReviewEditor/useCollectionReviewEditor.js";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAuthModal } from "../../contexts/AuthModalContext.jsx";
+import { decodeHavePrefill } from "../../lib/havePrefill.js";
 import { mergePickRows, savePendingPicks } from "../../lib/pendingPicks.js";
+import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
@@ -21,6 +29,19 @@ import {
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
 import QuickPinPicker from "./QuickPinPicker.jsx";
+
+function seriesMembershipFromTree(tree) {
+  const pinsSection = tree.find((section) => section.id === "pins");
+  return (pinsSection?.children ?? []).map((group) => ({
+    id: group.id,
+    skuIds: group.skus.map((sku) => sku.skuId),
+  }));
+}
+
+const HAVE_PREFILL_CONTEXT = {
+  catalogSkuIds: pinsCatalog.pins.map((pin) => pin.id),
+  seriesList: seriesMembershipFromTree(gettingStartedTree),
+};
 
 const COLLECTIBLE_OPTIONS = [
   {
@@ -134,6 +155,9 @@ export default function GettingStartedPage() {
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
   const navigate = useNavigate();
 
+  const haveRaw = searchParams.get("have");
+  const havePrefill = useMemo(() => decodeHavePrefill(haveRaw, HAVE_PREFILL_CONTEXT), [haveRaw]);
+
   const reviewTree = useMemo(
     () => filterGettingStartedTree(gettingStartedTree, collectibleType ?? COLLECTIBLE_TYPE_BOTH),
     [collectibleType],
@@ -153,6 +177,14 @@ export default function GettingStartedPage() {
   const canContinueProfile = Boolean(
     collectibleType && profile && !(spreadsheetDisabled && profile === "spreadsheet"),
   );
+
+  const goToStep = (nextStep, nextCollectibleType = collectibleType) => {
+    setStep(nextStep);
+    captureEvent(GETTING_STARTED_STEP, {
+      step: nextStep,
+      collectibleType: nextCollectibleType,
+    });
+  };
 
   const selectCollectibleType = (nextType) => {
     setCollectibleType(nextType);
@@ -175,7 +207,7 @@ export default function GettingStartedPage() {
     setCoverage(newCoverage);
     setQuantities({});
     reviewEditor.resetExpandedReviewIds(newCoverage);
-    setStep("manual");
+    goToStep("manual", nextCollectibleType);
   };
 
   const beginProfile = () => {
@@ -187,7 +219,7 @@ export default function GettingStartedPage() {
     }
     setError(null);
     if (profile === "spreadsheet") {
-      setStep("spreadsheet");
+      goToStep("spreadsheet");
       return;
     }
     beginManualReview(collectibleType);
@@ -195,7 +227,7 @@ export default function GettingStartedPage() {
 
   const selectStep = (targetStep) => {
     if (targetStep === "profile") {
-      setStep("profile");
+      goToStep("profile");
       return;
     }
 
@@ -216,12 +248,12 @@ export default function GettingStartedPage() {
         return;
       }
       reviewEditor.resetExpandedReviewIds(coverage);
-      setStep("manual");
+      goToStep("manual", nextCollectibleType);
       return;
     }
 
     if (targetStep === "spreadsheet") {
-      setStep("spreadsheet");
+      goToStep("spreadsheet");
     }
   };
 
@@ -237,7 +269,7 @@ export default function GettingStartedPage() {
     setProfile("manual");
     setError(null);
     if (collect === COLLECTIBLE_TYPE_PINS) {
-      setStep("quick");
+      goToStep("quick", collect);
       return;
     }
     beginManualReview(collect);
@@ -246,6 +278,7 @@ export default function GettingStartedPage() {
   const handleSave = async () => {
     if (!user) {
       pendingSaveRef.current = true;
+      captureEvent(SIGN_IN_PROMPTED, { reason: "getting-started-save" });
       openAuthModal({
         reason: "getting-started-save",
         initialMode: "register",
@@ -261,7 +294,7 @@ export default function GettingStartedPage() {
     let timeoutId = null;
     try {
       const saveTimeoutMs = 20000;
-      await Promise.race([
+      const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
           rows: buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, reviewTree),
@@ -279,6 +312,12 @@ export default function GettingStartedPage() {
         }),
       ]);
       pendingSaveRef.current = false;
+      captureEvent(GETTING_STARTED_SAVED, {
+        collectibleType,
+        created: result?.created ?? 0,
+        updated: result?.updated ?? 0,
+        deleted: result?.deleted ?? 0,
+      });
       navigate("/collections", { state: { onboardingComplete: true } });
     } catch (saveError) {
       console.error("Getting started collection update failed", saveError);
@@ -385,6 +424,7 @@ export default function GettingStartedPage() {
             saving={saving}
             error={error}
             isSignedIn={Boolean(user)}
+            prefill={havePrefill}
             onSubmit={handleQuickPickerSubmit}
           />
         ) : null}

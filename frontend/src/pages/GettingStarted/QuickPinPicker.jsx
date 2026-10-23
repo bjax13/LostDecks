@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { emptyHavePrefill } from "../../lib/havePrefill.js";
 import { gettingStartedTree } from "./gettingStartedCatalog";
 import "./QuickPinPicker.css";
 
@@ -47,6 +48,38 @@ function quantitiesFromEntries(entries, pinSkuIds) {
   return quantities;
 }
 
+function densifyZeros(allPinSkuIds, sparse) {
+  const quantities = {};
+  for (const skuId of allPinSkuIds) {
+    const raw = sparse?.[skuId];
+    quantities[skuId] =
+      typeof raw === "number" && Number.isFinite(raw)
+        ? Math.max(0, Math.min(MAX_QTY, Math.floor(raw)))
+        : 0;
+  }
+  return quantities;
+}
+
+/**
+ * Expand only partially Have series (some qty > 0 and some qty === 0).
+ * Fully Have and fully Need stay collapsed.
+ */
+function partialHaveSeriesIds(seriesList, quantities) {
+  const ids = [];
+  for (const series of seriesList) {
+    let haveCount = 0;
+    let needCount = 0;
+    for (const pin of series.pins) {
+      if ((quantities[pin.skuId] ?? 0) > 0) haveCount += 1;
+      else needCount += 1;
+    }
+    if (haveCount > 0 && needCount > 0) {
+      ids.push(series.id);
+    }
+  }
+  return ids;
+}
+
 /**
  * Scalable have/need picker for the full pin catalog (grouped by series).
  */
@@ -56,6 +89,7 @@ export default function QuickPinPicker({
   saving = false,
   error = null,
   isSignedIn = false,
+  prefill = emptyHavePrefill,
   onSubmit,
 }) {
   const seriesList = useMemo(() => buildSeriesFromTree(), []);
@@ -68,19 +102,32 @@ export default function QuickPinPicker({
   }, [seriesList]);
 
   const [quantities, setQuantities] = useState(() =>
-    Object.fromEntries([...allPinSkuIds].map((skuId) => [skuId, 0])),
+    densifyZeros(allPinSkuIds, prefill.quantities),
   );
   const [search, setSearch] = useState("");
-  const [expandedSeries, setExpandedSeries] = useState(() => new Set());
+  const [expandedSeries, setExpandedSeries] = useState(() => new Set(prefill.expandedSeriesIds));
   const [hydratedFromCollection, setHydratedFromCollection] = useState(false);
 
   useEffect(() => {
     if (collectionLoading || hydratedFromCollection || !isSignedIn) {
       return;
     }
-    setQuantities(quantitiesFromEntries(entries, allPinSkuIds));
+    // Prefill expansion was seed-only; recompute after raiseMerge so a series
+    // that became fully Have (or fully Need) collapses.
+    const merged = prefill.raiseMerge(quantities, quantitiesFromEntries(entries, allPinSkuIds));
+    setQuantities(merged);
+    setExpandedSeries(new Set(partialHaveSeriesIds(seriesList, merged)));
     setHydratedFromCollection(true);
-  }, [allPinSkuIds, collectionLoading, entries, hydratedFromCollection, isSignedIn]);
+  }, [
+    allPinSkuIds,
+    collectionLoading,
+    entries,
+    hydratedFromCollection,
+    isSignedIn,
+    prefill,
+    quantities,
+    seriesList,
+  ]);
 
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -128,6 +175,25 @@ export default function QuickPinPicker({
       }
       return next;
     });
+    // Uniform Have / Need is conveyed by the header + bulk buttons — keep collapsed.
+    setExpandedSeries((prev) => {
+      if (!prev.has(series.id)) return prev;
+      const next = new Set(prev);
+      next.delete(series.id);
+      return next;
+    });
+  };
+
+  const seriesBulkMode = (series) => {
+    let haveCount = 0;
+    let needCount = 0;
+    for (const pin of series.pins) {
+      if ((quantities[pin.skuId] ?? 0) >= 1) haveCount += 1;
+      else needCount += 1;
+    }
+    if (haveCount > 0 && needCount === 0) return MODE_HAVE;
+    if (needCount > 0 && haveCount === 0) return MODE_NEED;
+    return null;
   };
 
   const toggleSeries = (seriesId) => {
@@ -178,6 +244,7 @@ export default function QuickPinPicker({
         {visibleSeries.map((series) => {
           const fullSeries = seriesList.find((entry) => entry.id === series.id) ?? series;
           const isOpen = effectiveExpanded.has(series.id);
+          const bulkMode = seriesBulkMode(fullSeries);
           return (
             <section key={series.id} className="quick-pin-picker__series">
               <div className="quick-pin-picker__series-header">
@@ -200,14 +267,24 @@ export default function QuickPinPicker({
                 <div className="quick-pin-picker__series-actions">
                   <button
                     type="button"
-                    className="quick-pin-picker__bulk"
+                    className={
+                      bulkMode === MODE_HAVE
+                        ? "quick-pin-picker__bulk is-active"
+                        : "quick-pin-picker__bulk"
+                    }
+                    aria-pressed={bulkMode === MODE_HAVE}
                     onClick={() => setSeriesQuantities(fullSeries, 1)}
                   >
                     Have all
                   </button>
                   <button
                     type="button"
-                    className="quick-pin-picker__bulk"
+                    className={
+                      bulkMode === MODE_NEED
+                        ? "quick-pin-picker__bulk is-active"
+                        : "quick-pin-picker__bulk"
+                    }
+                    aria-pressed={bulkMode === MODE_NEED}
                     onClick={() => setSeriesQuantities(fullSeries, 0)}
                   >
                     Need all

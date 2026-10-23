@@ -156,6 +156,7 @@ describe("CollectiblesPage (integration)", () => {
     renderWithRouter(<CollectiblesPage />);
     expect(screen.getByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
     expect(screen.getByText(/Browse the/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Sort by")).toHaveValue("grouped");
   });
 
   it("toggles between grid and table view", async () => {
