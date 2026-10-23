@@ -59,10 +59,7 @@ describe("decodeHavePrefill", () => {
   });
 
   it("keeps fully Have series collapsed and expands only partial series", () => {
-    const fullChasm = decodeHavePrefill(
-      "PIN-CF-01,PIN-CF-02,PIN-CF-03,PIN-CF-04,PIN-CF-05",
-      ctx,
-    );
+    const fullChasm = decodeHavePrefill("PIN-CF-01,PIN-CF-02,PIN-CF-03,PIN-CF-04,PIN-CF-05", ctx);
     expect(fullChasm.status).toBe("applied");
     expect(fullChasm.expandedSeriesIds).toEqual([]);
 
