@@ -11,7 +11,9 @@ import CollectionReviewEditor from "../../components/CollectionReviewEditor/Coll
 import { useCollectionReviewEditor } from "../../components/CollectionReviewEditor/useCollectionReviewEditor.js";
 import { useAuth } from "../../contexts/AuthContext";
 import { useAuthModal } from "../../contexts/AuthModalContext.jsx";
+import { decodeHavePrefill } from "../../lib/havePrefill.js";
 import { mergePickRows, savePendingPicks } from "../../lib/pendingPicks.js";
+import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
@@ -27,6 +29,19 @@ import {
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
 import QuickPinPicker from "./QuickPinPicker.jsx";
+
+function seriesMembershipFromTree(tree) {
+  const pinsSection = tree.find((section) => section.id === "pins");
+  return (pinsSection?.children ?? []).map((group) => ({
+    id: group.id,
+    skuIds: group.skus.map((sku) => sku.skuId),
+  }));
+}
+
+const HAVE_PREFILL_CONTEXT = {
+  catalogSkuIds: pinsCatalog.pins.map((pin) => pin.id),
+  seriesList: seriesMembershipFromTree(gettingStartedTree),
+};
 
 const COLLECTIBLE_OPTIONS = [
   {
@@ -139,6 +154,9 @@ export default function GettingStartedPage() {
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
   const navigate = useNavigate();
+
+  const haveRaw = searchParams.get("have");
+  const havePrefill = useMemo(() => decodeHavePrefill(haveRaw, HAVE_PREFILL_CONTEXT), [haveRaw]);
 
   const reviewTree = useMemo(
     () => filterGettingStartedTree(gettingStartedTree, collectibleType ?? COLLECTIBLE_TYPE_BOTH),
@@ -406,6 +424,7 @@ export default function GettingStartedPage() {
             saving={saving}
             error={error}
             isSignedIn={Boolean(user)}
+            prefill={havePrefill}
             onSubmit={handleQuickPickerSubmit}
           />
         ) : null}
