@@ -164,4 +164,70 @@ describe("QuickPinPicker", () => {
 
     expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
   });
+
+  it("collapses a series that hydrate raiseMerge completes to fully Have", () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    // Prefill marks only part of the series → seed expands ChasmFriends.
+    const prefill = decodeHavePrefill("PIN-CF-01:2,PIN-CF-02", {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+    expect(prefill.expandedSeriesIds).toEqual(["pins:ChasmFriends"]);
+
+    render(
+      <QuickPinPicker
+        isSignedIn
+        prefill={prefill}
+        entries={[
+          { skuId: "PIN-CF-01", quantity: 1 },
+          { skuId: "PIN-CF-02", quantity: 1 },
+          { skuId: "PIN-CF-03", quantity: 1 },
+          { skuId: "PIN-CF-04", quantity: 2 },
+          { skuId: "PIN-CF-05", quantity: 1 },
+        ]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/5 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByText("Shredhead")).not.toBeInTheDocument();
+    const haveAll = screen.getAllByRole("button", { name: "Have all" })[0];
+    expect(haveAll).toHaveAttribute("aria-pressed", "true");
+    expect(haveAll).toHaveClass("is-active");
+  });
+
+  it("keeps a series expanded when hydrate leaves it only partially Have", () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    const prefill = decodeHavePrefill("PIN-CF-01:2", {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+
+    render(
+      <QuickPinPicker
+        isSignedIn
+        prefill={prefill}
+        entries={[
+          { skuId: "PIN-CF-01", quantity: 1 },
+          { skuId: "PIN-CF-02", quantity: 4 },
+        ]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByText("Shredhead")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Have all" })[0]).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
 });
