@@ -87,6 +87,13 @@
   background: rgba(138, 43, 226, 0.22);
 }
 
+.quick-pin-picker__bulk.is-active {
+  border-color: transparent;
+  background: linear-gradient(135deg, #8a2be2 0%, #da70d6 100%);
+  color: #fff;
+  font-weight: 600;
+}
+
 .quick-pin-picker__pin-list {
   margin: 0;
   padding: 0 0.75rem 0.85rem;

@@ -51,8 +51,22 @@ describe("QuickPinPicker", () => {
     render(<QuickPinPicker onSubmit={onSubmit} />);
 
     const chasmToggle = screen.getByRole("button", { name: /ChasmFriends/i });
+    const haveAll = screen.getAllByRole("button", { name: "Have all" })[0];
+    const needAll = screen.getAllByRole("button", { name: "Need all" })[0];
+
+    expect(needAll).toHaveAttribute("aria-pressed", "true");
+    expect(needAll).toHaveClass("is-active");
+    expect(haveAll).toHaveAttribute("aria-pressed", "false");
+
     await user.click(chasmToggle);
-    await user.click(screen.getAllByRole("button", { name: "Have all" })[0]);
+    expect(chasmToggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(haveAll);
+    expect(chasmToggle).toHaveAttribute("aria-expanded", "false");
+    expect(haveAll).toHaveAttribute("aria-pressed", "true");
+    expect(haveAll).toHaveClass("is-active");
+    expect(needAll).toHaveAttribute("aria-pressed", "false");
+
     await user.click(screen.getByRole("button", { name: "Find my trades" }));
 
     const afterHaveAll = onSubmit.mock.calls[0][0];
@@ -60,7 +74,11 @@ describe("QuickPinPicker", () => {
     expect(afterHaveAll["PIN-CF-05"]).toBe(1);
 
     onSubmit.mockClear();
-    await user.click(screen.getAllByRole("button", { name: "Need all" })[0]);
+    await user.click(needAll);
+    expect(chasmToggle).toHaveAttribute("aria-expanded", "false");
+    expect(needAll).toHaveAttribute("aria-pressed", "true");
+    expect(haveAll).toHaveAttribute("aria-pressed", "false");
+
     await user.click(screen.getByRole("button", { name: "Find my trades" }));
     const afterNeedAll = onSubmit.mock.calls[0][0];
     expect(afterNeedAll["PIN-CF-01"]).toBe(0);
@@ -82,7 +100,7 @@ describe("QuickPinPicker", () => {
     expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
   });
 
-  it("seeds quantities and expands series from have= prefill", async () => {
+  it("seeds quantities and expands only partially filled series from have= prefill", async () => {
     const onSubmit = vi.fn();
     const prefill = decodeHavePrefill("PIN-CF-01:2", {
       catalogSkuIds: ["PIN-CF-01", "PIN-CF-02"],
@@ -97,9 +115,33 @@ describe("QuickPinPicker", () => {
       "true",
     );
     expect(screen.getByText("Shredhead")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Have all" })[0]).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
 
     await user.click(screen.getByRole("button", { name: "Find my trades" }));
     expect(onSubmit.mock.calls[0][0]["PIN-CF-01"]).toBe(2);
+  });
+
+  it("keeps a fully Have prefilled series collapsed with Have all active", () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    const prefill = decodeHavePrefill(chasmSkuIds.join(","), {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+
+    render(<QuickPinPicker prefill={prefill} onSubmit={vi.fn()} />);
+
+    expect(screen.getByText(/5 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByText("Shredhead")).not.toBeInTheDocument();
+    const haveAll = screen.getAllByRole("button", { name: "Have all" })[0];
+    expect(haveAll).toHaveAttribute("aria-pressed", "true");
+    expect(haveAll).toHaveClass("is-active");
   });
 
   it("raise-merges URL prefill with signed-in collection quantities", () => {
@@ -121,5 +163,71 @@ describe("QuickPinPicker", () => {
     );
 
     expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+  });
+
+  it("collapses a series that hydrate raiseMerge completes to fully Have", () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    // Prefill marks only part of the series → seed expands ChasmFriends.
+    const prefill = decodeHavePrefill("PIN-CF-01:2,PIN-CF-02", {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+    expect(prefill.expandedSeriesIds).toEqual(["pins:ChasmFriends"]);
+
+    render(
+      <QuickPinPicker
+        isSignedIn
+        prefill={prefill}
+        entries={[
+          { skuId: "PIN-CF-01", quantity: 1 },
+          { skuId: "PIN-CF-02", quantity: 1 },
+          { skuId: "PIN-CF-03", quantity: 1 },
+          { skuId: "PIN-CF-04", quantity: 2 },
+          { skuId: "PIN-CF-05", quantity: 1 },
+        ]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/5 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByText("Shredhead")).not.toBeInTheDocument();
+    const haveAll = screen.getAllByRole("button", { name: "Have all" })[0];
+    expect(haveAll).toHaveAttribute("aria-pressed", "true");
+    expect(haveAll).toHaveClass("is-active");
+  });
+
+  it("keeps a series expanded when hydrate leaves it only partially Have", () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    const prefill = decodeHavePrefill("PIN-CF-01:2", {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+
+    render(
+      <QuickPinPicker
+        isSignedIn
+        prefill={prefill}
+        entries={[
+          { skuId: "PIN-CF-01", quantity: 1 },
+          { skuId: "PIN-CF-02", quantity: 4 },
+        ]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ChasmFriends/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByText("Shredhead")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Have all" })[0]).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 });
