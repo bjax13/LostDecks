@@ -54,12 +54,20 @@ describe("decodeHavePrefill", () => {
       "PIN-KROG-05": 2,
       "PIN-OTHER-01": 1,
     });
-    expect(seed.expandedSeriesIds).toEqual([
-      "pins:ChasmFriends",
-      "pins:CPS1",
-      "pins:KROG",
-      "pins:OTHER",
-    ]);
+    // OTHER is a single seeded SKU → fully Have → stays collapsed.
+    expect(seed.expandedSeriesIds).toEqual(["pins:ChasmFriends", "pins:CPS1", "pins:KROG"]);
+  });
+
+  it("keeps fully Have series collapsed and expands only partial series", () => {
+    const fullChasm = decodeHavePrefill(
+      "PIN-CF-01,PIN-CF-02,PIN-CF-03,PIN-CF-04,PIN-CF-05",
+      ctx,
+    );
+    expect(fullChasm.status).toBe("applied");
+    expect(fullChasm.expandedSeriesIds).toEqual([]);
+
+    const partial = decodeHavePrefill("PIN-CF-01,PIN-CF-02", ctx);
+    expect(partial.expandedSeriesIds).toEqual(["pins:ChasmFriends"]);
   });
 
   it("soft-fails the whole o1 payload on catalog hash mismatch", () => {

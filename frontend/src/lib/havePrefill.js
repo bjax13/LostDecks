@@ -188,13 +188,24 @@ function parseQtySuffix(suffix) {
   return Math.min(HAVE_QTY_MAX, qty);
 }
 
+/**
+ * Expand only partially filled series (some Have, some Need).
+ * Fully Have / Have spares and fully Need stay collapsed — the header + bulk
+ * buttons convey those states.
+ */
 function expandSeriesIds(quantities, seriesList) {
-  const seeded = new Set(Object.keys(quantities));
-  if (seeded.size === 0) return [];
   const expanded = [];
   for (const series of seriesList ?? []) {
-    if (!series?.id || !Array.isArray(series.skuIds)) continue;
-    if (series.skuIds.some((skuId) => seeded.has(skuId))) {
+    if (!series?.id || !Array.isArray(series.skuIds) || series.skuIds.length === 0) continue;
+    let haveCount = 0;
+    let needCount = 0;
+    for (const skuId of series.skuIds) {
+      const raw = quantities?.[skuId];
+      const qty = typeof raw === "number" && Number.isFinite(raw) ? raw : 0;
+      if (qty >= 1) haveCount += 1;
+      else needCount += 1;
+    }
+    if (haveCount > 0 && needCount > 0) {
       expanded.push(series.id);
     }
   }
