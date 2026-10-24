@@ -396,6 +396,42 @@
   color: #ffffff;
 }
 
+.collection-bulk-post-modal__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  padding: 0 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle, #e2e2ea);
+}
+
+.collection-bulk-post-modal__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.collection-bulk-post-modal__format {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.collection-bulk-post-modal__format legend {
+  float: left;
+  width: auto;
+  padding: 0;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .collection-bulk-post-modal__header p {
   margin: 0.35rem 0 0;
   color: rgba(224, 224, 224, 0.8);

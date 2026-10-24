@@ -1,46 +1,62 @@
+import { SITE_URL } from "../../../brand.js";
 import { datasetSkus, datasetStories, getCollectibleRecord } from "../../../data/collectibles";
+import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
+
+/** Story deck codes → single-letter shorthand prefix (ELS→E, LOP→L, CHM→C). */
+export const SHORTHAND_STORY_PREFIX = Object.freeze({
+  ELS: "E",
+  LOP: "L",
+  CHM: "C",
+});
 
 const SECTIONS = [
   {
     title: "Story Foils",
     slug: "story-foils",
     groupSuffix: "Foils",
+    lane: "foil",
     predicate: ({ card, finish }) => card.category === "story" && finish === "FOIL",
   },
   {
     title: "Story Dun",
     slug: "story-dun",
     groupSuffix: "Dun",
+    lane: "dun",
     predicate: ({ card, finish }) => card.category === "story" && finish === "DUN",
   },
   {
     title: "Heralds (Foil)",
     slug: "heralds-foil",
     groupSuffix: "Heralds",
+    lane: "foil",
     predicate: ({ card, finish }) => card.category === "herald" && finish === "FOIL",
   },
   {
     title: "Heralds (Dun)",
     slug: "heralds-dun",
     groupSuffix: "Heralds",
+    lane: "dun",
     predicate: ({ card, finish }) => card.category === "herald" && finish === "DUN",
   },
   {
     title: "Nonsense (Dun)",
     slug: "nonsense-dun",
     groupSuffix: "Nonsense",
+    lane: "dun",
     predicate: ({ card, finish }) => card.category === "nonsense" && finish === "DUN",
   },
   {
     title: "Nonsense (Foil)",
     slug: "nonsense-foil",
     groupSuffix: "Nonsense",
+    lane: "foil",
     predicate: ({ card, finish }) => card.category === "nonsense" && finish === "FOIL",
   },
   {
     title: "Pins",
     slug: "pins",
     groupSuffix: "Pins",
+    lane: "pins",
     predicate: ({ card }) => card.collectibleType === "pin" || card.category === "pin",
   },
 ];
@@ -50,6 +66,16 @@ export const DEFAULT_EXCLUDED_SECTION_IDS = ["uft:story-dun"];
 
 export function getDefaultExcludedIds() {
   return new Set(DEFAULT_EXCLUDED_SECTION_IDS);
+}
+
+export function buildShareUrl({ shareId = null, campaign = "iso_uft" } = {}) {
+  const path = shareId ? `t/${encodeURIComponent(shareId)}` : "getting-started";
+  const params = new URLSearchParams({
+    utm_source: "share",
+    utm_medium: "iso_uft",
+    utm_campaign: campaign,
+  });
+  return `${SITE_URL}/${path}?${params.toString()}`;
 }
 
 function coerceQuantity(value) {
@@ -94,10 +120,45 @@ function getVariantLabel(detail) {
   return trimmed;
 }
 
-function formatTradeItem(card) {
+function storyShorthandPrefix(card) {
+  const code = card.story ? String(card.story).trim().toUpperCase() : "";
+  if (code && SHORTHAND_STORY_PREFIX[code]) {
+    return SHORTHAND_STORY_PREFIX[code];
+  }
+  if (code) {
+    return code.charAt(0);
+  }
+  return "?";
+}
+
+function variantShorthandSuffix(card) {
+  const variant = getVariantLabel(card.detail) ?? card.variantName?.trim();
+  if (!variant) {
+    return "";
+  }
+  const compact = variant.replace(/\s+/g, "");
+  return compact ? `-${compact}` : "";
+}
+
+function formatTradeItem(card, format = "classic") {
   if (!card) {
     return null;
   }
+  if (format === "shorthand") {
+    if (card.category === "story") {
+      const text = `${storyShorthandPrefix(card)}${card.number}`;
+      return { text, sortKey: [card.number, ""] };
+    }
+    if (card.category === "herald") {
+      const number = Number.isFinite(card.number) ? card.number : 0;
+      return { text: `H${number}`, sortKey: [number, ""] };
+    }
+    if (card.category === "nonsense") {
+      const text = `${storyShorthandPrefix(card)}${card.number}N${variantShorthandSuffix(card)}`;
+      return { text, sortKey: [card.number, variantShorthandSuffix(card)] };
+    }
+  }
+
   if (card.category === "story") {
     return { text: `${card.number}`, sortKey: [card.number, ""] };
   }
@@ -176,6 +237,14 @@ function buildOwnedCardIds(ownedSkuCounts) {
   return ownedCardIds;
 }
 
+function normalizeMatchKeep(matchKeep) {
+  return {
+    dun: matchKeep?.dun ?? DEFAULT_MATCH_KEEP_BY_LANE.dun,
+    foil: matchKeep?.foil ?? DEFAULT_MATCH_KEEP_BY_LANE.foil,
+    pins: matchKeep?.pins ?? DEFAULT_MATCH_KEEP_BY_LANE.pins,
+  };
+}
+
 /** ISO only fills gaps in story groups already started for this finish/section. */
 function buildStartedStoryTitles(predicate, ownedSkuCounts) {
   const started = new Set();
@@ -192,17 +261,22 @@ function buildStartedStoryTitles(predicate, ownedSkuCounts) {
   return started;
 }
 
-function buildSectionStories(
-  { predicate, groupSuffix },
+function collectSectionTradeRows(
+  section,
   mode,
   ownedSkuCounts,
   ownedCardIds,
   storyRank,
+  format,
+  matchKeep,
 ) {
+  const { predicate, groupSuffix, lane } = section;
+  const keepThreshold = normalizeMatchKeep(matchKeep)[lane] ?? 1;
   const groups = new Map();
+  const skuRows = [];
   const startedStories = mode === "iso" ? buildStartedStoryTitles(predicate, ownedSkuCounts) : null;
   if (mode === "iso" && startedStories.size === 0) {
-    return [];
+    return { stories: [], skuRows: [] };
   }
 
   datasetSkus.forEach((sku) => {
@@ -211,7 +285,7 @@ function buildSectionStories(
       if (ownedCount > 0 || ownedCardIds.has(sku.cardId)) {
         return;
       }
-    } else if (ownedCount <= 1) {
+    } else if (ownedCount <= keepThreshold) {
       return;
     }
 
@@ -225,9 +299,18 @@ function buildSectionStories(
       return;
     }
 
-    const item = formatTradeItem(card);
+    const item = formatTradeItem(card, format);
     if (!item) {
       return;
+    }
+
+    if (mode === "iso") {
+      skuRows.push({ skuId: skuKey(sku.skuId), quantity: 1 });
+    } else {
+      skuRows.push({
+        skuId: skuKey(sku.skuId),
+        quantity: ownedCount - keepThreshold,
+      });
     }
 
     if (!groups.has(storyTitle)) {
@@ -259,10 +342,13 @@ function buildSectionStories(
     });
   });
 
-  return stories;
+  return { stories, skuRows };
 }
 
-export function buildIsoUftPostTree(entries) {
+export function buildIsoUftPostTree(
+  entries,
+  { matchKeep = DEFAULT_MATCH_KEEP_BY_LANE, format = "classic" } = {},
+) {
   const { ownedSkuCounts, skippedEntries } = buildOwnedSkuCounts(entries);
   const ownedCardIds = buildOwnedCardIds(ownedSkuCounts);
 
@@ -279,7 +365,15 @@ export function buildIsoUftPostTree(entries) {
 
   const tree = modes.map(({ id, label, mode }) => {
     const children = SECTIONS.map((section) => {
-      const stories = buildSectionStories(section, mode, ownedSkuCounts, ownedCardIds, storyRank);
+      const { stories } = collectSectionTradeRows(
+        section,
+        mode,
+        ownedSkuCounts,
+        ownedCardIds,
+        storyRank,
+        format,
+        matchKeep,
+      );
       if (stories.length === 0) {
         return null;
       }
@@ -301,7 +395,50 @@ export function buildIsoUftPostTree(entries) {
   return { tree, skippedEntries };
 }
 
-export function formatIsoUftPost(tree, excludedIds = new Set()) {
+export function buildIsoUftSkuLists(entries, { matchKeep = DEFAULT_MATCH_KEEP_BY_LANE } = {}) {
+  const { ownedSkuCounts, skippedEntries } = buildOwnedSkuCounts(entries);
+  const ownedCardIds = buildOwnedCardIds(ownedSkuCounts);
+
+  const storyOrder = datasetStories.map((story) => story.title);
+  const storyRank = (title) => {
+    const index = storyOrder.indexOf(title);
+    return index === -1 ? Number.POSITIVE_INFINITY : index;
+  };
+
+  const iso = [];
+  const uft = [];
+
+  for (const section of SECTIONS) {
+    for (const mode of ["iso", "uft"]) {
+      const { skuRows } = collectSectionTradeRows(
+        section,
+        mode,
+        ownedSkuCounts,
+        ownedCardIds,
+        storyRank,
+        "classic",
+        matchKeep,
+      );
+      if (mode === "iso") {
+        for (const row of skuRows) {
+          iso.push(row.skuId);
+        }
+      } else {
+        for (const row of skuRows) {
+          uft.push({ skuId: row.skuId, quantity: row.quantity });
+        }
+      }
+    }
+  }
+
+  return { iso, uft, skippedEntries };
+}
+
+export function formatIsoUftPost(
+  tree,
+  excludedIds = new Set(),
+  { format = "classic", footerUrl = null } = {},
+) {
   const lines = [];
 
   for (const modeNode of tree) {
@@ -346,11 +483,24 @@ export function formatIsoUftPost(tree, excludedIds = new Set()) {
     lines.pop();
   }
 
+  if (footerUrl) {
+    lines.push("");
+    lines.push(`Trade with me on ShardStash: ${footerUrl}`);
+  }
+
   return lines.join("\n");
 }
 
-export function buildIsoUftPost(entries, { excludedIds = new Set() } = {}) {
-  const { tree, skippedEntries } = buildIsoUftPostTree(entries);
-  const text = formatIsoUftPost(tree, excludedIds);
+export function buildIsoUftPost(
+  entries,
+  {
+    excludedIds = new Set(),
+    matchKeep = DEFAULT_MATCH_KEEP_BY_LANE,
+    format = "classic",
+    footerUrl = null,
+  } = {},
+) {
+  const { tree, skippedEntries } = buildIsoUftPostTree(entries, { matchKeep, format });
+  const text = formatIsoUftPost(tree, excludedIds, { format, footerUrl });
   return { text, skippedEntries };
 }

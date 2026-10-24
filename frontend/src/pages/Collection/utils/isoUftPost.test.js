@@ -2,9 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildIsoUftPost,
   buildIsoUftPostTree,
+  buildIsoUftSkuLists,
+  buildShareUrl,
   DEFAULT_EXCLUDED_SECTION_IDS,
   formatIsoUftPost,
   getDefaultExcludedIds,
+  SHORTHAND_STORY_PREFIX,
 } from "./isoUftPost.js";
 
 const collectiblesState = vi.hoisted(() => ({
@@ -284,5 +287,123 @@ describe("isoUftPost", () => {
     expect(text).toContain("UFT:");
     expect(text).not.toContain("Story Dun:");
     expect(text).not.toMatch(/Alpha Dun:/);
+  });
+
+  it("appends a tracked footer URL when footerUrl is set", () => {
+    const { tree } = buildIsoUftPostTree(entries);
+    const text = formatIsoUftPost(tree, new Set(), {
+      footerUrl: "https://shardstash.web.app/getting-started?utm_source=share",
+    });
+    expect(text).toContain(
+      "Trade with me on ShardStash: https://shardstash.web.app/getting-started?utm_source=share",
+    );
+  });
+
+  it("buildShareUrl targets getting-started or /t/:shareId with UTM params", () => {
+    expect(buildShareUrl()).toBe(
+      "https://shardstash.web.app/getting-started?utm_source=share&utm_medium=iso_uft&utm_campaign=iso_uft",
+    );
+    expect(buildShareUrl({ shareId: "abc123XYZ999", campaign: "iso_uft" })).toBe(
+      "https://shardstash.web.app/t/abc123XYZ999?utm_source=share&utm_medium=iso_uft&utm_campaign=iso_uft",
+    );
+  });
+
+  it("maps story codes to shorthand prefixes", () => {
+    expect(SHORTHAND_STORY_PREFIX).toEqual({ ELS: "E", LOP: "L", CHM: "C" });
+  });
+
+  it("formats shorthand for stories, heralds, nonsense variants, and pins", () => {
+    collectiblesState.skus = [
+      { skuId: "owned-els", cardId: "c-els-1", finish: "FOIL" },
+      { skuId: "iso-els", cardId: "c-els-40", finish: "FOIL" },
+      { skuId: "uft-herald", cardId: "c-hld-2", finish: "FOIL" },
+      { skuId: "uft-ns", cardId: "c-ns-24", finish: "DUN" },
+      { skuId: "uft-pin", cardId: "PIN-CF-01", finish: null },
+    ];
+    collectiblesState.cardById = {
+      "c-els-1": { category: "story", number: 1, story: "ELS", storyTitle: "Elsecaller" },
+      "c-els-40": { category: "story", number: 40, story: "ELS", storyTitle: "Elsecaller" },
+      "c-hld-2": {
+        category: "herald",
+        number: 2,
+        displayName: "Jezrien",
+        storyTitle: "Heraldic Order",
+      },
+      "c-ns-24": {
+        category: "nonsense",
+        number: 24,
+        story: "CHM",
+        detail: "variant: Dance",
+        storyTitle: "Chasm",
+      },
+      "PIN-CF-01": {
+        category: "pin",
+        collectibleType: "pin",
+        displayName: "Kaladin",
+        number: 1,
+        storyTitle: "Pins",
+      },
+    };
+
+    const { tree } = buildIsoUftPostTree(
+      [
+        { skuId: "owned-els", quantity: 1 },
+        { skuId: "uft-herald", quantity: 2 },
+        { skuId: "uft-ns", quantity: 2 },
+        { skuId: "uft-pin", quantity: 2 },
+      ],
+      { format: "shorthand" },
+    );
+    const text = formatIsoUftPost(tree);
+
+    expect(text).toMatch(/Elsecaller Foils: E40/);
+    expect(text).toMatch(/Heraldic Order Heralds: H2/);
+    expect(text).toMatch(/Chasm Nonsense: C24N-Dance/);
+    expect(text).toMatch(/Pins Pins: Kaladin|Kaladin/);
+  });
+
+  it("uses per-lane matchKeep for UFT instead of hard-coded > 1", () => {
+    collectiblesState.skus = [
+      { skuId: "foil-a", cardId: "c-foil-a", finish: "FOIL" },
+      { skuId: "dun-a", cardId: "c-dun-a", finish: "DUN" },
+    ];
+    collectiblesState.cardById = {
+      "c-foil-a": { category: "story", number: 1, storyTitle: "Alpha" },
+      "c-dun-a": { category: "story", number: 2, storyTitle: "Alpha" },
+    };
+
+    const keepTwo = { dun: 1, foil: 2, pins: 1 };
+    const { tree } = buildIsoUftPostTree(
+      [
+        { skuId: "foil-a", quantity: 2 },
+        { skuId: "dun-a", quantity: 2 },
+      ],
+      { matchKeep: keepTwo },
+    );
+
+    const uftSectionIds = tree[1].children.map((section) => section.id);
+    expect(uftSectionIds).toContain("uft:story-dun");
+    expect(uftSectionIds).not.toContain("uft:story-foils");
+  });
+
+  it("buildIsoUftSkuLists returns ISO sku ids and UFT quantity extras", () => {
+    collectiblesState.skus = [
+      { skuId: "owned-story-foil", cardId: "c-owned-sf", finish: "FOIL" },
+      { skuId: "iso-story-foil", cardId: "c-iso-sf", finish: "FOIL" },
+      { skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" },
+    ];
+    collectiblesState.cardById = {
+      "c-owned-sf": { category: "story", number: 8, storyTitle: "Alpha" },
+      "c-iso-sf": { category: "story", number: 9, storyTitle: "Alpha" },
+      "c-uft-sf": { category: "story", number: 10, storyTitle: "Zeta" },
+    };
+
+    const { iso, uft } = buildIsoUftSkuLists([
+      { skuId: "owned-story-foil", quantity: 1 },
+      { skuId: "uft-story-foil", quantity: 3 },
+    ]);
+
+    expect(iso).toContain("ISO-STORY-FOIL");
+    expect(uft).toEqual([{ skuId: "UFT-STORY-FOIL", quantity: 2 }]);
   });
 });

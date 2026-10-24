@@ -46,6 +46,11 @@ describe("BulkCollectionTools", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Prefer classic + no footer so existing preview assertions stay stable.
+    localStorage.setItem(
+      "isoUftPostPrefs",
+      JSON.stringify({ format: "classic", includeLink: false }),
+    );
     bulkImportMocks.createStoryDeckCollectionCsv.mockReturnValue("skuId,quantity,notes\n");
     bulkImportMocks.parseBulkCollectionCsv.mockReturnValue([]);
     bulkImportMocks.applyBulkCollectionUpdate.mockResolvedValue({
@@ -70,6 +75,7 @@ describe("BulkCollectionTools", () => {
   });
 
   afterEach(() => {
+    localStorage.removeItem("isoUftPostPrefs");
     vi.restoreAllMocks();
   });
 
@@ -377,6 +383,32 @@ describe("BulkCollectionTools", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("defaults to community shorthand with a tracked ShardStash link", async () => {
+    localStorage.removeItem("isoUftPostPrefs");
+    const user = userEvent.setup();
+    collectiblesState.skus = [
+      { skuId: "owned-els", cardId: "c-els-1", finish: "FOIL" },
+      { skuId: "iso-els", cardId: "c-els-40", finish: "FOIL" },
+    ];
+    collectiblesState.cardById = {
+      "c-els-1": { category: "story", number: 1, story: "ELS", storyTitle: "Elsecaller" },
+      "c-els-40": { category: "story", number: 40, story: "ELS", storyTitle: "Elsecaller" },
+    };
+
+    render(
+      <BulkCollectionTools ownerUid={ownerUid} entries={[{ skuId: "owned-els", quantity: 1 }]} />,
+    );
+    await openPostModal(user);
+
+    expect(screen.getByRole("radio", { name: /community shorthand/i })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /include link to shardstash/i })).toBeChecked();
+
+    const preview = getPostDialog().querySelector(".collection-bulk-post-modal__preview");
+    expect(preview).toHaveTextContent(/Elsecaller Foils: E40/);
+    expect(preview).toHaveTextContent(/Trade with me on ShardStash:/);
+    expect(preview).toHaveTextContent(/utm_source=share/);
+  });
+
   it("updates preview when a section is unchecked", async () => {
     const user = userEvent.setup();
     collectiblesState.skus = [{ skuId: "uft-story-foil", cardId: "c-uft-sf", finish: "FOIL" }];
@@ -511,6 +543,8 @@ describe("BulkCollectionTools", () => {
     expect(await screen.findByRole("status")).toHaveTextContent(/copied iso\/uft post/i);
     expect(mockCaptureEvent).toHaveBeenCalledWith("iso_uft_copied", {
       skippedEntries: expect.any(Number),
+      format: expect.any(String),
+      includeLink: expect.any(Boolean),
     });
   });
 

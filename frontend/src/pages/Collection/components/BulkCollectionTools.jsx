@@ -1,6 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BULK_IMPORT_APPLIED, ISO_UFT_COPIED } from "../../../analytics/events.js";
 import { captureEvent } from "../../../analytics/posthog.js";
+import {
+  DEFAULT_MATCH_KEEP_BY_LANE,
+  subscribeUserPreferences,
+} from "../../../lib/userPreferences.js";
 import {
   applyBulkCollectionUpdate,
   createStoryDeckCollectionCsv,
@@ -70,6 +74,17 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
+  const [matchKeep, setMatchKeep] = useState(() => ({ ...DEFAULT_MATCH_KEEP_BY_LANE }));
+
+  useEffect(() => {
+    if (!ownerUid) {
+      setMatchKeep({ ...DEFAULT_MATCH_KEEP_BY_LANE });
+      return undefined;
+    }
+    return subscribeUserPreferences(ownerUid, (prefs) => {
+      setMatchKeep(prefs.matchKeep);
+    });
+  }, [ownerUid]);
   const [lastFileName, setLastFileName] = useState("");
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
@@ -148,8 +163,12 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
     setIsPostModalOpen(true);
   };
 
-  const handlePostCopied = ({ skippedEntries }) => {
-    captureEvent(ISO_UFT_COPIED, { skippedEntries: skippedEntries ?? 0 });
+  const handlePostCopied = ({ skippedEntries, format, includeLink }) => {
+    captureEvent(ISO_UFT_COPIED, {
+      skippedEntries: skippedEntries ?? 0,
+      format,
+      includeLink,
+    });
     setPostStatus(
       skippedEntries > 0
         ? `Copied ISO/UFT post. ${skippedEntries} entries without a valid SKU were skipped.`
@@ -300,6 +319,7 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         entries={existingEntries}
         onCopied={handlePostCopied}
         onCopyError={handlePostCopyError}
+        matchKeep={matchKeep}
       />
       <VisualBulkCollectionEditorModal
         isOpen={isVisualEditorOpen}
