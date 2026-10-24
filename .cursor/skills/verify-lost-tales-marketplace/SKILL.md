@@ -74,25 +74,43 @@ $VERIFY drive login --email collector.one@example.com --password replace-me-loca
 $VERIFY drive logout
 ```
 
-Locator flags (Playwright accessible names, not CSS or coordinates):
+Locator flags:
 
 | Flag | Meaning |
 |------|---------|
-| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status) |
+| `--testid` | `getByTestId` — preferred for hooks listed below |
+| `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status, radio, checkbox, region) |
 | `--label` | `getByLabel` (Search, Email, Password, Category, Story, Rarity) |
 | `--placeholder` | `getByPlaceholder` |
 | `--text` | `getByText` |
-| `--scope nav` | Restrict to `navigation` named `Primary` |
+| `--scope nav` | Restrict to `primary-nav` test id |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name when role/name would substring-match another control |
+| `--force` | Playwright force-click (test id and radio clicks already force-click) |
 
-Stable handles from this repo:
+Stable `data-testid` hooks (product code owns these; verification map and Playwright should target them):
 
-- Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` (link to `/auth/login`); signed-in `Sign out` and `Hi, <name>`
+| Test id | Use |
+|---------|-----|
+| `primary-nav`, `nav-sign-in`, `nav-sign-out` | Primary navigation session |
+| `home-sign-in` | Home hero opens auth modal |
+| `auth-modal`, `auth-modal-close`, `auth-modal-submit` | In-page auth modal |
+| `login-submit` | `/auth/login` form submit |
+| `collectibles-page-heading`, `collectibles-grid`, `collectibles-table` | Catalog layout |
+| `collectible-tile-<id>`, `collectible-detail-link-<id>` | Grid expand then navigate to detail |
+| `collectible-detail-back` | Detail page back control |
+| `collection-page-heading`, `collection-bulk-tools` | Signed-in collection |
+| `bulk-download-zeros`, `bulk-download-ones`, `bulk-download-current` | Story Deck CSV downloads |
+| `getting-started-type-pins`, `getting-started-type-cards`, `getting-started-type-both` | Collectible type step |
+| `getting-started-profile-manual`, `getting-started-profile-spreadsheet` | Storage profile radios |
+| `getting-started-continue`, `getting-started-review-back`, `getting-started-spreadsheet-back` | Wizard navigation |
+| `site-footer`, `site-feedback-open`, `site-feedback-dialog` | Footer and feedback modal |
+
+Accessible names still used where no test id exists:
+
 - Home h1: `Track your collectibles in one place.`
-- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
+- Collectibles: search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
 - Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`
-- Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`)
 - Matches h1: `Matches`; Account h1: `Account Settings`
 
 Read `features/README.md` and the matching feature file before driving. A proof that uses one convenient entry point is incomplete when the map lists others.

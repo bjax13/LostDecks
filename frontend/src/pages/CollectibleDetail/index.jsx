@@ -130,7 +130,12 @@ export default function CollectibleDetailPage() {
 
   return (
     <div className="card-detail-page">
-      <button type="button" onClick={() => navigate(-1)} className="card-detail__back-button">
+      <button
+        type="button"
+        onClick={() => navigate(-1)}
+        className="card-detail__back-button"
+        data-testid="collectible-detail-back"
+      >
         ← Back
       </button>
 

@@ -59,7 +59,7 @@ function Login() {
             required
           />
         </label>
-        <button type="submit" disabled={submitting}>
+        <button type="submit" disabled={submitting} data-testid="login-submit">
           {submitting ? "Signing in…" : "Sign In"}
         </button>
       </form>
