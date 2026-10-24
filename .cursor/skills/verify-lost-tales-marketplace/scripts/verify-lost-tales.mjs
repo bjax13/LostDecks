@@ -91,7 +91,7 @@ Drive actions:
   fill --label Search --value Elsecaller
   select --label Category --value "Story cards"
   press --key Escape
-  expect --role heading --name Collectibles
+  expect --role heading --name Collectibles [--exact] [--state hidden]
   expect-url --path /collectibles
   count --role heading --name "Elsecaller #01"
   text [--role heading --name Collectibles]

@@ -66,7 +66,8 @@ $VERIFY drive goto --path /collectibles
 $VERIFY drive click --role link --name Collectibles --scope nav
 $VERIFY drive fill --label Search --value Elsecaller
 $VERIFY drive select --label Category --value "Story cards"
-$VERIFY drive expect --role heading --name Collectibles
+$VERIFY drive expect --role heading --name Collectibles --exact
+$VERIFY drive expect --text "Saving preference…" --state hidden
 $VERIFY drive expect-url --path /collectibles
 $VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.png --full-page
 $VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.aria.txt
@@ -84,7 +85,10 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 | `--text` | `getByText` |
 | `--scope nav` | Restrict to `navigation` named `Primary` |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name. Without it, the name is a substring: `Back` also matches `Feedback`, and `Your Collection` also matches `Bulk update your collection` |
+| `--state` | For `expect` only. `visible` (default), `hidden`, `attached`, or `detached`. Use `hidden` to wait until copy such as `Saving preference…` is gone |
+
+`click` on a radio or checkbox activates the surrounding label when there is one, so card-style options such as Getting Started's `Both` receive the click.
 
 Stable handles from this repo:
 
