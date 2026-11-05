@@ -10,12 +10,14 @@ Matches shows reciprocal extras between collectors, grouped as a person card wit
 - `matches-opt-out` honors Account `Include me in Matches` and shows matching-disabled copy.
 - `account-match-lanes` shows Dun cards, Foil cards, and Pins checkboxes under that control; they are disabled while matching is excluded.
 - `account-profile` shows display name and email on Account Settings.
+- `account-delete` opens Danger zone → Delete my account, asks for `DELETE`, and Cancel closes the dialog without deleting.
 
 ## How to get to it (user POV)
 
 - Choose `Matches` in the primary navigation.
 - Open `/matches` directly.
 - Choose `Account` in the primary navigation, then toggle `Include me in Matches` or the Dun cards, Foil cards, and Pins lane checkboxes.
+- On Account Settings, choose `Delete my account` in Danger zone.
 - Open `/account` directly.
 
 ## Driving it with verify-lost-tales
@@ -29,17 +31,20 @@ Preconditions:
 - **Signed-out gate.** Open Matches signed out. Run `$VERIFY drive logout` then `$VERIFY drive click --role link --name Matches --scope nav`. The login heading is visible.
 - **Seeded matches.** Sign in as Collector One and open Matches. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only` then `$VERIFY drive click --role link --name Matches --scope nav`. After `Finding possible matches…` disappears, heading `Matches` is visible and a heading `Collector Two` shows a Dun cards lane.
 - **Person contact.** Contact for Collector Two is visible on the expanded card. Run `$VERIFY drive expect --role button --name "Copy email"` and `$VERIFY drive expect --role link --name Email`.
-- **Account profile.** Open Account. Run `$VERIFY drive click --role link --name Account --scope nav`. Headings `Account Settings` and `Profile overview` show display name `Collector One` and email `collector.one@example.com`.
+- **Account profile.** Open Account. Run `$VERIFY drive click --role link --name Account --scope nav`. Headings `Account Settings` and `Profile overview` are visible. Display name `Collector One` and primary email `collector.one@example.com` are list text. The email also appears on the contact-sharing choice, so assert it with `$VERIFY drive expect --text "collector.one@example.com" --nth 0`.
 - **Match lanes.** On Account, checkboxes `Dun cards`, `Foil cards`, and `Pins` sit under `Include me in Matches` and are checked. Run `$VERIFY drive expect --role checkbox --name "Dun cards"`, `$VERIFY drive expect --role checkbox --name "Foil cards"`, and `$VERIFY drive expect --role checkbox --name "Pins"`.
-- **Opt out.** Uncheck matching. Run `$VERIFY drive click --role checkbox --name "Include me in Matches"`. Wait until `Saving preference…` is gone. The three lane checkboxes are disabled. Open Matches again. Run `$VERIFY drive click --role link --name Matches --scope nav`. Heading `Matching is disabled for your account` is visible and Collector Two is not listed.
-- **Restore opt-in.** Return to Account, check `Include me in Matches` again, and wait until saving finishes so later runs keep the seed behavior.
+- **Opt out.** Uncheck matching. Run `$VERIFY drive click --role checkbox --name "Include me in Matches"`, then `$VERIFY drive expect --text "Saving preference…" --state hidden`. The three lane checkboxes are disabled. Open Matches again. Run `$VERIFY drive click --role link --name Matches --scope nav`. Wait until `Finding possible matches…` is gone. Heading `Matching is disabled for your account` is visible and Collector Two is not listed.
+- **Restore opt-in.** Return to Account, check `Include me in Matches` again, and run `$VERIFY drive expect --text "Saving preference…" --state hidden` so later runs keep the seed behavior.
+- **Delete dialog.** On Account, choose Delete my account. Run `$VERIFY drive click --role button --name "Delete my account" --exact`. Heading `Delete your account?` and textbox `Type DELETE to confirm` are visible. Run `$VERIFY drive click --role button --name Cancel --exact`. The dialog closes and `Account Settings` remains. Do not submit `DELETE` for a seed user.
 - **Proof.** Capture Collector One's matches before any opt-out. Run `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/matches/collector-one.png --full-page` and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/matches/collector-one.aria.txt` while `Collector Two` is visible. Artifacts show Matches, the counterparty heading, dun piles, and signed-in nav.
 
 ## Gotchas
 
 - Matches load through a callable function. Wait for `Finding possible matches…` to disappear; do not snapshot the loading sentence as success or failure.
 - A freshness line `As of N seconds ago` with `Refresh` can appear. Refresh is disabled while `Can refresh in N seconds` is shown.
-- Opt-out is a negative checkbox (`Include me in Matches` checked means participating). After toggling, wait for `Saving preference…` to clear before changing routes.
+- Opt-out is a negative checkbox (`Include me in Matches` checked means participating). After toggling, wait for `Saving preference…` to clear before changing routes. `$VERIFY drive expect --text "Saving preference…" --state hidden` passes when the status is already gone.
+- A revisit within about 30 seconds can show the previous cached list (`As of N seconds ago`) even after opt-out. Once that cache expires, Matches can show `You're refreshing too fast, try again in a few seconds` with `Retry` instead of the disabled heading. Wait until `Retry` is enabled and press it once. Do not treat that error as the opt-out result.
+- Collector Two's `Email` link uses the shared trading address (`collector.two.trades@example.com` in the example seed), not the sign-in email.
 - If launch used a custom `functions/seed.local.json`, counterparties and SKUs may differ. Read that file before asserting `Collector Two`.
 - `$VERIFY seed` after an opt-out restores `matchingOptOut: false` and all three match lanes enabled for seed users.
 - Google-only accounts are out of scope here; prove with the seeded email user.

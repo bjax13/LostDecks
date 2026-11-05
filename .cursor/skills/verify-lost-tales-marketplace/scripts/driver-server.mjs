@@ -109,6 +109,20 @@ async function pageInfo() {
   };
 }
 
+async function clickTarget(spec) {
+  const loc = locatorFor(spec);
+  // Getting Started radios paint the visible title over the input, so a hit on the
+  // input never lands. The surrounding label is the control a collector actually clicks.
+  if (spec.role === "radio" || spec.role === "checkbox") {
+    const label = loc.locator("xpath=ancestor::label[1]");
+    if ((await label.count()) > 0) {
+      await label.click();
+      return;
+    }
+  }
+  await loc.click();
+}
+
 async function handleCommand(cmd) {
   const action = cmd.action;
   if (action === "goto") {
@@ -117,7 +131,7 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    await clickTarget(cmd);
     return pageInfo();
   }
   if (action === "fill") {

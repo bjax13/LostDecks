@@ -1,13 +1,14 @@
 # Home
 
-Home is the signed-out landing page: a hero that sends collectors into getting started or the catalog, tiles for supported sets, and a snapshot that stays empty until sign-in.
+Home is the landing page: a hero that sends collectors into getting started or the catalog, tiles for supported sets, shortcuts for tracking a collection, and a snapshot that stays empty until sign-in.
 
 ## Sub-features
 
 - `home-load` shows the ShardStash heading and primary navigation.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
 - `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
-- `home-supported` opens the catalog from Story Deck and ChasmFriends pin tiles.
+- `home-supported` opens the catalog from the Story Deck Cards and ChasmFriends Pins tiles.
+- `home-today` opens Collection from Track What You Own and the catalog from footer Browse Items.
 - `home-snapshot-signed-out` shows Collection Snapshot values as placeholders with Sign in hints.
 
 ## How to get to it (user POV)
@@ -29,13 +30,14 @@ Preconditions:
 - **Hero getting started.** From home, choose the first Getting Started control. Run `$VERIFY drive click --role link --name "Getting Started" --nth 0`. The heading `Build your collection without entering every card.` is visible.
 - **Hero catalog.** Return home, then choose View Collectibles. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "View Collectibles"`. The heading `Collectibles` is visible.
 - **Supported collections.** Return home and choose Browse catalog. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse catalog"`. The heading `Collectibles` is visible and the page still shows all categories.
-- **Pin tile.** Return home and choose Browse pins. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse pins"`. The Category filter is `Pins` (the catalog heading remains `Collectibles`).
+- **Pin tile.** Return home and choose Browse pins. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse pins"`. The Category filter is `Pins` (the catalog heading remains `Collectibles`). Confirm with `$VERIFY drive snapshot` and look for `option "Pins" [selected]`.
+- **Today tiles.** Return home and choose Track What You Own. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Track What You Own"`. Signed out, the heading `Sign in to ShardStash` is visible. Return home and choose Browse Items. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse Items"`. The heading `Collectibles` is visible.
 - **Signed-out snapshot.** Return home. Run `$VERIFY drive goto --path /` and `$VERIFY drive expect --role heading --name "Collection Snapshot"`. Snapshot stats include the hint `Sign in` rather than owned counts.
 - **Proof.** Capture home signed-out. Run `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/home/signed-out.png --full-page` and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/home/signed-out.aria.txt`. Artifacts show the hero heading, Supported Collections, and primary nav Sign in.
 
 ## Gotchas
 
 - `Getting Started` appears in the hero and again in the footer. Use `--nth 0` for the hero and do not assume a single link.
-- `Collection`, `Matches`, and `Account` in the nav are visible while signed out; following them redirects to `/auth/login`. That redirect is auth-gate behavior, not a broken home link.
+- `Collection`, `Matches`, and `Account` in the nav are visible while signed out; following them redirects to `/auth/login`. `Track What You Own` and `See What's Missing` use the same gate. That redirect is auth-gate behavior, not a broken home link.
 - Home hero `Sign In` opens the auth modal instead of `/auth/login`. Nav `Sign in` goes to the login page. Do not treat the modal heading `Sign In` as the login page heading.
 - Collection Snapshot loading skeletons disappear; wait for the `Collection Snapshot` heading and the `Sign in` hints, not a fixed sleep.
