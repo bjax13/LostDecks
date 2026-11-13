@@ -47,3 +47,4 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Sign in](./auth.md) covers login, register, the in-page auth modal, and auth-gated redirects.
 - [Collection](./collection.md) covers the signed-in collection, getting-started save, and bulk tools.
 - [Matches](./matches.md) covers reciprocal trade matches and the Account matching opt-out.
+- [Admin](./admin.md) covers the admin collector directory and the non-admin denial.
