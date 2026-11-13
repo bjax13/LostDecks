@@ -65,7 +65,7 @@ The driver keeps one browser context for the life of the run. Each command is on
 $VERIFY drive goto --path /collectibles
 $VERIFY drive click --role link --name Collectibles --scope nav
 $VERIFY drive fill --label Search --value Elsecaller
-$VERIFY drive select --label Category --value "Story cards"
+$VERIFY drive select --label Category --value "Story cards" --exact
 $VERIFY drive expect --role heading --name Collectibles
 $VERIFY drive expect-url --path /collectibles
 $VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/collectibles/grid.png --full-page
@@ -79,18 +79,20 @@ Locator flags (Playwright accessible names, not CSS or coordinates):
 | Flag | Meaning |
 |------|---------|
 | `--role` + `--name` | `getByRole` (heading, link, button, navigation, searchbox, textbox, status) |
-| `--label` | `getByLabel` (Search, Email, Password, Category, Story, Rarity) |
+| `--label` | `getByLabel` (Search, Email, Password, Category, Sub Category, Rarity) |
 | `--placeholder` | `getByPlaceholder` |
 | `--text` | `getByText` |
 | `--scope nav` | Restrict to `navigation` named `Primary` |
 | `--nth N` | 0-based match when several elements share a name |
-| `--exact` | Exact accessible name |
+| `--exact` | Exact accessible name. Required for Category: the visible label `Sub Category` also matches a substring search for `Category`. |
 
 Stable handles from this repo:
 
 - Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` (link to `/auth/login`); signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
-- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Story`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
+- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Sub Category`, `Rarity`; buttons `Grid view`, `Table view`, `Reset filters`
+- A catalog tile heading expands the tile. The detail link's accessible name is the card id (`LT24-ELS-01`), not the title. Table view is a region named `Collectibles table`.
+- Getting Started profile choices and Account match toggles are radios or checkboxes inside a label. `click` activates that label.
 - Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`
 - Collection h1: `Your Collection` (auth-gated; unauthenticated visitors land on `/auth/login`)
 - Matches h1: `Matches`; Account h1: `Account Settings`
