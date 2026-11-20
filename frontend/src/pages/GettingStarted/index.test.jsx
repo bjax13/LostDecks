@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import {
@@ -1098,5 +1099,162 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
     expect(call.allowPins).toBe(false);
     expect(call.rows.some((row) => String(row.skuId).startsWith("PIN-"))).toBe(false);
+  });
+
+  describe("Chasm Friend pin shortcut", () => {
+    const chasmPath = "/getting-started?pins=chasmfriends";
+    const chasmPinNames = ["Shredhead", "Howlerina", "Burpslurper", "Darren", "Cleverclaws"];
+
+    function expectNoCardWord() {
+      const main = document.querySelector("main");
+      expect(main).toBeTruthy();
+      expect(main.innerHTML.toLowerCase()).not.toMatch(/\bcards?\b/);
+    }
+
+    function ChasmAuthHarness() {
+      const [authUser, setAuthUser] = useState(null);
+      mockUseAuth.mockReturnValue({ user: authUser });
+      return (
+        <TestMemoryRouter initialEntries={[chasmPath]}>
+          <button type="button" onClick={() => setAuthUser({ uid: "user-1" })}>
+            Finish sign in
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    it("opens the five ChasmFriends pins expanded, with pin-only copy", async () => {
+      const user = setupUser();
+      renderPage(chasmPath);
+
+      expect(
+        screen.getByRole("heading", { name: "which chasm friends do you have?" }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "i have all 5" })).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: /what best describes you/i }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText(/card review/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: /which pins do you have/i }),
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /collapse pin collections/i })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: /collapse chasmfriends pins/i })).toHaveAttribute(
+        "aria-expanded",
+        "true",
+      );
+
+      for (const name of chasmPinNames) {
+        expect(
+          screen.getByRole("group", { name: new RegExp(`${name} quantity, 0$`, "i") }),
+        ).toBeInTheDocument();
+      }
+      expect(screen.queryByText("Brandon")).not.toBeInTheDocument();
+      const coverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+      expect(within(coverage).getByRole("button", { name: "All" })).toBeInTheDocument();
+      expect(within(coverage).getByRole("button", { name: "Some" })).toBeInTheDocument();
+      expect(within(coverage).getByRole("button", { name: "None" })).toBeInTheDocument();
+      expectNoCardWord();
+
+      await user.click(within(coverage).getByRole("button", { name: "All" }));
+      await user.click(within(coverage).getByRole("button", { name: "None" }));
+      expect(screen.getByRole("dialog", { name: /set all pins to zero/i })).toBeInTheDocument();
+      expectNoCardWord();
+      await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await user.click(screen.getByRole("button", { name: "i have all 5" }));
+      for (const name of chasmPinNames) {
+        expect(
+          screen.getByRole("group", { name: new RegExp(`${name} quantity, 1$`, "i") }),
+        ).toBeInTheDocument();
+      }
+      expectNoCardWord();
+    });
+
+    it("keeps signed-out picks through sign-in and save, then offers the next links", async () => {
+      const user = setupUser();
+      render(<ChasmAuthHarness />);
+
+      await user.click(
+        screen.getByRole("button", { name: /increase chasmfriends pins shredhead quantity/i }),
+      );
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Sign in and save" }));
+      expect(mockOpenAuthModal).toHaveBeenCalledWith({
+        reason: "getting-started-save",
+        initialMode: "register",
+        onSuccess: expect.any(Function),
+      });
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Finish sign in" }));
+
+      expect(
+        await screen.findByRole("link", { name: "done. see who needs yours" }),
+      ).toHaveAttribute("href", "/matches");
+      expect(screen.getByRole("link", { name: "add the rest of your pins" })).toHaveAttribute(
+        "href",
+        "/getting-started?pins=all",
+      );
+      expect(
+        screen.getByRole("heading", { name: "which chasm friends do you have?" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+
+      const rows = mockApplyBulkCollectionUpdate.mock.calls[0][0].rows;
+      expect(rows.map((row) => row.skuId)).toEqual([
+        "PIN-CF-01",
+        "PIN-CF-02",
+        "PIN-CF-03",
+        "PIN-CF-04",
+        "PIN-CF-05",
+      ]);
+      expect(rows.find((row) => row.skuId === "PIN-CF-01").quantity).toBe("1");
+      expect(
+        rows.filter((row) => row.skuId !== "PIN-CF-01").every((row) => row.quantity === "0"),
+      ).toBe(true);
+      expectNoCardWord();
+    });
+
+    it("opens the full pin review directly from pins=all", () => {
+      renderPage("/getting-started?pins=all");
+
+      expect(screen.getByRole("heading", { name: /review your pins/i })).toBeInTheDocument();
+      expect(screen.getByText("ChasmFriends Pins")).toBeInTheDocument();
+      expect(screen.getByText("Character Pin Series 1")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: /what best describes you/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: /which pins do you have/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("opens the unfiltered pin review from the after-save link", async () => {
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      const user = setupUser();
+      renderPage(chasmPath);
+
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+      await user.click(await screen.findByRole("link", { name: "add the rest of your pins" }));
+
+      expect(screen.getByRole("heading", { name: /review your pins/i })).toBeInTheDocument();
+      expect(screen.getByText("Character Pin Series 1")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "which chasm friends do you have?" }),
+      ).not.toBeInTheDocument();
+      expect(screen.getAllByRole("button", { name: "All", exact: true }).length).toBeGreaterThan(1);
+    });
   });
 });

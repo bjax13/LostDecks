@@ -220,6 +220,24 @@
   margin-top: 0.2rem;
 }
 
+.account-location {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.account-location-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 22rem;
+  color: #e6dcff;
+  font-weight: 600;
+}
+
 .account-match-lanes:disabled .account-lane-row {
   opacity: 0.55;
 }

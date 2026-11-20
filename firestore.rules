@@ -80,6 +80,25 @@ service cloud.firestore {
           && (!("pins" in data.matchKeep) || validMatchKeepCount(data.matchKeep.pins)));
     }
 
+    // Optional ISO codes. Writes stay owner-only because the preferences doc is owner-only.
+    function validMatchCountry(data) {
+      return !("matchCountry" in data)
+        || (data.matchCountry is string
+          && (data.matchCountry == ""
+            || (data.matchCountry.size() == 2 && data.matchCountry.matches('^[A-Z]{2}$'))));
+    }
+
+    function validMatchRegion(data) {
+      return !("matchRegion" in data)
+        || (data.matchRegion is string
+          && (data.matchRegion == ""
+            || (data.matchRegion.size() >= 4
+              && data.matchRegion.size() <= 6
+              && data.matchCountry is string
+              && data.matchCountry.size() == 2
+              && data.matchRegion.matches('^' + data.matchCountry + '-[A-Z0-9]{1,3}$'))));
+    }
+
     function validUserPreferences(data) {
       return (!("matchingOptOut" in data) || data.matchingOptOut is bool)
         && validMatchLanes(data)
@@ -92,6 +111,8 @@ service cloud.firestore {
           || (data.discordHandle is string && data.discordHandle.size() <= 100))
         && (!("discordChannel" in data)
           || (data.discordChannel is string && data.discordChannel.size() <= 100))
+        && validMatchCountry(data)
+        && validMatchRegion(data)
         && contactSharingComplete(data);
     }
 

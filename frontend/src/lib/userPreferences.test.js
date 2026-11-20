@@ -32,6 +32,8 @@ describe("userPreferences normalization", () => {
       tradingEmail: "trade@example.com",
       discordHandle: "stormlight",
       discordChannel: "Cosmere Trades",
+      matchCountry: "",
+      matchRegion: "",
     });
   });
 
@@ -49,7 +51,36 @@ describe("userPreferences normalization", () => {
       tradingEmail: "",
       discordHandle: "",
       discordChannel: DEFAULT_DISCORD_CHANNEL,
+      matchCountry: "",
+      matchRegion: "",
     });
+  });
+
+  it("keeps a known country and state and drops free text or a mismatched state", () => {
+    expect(
+      normalizeUserPreferences({
+        matchCountry: " us ",
+        matchRegion: "us-ut",
+      }),
+    ).toMatchObject({
+      matchCountry: "US",
+      matchRegion: "US-UT",
+    });
+    expect(
+      normalizeUserPreferences({
+        matchCountry: "California",
+        matchRegion: "Utah",
+      }),
+    ).toMatchObject({
+      matchCountry: "",
+      matchRegion: "",
+    });
+    expect(
+      normalizeUserPreferences({
+        matchCountry: "CA",
+        matchRegion: "US-UT",
+      }).matchRegion,
+    ).toBe("");
   });
 
   it("defaults missing match keep to 1 and clamps values outside 1 to 3", () => {

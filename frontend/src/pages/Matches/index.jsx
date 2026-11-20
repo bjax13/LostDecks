@@ -9,6 +9,16 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
 import {
+  MATCH_LOCATION_FILTER_NOTE,
+  MATCH_LOCATION_FILTER_NOTICE_AFTER,
+  MATCH_LOCATION_FILTER_NOTICE_BEFORE,
+  MATCH_LOCATION_FILTER_NOTICE_LINK,
+  readStoredMatchLocationFilter,
+  serverLocationFilter,
+  writeStoredMatchLocationFilter,
+} from "../../lib/matchLocationFilter";
+import { normalizeMatchCountry, normalizeMatchRegion } from "../../lib/matchLocations";
+import {
   isValidTradingEmail,
   MATCH_CONTACT_SHARING,
   subscribeUserPreferences,
@@ -210,6 +220,25 @@ function MatchesContent() {
   const [searchParams] = useSearchParams();
   const [showMayRefreshMessage, setShowMayRefreshMessage] = useState(false);
   const [pinsLaneEnabled, setPinsLaneEnabled] = useState(true);
+  const [locationUserId, setLocationUserId] = useState(user?.uid ?? null);
+  const [viewerLocation, setViewerLocation] = useState({ country: "", region: "" });
+  const [locationPrefsReady, setLocationPrefsReady] = useState(false);
+  const [locationFilterChoice, setLocationFilterChoice] = useState(() =>
+    readStoredMatchLocationFilter(user?.uid),
+  );
+  const [locationNoticeOpen, setLocationNoticeOpen] = useState(false);
+  const locationNoticeRef = useRef(null);
+
+  if ((user?.uid ?? null) !== locationUserId) {
+    const nextUserId = user?.uid ?? null;
+    setLocationUserId(nextUserId);
+    setLocationPrefsReady(false);
+    setViewerLocation({ country: "", region: "" });
+    setLocationNoticeOpen(false);
+    setLocationFilterChoice(readStoredMatchLocationFilter(nextUserId));
+  }
+
+  const locationFilter = serverLocationFilter(locationFilterChoice, viewerLocation);
   const welcome = searchParams.get("welcome") === "1";
   const matchesViewedKeyRef = useRef(null);
   const {
@@ -229,7 +258,10 @@ function MatchesContent() {
     reload,
     showRefreshCountdown,
     totalOnPage,
-  } = useTradeMatches(user?.uid);
+  } = useTradeMatches(user?.uid, {
+    locationFilter,
+    ready: !user?.uid || locationPrefsReady,
+  });
 
   const {
     matches: filteredMatches,
@@ -278,14 +310,73 @@ function MatchesContent() {
   }, [cacheAgeSeconds, error, loading, refreshAvailableInSeconds]);
 
   useEffect(() => {
+    if (!locationNoticeOpen) {
+      return undefined;
+    }
+    locationNoticeRef.current?.focus();
+    const onKey = (event) => {
+      if (event.key === "Escape") {
+        setLocationNoticeOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [locationNoticeOpen]);
+
+  useEffect(() => {
     if (!user?.uid) {
       setPinsLaneEnabled(true);
       return undefined;
     }
-    return subscribeUserPreferences(user.uid, (preferences) => {
-      setPinsLaneEnabled(preferences.matchLanes?.pins !== false);
-    });
+    return subscribeUserPreferences(
+      user.uid,
+      (preferences) => {
+        setPinsLaneEnabled(preferences.matchLanes?.pins !== false);
+        const country = normalizeMatchCountry(preferences.matchCountry);
+        const region = normalizeMatchRegion(country, preferences.matchRegion);
+        setViewerLocation({ country, region });
+        setLocationFilterChoice((current) => {
+          const next = {
+            country: current.country && Boolean(country),
+            state: current.state && Boolean(country) && Boolean(region),
+          };
+          if (next.country !== current.country || next.state !== current.state) {
+            writeStoredMatchLocationFilter(user.uid, next);
+            return next;
+          }
+          return current;
+        });
+        setLocationPrefsReady(true);
+      },
+      () => {
+        setPinsLaneEnabled(true);
+        setViewerLocation({ country: "", region: "" });
+        setLocationFilterChoice({ country: false, state: false });
+        setLocationPrefsReady(true);
+      },
+    );
   }, [user?.uid]);
+
+  const handleLocationFilterChange = (kind, checked) => {
+    if (checked) {
+      const missingCountry = !viewerLocation.country;
+      const missingState = missingCountry || !viewerLocation.region;
+      if ((kind === "country" && missingCountry) || (kind === "state" && missingState)) {
+        setLocationNoticeOpen(true);
+        return;
+      }
+    }
+
+    setLocationFilterChoice((current) => {
+      const next = { ...current, [kind]: checked };
+      if (user?.uid) {
+        writeStoredMatchLocationFilter(user.uid, next);
+      }
+      return next;
+    });
+  };
 
   const freshnessMessage = formatFreshnessMessage({
     cacheAgeSeconds,
@@ -313,6 +404,67 @@ function MatchesContent() {
         </div>
         <p className="matches-hint">{MATCHES_KEEP_TIP}</p>
       </header>
+
+      {!callerOptedOut ? (
+        <div className="matches-location-filters">
+          <label>
+            <input
+              type="checkbox"
+              checked={locationFilterChoice.state}
+              disabled={!locationPrefsReady}
+              onChange={(event) => handleLocationFilterChange("state", event.target.checked)}
+            />
+            Only my state
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={locationFilterChoice.country}
+              disabled={!locationPrefsReady}
+              onChange={(event) => handleLocationFilterChange("country", event.target.checked)}
+            />
+            Only my country
+          </label>
+          {locationFilter !== "off" ? (
+            <p className="matches-location-note">{MATCH_LOCATION_FILTER_NOTE}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {locationNoticeOpen ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: backdrop click dismisses; Escape and Close also dismiss
+        // biome-ignore lint/a11y/useKeyWithClickEvents: Escape closes the popup from a window listener
+        <div
+          className="matches-location-popup-backdrop"
+          onClick={() => setLocationNoticeOpen(false)}
+        >
+          <div
+            className="matches-location-popup"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="matches-location-popup-title"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                setLocationNoticeOpen(false);
+              }
+            }}
+          >
+            <p id="matches-location-popup-title">
+              {MATCH_LOCATION_FILTER_NOTICE_BEFORE}
+              <Link to="/account">{MATCH_LOCATION_FILTER_NOTICE_LINK}</Link>
+              {MATCH_LOCATION_FILTER_NOTICE_AFTER}
+            </p>
+            <button
+              type="button"
+              ref={locationNoticeRef}
+              onClick={() => setLocationNoticeOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {welcome ? (
         <section className="matches-panel matches-welcome">

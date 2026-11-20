@@ -89,6 +89,23 @@ describe("Home page", () => {
       );
     });
 
+    it("links the hero Chasm Friend shortcut to the filtered pin review", () => {
+      renderHome();
+      const hero = screen
+        .getByRole("heading", { level: 1, name: /track your collectibles in one place/i })
+        .closest("section");
+      expect(hero).toBeTruthy();
+      const actions = within(hero).getByRole("link", { name: "Getting Started" }).parentElement;
+      const actionNames = within(actions)
+        .getAllByRole("link")
+        .map((link) => link.textContent);
+      expect(actionNames.slice(0, 2)).toEqual(["Getting Started", "log my chasm friend pins"]);
+      expect(within(hero).getByRole("link", { name: "log my chasm friend pins" })).toHaveAttribute(
+        "href",
+        "/getting-started?pins=chasmfriends",
+      );
+    });
+
     it("links View Collectibles in hero to /collectibles", () => {
       renderHome();
       const hero = screen
@@ -168,7 +185,11 @@ describe("Home page", () => {
       .closest("section");
     expect(section).toBeTruthy();
     const pinsTile = within(section).getByRole("link", { name: /^Pins/ });
-    expect(pinsTile).toHaveAttribute("href", "/collectibles");
+    expect(pinsTile).toHaveAttribute("href", "/collectibles?category=pins");
+    expect(within(section).getByRole("link", { name: /Story Deck Cards/ })).toHaveAttribute(
+      "href",
+      "/collectibles",
+    );
     expect(within(pinsTile).getAllByText("Pins")).toHaveLength(2);
     expect(pinDatasetMeta.setName).toBe("Pins");
     expect(within(pinsTile).getByText("Browse pins")).toBeInTheDocument();

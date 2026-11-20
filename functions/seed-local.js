@@ -99,6 +99,10 @@ async function seedUserData(db, uid, userConfig) {
     typeof userConfig.discordChannel === "string" && userConfig.discordChannel.trim()
       ? userConfig.discordChannel.trim()
       : "Sanderson Collectors Guild";
+  const matchCountry =
+    typeof userConfig.matchCountry === "string" ? userConfig.matchCountry.trim().toUpperCase() : "";
+  const matchRegion =
+    typeof userConfig.matchRegion === "string" ? userConfig.matchRegion.trim().toUpperCase() : "";
 
   await db
     .collection(PREFERENCES_NAME)
@@ -115,6 +119,8 @@ async function seedUserData(db, uid, userConfig) {
         tradingEmail,
         discordHandle,
         discordChannel,
+        matchCountry,
+        matchRegion: matchCountry ? matchRegion : "",
       },
       { merge: true },
     );

@@ -158,7 +158,9 @@ describe("AccountPage", () => {
       loading: false,
     });
     renderAccountPage();
-    expect(screen.getByText("Not set")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Display name").closest("li")).getByText("Not set"),
+    ).toBeInTheDocument();
   });
 
   it('shows "Not set" when displayName is an empty string', () => {
@@ -167,7 +169,9 @@ describe("AccountPage", () => {
       loading: false,
     });
     renderAccountPage();
-    expect(screen.getByText("Not set")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Display name").closest("li")).getByText("Not set"),
+    ).toBeInTheDocument();
   });
 
   it("hides profile overview when user is null", () => {
@@ -448,7 +452,9 @@ describe("AccountPage", () => {
     const user = userEvent.setup();
     renderAccountPage();
 
-    expect(screen.getByText("Not set")).toBeInTheDocument();
+    expect(
+      within(screen.getByText("Display name").closest("li")).getByText("Not set"),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Edit" }));
     await user.type(screen.getByRole("textbox", { name: "Display name" }), "Collector");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -641,5 +647,157 @@ describe("AccountPage", () => {
     expect(within(dialog).getByText("Nope")).toBeInTheDocument();
     expect(mockLogout).not.toHaveBeenCalled();
     errSpy.mockRestore();
+  });
+
+  function locationField(label) {
+    return screen.getByRole("combobox", { name: label });
+  }
+
+  async function chooseLocation(user, label, optionName) {
+    const field = locationField(label);
+    await user.click(field);
+    const list = screen.getByRole("listbox");
+    await user.click(within(list).getByRole("option", { name: optionName }));
+    return field;
+  }
+
+  it("filters locations, saves list codes only, and clears state when the country changes", async () => {
+    const user = userEvent.setup();
+    renderAccountPage();
+
+    const country = locationField("Country");
+    expect(country).toHaveValue("");
+    expect(country).toHaveAttribute("placeholder", "Not set");
+    expect(screen.queryByLabelText("State/Province")).not.toBeInTheDocument();
+
+    await user.click(country);
+    const openCountries = within(screen.getByRole("listbox")).getAllByRole("option");
+    expect(openCountries[0]).toHaveTextContent("United States");
+    expect(openCountries[1]).toHaveTextContent("Not set");
+    expect(openCountries[2]).toHaveTextContent("Afghanistan");
+
+    await user.type(country, "cAn");
+    const filtered = within(screen.getByRole("listbox")).getAllByRole("option");
+    expect(filtered.map((option) => option.textContent)).toEqual([
+      "Canada",
+      "Central African Republic",
+      "Dominican Republic",
+      "Vatican City",
+    ]);
+    await user.click(filtered[0]);
+    expect(country).toHaveValue("Canada");
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchCountry: "CA",
+      matchRegion: "",
+    });
+
+    await user.type(country, "Narnia");
+    await user.tab();
+    expect(country).toHaveValue("Canada");
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalledWith("abc-123", {
+      matchCountry: "Narnia",
+      matchRegion: "",
+    });
+
+    const province = locationField("State/Province");
+    await user.click(province);
+    await user.type(province, "ont");
+    await user.click(screen.getByRole("option", { name: "Ontario" }));
+    expect(province).toHaveValue("Ontario");
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", { matchRegion: "CA-ON" });
+
+    await chooseLocation(user, "Country", "United States");
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchCountry: "US",
+      matchRegion: "",
+    });
+    const usState = locationField("State/Province");
+    expect(usState).toHaveValue("");
+    await user.click(usState);
+    const stateList = within(screen.getByRole("listbox"));
+    expect(stateList.getByRole("option", { name: "Utah" })).toBeInTheDocument();
+    expect(stateList.getByRole("option", { name: "District of Columbia" })).toBeInTheDocument();
+    expect(stateList.queryByRole("option", { name: "Ontario" })).not.toBeInTheDocument();
+    await user.type(usState, "ut");
+    await user.click(screen.getByRole("option", { name: "Utah" }));
+    expect(usState).toHaveValue("Utah");
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", { matchRegion: "US-UT" });
+
+    await chooseLocation(user, "Country", "Australia");
+    expect(locationField("State/Province")).toHaveValue("");
+    await user.click(locationField("State/Province"));
+    const australiaList = within(screen.getByRole("listbox"));
+    expect(australiaList.queryByRole("option", { name: "Utah" })).not.toBeInTheDocument();
+    expect(australiaList.getByRole("option", { name: "Victoria" })).toBeInTheDocument();
+
+    await chooseLocation(user, "Country", "United Kingdom");
+    await user.click(locationField("State/Province"));
+    expect(
+      within(screen.getByRole("listbox")).getByRole("option", {
+        name: "Scotland",
+      }),
+    ).toBeInTheDocument();
+
+    await chooseLocation(user, "Country", "France");
+    expect(screen.queryByLabelText("State/Province")).not.toBeInTheDocument();
+    expect(mockUpdateUserPreferences).toHaveBeenCalledWith("abc-123", {
+      matchCountry: "FR",
+      matchRegion: "",
+    });
+
+    await chooseLocation(user, "Country", "Not set");
+    expect(country).toHaveValue("");
+    expect(screen.queryByLabelText("State/Province")).not.toBeInTheDocument();
+    expect(mockUpdateUserPreferences).toHaveBeenLastCalledWith("abc-123", {
+      matchCountry: "",
+      matchRegion: "",
+    });
+  });
+
+  it("keeps a saved state when the same country is chosen again", async () => {
+    const user = userEvent.setup();
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+        matchCountry: "US",
+        matchRegion: "US-UT",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(locationField("Country")).toHaveValue("United States");
+    expect(locationField("State/Province")).toHaveValue("Utah");
+
+    await chooseLocation(user, "Country", "United States");
+    expect(mockUpdateUserPreferences).not.toHaveBeenCalled();
+    expect(locationField("State/Province")).toHaveValue("Utah");
+  });
+
+  it("loads a saved country and state", () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext({
+        matchingOptOut: false,
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchContactSharing: "trueEmail",
+        tradingEmail: "",
+        discordHandle: "",
+        discordChannel: "Sanderson Collectors Guild",
+        matchCountry: "US",
+        matchRegion: "US-CA",
+      });
+      return () => {};
+    });
+
+    renderAccountPage();
+
+    expect(locationField("Country")).toHaveValue("United States");
+    expect(locationField("State/Province")).toHaveValue("California");
   });
 });

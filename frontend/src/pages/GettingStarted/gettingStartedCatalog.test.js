@@ -10,6 +10,7 @@ import {
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
   deriveReviewStateFromEntries,
+  filterChasmFriendsTree,
   filterGettingStartedTree,
   formatCollectionQuantityNoun,
   formatCollectionQuantitySummary,
@@ -72,6 +73,19 @@ describe("gettingStartedCatalog", () => {
     expect(characterSeries1).toBeDefined();
     expect(characterSeries1.skus.some((sku) => sku.skuId === "PIN-CPS1-00")).toBe(true);
     expect(formatReviewGroupLabel(characterSeries1, pinsSection)).toBe("Character Pin Series 1");
+  });
+
+  it("filters the review tree to the five ChasmFriends pins from the catalog", () => {
+    const tree = filterChasmFriendsTree();
+    expect(tree.map((section) => section.id)).toEqual(["pins"]);
+    expect(tree[0].children.map((group) => group.label)).toEqual(["ChasmFriends"]);
+    expect(tree[0].children[0].skus.map((sku) => [sku.skuId, sku.label])).toEqual([
+      ["PIN-CF-01", "Shredhead"],
+      ["PIN-CF-02", "Howlerina"],
+      ["PIN-CF-03", "Burpslurper"],
+      ["PIN-CF-04", "Darren"],
+      ["PIN-CF-05", "Cleverclaws"],
+    ]);
   });
 
   it("filters the review tree by collectible type", () => {
