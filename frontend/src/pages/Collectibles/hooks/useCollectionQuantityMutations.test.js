@@ -45,6 +45,7 @@ const mockResolveSkuId = vi.fn((card, finish) => {
 });
 vi.mock("../../../data/collectibles", () => ({
   resolveSkuId: (...args) => mockResolveSkuId(...args),
+  isRetiredPinId: (skuId) => skuId === "PIN-CPS4-03",
 }));
 
 const { useCollectionQuantityMutations } = await import("./useCollectionQuantityMutations.js");
@@ -87,6 +88,18 @@ describe("useCollectionQuantityMutations", () => {
   });
 
   describe("addToCollection", () => {
+    it("refuses to add a retired pin", async () => {
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      await expect(
+        result.current.addToCollection({
+          card: { id: "PIN-CPS4-03", collectibleType: "pin", category: "pin" },
+          quantity: 1,
+        }),
+      ).rejects.toThrow("This pin is no longer listed.");
+      expect(mockAddDoc).not.toHaveBeenCalled();
+    });
+
     it("creates a new entry and captures item_added", async () => {
       const { result } = renderHook(() => useCollectionQuantityMutations());
 

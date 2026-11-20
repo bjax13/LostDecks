@@ -100,6 +100,7 @@ const { testCollectibles, testDatasetMeta, testDatasetStories } = vi.hoisted(() 
 });
 
 vi.mock("../../data/collectibles", () => ({
+  isRetiredPinId: () => false,
   collectiblesIndex: testCollectibles,
   datasetMeta: testDatasetMeta,
   datasetStories: testDatasetStories,

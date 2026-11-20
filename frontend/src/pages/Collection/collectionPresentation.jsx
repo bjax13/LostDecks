@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { datasetMeta } from "../../data/collectibles";
+import { datasetMeta, isRetiredPinId } from "../../data/collectibles";
 import { categoryLabels } from "../Collectibles/constants";
 
 export function normalizeQuantity(entry) {
@@ -325,7 +325,12 @@ export function CollectionTable({
                     <button
                       type="button"
                       className="collection-table__action-button"
-                      disabled={!canMutate(entry) || isBusy(entry)}
+                      disabled={
+                        !canMutate(entry) ||
+                        isBusy(entry) ||
+                        isRetiredPinId(entry.skuId) ||
+                        isRetiredPinId(entry.cardId)
+                      }
                       onClick={() => onIncrement?.(entry)}
                       aria-label={`Increase quantity for ${entry.displayName}`}
                     >

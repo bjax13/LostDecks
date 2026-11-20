@@ -25,6 +25,7 @@ vi.mock("../../data/collectibles", () => ({
   collectiblesIndex: [],
   datasetStories: [],
   getSkuRecord: mockGetSkuRecord,
+  isRetiredPinId: () => false,
 }));
 
 vi.mock("./hooks/useTradeMatches", () => ({

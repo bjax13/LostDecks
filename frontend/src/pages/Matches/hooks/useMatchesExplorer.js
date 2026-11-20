@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { getSkuRecord } from "../../../data/collectibles";
+import { getSkuRecord, isRetiredPinId } from "../../../data/collectibles";
 import { MATCH_LANE_ALL } from "../constants";
 
 const defaultSortState = {
@@ -51,6 +51,16 @@ function lanesForFilter(lanes, laneFilter) {
   return lanes.filter((lane) => lane.id === laneFilter);
 }
 
+function lanesWithoutRetired(lanes) {
+  return (lanes || [])
+    .map((lane) => ({
+      ...lane,
+      theyCanSend: (lane.theyCanSend || []).filter((item) => !isRetiredPinId(item.skuId)),
+      youCanSend: (lane.youCanSend || []).filter((item) => !isRetiredPinId(item.skuId)),
+    }))
+    .filter((lane) => lane.theyCanSend.length > 0 || lane.youCanSend.length > 0);
+}
+
 function compareCounterparties(a, b, sortField, sortDirection) {
   const direction = sortDirection === "asc" ? 1 : -1;
 
@@ -69,10 +79,22 @@ export function useMatchesExplorer({ matches = [] } = {}) {
   const [sortField, setSortField] = useState(defaultSortState.field);
   const [sortDirection, setSortDirection] = useState(defaultSortState.direction);
 
+  const listedMatches = useMemo(
+    () =>
+      matches
+        .map((counterparty) => {
+          const lanes = lanesWithoutRetired(counterparty.lanes || []);
+          if (lanes.length === 0) return null;
+          return { ...counterparty, lanes };
+        })
+        .filter(Boolean),
+    [matches],
+  );
+
   const filteredMatches = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
 
-    const items = matches
+    const items = listedMatches
       .map((counterparty) => {
         const lanes = lanesForFilter(counterparty.lanes || [], laneFilter);
         if (lanes.length === 0) {
@@ -96,7 +118,7 @@ export function useMatchesExplorer({ matches = [] } = {}) {
       .filter(Boolean);
 
     return items.sort((a, b) => compareCounterparties(a, b, sortField, sortDirection));
-  }, [matches, searchTerm, laneFilter, sortField, sortDirection]);
+  }, [listedMatches, searchTerm, laneFilter, sortField, sortDirection]);
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
@@ -107,7 +129,7 @@ export function useMatchesExplorer({ matches = [] } = {}) {
 
   return {
     matches: filteredMatches,
-    totalMatches: matches.length,
+    totalMatches: listedMatches.length,
     searchTerm,
     setSearchTerm,
     laneFilter,
