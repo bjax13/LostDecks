@@ -175,4 +175,17 @@ describe("useCollectiblesExplorer (unit)", () => {
     act(() => result.current.setSortField("rarity"));
     expect(result.current.sortField).toBe("rarity");
   });
+
+  it("clears rarity filter and rarity sort when the view switches to pins", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setRarityFilter(result.current.rarityOptions[0]));
+    act(() => result.current.setSortField("rarity"));
+    act(() => result.current.setCategoryFilter("pin"));
+    expect(result.current.rarityFilter).toBe("all");
+    expect(result.current.sortField).toBe("grouped");
+    expect(result.current.collectibles.length).toBeGreaterThan(0);
+    expect(result.current.collectibles.every((collectible) => collectible.category === "pin")).toBe(
+      true,
+    );
+  });
 });

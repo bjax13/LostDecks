@@ -217,4 +217,99 @@ describe("CollectibleGrid (unit)", () => {
     expect(tiles[0].querySelector(".card-details")).toHaveAttribute("open");
     expect(tiles[1].querySelector(".card-details")).not.toHaveAttribute("open");
   });
+
+  it("renders pin list and expanded entries without card-only fields", async () => {
+    const pin = {
+      id: "PIN-CPS1-00",
+      collectibleType: "pin",
+      category: "pin",
+      displayName: "Brandon",
+      detail: "Character Pin Series 1",
+      storyTitle: "Character Pin Series 1",
+      number: 0,
+      rarity: "Mythic",
+      finishes: ["DUN", "FOIL"],
+      binder: { page: 1, row: 1, col: 1, position: "A" },
+      country: "US",
+      release: "Year of Sanderson Box, later Dragonsteel store",
+    };
+    render(
+      <TestMemoryRouter>
+        <CollectibleGrid collectibles={[mockCollectible, pin]} />
+      </TestMemoryRouter>,
+    );
+
+    const pinTile = screen.getByRole("heading", { name: "Brandon" }).closest(".card-tile");
+    expect(pinTile.querySelector(".category-pill")).toHaveTextContent("Pin");
+    expect(pinTile.querySelector(".card-details")).not.toHaveAttribute("open");
+    expect(pinTile).not.toHaveTextContent("Rarity");
+    expect(pinTile).not.toHaveTextContent("Finishes");
+    expect(pinTile).not.toHaveTextContent("Binder");
+    expect(pinTile).not.toHaveTextContent("DUN");
+    expect(pinTile).not.toHaveTextContent("FOIL");
+
+    await userEvent.click(screen.getByRole("heading", { name: "Brandon" }));
+
+    expect(pinTile.querySelector(".card-details")).toHaveAttribute("open");
+    expect(pinTile.querySelector(".card-stats")).toHaveClass("card-stats--pin");
+    expect(pinTile.querySelector("dt")).toHaveTextContent("Series");
+    expect(pinTile).toHaveTextContent("Character Pin Series 1");
+    expect(pinTile).toHaveTextContent("Country");
+    expect(pinTile).toHaveTextContent("US");
+    expect(pinTile).toHaveTextContent("Release");
+    expect(pinTile).toHaveTextContent("Year of Sanderson Box, later Dragonsteel store");
+    expect(pinTile).not.toHaveTextContent("Story");
+    expect(pinTile).not.toHaveTextContent("Rarity");
+    expect(pinTile).not.toHaveTextContent("Finishes");
+    expect(pinTile).not.toHaveTextContent("Binder");
+    expect(pinTile).not.toHaveTextContent("DUN");
+    expect(pinTile).not.toHaveTextContent("FOIL");
+    expect(pinTile).not.toHaveTextContent("Mythic");
+    expect(pinTile).not.toHaveTextContent("Not in binder mosaic");
+    expect(pinTile).not.toHaveTextContent("Page 1");
+
+    const cardTile = screen.getByRole("heading", { name: "Story #01" }).closest(".card-tile");
+    await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
+    expect(cardTile.querySelector(".card-stats")).not.toHaveClass("card-stats--pin");
+    expect(cardTile.querySelector("dt")).toHaveTextContent("Story");
+    expect(cardTile).toHaveTextContent("Story");
+    expect(cardTile).toHaveTextContent("Rarity");
+    expect(cardTile).toHaveTextContent("Common");
+    expect(cardTile).toHaveTextContent("DUN");
+    expect(cardTile).toHaveTextContent("FOIL");
+    expect(cardTile).toHaveTextContent("Finishes");
+    expect(cardTile).toHaveTextContent("Binder location");
+    expect(cardTile).not.toHaveTextContent("Series");
+    expect(cardTile).not.toHaveTextContent("Country");
+    expect(cardTile).not.toHaveTextContent("Release");
+  });
+
+  it("omits blank pin release and country on the expanded entry", async () => {
+    const pin = {
+      id: "PIN-CF-01",
+      collectibleType: "pin",
+      category: "pin",
+      displayName: "Shredhead",
+      detail: "ChasmFriends enamel pin",
+      storyTitle: "ChasmFriends",
+      number: 1,
+      country: null,
+      release: null,
+      finishes: [],
+      binder: null,
+    };
+    render(
+      <TestMemoryRouter>
+        <CollectibleGrid collectibles={[pin]} />
+      </TestMemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByRole("heading", { name: "Shredhead" }));
+    const pinTile = screen.getByRole("heading", { name: "Shredhead" }).closest(".card-tile");
+    expect(pinTile).toHaveTextContent("Series");
+    expect(pinTile).toHaveTextContent("ChasmFriends");
+    expect(pinTile).not.toHaveTextContent("Country");
+    expect(pinTile).not.toHaveTextContent("Release");
+    expect(pinTile).not.toHaveTextContent("Rarity");
+  });
 });
