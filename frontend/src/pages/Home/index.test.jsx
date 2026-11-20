@@ -168,7 +168,11 @@ describe("Home page", () => {
       .closest("section");
     expect(section).toBeTruthy();
     const pinsTile = within(section).getByRole("link", { name: /^Pins/ });
-    expect(pinsTile).toHaveAttribute("href", "/collectibles");
+    expect(pinsTile).toHaveAttribute("href", "/collectibles?category=pins");
+    expect(within(section).getByRole("link", { name: /Story Deck Cards/ })).toHaveAttribute(
+      "href",
+      "/collectibles",
+    );
     expect(within(pinsTile).getAllByText("Pins")).toHaveLength(2);
     expect(pinDatasetMeta.setName).toBe("Pins");
     expect(within(pinsTile).getByText("Browse pins")).toBeInTheDocument();
