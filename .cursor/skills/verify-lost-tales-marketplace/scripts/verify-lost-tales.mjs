@@ -89,7 +89,7 @@ Drive actions:
   goto --path /collectibles
   click --role link --name Collectibles [--scope nav] [--nth 0] [--exact]
   fill --label Search --value Elsecaller
-  select --label Category --value "Story cards"
+  select --label Category --value "Story cards" --exact
   press --key Escape
   expect --role heading --name Collectibles
   expect-url --path /collectibles

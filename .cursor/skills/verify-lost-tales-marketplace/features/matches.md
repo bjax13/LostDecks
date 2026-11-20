@@ -27,19 +27,20 @@ Preconditions:
 - `doctor` reports `ok=true`.
 
 - **Signed-out gate.** Open Matches signed out. Run `$VERIFY drive logout` then `$VERIFY drive click --role link --name Matches --scope nav`. The login heading is visible.
-- **Seeded matches.** Sign in as Collector One and open Matches. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only` then `$VERIFY drive click --role link --name Matches --scope nav`. After `Finding possible matches…` disappears, heading `Matches` is visible and a heading `Collector Two` shows a Dun cards lane.
+- **Seeded matches.** Sign in as Collector One and open Matches. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only` then `$VERIFY drive click --role link --name Matches --scope nav`. If the page shows `You're refreshing too fast, try again in a few seconds`, wait a few seconds and run `$VERIFY drive click --role button --name Retry`. After `Finding possible matches…` disappears, heading `Matches` is visible and a heading `Collector Two` shows a Dun cards lane.
 - **Person contact.** Contact for Collector Two is visible on the expanded card. Run `$VERIFY drive expect --role button --name "Copy email"` and `$VERIFY drive expect --role link --name Email`.
 - **Account profile.** Open Account. Run `$VERIFY drive click --role link --name Account --scope nav`. Headings `Account Settings` and `Profile overview` show display name `Collector One` and email `collector.one@example.com`.
 - **Match lanes.** On Account, checkboxes `Dun cards`, `Foil cards`, and `Pins` sit under `Include me in Matches` and are checked. Run `$VERIFY drive expect --role checkbox --name "Dun cards"`, `$VERIFY drive expect --role checkbox --name "Foil cards"`, and `$VERIFY drive expect --role checkbox --name "Pins"`.
-- **Opt out.** Uncheck matching. Run `$VERIFY drive click --role checkbox --name "Include me in Matches"`. Wait until `Saving preference…` is gone. The three lane checkboxes are disabled. Open Matches again. Run `$VERIFY drive click --role link --name Matches --scope nav`. Heading `Matching is disabled for your account` is visible and Collector Two is not listed.
+- **Opt out.** Uncheck matching. Run `$VERIFY drive click --role checkbox --name "Include me in Matches"`. Wait until `Saving preference…` is gone. The three lane checkboxes are disabled. Open Matches again. Run `$VERIFY drive click --role link --name Matches --scope nav`. If Collector Two is still listed, wait until `Refresh` is enabled (the previous result is cached for about 30 seconds) and run `$VERIFY drive click --role button --name Refresh`. Heading `Matching is disabled for your account` is visible and Collector Two is not listed.
 - **Restore opt-in.** Return to Account, check `Include me in Matches` again, and wait until saving finishes so later runs keep the seed behavior.
 - **Proof.** Capture Collector One's matches before any opt-out. Run `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/matches/collector-one.png --full-page` and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/matches/collector-one.aria.txt` while `Collector Two` is visible. Artifacts show Matches, the counterparty heading, dun piles, and signed-in nav.
 
 ## Gotchas
 
 - Matches load through a callable function. Wait for `Finding possible matches…` to disappear; do not snapshot the loading sentence as success or failure.
-- A freshness line `As of N seconds ago` with `Refresh` can appear. Refresh is disabled while `Can refresh in N seconds` is shown.
-- Opt-out is a negative checkbox (`Include me in Matches` checked means participating). After toggling, wait for `Saving preference…` to clear before changing routes.
+- Opening Matches can show `You're refreshing too fast, try again in a few seconds` with `Retry`. Wait a few seconds, choose `Retry`, and treat `Collector Two` as the proof. Do not record the error sentence as an empty match list.
+- A freshness line can appear as one sentence, `As of N seconds ago. Can refresh in N seconds.`, with `Refresh` disabled during that countdown. After the countdown, the line can change to `You may now refresh.`
+- Opt-out is a negative checkbox (`Include me in Matches` checked means participating). After toggling, wait for `Saving preference…` to clear before changing routes. A Matches view cached in the last 30 seconds can still list counterparties; use `Refresh` once it is enabled before treating that list as the opt-out result.
 - If launch used a custom `functions/seed.local.json`, counterparties and SKUs may differ. Read that file before asserting `Collector Two`.
 - `$VERIFY seed` after an opt-out restores `matchingOptOut: false` and all three match lanes enabled for seed users.
 - Google-only accounts are out of scope here; prove with the seeded email user.

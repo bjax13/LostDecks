@@ -109,6 +109,26 @@ async function pageInfo() {
   };
 }
 
+// Getting Started profile cards clip the radio to 1px and paint the title over it.
+// Account toggles use the same label+input pattern. Click the label the collector hits.
+async function clickUserTarget(loc) {
+  const clippedChoice = await loc
+    .evaluate((el) => {
+      const type = (el.getAttribute("type") || "").toLowerCase();
+      return (
+        el.tagName === "INPUT" &&
+        (type === "radio" || type === "checkbox") &&
+        Boolean(el.closest("label"))
+      );
+    })
+    .catch(() => false);
+  if (clippedChoice) {
+    await loc.locator("xpath=ancestor::label[1]").click();
+    return;
+  }
+  await loc.click();
+}
+
 async function handleCommand(cmd) {
   const action = cmd.action;
   if (action === "goto") {
@@ -117,7 +137,7 @@ async function handleCommand(cmd) {
     return pageInfo();
   }
   if (action === "click") {
-    await locatorFor(cmd).click();
+    await clickUserTarget(locatorFor(cmd));
     return pageInfo();
   }
   if (action === "fill") {
