@@ -834,6 +834,157 @@ describe("CollectibleDetailPage – Dragonsteel store link", () => {
   });
 });
 
+describe("CollectibleDetailPage – archived store link", () => {
+  const mBotArchive =
+    "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin";
+  const bundleArchive =
+    "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle";
+  const exactArchiveLabel = "Archived Dragonsteel store page (Wayback Machine, May 2022)";
+  const bundleArchiveLabel = "Archived bundle page (Wayback Machine, Nov 2023)";
+
+  const livePin = {
+    id: "PIN-CPS4-01",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Character Pin Series 4",
+    number: 1,
+    displayName: "Sazed",
+    detail: "Character Pin Series 4 · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+    storeUrl: "https://www.dragonsteelbooks.com/products/dcp-series-4-001-sazed",
+    storeMatch: "exact",
+    archiveUrl: mBotArchive,
+    archiveMatch: "exact",
+  };
+  const archivePin = {
+    id: "PIN-CYTO-06",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Cytoverse",
+    number: 6,
+    displayName: "M-Bot",
+    detail: "Cytoverse · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+    archiveUrl: mBotArchive,
+    archiveMatch: "exact",
+  };
+  const bundlePin = {
+    id: "PIN-CYTDS-01",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Cytoverse Defiant Ships",
+    number: 1,
+    displayName: "Kitsen Ship",
+    detail: "Cytoverse Defiant Ships · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+    archiveUrl: bundleArchive,
+    archiveMatch: "bundle",
+  };
+  const unlinkedPin = {
+    id: "PIN-CONV-04",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Convention",
+    number: 4,
+    displayName: "Dragonsteel 2023",
+    detail: "Convention · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+  };
+
+  function blankLinks() {
+    return screen.getAllByRole("link").filter((link) => link.getAttribute("target") === "_blank");
+  }
+
+  it("keeps the live store link and does not also show the archive link", () => {
+    setDefaults({ card: livePin });
+    renderWithRoute("/collectibles/PIN-CPS4-01");
+
+    const link = screen.getByRole("link", { name: "Dragonsteel store" });
+    expect(link).toHaveAttribute("href", livePin.storeUrl);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(blankLinks()).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: exactArchiveLabel })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Wayback Machine/ })).not.toBeInTheDocument();
+    expect(document.querySelector('a[href*="web.archive.org"]')).toBeNull();
+  });
+
+  it("shows one archived Dragonsteel link with the capture month and year", () => {
+    setDefaults({ card: archivePin });
+    renderWithRoute("/collectibles/PIN-CYTO-06");
+
+    const link = screen.getByRole("link", { name: exactArchiveLabel });
+    expect(link).toHaveAttribute("href", mBotArchive);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(blankLinks()).toHaveLength(1);
+    expect(screen.getAllByRole("link", { name: exactArchiveLabel })).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: bundleArchiveLabel })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Sold in a bundle/ })).not.toBeInTheDocument();
+  });
+
+  it("labels a bundle capture as an archived bundle page", () => {
+    setDefaults({ card: bundlePin });
+    renderWithRoute("/collectibles/PIN-CYTDS-01");
+
+    const link = screen.getByRole("link", { name: bundleArchiveLabel });
+    expect(link).toHaveAttribute("href", bundleArchive);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(blankLinks()).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: exactArchiveLabel })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
+  });
+
+  it("shows no store or archive link when a pin has neither", () => {
+    setDefaults({ card: unlinkedPin });
+    renderWithRoute("/collectibles/PIN-CONV-04");
+
+    expect(screen.getByRole("heading", { name: "Dragonsteel 2023" })).toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Wayback Machine/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Sold in a bundle/ })).not.toBeInTheDocument();
+    expect(document.querySelector('a[target="_blank"]')).toBeNull();
+  });
+
+  it("does not show an archive link on a card page", () => {
+    setDefaults({
+      card: {
+        ...CARD,
+        collectibleType: "card",
+        archiveUrl: mBotArchive,
+        archiveMatch: "exact",
+      },
+    });
+    renderWithRoute("/collectibles/LT24-ELS-01");
+
+    expect(screen.getByRole("heading", { name: CARD.displayName })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: exactArchiveLabel })).not.toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+    expect(document.querySelector('a[href*="web.archive.org"]')).toBeNull();
+  });
+
+  it("does not show a reseller archive link", () => {
+    setDefaults({
+      card: {
+        ...archivePin,
+        archiveUrl: "https://web.archive.org/web/20220520175820/https://www.ebay.com/itm/m-bot-pin",
+      },
+    });
+    renderWithRoute("/collectibles/PIN-CYTO-06");
+
+    expect(screen.queryByRole("link", { name: /Wayback Machine/ })).not.toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+    expect(document.querySelector('a[target="_blank"]')).toBeNull();
+  });
+});
+
 describe("formatDate – null input", () => {
   it("returns null when no timestamp in entry (formatDate receives null)", () => {
     setDefaults({

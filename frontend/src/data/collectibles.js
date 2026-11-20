@@ -170,6 +170,10 @@ function formatPinCollectible(pin) {
     (pin.storeMatch === "exact" || pin.storeMatch === "bundle")
       ? { storeUrl: pin.storeUrl, storeMatch: pin.storeMatch }
       : {}),
+    ...(typeof pin.archiveUrl === "string" &&
+    (pin.archiveMatch === "exact" || pin.archiveMatch === "bundle")
+      ? { archiveUrl: pin.archiveUrl, archiveMatch: pin.archiveMatch }
+      : {}),
     finishes: toFinishList(pin.id),
     searchTokens: [pin.id, displayName, seriesTitle, catalogName, country, release, "pin"]
       .filter(Boolean)
