@@ -238,22 +238,6 @@
   font-weight: 600;
 }
 
-.account-location-field select {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0.55rem 0.85rem;
-  border-radius: 8px;
-  border: 1px solid rgba(132, 105, 221, 0.55);
-  background: rgba(24, 18, 45, 0.85);
-  color: #f4f1ff;
-  font: inherit;
-}
-
-.account-location-field select:focus-visible {
-  outline: 2px solid rgba(177, 157, 255, 0.95);
-  outline-offset: 1px;
-}
-
 .account-match-lanes:disabled .account-lane-row {
   opacity: 0.55;
 }

@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildLocationList,
+  filterLocationOptions,
   locationSelectionForCountry,
   MATCH_COUNTRIES,
   normalizeMatchCountry,
   normalizeMatchRegion,
+  resolveLocationOption,
   subdivisionsForCountry,
 } from "./matchLocations.js";
 
@@ -62,5 +65,60 @@ describe("match location lists", () => {
       matchCountry: "",
       matchRegion: "",
     });
+  });
+
+  it("pins the United States first and filters names without case", () => {
+    const countries = filterLocationOptions(MATCH_COUNTRIES, "", { pinCode: "US" });
+    expect(countries[0]).toMatchObject({ code: "US", name: "United States" });
+    expect(countries[1]).toMatchObject({ code: "AF", name: "Afghanistan" });
+    const restNames = countries.slice(1).map((country) => country.name);
+    expect(restNames).toEqual([...restNames].sort((a, b) => a.localeCompare(b, "en")));
+
+    expect(
+      filterLocationOptions(MATCH_COUNTRIES, "UNI", { pinCode: "US" }).map((c) => c.name),
+    ).toEqual(["United States", "United Arab Emirates", "United Kingdom", "Tunisia"]);
+    expect(filterLocationOptions(MATCH_COUNTRIES, "cAn").map((country) => country.name)).toEqual([
+      "Canada",
+      "Central African Republic",
+      "Dominican Republic",
+      "Vatican City",
+    ]);
+    expect(filterLocationOptions(MATCH_COUNTRIES, "zzzz")).toEqual([]);
+    expect(filterLocationOptions(MATCH_COUNTRIES, "gb").map((country) => country.code)).toEqual([
+      "GB",
+    ]);
+  });
+
+  it("ranks state names that start with the query ahead of other partial matches", () => {
+    const states = subdivisionsForCountry("US");
+    expect(filterLocationOptions(states, "ut").map((region) => region.name)).toEqual([
+      "Utah",
+      "Connecticut",
+      "South Carolina",
+      "South Dakota",
+    ]);
+    expect(filterLocationOptions(states, "US-UT").map((region) => region.code)).toEqual(["US-UT"]);
+    expect(resolveLocationOption(states, " utah ")).toMatchObject({ code: "US-UT" });
+    expect(resolveLocationOption(states, "us-ut")).toMatchObject({ code: "US-UT" });
+    expect(resolveLocationOption(states, "Narnia")).toBeNull();
+    expect(resolveLocationOption(states, "  ")).toBeNull();
+  });
+
+  it("keeps Not set available and still shows the United States first when unfiltered", () => {
+    const list = buildLocationList(MATCH_COUNTRIES, "", { pinCode: "US", clearLabel: "Not set" });
+    expect(list.slice(0, 3).map((option) => option.name)).toEqual([
+      "United States",
+      "Not set",
+      "Afghanistan",
+    ]);
+    expect(list[1].code).toBe("");
+
+    expect(
+      buildLocationList(MATCH_COUNTRIES, "can", { pinCode: "US" }).map((option) => option.name),
+    ).toEqual(["Canada", "Central African Republic", "Dominican Republic", "Vatican City"]);
+
+    const states = buildLocationList(subdivisionsForCountry("US"), "");
+    expect(states[0]).toMatchObject({ code: "", name: "Not set" });
+    expect(states[1].name).toBe("Alabama");
   });
 });
