@@ -177,7 +177,7 @@ function CondensedSkuCell({
   );
 }
 
-function NoneCoverageConfirmModal({ groupTitle, isOpen, onConfirm, onCancel }) {
+function NoneCoverageConfirmModal({ groupTitle, itemNoun = "cards", isOpen, onConfirm, onCancel }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -209,7 +209,7 @@ function NoneCoverageConfirmModal({ groupTitle, isOpen, onConfirm, onCancel }) {
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 id="collection-review-none-confirm-title">Set all cards to zero?</h2>
+        <h2 id="collection-review-none-confirm-title">Set all {itemNoun} to zero?</h2>
         <p>
           This will clear quantities for <strong>{groupTitle}</strong>. Are you sure you want to set
           this group to None?
@@ -426,6 +426,7 @@ export default function CollectionReviewEditor({
       )}
       <NoneCoverageConfirmModal
         groupTitle={editor.noneConfirmRequest?.groupTitle ?? ""}
+        itemNoun={collectibleType === COLLECTIBLE_TYPE_PINS ? "pins" : "cards"}
         isOpen={editor.noneConfirmRequest !== null}
         onConfirm={editor.confirmNoneCoverage}
         onCancel={editor.cancelNoneCoverage}
