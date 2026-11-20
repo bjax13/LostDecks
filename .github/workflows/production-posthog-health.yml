@@ -1,0 +1,25 @@
+# Daily guard: production Hosting must ship a built bundle containing VITE_POSTHOG_KEY (phc_…).
+# Canonical site: https://shardstash.web.app (firebase.json hosting target shardstash).
+name: Production PostHog health
+
+on:
+  schedule:
+    # Once per day, UTC — no end date; workflow_dispatch for manual runs.
+    - cron: "15 14 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: production-posthog-health
+  cancel-in-progress: false
+
+jobs:
+  live-bundle-check:
+    name: Live bundle PostHog key
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Assert PostHog key in production frontend bundle
+        run: npm run check:production:posthog
