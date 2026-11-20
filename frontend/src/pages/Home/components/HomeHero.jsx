@@ -18,6 +18,9 @@ export default function HomeHero() {
           <Link to="/getting-started" className="home-cta home-cta--primary">
             Getting Started
           </Link>
+          <Link to="/getting-started?pins=chasmfriends" className="home-cta home-cta--secondary">
+            log my chasm friend pins
+          </Link>
           {!isSignedIn ? (
             <button
               type="button"

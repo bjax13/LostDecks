@@ -23,6 +23,7 @@ import {
   COLLECTIBLE_TYPE_PINS,
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
+  filterChasmFriendsTree,
   filterGettingStartedTree,
   gettingStartedTree,
   includesPins,
@@ -80,6 +81,29 @@ const VALID_COLLECT_PARAMS = new Set([
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_BOTH,
 ]);
+
+const CHASM_FRIENDS_PINS_PARAM = "chasmfriends";
+const PIN_REVIEW_INTRO =
+  "All and None are set to 1 and 0, but can be expanded for more granular edits. Selecting Some will proactively open the granular view.";
+
+function isChasmFriendsParam(searchParams) {
+  return searchParams.get("pins") === CHASM_FRIENDS_PINS_PARAM;
+}
+
+function isFullPinReviewParam(searchParams) {
+  return searchParams.get("pins") === "all";
+}
+
+function expandedIdsForTree(tree) {
+  const ids = new Set();
+  for (const section of tree) {
+    ids.add(section.id);
+    for (const group of section.children) {
+      ids.add(group.id);
+    }
+  }
+  return ids;
+}
 
 function StepIndicator({ step, profile, collectibleType, onSelectStep }) {
   const spreadsheet = profile === "spreadsheet";
@@ -140,16 +164,31 @@ function StepIndicator({ step, profile, collectibleType, onSelectStep }) {
 }
 
 export default function GettingStartedPage() {
-  const [step, setStep] = useState("profile");
-  const [collectibleType, setCollectibleType] = useState(null);
-  const [profile, setProfile] = useState(null);
-  const [coverage, setCoverage] = useState({});
+  const [searchParams] = useSearchParams();
+  const fullPinReview = isFullPinReviewParam(searchParams);
+  const chasmFriendsShortcut = isChasmFriendsParam(searchParams);
+  const [step, setStep] = useState(chasmFriendsShortcut || fullPinReview ? "manual" : "profile");
+  const [collectibleType, setCollectibleType] = useState(
+    chasmFriendsShortcut || fullPinReview ? COLLECTIBLE_TYPE_PINS : null,
+  );
+  const [profile, setProfile] = useState(chasmFriendsShortcut || fullPinReview ? "manual" : null);
+  const [coverage, setCoverage] = useState(() => {
+    if (chasmFriendsShortcut) return createCoverageState("none", filterChasmFriendsTree());
+    if (fullPinReview) {
+      return createCoverageState(
+        "none",
+        filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS),
+      );
+    }
+    return {};
+  });
   const [quantities, setQuantities] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-  const [searchParams] = useSearchParams();
+  const [chasmSaved, setChasmSaved] = useState(false);
   const urlBootstrappedRef = useRef(false);
   const pendingSaveRef = useRef(false);
+  const chasmTrackedRef = useRef(false);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -158,10 +197,10 @@ export default function GettingStartedPage() {
   const haveRaw = searchParams.get("have");
   const havePrefill = useMemo(() => decodeHavePrefill(haveRaw, HAVE_PREFILL_CONTEXT), [haveRaw]);
 
-  const reviewTree = useMemo(
-    () => filterGettingStartedTree(gettingStartedTree, collectibleType ?? COLLECTIBLE_TYPE_BOTH),
-    [collectibleType],
-  );
+  const reviewTree = useMemo(() => {
+    if (chasmFriendsShortcut) return filterChasmFriendsTree();
+    return filterGettingStartedTree(gettingStartedTree, collectibleType ?? COLLECTIBLE_TYPE_BOTH);
+  }, [chasmFriendsShortcut, collectibleType]);
 
   const reviewEditor = useCollectionReviewEditor({
     reviewTree,
@@ -170,6 +209,7 @@ export default function GettingStartedPage() {
     setCoverage,
     quantities,
     setQuantities,
+    initialExpandedReviewIds: chasmFriendsShortcut ? expandedIdsForTree(reviewTree) : null,
   });
 
   const spreadsheetDisabled = collectibleType === COLLECTIBLE_TYPE_PINS;
@@ -260,6 +300,10 @@ export default function GettingStartedPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: bootstrap once from collect URL param
   useEffect(() => {
     if (urlBootstrappedRef.current) return;
+    if (isChasmFriendsParam(searchParams)) {
+      urlBootstrappedRef.current = true;
+      return;
+    }
     const collect = searchParams.get("collect");
     if (!VALID_COLLECT_PARAMS.has(collect)) {
       return;
@@ -274,6 +318,15 @@ export default function GettingStartedPage() {
     }
     beginManualReview(collect);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!chasmFriendsShortcut || chasmTrackedRef.current) return;
+    chasmTrackedRef.current = true;
+    captureEvent(GETTING_STARTED_STEP, {
+      step: "manual",
+      collectibleType: COLLECTIBLE_TYPE_PINS,
+    });
+  }, [chasmFriendsShortcut]);
 
   const handleSave = async () => {
     if (!user) {
@@ -318,7 +371,11 @@ export default function GettingStartedPage() {
         updated: result?.updated ?? 0,
         deleted: result?.deleted ?? 0,
       });
-      navigate("/collections", { state: { onboardingComplete: true } });
+      if (chasmFriendsShortcut) {
+        setChasmSaved(true);
+      } else {
+        navigate("/collections", { state: { onboardingComplete: true } });
+      }
     } catch (saveError) {
       console.error("Getting started collection update failed", saveError);
       setError(saveError.message ?? "We could not update your collection. Please try again.");
@@ -375,16 +432,32 @@ export default function GettingStartedPage() {
     }
   };
 
+  const openFullPinReview = () => {
+    const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
+    const nextCoverage = createCoverageState("none", tree);
+    setCollectibleType(COLLECTIBLE_TYPE_PINS);
+    setProfile("manual");
+    setCoverage(nextCoverage);
+    setQuantities({});
+    setChasmSaved(false);
+    reviewEditor.resetExpandedReviewIds(nextCoverage);
+    goToStep("manual", COLLECTIBLE_TYPE_PINS);
+  };
+
+  const markAllChasmFriends = () => {
+    const section = reviewTree.find((entry) => entry.id === "pins");
+    const group = section?.children.find((entry) => entry.label === "ChasmFriends");
+    if (!section || !group) return;
+    reviewEditor.handleReviewGroupCoverage(group, section, "all");
+  };
+
   const reviewHeading =
     collectibleType === COLLECTIBLE_TYPE_PINS
       ? "Review your pins"
       : collectibleType === COLLECTIBLE_TYPE_CARDS
         ? "Review your cards"
         : "Review your collection";
-  const reviewIntro =
-    collectibleType === COLLECTIBLE_TYPE_PINS
-      ? "All and None are set to 1 and 0, but can be expanded for more granular edits. Selecting Some will proactively open the granular view."
-      : "All and None are set to 1 and 0, but can be expanded for more granular edits. Selecting Some will proactively open the granular view.";
+  const reviewIntro = PIN_REVIEW_INTRO;
 
   const isQuickStep = step === "quick";
 
@@ -396,18 +469,45 @@ export default function GettingStartedPage() {
         </Link>
         <p className="getting-started__eyebrow">{SITE_NAME} setup</p>
         <h1>
-          {isQuickStep
-            ? "Mark what you have, then find trades."
-            : "Build your collection without entering every card."}
+          {chasmFriendsShortcut
+            ? "which chasm friends do you have?"
+            : isQuickStep
+              ? "Mark what you have, then find trades."
+              : "Build your collection without entering every card."}
         </h1>
         <p>
-          {isQuickStep
-            ? "Scan the QR, mark Need / Have / Have spares, and jump into Matches after you sign up."
-            : "Tell us roughly what you own. We will only ask about the cards that need a closer look."}
+          {chasmFriendsShortcut
+            ? PIN_REVIEW_INTRO
+            : isQuickStep
+              ? "Scan the QR, mark Need / Have / Have spares, and jump into Matches after you sign up."
+              : "Tell us roughly what you own. We will only ask about the cards that need a closer look."}
         </p>
+        {chasmFriendsShortcut && !chasmSaved ? (
+          <button
+            type="button"
+            className="getting-started__button is-primary getting-started__chasm-all"
+            onClick={markAllChasmFriends}
+          >
+            i have all 5
+          </button>
+        ) : null}
+        {chasmFriendsShortcut && chasmSaved ? (
+          <div className="getting-started__chasm-done">
+            <Link className="getting-started__button is-primary" to="/matches">
+              done. see who needs yours
+            </Link>
+            <Link
+              className="getting-started__chasm-more"
+              to="/getting-started?pins=all"
+              onClick={openFullPinReview}
+            >
+              add the rest of your pins
+            </Link>
+          </div>
+        ) : null}
       </header>
 
-      {!isQuickStep ? (
+      {!isQuickStep && !chasmFriendsShortcut ? (
         <StepIndicator
           step={step}
           profile={profile}
@@ -528,34 +628,44 @@ export default function GettingStartedPage() {
 
         {step === "manual" ? (
           <>
-            <div className="getting-started__section-heading">
-              <span>Step 2</span>
-              <h2>{reviewHeading}</h2>
-              <p>{reviewIntro}</p>
-            </div>
+            {chasmFriendsShortcut ? null : (
+              <div className="getting-started__section-heading">
+                <span>Step 2</span>
+                <h2>{reviewHeading}</h2>
+                <p>{reviewIntro}</p>
+              </div>
+            )}
             <CollectionReviewEditor
               reviewTree={reviewTree}
               collectibleType={collectibleType ?? COLLECTIBLE_TYPE_BOTH}
               editor={reviewEditor}
               error={error}
               footerStart={
-                <button
-                  type="button"
-                  className="getting-started__button"
-                  onClick={() => setStep("profile")}
-                >
-                  Back
-                </button>
+                chasmFriendsShortcut ? null : (
+                  <button
+                    type="button"
+                    className="getting-started__button"
+                    onClick={() => setStep("profile")}
+                  >
+                    Back
+                  </button>
+                )
               }
               footerPrimary={
-                <button
-                  type="button"
-                  className="getting-started__button is-primary"
-                  disabled={saving || collectionLoading}
-                  onClick={handleSave}
-                >
-                  {saving ? "Saving collection..." : user ? "Save collection" : "Sign in and save"}
-                </button>
+                chasmFriendsShortcut && chasmSaved ? null : (
+                  <button
+                    type="button"
+                    className="getting-started__button is-primary"
+                    disabled={saving || collectionLoading}
+                    onClick={handleSave}
+                  >
+                    {saving
+                      ? "Saving collection..."
+                      : user
+                        ? "Save collection"
+                        : "Sign in and save"}
+                  </button>
+                )
               }
             />
           </>

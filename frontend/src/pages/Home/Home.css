@@ -100,6 +100,12 @@
   background: rgba(138, 43, 226, 0.15);
 }
 
+.home-hero__actions .home-cta {
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+}
+
 /* Supported collections */
 .home-supported h2,
 .home-features h2,

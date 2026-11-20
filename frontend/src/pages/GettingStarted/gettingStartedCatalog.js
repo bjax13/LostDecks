@@ -127,6 +127,16 @@ export function filterGettingStartedTree(tree = gettingStartedTree, collectibleT
   return tree;
 }
 
+/** Pin review limited to the ChasmFriends series already in the catalog tree. */
+export function filterChasmFriendsTree(tree = gettingStartedTree) {
+  return filterGettingStartedTree(tree, COLLECTIBLE_TYPE_PINS)
+    .map((section) => ({
+      ...section,
+      children: section.children.filter((group) => group.label === "ChasmFriends"),
+    }))
+    .filter((section) => section.children.length > 0);
+}
+
 export function includesPins(collectibleType) {
   return collectibleType === COLLECTIBLE_TYPE_PINS || collectibleType === COLLECTIBLE_TYPE_BOTH;
 }
