@@ -105,6 +105,12 @@ creates the `shardstash` Hosting site if it is missing, and deploys Hosting to
 that site. The default `storydeck-16.web.app` site is not deleted and may go
 stale.
 
+### MCP bot PoC (optional)
+
+`mcp-shardstash/` is a side PoC MCP server for Grok/Cursor bot access (catalog
+search + stub/emulator collection & matches). It does not affect Hosting or the
+launch-prep stack. See `mcp-shardstash/README.md`.
+
 ### Planning docs
 
 See `docs/plan.md` for a high-level plan of the pages and features considered
