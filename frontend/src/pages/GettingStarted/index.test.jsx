@@ -962,22 +962,20 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     }
 
     await openGroup("Character Pin Series 4");
-    const pin3 = getSkuQuantityGroup(/character pin series 4 series 4 - pin 3 - quantity, 0$/i);
-    expect(within(pin3).getByText("Series 4 - Pin 3 - :")).toHaveAttribute(
-      "title",
-      "Series 4 - Pin 3 -",
-    );
-    expect(pin3).toHaveClass("has-name-label");
-    expect(within(pin3.closest(".getting-started__sku-list")).getByText("Sazed :")).toHaveAttribute(
-      "title",
-      "Sazed",
-    );
-    expect(pin3.closest(".getting-started__sku-list")).toHaveStyle({
+    const captain = getSkuQuantityGroup(/character pin series 4 captain tress quantity, 0$/i);
+    expect(within(captain).getByText("Captain Tress :")).toHaveAttribute("title", "Captain Tress");
+    expect(captain).toHaveClass("has-name-label");
+    expect(
+      within(captain.closest(".getting-started__sku-list")).getByText("Sazed :"),
+    ).toHaveAttribute("title", "Sazed");
+    expect(captain.closest(".getting-started__sku-list")).toHaveStyle({
       "--sku-cols": "4",
-      "--sku-rows": "4",
+      "--sku-rows": "1",
       "--sku-cols-narrow": "1",
-      "--sku-rows-narrow": "13",
+      "--sku-rows-narrow": "4",
     });
+    expect(screen.queryByText("Series 4 - Pin 3 - :")).not.toBeInTheDocument();
+    expect(screen.queryByText("Series 4 - Pin 0 - :")).not.toBeInTheDocument();
 
     await openGroup("Scene Pin");
     const sceneName = "Worldhopper Ball 2024 Scene Pin: Adolin and Shallan";
@@ -991,11 +989,9 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     });
 
     await openGroup("Sandershelf Pins");
-    const tress = getSkuQuantityGroup(/sandershelf pins sandershelf - pin 1 - tress quantity, 0$/i);
-    expect(within(tress).getByText("Sandershelf - Pin 1 - Tress :")).toHaveAttribute(
-      "title",
-      "Sandershelf - Pin 1 - Tress",
-    );
+    const tress = getSkuQuantityGroup(/sandershelf pins tress quantity, 0$/i);
+    expect(within(tress).getByText("Tress :")).toHaveAttribute("title", "Tress");
+    expect(screen.queryByText("Sandershelf - Pin 1 - Tress :")).not.toBeInTheDocument();
 
     await openGroup("Roshar Pins");
     const australian = getSkuQuantityGroup(/roshar pins wind and truth - australian quantity, 0$/i);
@@ -1005,9 +1001,17 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
 
     await openGroup("Cytoverse Pins");
-    expect(
-      screen.getAllByRole("group", { name: /cytoverse pins ddf two-tone quantity, 0$/i }),
-    ).toHaveLength(2);
+    const ddfUs = getSkuQuantityGroup(/cytoverse pins ddf two-tone \(us\) quantity, 0$/i);
+    const ddfUk = getSkuQuantityGroup(/cytoverse pins ddf two-tone \(uk\) quantity, 0$/i);
+    expect(within(ddfUs).getByText("DDF Two-Tone (US) :")).toHaveAttribute(
+      "title",
+      "DDF Two-Tone (US)",
+    );
+    expect(within(ddfUk).getByText("DDF Two-Tone (UK) :")).toHaveAttribute(
+      "title",
+      "DDF Two-Tone (UK)",
+    );
+    expect(screen.queryByText("DDF UK :")).not.toBeInTheDocument();
   });
 
   it("hides Pin Collections for Story Deck-only collectors", async () => {

@@ -149,27 +149,34 @@ describe("gettingStartedCatalog", () => {
     expect(formatSkuNumberLabel(brandon)).toBe("Brandon");
   });
 
-  it("keeps full pin names, including blank series 4 placeholders and shared prefixes", () => {
+  it("keeps full pin names, without retired series 4 placeholders or Sandershelf prefixes", () => {
     const pins = gettingStartedTree.find((section) => section.id === "pins");
     const series4 = pins.children.find((group) => group.label === "Character Pin Series 4");
     expect(series4.skus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
       "Sazed",
       "Sarene",
-      "Series 4 - Pin 3 -",
-      "Series 4 - Pin 4 -",
-      "Series 4 - Pin 5 -",
-      "Series 4 - Pin 6 -",
+      "Captain Tress",
       "Maya",
-      "Series 4 - Pin 8 -",
-      "Series 4 - Pin 9 -",
-      "Series 4 - Pin 10 -",
-      "Series 4 - Pin 11 -",
-      "Series 4 - Pin 12 -",
-      "Series 4 - Pin 0 -",
+    ]);
+    expect(series4.skus.map((sku) => sku.skuId)).toEqual([
+      "PIN-CPS4-01",
+      "PIN-CPS4-02",
+      "PIN-CPS4-05",
+      "PIN-CPS4-07",
     ]);
 
     const shelf = pins.children.find((group) => group.label === "Sandershelf");
-    expect(formatSkuNumberLabel(shelf.skus[0])).toBe("Sandershelf - Pin 1 - Tress");
+    expect(shelf.skus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
+      "Tress",
+      "Way of Kings",
+      "Elantris",
+      "Yumi",
+      "Mistborn Era 1",
+      "Emberdark",
+      "Skyward",
+      "Warbreaker",
+      "Sunlit Man",
+    ]);
 
     const roshar = pins.children.find((group) => group.label === "Roshar");
     expect(roshar.skus.map((sku) => formatSkuNumberLabel(sku))).toContain(
