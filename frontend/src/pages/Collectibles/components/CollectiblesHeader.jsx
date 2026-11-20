@@ -5,8 +5,9 @@ export default function CollectiblesHeader({ setName, totalCollectibles, viewMod
         <p className="cards-meta">Set: {setName}</p>
         <h1>Collectibles</h1>
         <p className="cards-description">
-          Browse the {totalCollectibles} collectibles from the Stormlight Lost Tales story deck. Use
-          the tools below to search, filter, and sort story, herald, and nonsense variants.
+          Browse the {totalCollectibles} collectibles, including Stormlight Lost Tales cards and
+          pins. Use the tools below to search, filter, and sort story, herald, and nonsense
+          variants, and pins.
         </p>
       </div>
       <fieldset className="view-toggle">

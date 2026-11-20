@@ -81,4 +81,78 @@ describe("CollectibleTable (unit)", () => {
     );
     expect(screen.getByTestId("add-btn")).toHaveTextContent("Dun · x2");
   });
+
+  it("hides card-only columns and labels series when the list is pins", () => {
+    const pin = {
+      id: "PIN-CPS1-00",
+      collectibleType: "pin",
+      category: "pin",
+      displayName: "Brandon",
+      detail: "Character Pin Series 1",
+      storyTitle: "Character Pin Series 1",
+      number: 0,
+      rarity: "Mythic",
+      finishes: ["DUN", "FOIL"],
+      binder: { page: 1, row: 1, col: 1, position: "A" },
+      country: "US",
+      release: "Year of Sanderson Box, later Dragonsteel store",
+    };
+    render(
+      <TestMemoryRouter>
+        <CollectibleTable collectibles={[pin]} />
+      </TestMemoryRouter>,
+    );
+
+    expect(screen.getByRole("columnheader", { name: "Series" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Story" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Rarity" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Finishes" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Binder" })).not.toBeInTheDocument();
+
+    const row = screen.getByText("PIN-CPS1-00").closest("tr");
+    expect(row).toHaveTextContent("Character Pin Series 1");
+    expect(row).toHaveTextContent("Brandon");
+    expect(row).not.toHaveTextContent("Mythic");
+    expect(row).not.toHaveTextContent("DUN");
+    expect(row).not.toHaveTextContent("FOIL");
+    expect(row).not.toHaveTextContent("Page 1");
+  });
+
+  it("keeps card columns and blanks card-only fields on pin rows in a mixed list", () => {
+    const pin = {
+      id: "PIN-CPS1-00",
+      collectibleType: "pin",
+      category: "pin",
+      displayName: "Brandon",
+      detail: "Character Pin Series 1",
+      storyTitle: "Character Pin Series 1",
+      number: 0,
+      rarity: "Mythic",
+      finishes: ["DUN", "FOIL"],
+      binder: { page: 2, row: 2, col: 2, position: "B" },
+    };
+    render(
+      <TestMemoryRouter>
+        <CollectibleTable collectibles={[mockCollectible, pin]} />
+      </TestMemoryRouter>,
+    );
+
+    expect(screen.getByRole("columnheader", { name: "Story" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Rarity" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Finishes" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Binder" })).toBeInTheDocument();
+
+    const cardRow = screen.getByText("LT24-ELS-01").closest("tr");
+    expect(cardRow).toHaveTextContent("Elsecaller");
+    expect(cardRow).toHaveTextContent("Common");
+    expect(cardRow).toHaveTextContent("DUN");
+    expect(cardRow).toHaveTextContent("FOIL");
+
+    const pinRow = screen.getByText("PIN-CPS1-00").closest("tr");
+    expect(pinRow).toHaveTextContent("Character Pin Series 1");
+    expect(pinRow).not.toHaveTextContent("Mythic");
+    expect(pinRow).not.toHaveTextContent("DUN");
+    expect(pinRow).not.toHaveTextContent("FOIL");
+    expect(pinRow).not.toHaveTextContent("Page 2");
+  });
 });

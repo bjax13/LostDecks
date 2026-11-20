@@ -93,7 +93,8 @@ jobs:
 
   frontend-e2e:
     name: Frontend E2E (Playwright)
-    runs-on: ubuntu-latest
+    # Playwright 1.60 cannot install Chromium system deps on ubuntu-latest (26.04).
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

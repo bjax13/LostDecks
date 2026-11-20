@@ -1,4 +1,4 @@
-import { sortOptions } from "../constants";
+import { sortOptionsForView } from "../constants";
 
 export default function CollectiblesToolbar({
   searchTerm,
@@ -21,6 +21,10 @@ export default function CollectiblesToolbar({
 }) {
   const isPinSubCategory = categoryFilter === "pin";
   const subCategoryDisabled = categoryFilter === "herald";
+  const visibleSortOptions = sortOptionsForView(categoryFilter);
+  const sortFieldValue = visibleSortOptions.some((option) => option.value === sortField)
+    ? sortField
+    : visibleSortOptions[0].value;
 
   return (
     <section className="cards-toolbar">
@@ -75,32 +79,34 @@ export default function CollectiblesToolbar({
           </select>
         </div>
 
-        <div className="filter-control">
-          <label htmlFor="rarity-filter">Rarity</label>
-          <select
-            id="rarity-filter"
-            value={rarityFilter}
-            onChange={(event) => onRarityChange(event.target.value)}
-          >
-            <option value="all">All rarities</option>
-            {rarityOptions.map((rarity) => (
-              <option key={rarity} value={rarity}>
-                {rarity}
-              </option>
-            ))}
-            <option value="none">No rarity (nonsense)</option>
-          </select>
-        </div>
+        {isPinSubCategory ? null : (
+          <div className="filter-control">
+            <label htmlFor="rarity-filter">Rarity</label>
+            <select
+              id="rarity-filter"
+              value={rarityFilter}
+              onChange={(event) => onRarityChange(event.target.value)}
+            >
+              <option value="all">All rarities</option>
+              {rarityOptions.map((rarity) => (
+                <option key={rarity} value={rarity}>
+                  {rarity}
+                </option>
+              ))}
+              <option value="none">No rarity (nonsense)</option>
+            </select>
+          </div>
+        )}
 
         <div className="filter-control">
           <label htmlFor="sort-by">Sort by</label>
           <div className="sort-wrapper">
             <select
               id="sort-by"
-              value={sortField}
+              value={sortFieldValue}
               onChange={(event) => onSortFieldChange(event.target.value)}
             >
-              {sortOptions.map((option) => (
+              {visibleSortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

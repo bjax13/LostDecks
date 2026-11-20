@@ -44,6 +44,10 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     setCategoryFilterState(nextCategory);
     // Clear stale Sub Category whenever Category changes (esp. → Heralds / Pins).
     setStoryFilter("all");
+    if (nextCategory === "pin") {
+      setRarityFilter("all");
+      setSortField((current) => (current === "rarity" ? defaultSort.field : current));
+    }
   }, []);
 
   const filteredCollectibles = useMemo(() => {
@@ -60,7 +64,7 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
           return false;
         }
       }
-      if (rarityFilter !== "all") {
+      if (!isPinSubCategory && rarityFilter !== "all") {
         if (rarityFilter === "none") {
           if (c.rarity) return false;
         } else if (!c.rarity || c.rarity !== rarityFilter) {
