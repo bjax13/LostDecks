@@ -319,6 +319,47 @@ describe("CollectibleGrid (unit)", () => {
     expect(cardTile).not.toHaveTextContent("Release");
   });
 
+  it("keeps a fixed pin photo slot in the collapsed header and expands it in place", async () => {
+    const pin = {
+      id: "PIN-CPS2-01",
+      collectibleType: "pin",
+      category: "pin",
+      displayName: "Kaladin",
+      detail: "Character Pin Series 2",
+      storyTitle: "Character Pin Series 2",
+      number: 1,
+      finishes: [],
+      binder: null,
+    };
+    render(
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
+        <CollectibleGrid collectibles={[pin, mockCollectible]} />
+        <Pathname />
+      </TestMemoryRouter>,
+    );
+
+    const pinTile = screen.getByRole("heading", { name: "Kaladin" }).closest(".card-tile");
+    const details = pinTile.querySelector(".card-details");
+    expect(details).not.toHaveAttribute("open");
+    const slot = within(pinTile).getByRole("img", { name: "no photo yet" });
+    expect(slot).toHaveTextContent("CPS2");
+    expect(slot.closest("summary")).not.toBeNull();
+    expect(slot.querySelector("img")).toBeNull();
+    expect(getComputedStyle(slot).width).toBe("64px");
+    expect(getComputedStyle(slot).height).toBe("64px");
+
+    const cardTile = screen.getByRole("heading", { name: "Story #01" }).closest(".card-tile");
+    expect(cardTile.querySelector(".pin-image")).toBeNull();
+
+    await userEvent.click(slot);
+    expect(details).toHaveAttribute("open");
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/collectibles");
+    expect(screen.getByRole("link", { name: "View details for Kaladin" })).toHaveAttribute(
+      "href",
+      "/collectibles/PIN-CPS2-01",
+    );
+  });
+
   it("omits blank pin release and country on the expanded entry", async () => {
     const pin = {
       id: "PIN-CF-01",

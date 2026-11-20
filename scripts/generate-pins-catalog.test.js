@@ -4,12 +4,17 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
-const { applyDragonsteelStoreMap, STORE_URL_RE } = require("./generate-pins-catalog.js");
+const {
+  applyDragonsteelStoreMap,
+  applyPinImages,
+  STORE_URL_RE,
+} = require("./generate-pins-catalog.js");
 
 const ROOT = path.resolve(__dirname, "..");
 const CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 const SCRIPT_PATH = path.join(ROOT, "scripts/generate-pins-catalog.js");
 const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
+const IMAGE_MAP_PATH = path.join(ROOT, "scripts/data/pin-images.json");
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
 const BUNDLE_IDS = [
   "PIN-CPS3-10",
@@ -302,12 +307,13 @@ test("listed pins omit retired ids, keep every previous id, and use the cleaned 
 
   for (const pin of [...catalog.pins, ...catalog.retired]) {
     const keys = Object.keys(pin);
-    if (pin.storeUrl == null && pin.storeMatch == null) {
-      assert.deepEqual(keys, PIN_KEYS);
-    } else {
+    const expected = [...PIN_KEYS];
+    if (pin.image != null) expected.push("image");
+    if (pin.storeUrl != null || pin.storeMatch != null) {
       assert.equal(listedIds.includes(pin.id), true, pin.id);
-      assert.deepEqual(keys, [...PIN_KEYS, "storeUrl", "storeMatch"]);
+      expected.push("storeUrl", "storeMatch");
     }
+    assert.deepEqual(keys, expected);
     assert.equal(
       /^Series\s+\d+\s*-\s*Pin\s+\d+\s*-\s*$/.test(pin.name) && listedIds.includes(pin.id),
       false,
@@ -328,8 +334,10 @@ test("regenerating the pins catalog reproduces the committed catalog", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const after = fs.readFileSync(CATALOG_PATH, "utf8");
   assert.equal(after, before);
+  assert.match(result.stdout, /Applied pin image versions to 0 pins/);
   assert.match(result.stdout, /73 exact, 6 bundle/);
   assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped Dragonsteel store mapping/);
+  assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped pin image/);
 });
 
 test("every storeUrl is https on www.dragonsteelbooks.com and every id exists in the catalog", () => {
@@ -405,6 +413,51 @@ test("every storeUrl is https on www.dragonsteelbooks.com and every id exists in
     assert.equal(map.pins[pin.id], undefined);
   }
   assert.equal(listed.get("PIN-CF-01").storeUrl, undefined);
+});
+
+test("an empty pin image map leaves every pin without an image field", () => {
+  const map = JSON.parse(fs.readFileSync(IMAGE_MAP_PATH, "utf8"));
+  assert.deepEqual(map.pins, {});
+  const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
+  for (const pin of [...catalog.pins, ...catalog.retired]) {
+    assert.equal(pin.image, undefined, pin.id);
+  }
+});
+
+test("applyPinImages copies positive versions and leaves 0 or unknown ids without a photo", () => {
+  const listed = [{ id: "PIN-CPS2-01", name: "Kaladin" }];
+  const retired = [{ id: "PIN-CYTO-01", name: "DDF Two-Tone" }];
+  const warnings = [];
+  const result = applyPinImages(
+    [...listed, ...retired],
+    {
+      "PIN-CPS2-01": 2,
+      "PIN-CYTO-01": 1,
+      "PIN-CF-01": 0,
+      "PIN-NOPE-01": 4,
+    },
+    { warn: (message) => warnings.push(message) },
+  );
+
+  assert.equal(listed[0].image, 2);
+  assert.equal(retired[0].image, 1);
+  assert.equal(result.applied, 2);
+  assert.deepEqual(result.skipped, [{ id: "PIN-NOPE-01", reason: "not in catalog" }]);
+  assert.match(warnings.join("\n"), /PIN-NOPE-01: not in catalog/);
+  assert.equal(Object.hasOwn(listed[0], "image"), true);
+});
+
+test("applyPinImages rejects a version that is not a non-negative integer", () => {
+  const listed = [{ id: "PIN-CPS2-01" }];
+  assert.throws(
+    () => applyPinImages(listed, { "PIN-CPS2-01": 1.5 }),
+    /Invalid pin image version for PIN-CPS2-01/,
+  );
+  assert.equal(listed[0].image, undefined);
+  assert.throws(
+    () => applyPinImages([{ id: "PIN-CF-01" }], { "PIN-CF-01": -1 }),
+    /Invalid pin image version/,
+  );
 });
 
 test("applyDragonsteelStoreMap skips unknown and retired ids and reports them", () => {

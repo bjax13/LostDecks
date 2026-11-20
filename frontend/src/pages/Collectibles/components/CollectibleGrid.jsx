@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PinImage from "../../../components/PinImage/PinImage.jsx";
 import { collectibleDetailPath } from "../../../lib/collectibleDetailPath";
 import AddToCollectionButton from "./AddToCollectionButton";
 import BinderInfo from "./BinderInfo";
@@ -24,11 +25,21 @@ export default function CollectibleGrid({
           <article key={collectible.id} className="card-tile">
             <div className="card-header">
               <details className="card-details">
-                <summary className="card-glance">
-                  <div className="card-glance__meta">
-                    <CategoryPill category={collectible.category} />
+                <summary className={pin ? "card-glance card-glance--pin" : "card-glance"}>
+                  {pin ? (
+                    <PinImage
+                      pinId={collectible.id}
+                      name={collectible.displayName}
+                      image={collectible.image}
+                      variant="grid"
+                    />
+                  ) : null}
+                  <div className="card-glance__body">
+                    <div className="card-glance__meta">
+                      <CategoryPill category={collectible.category} />
+                    </div>
+                    <h2>{collectible.displayName}</h2>
                   </div>
-                  <h2>{collectible.displayName}</h2>
                 </summary>
                 <div className="card-details__body">
                   <Link

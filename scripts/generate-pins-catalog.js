@@ -4,6 +4,8 @@
  * - Hard-coded ChasmFriends pins (extended, not replaced)
  * - Sanderson Collectors Guild blue-book CSV (scripts/data/pin-bluebook-gid788070872.csv)
  * - Dragonsteel store links (scripts/data/pin-dragonsteel-store-map.json)
+ * - Photo versions (scripts/data/pin-images.json). A positive integer is
+ *   copied onto the pin as image. 0 or a missing id means no photo.
  *
  * Usage: node scripts/generate-pins-catalog.js
  */
@@ -13,6 +15,7 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const CSV_PATH = path.join(ROOT, "scripts/data/pin-bluebook-gid788070872.csv");
 const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
+const IMAGE_MAP_PATH = path.join(ROOT, "scripts/data/pin-images.json");
 const OUT_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 const STORE_URL_RE = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
 
@@ -210,6 +213,42 @@ function applyDragonsteelStoreMap(listedPins, retiredPins, storeMap, options = {
   return { applied: exact + bundle, exact, bundle, skipped };
 }
 
+function loadImageMap(mapPath = IMAGE_MAP_PATH) {
+  const raw = JSON.parse(fs.readFileSync(mapPath, "utf8"));
+  if (!raw || typeof raw.pins !== "object" || raw.pins == null || Array.isArray(raw.pins)) {
+    throw new Error(`Pin image map must include a pins object: ${mapPath}`);
+  }
+  return raw.pins;
+}
+
+/**
+ * Copy a positive image version onto known pins. 0 leaves the field absent
+ * (no photo, no request). Unknown ids are skipped and reported via warn.
+ */
+function applyPinImages(pins, imageMap, options = {}) {
+  const warn = options.warn ?? console.warn;
+  const byId = new Map((pins ?? []).filter((pin) => pin?.id).map((pin) => [pin.id, pin]));
+  const skipped = [];
+  let applied = 0;
+
+  for (const [id, version] of Object.entries(imageMap ?? {})) {
+    if (!Number.isInteger(version) || version < 0) {
+      throw new Error(`Invalid pin image version for ${id}: ${JSON.stringify(version)}`);
+    }
+    if (version === 0) continue;
+    const pin = byId.get(id);
+    if (!pin) {
+      skipped.push({ id, reason: "not in catalog" });
+      warn(`Skipped pin image for ${id}: not in catalog`);
+      continue;
+    }
+    pin.image = version;
+    applied += 1;
+  }
+
+  return { applied, skipped };
+}
+
 function buildChasmFriendsPins() {
   return CHASM_FRIENDS.map((pin) => ({
     id: pin.id,
@@ -317,6 +356,9 @@ function main() {
     }
   }
 
+  const imageResult = applyPinImages([...pins, ...retired], loadImageMap());
+  console.log(`Applied pin image versions to ${imageResult.applied} pins.`);
+
   const storeResult = applyDragonsteelStoreMap(pins, retired, loadStoreMap());
   console.log(
     `Applied Dragonsteel store links to ${storeResult.applied} pins (${storeResult.exact} exact, ${storeResult.bundle} bundle).`,
@@ -360,7 +402,7 @@ function main() {
         "Blue-book rows imported from Sanderson Collectors Guild Pin List (gid=788070872).",
         "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
         "Each pin has a single SKU with no DUN/FOIL finish variants.",
-        "Image URLs from the sheet are omitted until a product decision on asset hosting.",
+        "Pin photos use an image version copied from scripts/data/pin-images.json. A positive integer means a photo exists at that version. 0 or a missing image field means no photo, and the app does not request a file.",
         "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
         "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped.",
       ],
@@ -382,5 +424,6 @@ if (require.main === module) {
 
 module.exports = {
   applyDragonsteelStoreMap,
+  applyPinImages,
   STORE_URL_RE,
 };

@@ -876,10 +876,17 @@
   cursor: pointer;
 }
 
+.collection-table__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
 .collection-table__card {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .collection-table__card-name {

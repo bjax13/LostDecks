@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "description": "Pin id to photo version. A positive integer means files exist at that version. 0 or a missing id means no photo. The catalog generator copies positive versions onto pins as image."
+  },
+  "pins": {}
+}

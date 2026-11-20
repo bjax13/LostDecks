@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { datasetMeta, isRetiredPinId } from "../../data/collectibles";
+import PinImage from "../../components/PinImage/PinImage.jsx";
+import { datasetMeta, getCollectibleRecord, isRetiredPinId } from "../../data/collectibles";
 import { collectibleDetailPath } from "../../lib/collectibleDetailPath";
 import CollectibleDetailsLink from "../Collectibles/components/CollectibleDetailsLink";
 import { categoryLabels } from "../Collectibles/constants";
@@ -248,6 +249,16 @@ export function CollectionTable({
 
   const isBusy = (entry) => Boolean(busySkuId && entry.skuId && busySkuId === entry.skuId);
   const canMutate = (entry) => Boolean(entry.cardId);
+  const pinRecord = (entry) => {
+    const id = entry?.cardId;
+    if (entry?.collectibleType === "pin" || entry?.category === "pin") {
+      return getCollectibleRecord(id) ?? { id, displayName: entry.displayName, image: entry.image };
+    }
+    if (typeof id === "string" && /^PIN-[A-Z0-9]{2,6}-\d{2,3}$/.test(id)) {
+      return getCollectibleRecord(id) ?? { id, displayName: entry.displayName, image: entry.image };
+    }
+    return null;
+  };
 
   return (
     <div className="collection-table__wrapper">
@@ -264,91 +275,106 @@ export function CollectionTable({
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry) => (
-            <tr
-              key={entry.id}
-              className={
-                !readOnly && (entry.cardId || entry.skuId) ? "collection-table__row--clickable" : ""
-              }
-              onClick={readOnly ? undefined : (event) => handleRowClick(entry, event)}
-            >
-              <td data-label="Card">
-                <div className="collection-table__card">
-                  <span className="collection-table__card-name">{entry.displayName}</span>
-                  <div className="collection-table__card-meta">
-                    {entry.cardId ? <span>{entry.cardId}</span> : null}
-                    {entry.storyTitle ? <span>{entry.storyTitle}</span> : null}
-                    {entry.binderLabel ? <span>{entry.binderLabel}</span> : null}
-                  </div>
-                  {entry.detail ? (
-                    <span className="collection-table__card-detail">{entry.detail}</span>
-                  ) : null}
-                </div>
-              </td>
-              <td data-label="Category">
-                <span className="collection-table__badge">{entry.categoryLabel}</span>
-              </td>
-              <td data-label="Finish">
-                <div className="collection-table__finish">
-                  {entry.finish ? (
-                    <span className="collection-table__finish-chip">{entry.finish}</span>
-                  ) : (
-                    <span>—</span>
-                  )}
-                  {entry.skuId ? (
-                    <span className="collection-table__sku">{entry.skuId}</span>
-                  ) : null}
-                </div>
-              </td>
-              <td data-label="Quantity">
-                <span className="collection-table__quantity">{entry.quantity}</span>
-              </td>
-              <td data-label="Last updated">
-                <div className="collection-table__updated">
-                  <span>{entry.updatedAtLabel ?? "—"}</span>
-                  {entry.notes ? (
-                    <span className="collection-table__notes">{entry.notes}</span>
-                  ) : null}
-                </div>
-              </td>
-              {readOnly ? null : (
-                <td data-label="Actions">
-                  <div className="collection-table__actions">
-                    <button
-                      type="button"
-                      className="collection-table__action-button"
-                      disabled={!canMutate(entry) || isBusy(entry) || entry.quantity <= 0}
-                      onClick={() => onDecrement?.(entry)}
-                      aria-label={`Decrease quantity for ${entry.displayName}`}
-                    >
-                      −1
-                    </button>
-                    <button
-                      type="button"
-                      className="collection-table__action-button"
-                      disabled={
-                        !canMutate(entry) ||
-                        isBusy(entry) ||
-                        isRetiredPinId(entry.skuId) ||
-                        isRetiredPinId(entry.cardId)
-                      }
-                      onClick={() => onIncrement?.(entry)}
-                      aria-label={`Increase quantity for ${entry.displayName}`}
-                    >
-                      +1
-                    </button>
+          {entries.map((entry) => {
+            const pin = pinRecord(entry);
+            return (
+              <tr
+                key={entry.id}
+                className={
+                  !readOnly && (entry.cardId || entry.skuId)
+                    ? "collection-table__row--clickable"
+                    : ""
+                }
+                onClick={readOnly ? undefined : (event) => handleRowClick(entry, event)}
+              >
+                <td data-label="Card">
+                  <div className="collection-table__identity">
+                    {pin ? (
+                      <PinImage
+                        pinId={pin.id}
+                        name={entry.displayName}
+                        image={pin.image}
+                        variant="row"
+                      />
+                    ) : null}
+                    <div className="collection-table__card">
+                      <span className="collection-table__card-name">{entry.displayName}</span>
+                      <div className="collection-table__card-meta">
+                        {entry.cardId ? <span>{entry.cardId}</span> : null}
+                        {entry.storyTitle ? <span>{entry.storyTitle}</span> : null}
+                        {entry.binderLabel ? <span>{entry.binderLabel}</span> : null}
+                      </div>
+                      {entry.detail ? (
+                        <span className="collection-table__card-detail">{entry.detail}</span>
+                      ) : null}
+                    </div>
                   </div>
                 </td>
-              )}
-              <td className="collection-table__details" data-label="Details">
-                <CollectibleDetailsLink
-                  collectibleId={entry.cardId}
-                  skuId={entry.skuId}
-                  name={entry.displayName}
-                />
-              </td>
-            </tr>
-          ))}
+                <td data-label="Category">
+                  <span className="collection-table__badge">{entry.categoryLabel}</span>
+                </td>
+                <td data-label="Finish">
+                  <div className="collection-table__finish">
+                    {entry.finish ? (
+                      <span className="collection-table__finish-chip">{entry.finish}</span>
+                    ) : (
+                      <span>—</span>
+                    )}
+                    {entry.skuId ? (
+                      <span className="collection-table__sku">{entry.skuId}</span>
+                    ) : null}
+                  </div>
+                </td>
+                <td data-label="Quantity">
+                  <span className="collection-table__quantity">{entry.quantity}</span>
+                </td>
+                <td data-label="Last updated">
+                  <div className="collection-table__updated">
+                    <span>{entry.updatedAtLabel ?? "—"}</span>
+                    {entry.notes ? (
+                      <span className="collection-table__notes">{entry.notes}</span>
+                    ) : null}
+                  </div>
+                </td>
+                {readOnly ? null : (
+                  <td data-label="Actions">
+                    <div className="collection-table__actions">
+                      <button
+                        type="button"
+                        className="collection-table__action-button"
+                        disabled={!canMutate(entry) || isBusy(entry) || entry.quantity <= 0}
+                        onClick={() => onDecrement?.(entry)}
+                        aria-label={`Decrease quantity for ${entry.displayName}`}
+                      >
+                        −1
+                      </button>
+                      <button
+                        type="button"
+                        className="collection-table__action-button"
+                        disabled={
+                          !canMutate(entry) ||
+                          isBusy(entry) ||
+                          isRetiredPinId(entry.skuId) ||
+                          isRetiredPinId(entry.cardId)
+                        }
+                        onClick={() => onIncrement?.(entry)}
+                        aria-label={`Increase quantity for ${entry.displayName}`}
+                      >
+                        +1
+                      </button>
+                    </div>
+                  </td>
+                )}
+                <td className="collection-table__details" data-label="Details">
+                  <CollectibleDetailsLink
+                    collectibleId={entry.cardId}
+                    skuId={entry.skuId}
+                    name={entry.displayName}
+                  />
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PinImage from "../../components/PinImage/PinImage.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getCollectibleRecord, getSkuRecord } from "../../data/collectibles";
 import AddToCollectionButton from "../Collectibles/components/AddToCollectionButton";
@@ -152,6 +153,9 @@ export default function CollectibleDetailPage() {
       </button>
 
       <div className="card-detail__header">
+        {card.collectibleType === "pin" || card.category === "pin" ? (
+          <PinImage pinId={card.id} name={card.displayName} image={card.image} variant="detail" />
+        ) : null}
         <div className="card-detail__header-main">
           <div className="card-detail__header-top">
             <CategoryPill category={card.category} />
