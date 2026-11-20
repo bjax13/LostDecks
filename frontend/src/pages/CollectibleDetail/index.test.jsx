@@ -718,6 +718,110 @@ describe("resolveTimestamp – null entry", () => {
 
 /* ---------- formatDate with null ---------- */
 
+describe("CollectibleDetailPage – Dragonsteel store link", () => {
+  const exactPin = {
+    id: "PIN-CPS1-00",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Character Pin Series 1",
+    number: 0,
+    displayName: "Brandon",
+    detail: "Character Pin Series 1 · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+    storeUrl: "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+    storeMatch: "exact",
+  };
+  const bundlePin = {
+    id: "PIN-MBWA-01",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "Mistborn Word Art",
+    number: 1,
+    displayName: "Hemalurgy",
+    detail: "Mistborn Word Art · US",
+    country: "US",
+    catalogName: "Sanderson Collectors Guild Pins",
+    storeUrl: "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+    storeMatch: "bundle",
+  };
+  const unmappedPin = {
+    id: "PIN-CF-01",
+    collectibleType: "pin",
+    category: "pin",
+    storyTitle: "ChasmFriends",
+    number: 1,
+    displayName: "Shredhead",
+    detail: "ChasmFriends enamel pin",
+    country: "US",
+    catalogName: "ChasmFriends Pins",
+  };
+
+  it("shows Dragonsteel store for an exact pin match", () => {
+    setDefaults({ card: exactPin });
+    renderWithRoute("/collectibles/PIN-CPS1-00");
+
+    const link = screen.getByRole("link", { name: "Dragonsteel store" });
+    expect(link).toHaveAttribute("href", exactPin.storeUrl);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(
+      screen.queryByRole("link", { name: "Sold in a bundle on the Dragonsteel store" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("labels a bundle match as sold in a bundle", () => {
+    setDefaults({ card: bundlePin });
+    renderWithRoute("/collectibles/PIN-MBWA-01");
+
+    const link = screen.getByRole("link", { name: "Sold in a bundle on the Dragonsteel store" });
+    expect(link).toHaveAttribute("href", bundlePin.storeUrl);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
+  });
+
+  it("shows no store link or label for an unmapped pin", () => {
+    setDefaults({ card: unmappedPin });
+    renderWithRoute("/collectibles/PIN-CF-01");
+
+    expect(screen.getByRole("heading", { name: "Shredhead" })).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+    expect(screen.queryByText(/dragonsteel/i)).not.toBeInTheDocument();
+  });
+
+  it("shows no Dragonsteel store link on a card page", () => {
+    setDefaults({
+      card: {
+        ...CARD,
+        collectibleType: "card",
+        storeUrl: "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+        storeMatch: "exact",
+      },
+    });
+    renderWithRoute("/collectibles/LT24-ELS-01");
+
+    expect(screen.getByRole("heading", { name: CARD.displayName })).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+    expect(screen.queryByText("Dragonsteel store")).not.toBeInTheDocument();
+  });
+
+  it("ignores a pin store URL that is not https on www.dragonsteelbooks.com", () => {
+    setDefaults({
+      card: {
+        ...exactPin,
+        storeUrl: "http://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+      },
+    });
+    renderWithRoute("/collectibles/PIN-CPS1-00");
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByText("Store")).not.toBeInTheDocument();
+  });
+});
+
 describe("formatDate – null input", () => {
   it("returns null when no timestamp in entry (formatDate receives null)", () => {
     setDefaults({

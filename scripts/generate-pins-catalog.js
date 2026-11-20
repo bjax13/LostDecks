@@ -3,6 +3,7 @@
  * Build frontend/src/storyData/pins-catalog.json from:
  * - Hard-coded ChasmFriends pins (extended, not replaced)
  * - Sanderson Collectors Guild blue-book CSV (scripts/data/pin-bluebook-gid788070872.csv)
+ * - Dragonsteel store links (scripts/data/pin-dragonsteel-store-map.json)
  *
  * Usage: node scripts/generate-pins-catalog.js
  */
@@ -11,7 +12,9 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 const CSV_PATH = path.join(ROOT, "scripts/data/pin-bluebook-gid788070872.csv");
+const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
 const OUT_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
+const STORE_URL_RE = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
 
 /** Stable set-code map for SKU ids: PIN-{CODE}-{NN|NNN} */
 const SET_CODES = [
@@ -156,6 +159,57 @@ function isRetiredPin(id, raw) {
   return RETIRED_PIN_IDS.has(id) || BLANK_SERIES_PIN_RE.test(raw.trim());
 }
 
+function loadStoreMap(mapPath = STORE_MAP_PATH) {
+  const raw = JSON.parse(fs.readFileSync(mapPath, "utf8"));
+  if (!raw || typeof raw.pins !== "object" || raw.pins == null || Array.isArray(raw.pins)) {
+    throw new Error(`Dragonsteel store map must include a pins object: ${mapPath}`);
+  }
+  return raw.pins;
+}
+
+/**
+ * Copy storeUrl and storeMatch onto listed pins. Ids that are missing or
+ * retired are left unchanged and reported via warn.
+ */
+function applyDragonsteelStoreMap(listedPins, retiredPins, storeMap, options = {}) {
+  const warn = options.warn ?? console.warn;
+  const listedById = new Map(listedPins.map((pin) => [pin.id, pin]));
+  const retiredIds = new Set((retiredPins ?? []).map((pin) => pin.id));
+  const skipped = [];
+  let exact = 0;
+  let bundle = 0;
+
+  for (const [id, entry] of Object.entries(storeMap ?? {})) {
+    if (retiredIds.has(id)) {
+      skipped.push({ id, reason: "retired" });
+      warn(`Skipped Dragonsteel store mapping for ${id}: retired`);
+      continue;
+    }
+    const pin = listedById.get(id);
+    if (!pin) {
+      skipped.push({ id, reason: "not in catalog" });
+      warn(`Skipped Dragonsteel store mapping for ${id}: not in catalog`);
+      continue;
+    }
+    const storeUrl = typeof entry?.storeUrl === "string" ? entry.storeUrl.trim() : "";
+    const storeMatch = entry?.storeMatch;
+    if (!STORE_URL_RE.test(storeUrl)) {
+      throw new Error(
+        `Invalid Dragonsteel store URL for ${id}: ${JSON.stringify(entry?.storeUrl)}`,
+      );
+    }
+    if (storeMatch !== "exact" && storeMatch !== "bundle") {
+      throw new Error(`Invalid storeMatch for ${id}: ${JSON.stringify(storeMatch)}`);
+    }
+    pin.storeUrl = storeUrl;
+    pin.storeMatch = storeMatch;
+    if (storeMatch === "exact") exact += 1;
+    else bundle += 1;
+  }
+
+  return { applied: exact + bundle, exact, bundle, skipped };
+}
+
 function buildChasmFriendsPins() {
   return CHASM_FRIENDS.map((pin) => ({
     id: pin.id,
@@ -263,6 +317,11 @@ function main() {
     }
   }
 
+  const storeResult = applyDragonsteelStoreMap(pins, retired, loadStoreMap());
+  console.log(
+    `Applied Dragonsteel store links to ${storeResult.applied} pins (${storeResult.exact} exact, ${storeResult.bundle} bundle).`,
+  );
+
   const series = ["ChasmFriends", ...SET_CODES.map(([name]) => name)].filter((name, index, all) => {
     return pins.some((pin) => pin.series === name) && all.indexOf(name) === index;
   });
@@ -303,6 +362,7 @@ function main() {
         "Each pin has a single SKU with no DUN/FOIL finish variants.",
         "Image URLs from the sheet are omitted until a product decision on asset hosting.",
         "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
+        "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped.",
       ],
     },
     pins,
@@ -316,4 +376,11 @@ function main() {
   );
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  applyDragonsteelStoreMap,
+  STORE_URL_RE,
+};

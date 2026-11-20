@@ -165,6 +165,10 @@ function formatPinCollectible(pin) {
     release,
     notes,
     sourceName: pin.sourceName ?? null,
+    ...(typeof pin.storeUrl === "string" &&
+    (pin.storeMatch === "exact" || pin.storeMatch === "bundle")
+      ? { storeUrl: pin.storeUrl, storeMatch: pin.storeMatch }
+      : {}),
     finishes: toFinishList(pin.id),
     searchTokens: [pin.id, displayName, seriesTitle, catalogName, country, release, "pin"]
       .filter(Boolean)

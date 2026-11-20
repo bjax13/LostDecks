@@ -1,0 +1,323 @@
+{
+  "meta": {
+    "description": "Dragonsteel store product URLs for listed pin ids. storeMatch is exact or bundle. The catalog generator copies these onto pins and skips ids that are missing or retired."
+  },
+  "pins": {
+    "PIN-CPS1-00": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/vin-character-pin-series-1-001",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/hoid-character-pin-series-1-002",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-03": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/steris-character-pin-series-1-003",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-04": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/vasher-character-pin-series-1-004",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/wax-character-pin-series-1-005",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/raoden-character-pin-series-1-006",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/shallan-character-pin-series-1-007",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/khriss-character-pin-series-1-008",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-10": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/kaladin-character-pin-series-1-010",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-11": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/syl-character-pin-series-1-011",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS1-12": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/kelsier-character-pin-series-1-012",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-00": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/queen-emily-character-pin-series-2-000",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/windrunner-honorspren-character-pin-series-2-001",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/skybreaker-highspren-character-pin-series-2-002",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-03": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dustbringer-ashspren-character-pin-series-2-003",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-04": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/edgedancer-cultivationspren-character-pin-series-2-004",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/truthwatcher-mistspren-character-pin-series-2-005",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lightweaver-cryptic-character-pin-series-2-006",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/elsecaller-inkspren-character-pin-series-2-007",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/willshaper-reacher-character-pin-series-2-008",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-09": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/stoneward-peakspren-character-pin-series-2-009",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-10": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/bondsmith-stormfather-character-pin-series-2-010",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-11": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dalinar-character-pin-series-2-012",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-13": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/tress-character-pin-series-1-013",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-14": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mervin-character-pin-series-1-014",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-15": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/yumi-character-pin-series-1-015",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-17": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/spensa-character-pin-series-1-017",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-18": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/szeth-character-pin-series-2-018",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-19": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/painter-character-pin-series-2-019",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-20": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/cursed-hoid-character-pin-series-2-020",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-21": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/renarin-character-pin-series-2-014",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-22": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/jasnah-character-pin-series-2-015",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-23": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/navani-character-pin-series-2-016",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-24": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/venli-character-pin-series-2-018",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS2-25": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lift-character-pin-series-2-017",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-00": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-000-peter",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/elend-character-pin-series-3-001",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/shai-character-pin-series-3-002",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-03": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/marasi-character-pin-series-3-003",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-04": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/rysn-character-pin-series-3-004",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/hrathen-character-pin-series-3-005",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dusk-character-pin-series-3-006",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lightsong-character-pin-series-3-007",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/blushweaver-character-pin-series-3-008",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-09": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-009-wayne",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS3-10": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-010-starling-character-pin-set",
+      "storeMatch": "bundle"
+    },
+    "PIN-CPS3-11": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-010-starling-character-pin-set",
+      "storeMatch": "bundle"
+    },
+    "PIN-CPS3-12": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-012-worldhopper-hoid",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS4-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-001-sazed",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS4-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-002-sarene",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS4-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-005-captain-tress",
+      "storeMatch": "exact"
+    },
+    "PIN-CPS4-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-007-maya",
+      "storeMatch": "exact"
+    },
+    "PIN-CONV-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/nexus-2024-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-CONV-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dsnx25-convention-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/tress-sandershelf-pin-set-001",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/way-of-kings-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-04": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/yumi-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-era-1-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/emberdark-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/skyward-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/warbreaker-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-SHELF-09": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/the-sunlit-man-sandershelf-pin-set",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/bridge-four-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/cosmere-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-03": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-04": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/ghostbloods-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-05": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/scadrial-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-06": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/space-age-stormlight-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-LOGO-07": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/space-age-stormlight-pin-copy",
+      "storeMatch": "exact"
+    },
+    "PIN-MBWA-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
+    },
+    "PIN-MBWA-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
+    },
+    "PIN-MBWA-03": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
+    },
+    "PIN-SCENE-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-scene-pin-adolin-and-shallan",
+      "storeMatch": "exact"
+    },
+    "PIN-SCENE-02": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-scene-pin-vin-and-elend",
+      "storeMatch": "exact"
+    },
+    "PIN-WHBALL-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/worldhopper-ball-2025-commemorative-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-CAMP-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/the-fires-of-december-tor-edition-numbered-bundle",
+      "storeMatch": "bundle"
+    },
+    "PIN-OTHER-01": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/ascendent-warrior-pin",
+      "storeMatch": "exact"
+    },
+    "PIN-OTHER-08": {
+      "storeUrl": "https://www.dragonsteelbooks.com/products/silverlight-key-cloak-pin",
+      "storeMatch": "exact"
+    }
+  }
+}

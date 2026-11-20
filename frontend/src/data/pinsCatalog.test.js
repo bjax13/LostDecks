@@ -67,4 +67,19 @@ describe("pin catalog listing", () => {
     expect(getCollectibleRecord("PIN-CPS4-01")?.displayName).toBe("Sazed");
     expect(getCollectibleRecord("PIN-CPS4-07")?.displayName).toBe("Maya");
   });
+
+  it("exposes Dragonsteel store links on mapped pins only", () => {
+    expect(getCollectibleRecord("PIN-CPS1-00")?.storeUrl).toBe(
+      "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+    );
+    expect(getCollectibleRecord("PIN-CPS1-00")?.storeMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-LOGO-03")?.storeUrl).toBe(
+      "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+    );
+    expect(getCollectibleRecord("PIN-LOGO-03")?.storeMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CAMP-01")?.storeMatch).toBe("bundle");
+    expect(getCollectibleRecord("PIN-CF-01")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-03")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("LT24-ELS-01")?.storeUrl).toBeUndefined();
+  });
 });
