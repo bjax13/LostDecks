@@ -84,4 +84,25 @@ describe("pin catalog listing", () => {
     expect(getCollectibleRecord("PIN-CPS4-03")?.storeUrl).toBeUndefined();
     expect(getCollectibleRecord("LT24-ELS-01")?.storeUrl).toBeUndefined();
   });
+
+  it("exposes archived store links on mapped pins that have no live store link", () => {
+    expect(getCollectibleRecord("PIN-CYTO-06")?.archiveUrl).toBe(
+      "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin",
+    );
+    expect(getCollectibleRecord("PIN-CYTO-06")?.archiveMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CYTO-06")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CYTDS-01")?.archiveMatch).toBe("bundle");
+    expect(getCollectibleRecord("PIN-CYTDS-01")?.archiveUrl).toBe(
+      "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+    );
+    expect(getCollectibleRecord("PIN-KRO-01")?.archiveMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CONV-04")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-SHELF-03")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-SCAD-01")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-01")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-01")?.storeUrl).toMatch(
+      /^https:\/\/www\.dragonsteelbooks\.com\//,
+    );
+    expect(getCollectibleRecord("LT24-ELS-01")?.archiveUrl).toBeUndefined();
+  });
 });

@@ -6,7 +6,9 @@ const { spawnSync } = require("node:child_process");
 
 const {
   applyDragonsteelStoreMap,
+  applyPinArchiveMap,
   applyPinImages,
+  ARCHIVE_URL_RE,
   STORE_URL_RE,
 } = require("./generate-pins-catalog.js");
 
@@ -14,6 +16,7 @@ const ROOT = path.resolve(__dirname, "..");
 const CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 const SCRIPT_PATH = path.join(ROOT, "scripts/generate-pins-catalog.js");
 const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
+const ARCHIVE_MAP_PATH = path.join(ROOT, "scripts/data/pin-archive-map.json");
 const IMAGE_MAP_PATH = path.join(ROOT, "scripts/data/pin-images.json");
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
 const BUNDLE_IDS = [
@@ -23,6 +26,13 @@ const BUNDLE_IDS = [
   "PIN-MBWA-02",
   "PIN-MBWA-03",
   "PIN-CAMP-01",
+];
+const ARCHIVE_BUNDLE_IDS = [
+  "PIN-CYTDS-01",
+  "PIN-CYTDS-02",
+  "PIN-CYTDS-03",
+  "PIN-CYTDS-04",
+  "PIN-CYTDS-05",
 ];
 const PIN_KEYS = [
   "id",
@@ -313,6 +323,10 @@ test("listed pins omit retired ids, keep every previous id, and use the cleaned 
       assert.equal(listedIds.includes(pin.id), true, pin.id);
       expected.push("storeUrl", "storeMatch");
     }
+    if (pin.archiveUrl != null || pin.archiveMatch != null) {
+      assert.equal(listedIds.includes(pin.id), true, pin.id);
+      expected.push("archiveUrl", "archiveMatch");
+    }
     assert.deepEqual(keys, expected);
     assert.equal(
       /^Series\s+\d+\s*-\s*Pin\s+\d+\s*-\s*$/.test(pin.name) && listedIds.includes(pin.id),
@@ -336,7 +350,9 @@ test("regenerating the pins catalog reproduces the committed catalog", () => {
   assert.equal(after, before);
   assert.match(result.stdout, /Applied pin image versions to 0 pins/);
   assert.match(result.stdout, /73 exact, 6 bundle/);
+  assert.match(result.stdout, /Applied archived store links to 24 pins \(19 exact, 5 bundle\)/);
   assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped Dragonsteel store mapping/);
+  assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped archived store mapping/);
   assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped pin image/);
 });
 
@@ -526,4 +542,187 @@ test("applyDragonsteelStoreMap rejects a URL that is not https on www.dragonstee
       }),
     /Invalid Dragonsteel store URL/,
   );
+});
+
+test("every archiveUrl is a Wayback capture of an official store page and every id exists", () => {
+  const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
+  const map = JSON.parse(fs.readFileSync(ARCHIVE_MAP_PATH, "utf8"));
+  const storeMap = JSON.parse(fs.readFileSync(STORE_MAP_PATH, "utf8"));
+  const entries = Object.entries(map.pins);
+  assert.equal(entries.length, 24);
+
+  const listed = new Map(catalog.pins.map((pin) => [pin.id, pin]));
+  const retired = new Map(catalog.retired.map((pin) => [pin.id, pin]));
+  const catalogIds = new Set([...listed.keys(), ...retired.keys()]);
+  let exact = 0;
+  let bundle = 0;
+
+  for (const [id, entry] of entries) {
+    assert.equal(catalogIds.has(id), true, `${id} is not in the catalog`);
+    assert.equal(storeMap.pins[id], undefined, `${id} already has a live store link`);
+    assert.match(entry.archiveUrl, ARCHIVE_URL_RE);
+    const url = new URL(entry.archiveUrl);
+    assert.equal(url.protocol, "https:");
+    assert.equal(url.hostname, "web.archive.org");
+    const stamp = url.pathname.split("/")[2];
+    assert.match(stamp, /^\d{14}$/);
+    const month = Number(stamp.slice(4, 6));
+    assert.equal(month >= 1 && month <= 12, true, stamp);
+    const archived = new URL(entry.archiveUrl.slice(entry.archiveUrl.indexOf("https://", 8)));
+    assert.equal(
+      archived.hostname === "www.dragonsteelbooks.com" ||
+        archived.hostname === "store.brandonsanderson.com",
+      true,
+      archived.hostname,
+    );
+    assert.equal(archived.pathname.startsWith("/products/"), true);
+
+    const pin = listed.get(id);
+    assert.ok(pin, `${id} is not a listed pin`);
+    assert.equal(retired.has(id), false);
+    assert.equal(pin.storeUrl, undefined, id);
+    assert.equal(pin.archiveUrl, entry.archiveUrl);
+    assert.equal(pin.archiveMatch, entry.archiveMatch);
+    if (entry.archiveMatch === "exact") exact += 1;
+    else if (entry.archiveMatch === "bundle") bundle += 1;
+    else assert.fail(entry.archiveMatch);
+  }
+
+  assert.equal(exact, 19);
+  assert.equal(bundle, 5);
+  assert.deepEqual(
+    catalog.pins
+      .filter((pin) => pin.archiveMatch === "bundle")
+      .map((pin) => pin.id)
+      .sort(),
+    [...ARCHIVE_BUNDLE_IDS].sort(),
+  );
+
+  const mBot =
+    "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin";
+  const bundlePage =
+    "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle";
+  const knightPage =
+    "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins";
+  assert.equal(listed.get("PIN-CYTO-06").archiveUrl, mBot);
+  assert.equal(listed.get("PIN-CYTO-06").archiveMatch, "exact");
+  assert.equal(listed.get("PIN-CYTDS-01").archiveUrl, bundlePage);
+  assert.equal(listed.get("PIN-CYTDS-01").archiveMatch, "bundle");
+  for (const id of ARCHIVE_BUNDLE_IDS) {
+    assert.equal(listed.get(id).archiveUrl, bundlePage);
+    assert.equal(listed.get(id).archiveMatch, "bundle");
+  }
+  for (let n = 1; n <= 10; n += 1) {
+    const id = `PIN-KRO-${String(n).padStart(2, "0")}`;
+    assert.equal(listed.get(id).archiveUrl, knightPage);
+    assert.equal(listed.get(id).archiveMatch, "exact");
+  }
+
+  for (const id of ["PIN-CONV-04", "PIN-SHELF-03", "PIN-SCAD-01", "PIN-CPS4-01", "PIN-CF-01"]) {
+    assert.equal(listed.get(id).archiveUrl, undefined, id);
+    assert.equal(listed.get(id).archiveMatch, undefined, id);
+    assert.equal(map.pins[id], undefined, id);
+  }
+
+  const mapped = catalog.pins.filter((pin) => pin.archiveUrl != null || pin.archiveMatch != null);
+  assert.equal(mapped.length, 24);
+  for (const pin of catalog.pins) {
+    if (pin.archiveUrl == null && pin.archiveMatch == null) {
+      assert.equal(map.pins[pin.id], undefined);
+      continue;
+    }
+    assert.match(pin.archiveUrl, ARCHIVE_URL_RE);
+    assert.equal(map.pins[pin.id].archiveUrl, pin.archiveUrl);
+    assert.equal(map.pins[pin.id].archiveMatch, pin.archiveMatch);
+  }
+  for (const pin of catalog.retired) {
+    assert.equal(pin.archiveUrl, undefined);
+    assert.equal(pin.archiveMatch, undefined);
+    assert.equal(map.pins[pin.id], undefined);
+  }
+});
+
+test("applyPinArchiveMap copies exact and bundle captures and leaves store fields alone", () => {
+  const listed = [
+    {
+      id: "PIN-CYTO-06",
+      storeUrl: "https://www.dragonsteelbooks.com/products/m-bot-pin",
+      storeMatch: "exact",
+    },
+    { id: "PIN-CYTDS-01" },
+  ];
+  const retired = [{ id: "PIN-CYTO-01", name: "DDF Two-Tone" }];
+  const warnings = [];
+  const mBot =
+    "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin";
+  const bundlePage =
+    "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle";
+  const result = applyPinArchiveMap(
+    listed,
+    retired,
+    {
+      "PIN-CYTO-06": { archiveUrl: mBot, archiveMatch: "exact" },
+      "PIN-CYTDS-01": { archiveUrl: bundlePage, archiveMatch: "bundle" },
+      "PIN-CYTO-01": { archiveUrl: mBot, archiveMatch: "exact" },
+      "PIN-NOPE-01": { archiveUrl: mBot, archiveMatch: "exact" },
+    },
+    { warn: (message) => warnings.push(message) },
+  );
+
+  assert.equal(listed[0].archiveUrl, mBot);
+  assert.equal(listed[0].archiveMatch, "exact");
+  assert.equal(listed[0].storeUrl, "https://www.dragonsteelbooks.com/products/m-bot-pin");
+  assert.equal(listed[0].storeMatch, "exact");
+  assert.equal(listed[1].archiveUrl, bundlePage);
+  assert.equal(listed[1].archiveMatch, "bundle");
+  assert.equal(retired[0].archiveUrl, undefined);
+  assert.equal(result.applied, 2);
+  assert.equal(result.exact, 1);
+  assert.equal(result.bundle, 1);
+  assert.deepEqual(result.skipped, [
+    { id: "PIN-CYTO-01", reason: "retired" },
+    { id: "PIN-NOPE-01", reason: "not in catalog" },
+  ]);
+  assert.match(warnings.join("\n"), /PIN-CYTO-01: retired/);
+  assert.match(warnings.join("\n"), /PIN-NOPE-01: not in catalog/);
+});
+
+test("applyPinArchiveMap rejects live URLs, resellers, bad timestamps, and bad match values", () => {
+  const listed = [{ id: "PIN-CYTO-06" }];
+  const live = "https://www.dragonsteelbooks.com/products/m-bot-pin";
+  const reseller = "https://web.archive.org/web/20220520175820/https://www.ebay.com/itm/m-bot-pin";
+  const badMonth =
+    "https://web.archive.org/web/20241320175820/https://www.dragonsteelbooks.com/products/m-bot-pin";
+  const mBot =
+    "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin";
+
+  assert.throws(
+    () =>
+      applyPinArchiveMap(listed, [], {
+        "PIN-CYTO-06": { archiveUrl: live, archiveMatch: "exact" },
+      }),
+    /Invalid Wayback archive URL/,
+  );
+  assert.equal(listed[0].archiveUrl, undefined);
+  assert.throws(
+    () =>
+      applyPinArchiveMap(listed, [], {
+        "PIN-CYTO-06": { archiveUrl: reseller, archiveMatch: "exact" },
+      }),
+    /Invalid Wayback archive URL/,
+  );
+  assert.throws(
+    () =>
+      applyPinArchiveMap(listed, [], {
+        "PIN-CYTO-06": { archiveUrl: badMonth, archiveMatch: "exact" },
+      }),
+    /Invalid Wayback archive URL/,
+  );
+  assert.throws(
+    () =>
+      applyPinArchiveMap(listed, [], { "PIN-CYTO-06": { archiveUrl: mBot, archiveMatch: "set" } }),
+    /Invalid archiveMatch/,
+  );
+  assert.equal(listed[0].archiveUrl, undefined);
+  assert.equal(listed[0].archiveMatch, undefined);
 });

@@ -58,7 +58,8 @@
       "Each pin has a single SKU with no DUN/FOIL finish variants.",
       "Pin photos use an image version copied from scripts/data/pin-images.json. A positive integer means a photo exists at that version. 0 or a missing image field means no photo, and the app does not request a file.",
       "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
-      "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped."
+      "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped.",
+      "Wayback Machine archive links are archiveUrl and archiveMatch (exact or bundle) on listed pins, copied from scripts/data/pin-archive-map.json. The 14-digit timestamp in archiveUrl is the capture date. Ids missing from the catalog or retired are skipped."
     ]
   },
   "pins": [
@@ -273,7 +274,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 09 - Vivenna"
+      "sourceName": "Series 1 - Pin 09 - Vivenna",
+      "archiveUrl": "https://web.archive.org/web/20240130165307/https://www.dragonsteelbooks.com/products/vivenna-character-pin-series-1-009",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS1-10",
@@ -511,7 +514,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 12 - Adolin"
+      "sourceName": "Series 2 - Pin 12 - Adolin",
+      "archiveUrl": "https://web.archive.org/web/20241030030214/https://www.dragonsteelbooks.com/products/adolin-character-pin-series-2-013",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS2-13",
@@ -569,7 +574,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 16 - Nomad"
+      "sourceName": "Series 1 - Pin 16 - Nomad",
+      "archiveUrl": "https://web.archive.org/web/20240118172029/https://www.dragonsteelbooks.com/products/nomad-character-pin-series-1-016",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS2-17",
@@ -972,7 +979,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-02",
@@ -985,7 +994,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-03",
@@ -998,7 +1009,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-04",
@@ -1011,7 +1024,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-05",
@@ -1024,7 +1039,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-06",
@@ -1037,7 +1054,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-07",
@@ -1050,7 +1069,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-08",
@@ -1063,7 +1084,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-09",
@@ -1076,7 +1099,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-10",
@@ -1089,7 +1114,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KROG-01",
@@ -1167,7 +1194,9 @@
       "country": "US",
       "release": "Dragonsteel 2021 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220125060426/https://www.dragonsteelbooks.com/products/dragonsteel-2021-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CONV-02",
@@ -1180,7 +1209,9 @@
       "country": "US",
       "release": "Dragonsteel 2022 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20230131064119/https://www.dragonsteelbooks.com/products/dragonsteel-2022-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CONV-03",
@@ -1314,7 +1345,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20210514003435/https://store.brandonsanderson.com/products/ddf-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-03",
@@ -1353,7 +1386,9 @@
       "country": "US",
       "release": "Part of the Defiant release bundle and later sold in store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20240221151126/https://www.dragonsteelbooks.com/products/hesho-mask-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-06",
@@ -1366,7 +1401,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-07",
@@ -1379,7 +1416,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220520180940/https://www.dragonsteelbooks.com/products/m-drone-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-08",
@@ -1496,7 +1535,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-02",
@@ -1509,7 +1550,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-03",
@@ -1522,7 +1565,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-04",
@@ -1535,7 +1580,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-05",
@@ -1548,7 +1595,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-SHELF-01",

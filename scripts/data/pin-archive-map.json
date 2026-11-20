@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "description": "Wayback Machine captures of official Dragonsteel or Brandon Sanderson store pages for listed pin ids. archiveMatch is exact or bundle. The catalog generator copies archiveUrl and archiveMatch onto pins and skips ids that are missing or retired. The capture month and year come from the 14-digit timestamp in archiveUrl."
+  },
+  "pins": {
+    "PIN-CPS1-09": {
+      "archiveUrl": "https://web.archive.org/web/20240130165307/https://www.dragonsteelbooks.com/products/vivenna-character-pin-series-1-009",
+      "archiveMatch": "exact"
+    },
+    "PIN-CPS2-12": {
+      "archiveUrl": "https://web.archive.org/web/20241030030214/https://www.dragonsteelbooks.com/products/adolin-character-pin-series-2-013",
+      "archiveMatch": "exact"
+    },
+    "PIN-CPS2-16": {
+      "archiveUrl": "https://web.archive.org/web/20240118172029/https://www.dragonsteelbooks.com/products/nomad-character-pin-series-1-016",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-01": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-02": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-03": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-04": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-05": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-06": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-07": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-08": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-09": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-KRO-10": {
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
+    },
+    "PIN-CONV-01": {
+      "archiveUrl": "https://web.archive.org/web/20220125060426/https://www.dragonsteelbooks.com/products/dragonsteel-2021-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CONV-02": {
+      "archiveUrl": "https://web.archive.org/web/20230131064119/https://www.dragonsteelbooks.com/products/dragonsteel-2022-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CYTO-02": {
+      "archiveUrl": "https://web.archive.org/web/20210514003435/https://store.brandonsanderson.com/products/ddf-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CYTO-05": {
+      "archiveUrl": "https://web.archive.org/web/20240221151126/https://www.dragonsteelbooks.com/products/hesho-mask-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CYTO-06": {
+      "archiveUrl": "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CYTO-07": {
+      "archiveUrl": "https://web.archive.org/web/20220520180940/https://www.dragonsteelbooks.com/products/m-drone-pin",
+      "archiveMatch": "exact"
+    },
+    "PIN-CYTDS-01": {
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
+    },
+    "PIN-CYTDS-02": {
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
+    },
+    "PIN-CYTDS-03": {
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
+    },
+    "PIN-CYTDS-04": {
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
+    },
+    "PIN-CYTDS-05": {
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
+    }
+  }
+}

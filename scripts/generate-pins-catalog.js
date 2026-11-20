@@ -4,6 +4,7 @@
  * - Hard-coded ChasmFriends pins (extended, not replaced)
  * - Sanderson Collectors Guild blue-book CSV (scripts/data/pin-bluebook-gid788070872.csv)
  * - Dragonsteel store links (scripts/data/pin-dragonsteel-store-map.json)
+ * - Wayback Machine archive links (scripts/data/pin-archive-map.json)
  * - Photo versions (scripts/data/pin-images.json). A positive integer is
  *   copied onto the pin as image. 0 or a missing id means no photo.
  *
@@ -15,9 +16,12 @@ const path = require("node:path");
 const ROOT = path.resolve(__dirname, "..");
 const CSV_PATH = path.join(ROOT, "scripts/data/pin-bluebook-gid788070872.csv");
 const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
+const ARCHIVE_MAP_PATH = path.join(ROOT, "scripts/data/pin-archive-map.json");
 const IMAGE_MAP_PATH = path.join(ROOT, "scripts/data/pin-images.json");
 const OUT_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 const STORE_URL_RE = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
+const ARCHIVE_URL_RE =
+  /^https:\/\/web\.archive\.org\/web\/(\d{14})\/https:\/\/(?:www\.dragonsteelbooks\.com|store\.brandonsanderson\.com)\/products\/[a-z0-9-]+$/;
 
 /** Stable set-code map for SKU ids: PIN-{CODE}-{NN|NNN} */
 const SET_CODES = [
@@ -213,6 +217,61 @@ function applyDragonsteelStoreMap(listedPins, retiredPins, storeMap, options = {
   return { applied: exact + bundle, exact, bundle, skipped };
 }
 
+function loadArchiveMap(mapPath = ARCHIVE_MAP_PATH) {
+  const raw = JSON.parse(fs.readFileSync(mapPath, "utf8"));
+  if (!raw || typeof raw.pins !== "object" || raw.pins == null || Array.isArray(raw.pins)) {
+    throw new Error(`Pin archive map must include a pins object: ${mapPath}`);
+  }
+  return raw.pins;
+}
+
+/**
+ * Copy archiveUrl and archiveMatch onto listed pins. Ids that are missing
+ * or retired are left unchanged and reported via warn. archiveMatch mirrors
+ * storeMatch: exact or bundle. The capture month and year stay in the
+ * 14-digit Wayback timestamp; this does not write a separate date.
+ */
+function applyPinArchiveMap(listedPins, retiredPins, archiveMap, options = {}) {
+  const warn = options.warn ?? console.warn;
+  const listedById = new Map(listedPins.map((pin) => [pin.id, pin]));
+  const retiredIds = new Set((retiredPins ?? []).map((pin) => pin.id));
+  const skipped = [];
+  let exact = 0;
+  let bundle = 0;
+
+  for (const [id, entry] of Object.entries(archiveMap ?? {})) {
+    if (retiredIds.has(id)) {
+      skipped.push({ id, reason: "retired" });
+      warn(`Skipped archived store mapping for ${id}: retired`);
+      continue;
+    }
+    const pin = listedById.get(id);
+    if (!pin) {
+      skipped.push({ id, reason: "not in catalog" });
+      warn(`Skipped archived store mapping for ${id}: not in catalog`);
+      continue;
+    }
+    const archiveUrl = typeof entry?.archiveUrl === "string" ? entry.archiveUrl.trim() : "";
+    const archiveMatch = entry?.archiveMatch;
+    const stamp = ARCHIVE_URL_RE.exec(archiveUrl)?.[1] ?? "";
+    const month = Number(stamp.slice(4, 6));
+    if (!stamp || month < 1 || month > 12) {
+      throw new Error(
+        `Invalid Wayback archive URL for ${id}: ${JSON.stringify(entry?.archiveUrl)}`,
+      );
+    }
+    if (archiveMatch !== "exact" && archiveMatch !== "bundle") {
+      throw new Error(`Invalid archiveMatch for ${id}: ${JSON.stringify(archiveMatch)}`);
+    }
+    pin.archiveUrl = archiveUrl;
+    pin.archiveMatch = archiveMatch;
+    if (archiveMatch === "exact") exact += 1;
+    else bundle += 1;
+  }
+
+  return { applied: exact + bundle, exact, bundle, skipped };
+}
+
 function loadImageMap(mapPath = IMAGE_MAP_PATH) {
   const raw = JSON.parse(fs.readFileSync(mapPath, "utf8"));
   if (!raw || typeof raw.pins !== "object" || raw.pins == null || Array.isArray(raw.pins)) {
@@ -364,6 +423,11 @@ function main() {
     `Applied Dragonsteel store links to ${storeResult.applied} pins (${storeResult.exact} exact, ${storeResult.bundle} bundle).`,
   );
 
+  const archiveResult = applyPinArchiveMap(pins, retired, loadArchiveMap());
+  console.log(
+    `Applied archived store links to ${archiveResult.applied} pins (${archiveResult.exact} exact, ${archiveResult.bundle} bundle).`,
+  );
+
   const series = ["ChasmFriends", ...SET_CODES.map(([name]) => name)].filter((name, index, all) => {
     return pins.some((pin) => pin.series === name) && all.indexOf(name) === index;
   });
@@ -405,6 +469,7 @@ function main() {
         "Pin photos use an image version copied from scripts/data/pin-images.json. A positive integer means a photo exists at that version. 0 or a missing image field means no photo, and the app does not request a file.",
         "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
         "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped.",
+        "Wayback Machine archive links are archiveUrl and archiveMatch (exact or bundle) on listed pins, copied from scripts/data/pin-archive-map.json. The 14-digit timestamp in archiveUrl is the capture date. Ids missing from the catalog or retired are skipped.",
       ],
     },
     pins,
@@ -424,6 +489,8 @@ if (require.main === module) {
 
 module.exports = {
   applyDragonsteelStoreMap,
+  applyPinArchiveMap,
   applyPinImages,
   STORE_URL_RE,
+  ARCHIVE_URL_RE,
 };

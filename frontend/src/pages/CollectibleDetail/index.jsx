@@ -61,6 +61,22 @@ function formatDate(date) {
 }
 
 const DRAGONSTEEL_STORE_URL = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
+const WAYBACK_ARCHIVE_URL =
+  /^https:\/\/web\.archive\.org\/web\/(\d{14})\/https:\/\/(?:www\.dragonsteelbooks\.com|store\.brandonsanderson\.com)\/products\/[a-z0-9-]+$/;
+const ARCHIVE_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function dragonsteelStoreLink(card) {
   if (card?.collectibleType !== "pin") return null;
@@ -72,6 +88,30 @@ function dragonsteelStoreLink(card) {
       card.storeMatch === "bundle"
         ? "Sold in a bundle on the Dragonsteel store"
         : "Dragonsteel store",
+  };
+}
+
+function archiveCaptureLabel(archiveUrl) {
+  if (typeof archiveUrl !== "string") return null;
+  const stamp = WAYBACK_ARCHIVE_URL.exec(archiveUrl)?.[1];
+  if (!stamp) return null;
+  const month = Number(stamp.slice(4, 6));
+  if (month < 1 || month > 12) return null;
+  return `${ARCHIVE_MONTHS[month - 1]} ${stamp.slice(0, 4)}`;
+}
+
+function archivedStoreLink(card) {
+  if (card?.collectibleType !== "pin") return null;
+  if (typeof card.storeUrl === "string" && card.storeUrl.trim().length > 0) return null;
+  if (card.archiveMatch !== "exact" && card.archiveMatch !== "bundle") return null;
+  const captured = archiveCaptureLabel(card.archiveUrl);
+  if (!captured) return null;
+  return {
+    href: card.archiveUrl,
+    label:
+      card.archiveMatch === "bundle"
+        ? `Archived bundle page (Wayback Machine, ${captured})`
+        : `Archived Dragonsteel store page (Wayback Machine, ${captured})`,
   };
 }
 
@@ -127,6 +167,7 @@ export default function CollectibleDetailPage() {
   }, [collectionEntry, quantity]);
 
   const storeLink = dragonsteelStoreLink(card);
+  const archiveLink = storeLink ? null : archivedStoreLink(card);
 
   if (!card) {
     return (
@@ -216,6 +257,20 @@ export default function CollectibleDetailPage() {
                         rel="noopener noreferrer"
                       >
                         {storeLink.label}
+                      </a>
+                    </dd>
+                  </div>
+                ) : archiveLink ? (
+                  <div className="card-detail__store">
+                    <dt>Store</dt>
+                    <dd>
+                      <a
+                        className="card-detail__store-link"
+                        href={archiveLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {archiveLink.label}
                       </a>
                     </dd>
                   </div>
