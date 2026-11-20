@@ -13,7 +13,7 @@ import { useCallback, useState } from "react";
 import { ITEM_ADDED } from "../../../analytics/events.js";
 import { captureEvent } from "../../../analytics/posthog.js";
 import { useAuth } from "../../../contexts/AuthContext";
-import { resolveSkuId } from "../../../data/collectibles";
+import { isRetiredPinId, resolveSkuId } from "../../../data/collectibles";
 import { MAX_COLLECTION_QUANTITY } from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
 
@@ -113,6 +113,9 @@ export function useCollectionQuantityMutations() {
     async ({ card, finish = null, quantity = 1, notes }) => {
       requireAuth(user);
       const { skuId } = resolveTargetSku(card, finish);
+      if (isRetiredPinId(skuId) || isRetiredPinId(card?.id)) {
+        throw new Error("This pin is no longer listed.");
+      }
       const addQuantity = normalizeQuantity(quantity) || 1;
 
       return runMutation("add to collection", async () => {

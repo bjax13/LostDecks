@@ -54,6 +54,7 @@ vi.mock("../utils/ownedQuantities", () => ({
 }));
 
 vi.mock("../../../data/collectibles", () => ({
+  isRetiredPinId: (skuId) => skuId === "PIN-CPS4-03",
   resolveSkuId(collectible, finish = null) {
     if (!collectible?.id) return null;
     if (collectible.collectibleType === "pin" || collectible.category === "pin") {
@@ -490,5 +491,19 @@ describe("AddToCollectionButton", () => {
       quantity: 1,
     });
     rerender(<AddToCollectionButton collectible={baseCollectible} />);
+  });
+
+  it("does not offer add for a retired pin", () => {
+    renderButton({
+      collectible: {
+        id: "PIN-CPS4-03",
+        collectibleType: "pin",
+        category: "pin",
+        finishes: [],
+      },
+    });
+    expect(screen.getByText("This pin is no longer listed.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add to collection" })).not.toBeInTheDocument();
+    expect(hookState.addToCollection).not.toHaveBeenCalled();
   });
 });

@@ -6,6 +6,13 @@ const storyTitleByCode = dataset.stories.reduce((acc, story) => {
   return acc;
 }, {});
 
+const retiredPins = Array.isArray(pinDataset.retired) ? pinDataset.retired : [];
+const retiredSkuRecords = retiredPins.map((pin) => ({
+  skuId: pin.id,
+  cardId: pin.id,
+  finish: null,
+}));
+
 const allRawSkus = [...dataset.skus, ...pinDataset.skus];
 
 const finishesByCardId = allRawSkus.reduce((acc, sku) => {
@@ -178,6 +185,17 @@ const collectiblesById = collectibleRecords.reduce((acc, rec) => {
   return acc;
 }, {});
 
+for (const pin of retiredPins) {
+  collectiblesById[pin.id] = formatPinCollectible(pin);
+}
+
+for (const sku of retiredSkuRecords) {
+  if (!skuIdsByCollectibleId[sku.cardId]) {
+    skuIdsByCollectibleId[sku.cardId] = [];
+  }
+  skuIdsByCollectibleId[sku.cardId].push(sku.skuId);
+}
+
 const storyProgressSets = dataset.stories.reduce((acc, story) => {
   acc[story.code] = {
     title: story.title,
@@ -262,6 +280,20 @@ const skusById = allRawSkus.reduce((acc, sku) => {
   };
   return acc;
 }, {});
+
+for (const sku of retiredSkuRecords) {
+  skusById[sku.skuId] = {
+    skuId: sku.skuId,
+    cardId: sku.cardId,
+    finish: null,
+  };
+}
+
+export const retiredPinIds = new Set(retiredPins.map((pin) => pin.id));
+
+export function isRetiredPinId(id) {
+  return typeof id === "string" && retiredPinIds.has(id);
+}
 
 const storiesByCode = { ...storyTitleByCode };
 

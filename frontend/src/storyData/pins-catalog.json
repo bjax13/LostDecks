@@ -2,8 +2,8 @@
   "meta": {
     "setId": "PINS",
     "setName": "Pins",
-    "totalUniquePins": 171,
-    "totalSkus": 171,
+    "totalUniquePins": 161,
+    "totalSkus": 161,
     "sources": [
       {
         "id": "ChasmFriends",
@@ -13,7 +13,7 @@
       {
         "id": "SCG",
         "name": "Sanderson Collectors Guild Pins",
-        "pinCount": 166,
+        "pinCount": 156,
         "sheetTitle": "Sanderson Collectors Guild Pin List",
         "sheetGid": "788070872",
         "dataAsOf": "2026-09-28"
@@ -56,7 +56,8 @@
       "Blue-book rows imported from Sanderson Collectors Guild Pin List (gid=788070872).",
       "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
       "Each pin has a single SKU with no DUN/FOIL finish variants.",
-      "Image URLs from the sheet are omitted until a product decision on asset hosting."
+      "Image URLs from the sheet are omitted until a product decision on asset hosting.",
+      "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them."
     ]
   },
   "pins": [
@@ -828,34 +829,8 @@
       "sourceName": "Series 4 - Pin 2 - Sarene"
     },
     {
-      "id": "PIN-CPS4-03",
-      "name": "Series 4 - Pin 3 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 3,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-04",
-      "name": "Series 4 - Pin 4 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 4,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
       "id": "PIN-CPS4-05",
-      "name": "Series 4 - Pin 5 -",
+      "name": "Captain Tress",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -864,20 +839,7 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-06",
-      "name": "Series 4 - Pin 6 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 6,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
+      "sourceName": "Series 4 - Pin 5 - Captain Tress"
     },
     {
       "id": "PIN-CPS4-07",
@@ -891,84 +853,6 @@
       "release": "Released at Gen Con 2026, later on Dragonsteel store",
       "notes": null,
       "sourceName": "Series 4 - Pin 7 - Maya"
-    },
-    {
-      "id": "PIN-CPS4-08",
-      "name": "Series 4 - Pin 8 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 8,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-09",
-      "name": "Series 4 - Pin 9 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 9,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-10",
-      "name": "Series 4 - Pin 10 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 10,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-11",
-      "name": "Series 4 - Pin 11 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 11,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-12",
-      "name": "Series 4 - Pin 12 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 12,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-13",
-      "name": "Series 4 - Pin 0 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 13,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
     },
     {
       "id": "PIN-KRO-01",
@@ -1271,7 +1155,7 @@
     },
     {
       "id": "PIN-CONV-09",
-      "name": "Dragonsteel Nexus 2025- Premium",
+      "name": "Dragonsteel Nexus 2025 - Premium",
       "series": "Convention",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1309,21 +1193,8 @@
       "sourceName": null
     },
     {
-      "id": "PIN-CYTO-01",
-      "name": "DDF Two-Tone",
-      "series": "Cytoverse",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 1,
-      "detail": "Cytoverse · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
       "id": "PIN-CYTO-02",
-      "name": "DDF Two-Tone",
+      "name": "DDF Two-Tone (US)",
       "series": "Cytoverse",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1336,7 +1207,7 @@
     },
     {
       "id": "PIN-CYTO-03",
-      "name": "DDF UK",
+      "name": "DDF Two-Tone (UK)",
       "series": "Cytoverse",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1570,7 +1441,7 @@
     },
     {
       "id": "PIN-SHELF-01",
-      "name": "Sandershelf - Pin 1 - Tress",
+      "name": "Tress",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1579,11 +1450,11 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 1 - Tress"
     },
     {
       "id": "PIN-SHELF-02",
-      "name": "Sandershelf - Pin 2 - Way of Kings",
+      "name": "Way of Kings",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1592,11 +1463,11 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 2 - Way of Kings"
     },
     {
       "id": "PIN-SHELF-03",
-      "name": "Sandershelf - Pin 3 - Elantris",
+      "name": "Elantris",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1605,11 +1476,11 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 3 - Elantris"
     },
     {
       "id": "PIN-SHELF-04",
-      "name": "Sandershelf - Pin 4 - Yumi",
+      "name": "Yumi",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1618,11 +1489,11 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 4 - Yumi"
     },
     {
       "id": "PIN-SHELF-05",
-      "name": "Sandershelf - Pin 5 - Mistborn Era 1",
+      "name": "Mistborn Era 1",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1631,11 +1502,11 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 5 - Mistborn Era 1"
     },
     {
       "id": "PIN-SHELF-06",
-      "name": "Sandershelf - Pin 6 - Emerdark",
+      "name": "Emberdark",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1644,11 +1515,11 @@
       "country": "US",
       "release": "Released at FanX 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 6 - Emberdark"
     },
     {
       "id": "PIN-SHELF-07",
-      "name": "Sandershelf - Pin 7 - Skyward",
+      "name": "Skyward",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1657,11 +1528,11 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 7 - Skyward"
     },
     {
       "id": "PIN-SHELF-08",
-      "name": "Sandershelf - Pin 8 - Warbreaker",
+      "name": "Warbreaker",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1670,11 +1541,11 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 8 - Warbreaker"
     },
     {
       "id": "PIN-SHELF-09",
-      "name": "Sandershelf - Pin 9 - Sunlit Man",
+      "name": "Sunlit Man",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1683,7 +1554,7 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 9 - Sunlit Man"
     },
     {
       "id": "PIN-ROSH-01",
@@ -1817,7 +1688,7 @@
     },
     {
       "id": "PIN-LOGO-03",
-      "name": "Dragonsteel Logo- Red",
+      "name": "Dragonsteel Logo - Red",
       "series": "Logo Pins",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1908,7 +1779,7 @@
     },
     {
       "id": "PIN-WHOP-03",
-      "name": "DSNX Worldhopper",
+      "name": "Dragonsteel Nexus Worldhopper",
       "series": "Worldhopper Pins",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -2168,7 +2039,7 @@
     },
     {
       "id": "PIN-OTHER-02",
-      "name": "Aviar- Emberdark",
+      "name": "Aviar - Emberdark",
       "series": "Other",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -2272,7 +2143,7 @@
     },
     {
       "id": "PIN-OTHER-10",
-      "name": "WoR Backer Pin",
+      "name": "Words of Radiance Backer Pin",
       "series": "Other",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -2280,6 +2151,138 @@
       "detail": "Other · US",
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": null
+    }
+  ],
+  "retired": [
+    {
+      "id": "PIN-CPS4-03",
+      "name": "Series 4 - Pin 3 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-04",
+      "name": "Series 4 - Pin 4 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-06",
+      "name": "Series 4 - Pin 6 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-08",
+      "name": "Series 4 - Pin 8 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-09",
+      "name": "Series 4 - Pin 9 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-10",
+      "name": "Series 4 - Pin 10 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-11",
+      "name": "Series 4 - Pin 11 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-12",
+      "name": "Series 4 - Pin 12 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-13",
+      "name": "Series 4 - Pin 0 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 13,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-01",
+      "name": "DDF Two-Tone",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": null,
       "notes": null,
       "sourceName": null
     }
@@ -2581,58 +2584,13 @@
       "finish": null
     },
     {
-      "skuId": "PIN-CPS4-03",
-      "cardId": "PIN-CPS4-03",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-04",
-      "cardId": "PIN-CPS4-04",
-      "finish": null
-    },
-    {
       "skuId": "PIN-CPS4-05",
       "cardId": "PIN-CPS4-05",
       "finish": null
     },
     {
-      "skuId": "PIN-CPS4-06",
-      "cardId": "PIN-CPS4-06",
-      "finish": null
-    },
-    {
       "skuId": "PIN-CPS4-07",
       "cardId": "PIN-CPS4-07",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-08",
-      "cardId": "PIN-CPS4-08",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-09",
-      "cardId": "PIN-CPS4-09",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-10",
-      "cardId": "PIN-CPS4-10",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-11",
-      "cardId": "PIN-CPS4-11",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-12",
-      "cardId": "PIN-CPS4-12",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-13",
-      "cardId": "PIN-CPS4-13",
       "finish": null
     },
     {
@@ -2763,11 +2721,6 @@
     {
       "skuId": "PIN-COSM-02",
       "cardId": "PIN-COSM-02",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CYTO-01",
-      "cardId": "PIN-CYTO-01",
       "finish": null
     },
     {

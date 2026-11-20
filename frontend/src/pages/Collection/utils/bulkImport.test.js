@@ -60,6 +60,7 @@ vi.mock("../../../data/collectibles", () => ({
     return collectiblesState.skus;
   },
   getSkuRecord: (skuId) => collectiblesState.records[skuId] ?? null,
+  isRetiredPinId: (skuId) => skuId === "PIN-CPS4-03",
   toSkuId: (cardId, finish) => `${cardId}-${finish}`,
 }));
 
@@ -162,6 +163,27 @@ describe("bulkImport (unit)", () => {
         message: "Missing skuId, or cardId+finish.",
       });
       expect(result.created).toBe(0);
+    });
+
+    it("rejects a retired pin even when a sku record exists", async () => {
+      collectiblesState.records["PIN-CPS4-03"] = {
+        skuId: "PIN-CPS4-03",
+        cardId: "PIN-CPS4-03",
+        finish: null,
+        card: { collectibleType: "pin", category: "pin" },
+      };
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "PIN-CPS4-03", quantity: "1" }],
+        existingEntries: [],
+        allowPins: true,
+      });
+      expect(result.issues).toContainEqual({
+        line: 2,
+        message: 'SKU "PIN-CPS4-03" not found in catalog.',
+      });
+      expect(result.created).toBe(0);
+      expect(mockBatchCommit).not.toHaveBeenCalled();
     });
 
     it("returns issues when SKU not in catalog", async () => {

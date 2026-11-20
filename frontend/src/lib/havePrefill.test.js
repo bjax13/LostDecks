@@ -45,7 +45,7 @@ describe("decodeHavePrefill", () => {
   });
 
   it("decodes toy o1 ordinal payload against live catalog hash", () => {
-    const seed = decodeHavePrefill("o1.51b124c5.0,3,5,2c:2,4h", ctx);
+    const seed = decodeHavePrefill("o1.701cf02d.0,3,5,23:2,47", ctx);
     expect(seed.status).toBe("applied");
     expect(seed.quantities).toEqual({
       "PIN-CF-01": 1,
@@ -75,7 +75,7 @@ describe("decodeHavePrefill", () => {
   });
 
   it("skips out-of-bounds ordinal indices without inventing skus", () => {
-    const seed = decodeHavePrefill("o1.51b124c5.0,zzzz,3", ctx);
+    const seed = decodeHavePrefill("o1.701cf02d.0,zzzz,3", ctx);
     expect(seed.status).toBe("applied");
     expect(seed.quantities).toEqual({
       "PIN-CF-01": 1,

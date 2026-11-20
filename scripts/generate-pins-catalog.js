@@ -42,7 +42,44 @@ const SET_CODES = [
 ];
 
 const SERIES_PIN_RE = /^Series\s+(\d+)\s*-\s*Pin\s+(\d+)\s*-\s*(.+)$/i;
+const SHELF_PIN_RE = /^Sandershelf\s*-\s*Pin\s+(\d+)\s*-\s*(.+)$/i;
+const BLANK_SERIES_PIN_RE = /^Series\s+\d+\s*-\s*Pin\s+\d+\s*-\s*$/i;
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
+
+/**
+ * Display names applied after id assignment. Ids stay on the CSV row order.
+ * Sandershelf titles are stripped by SHELF_PIN_RE; this map covers the rest.
+ */
+const DISPLAY_NAME_BY_ID = {
+  "PIN-CPS4-05": "Captain Tress",
+  "PIN-CYTO-02": "DDF Two-Tone (US)",
+  "PIN-CYTO-03": "DDF Two-Tone (UK)",
+  "PIN-CONV-09": "Dragonsteel Nexus 2025 - Premium",
+  "PIN-LOGO-03": "Dragonsteel Logo - Red",
+  "PIN-OTHER-02": "Aviar - Emberdark",
+  "PIN-SHELF-06": "Emberdark",
+  "PIN-OTHER-10": "Words of Radiance Backer Pin",
+  "PIN-WHOP-03": "Dragonsteel Nexus Worldhopper",
+};
+
+/**
+ * Stop listing these ids. Blank Series rows stay in the snapshot CSV so
+ * assignNumbers does not move later ids (Series 4 Pin 0 is PIN-CPS4-13
+ * because SERIES_PIN_RE requires a name). PIN-CYTO-01 stays in the CSV so
+ * PIN-CYTO-02 and later keep their numbers.
+ */
+const RETIRED_PIN_IDS = new Set([
+  "PIN-CPS4-03",
+  "PIN-CPS4-04",
+  "PIN-CPS4-06",
+  "PIN-CPS4-08",
+  "PIN-CPS4-09",
+  "PIN-CPS4-10",
+  "PIN-CPS4-11",
+  "PIN-CPS4-12",
+  "PIN-CPS4-13",
+  "PIN-CYTO-01",
+]);
 
 const CHASM_FRIENDS = [
   { id: "PIN-CF-01", name: "Shredhead", number: 1 },
@@ -100,13 +137,23 @@ function parseCsv(text) {
 }
 
 function displayName(raw) {
-  const match = SERIES_PIN_RE.exec(raw.trim());
-  return match ? match[3].trim() : raw.trim();
+  const trimmed = raw.trim();
+  const seriesMatch = SERIES_PIN_RE.exec(trimmed);
+  if (seriesMatch) return seriesMatch[3].trim();
+  const shelfMatch = SHELF_PIN_RE.exec(trimmed);
+  return shelfMatch ? shelfMatch[2].trim() : trimmed;
 }
 
 function parseNumber(raw) {
-  const match = SERIES_PIN_RE.exec(raw.trim());
-  return match ? Number.parseInt(match[2], 10) : null;
+  const trimmed = raw.trim();
+  const seriesMatch = SERIES_PIN_RE.exec(trimmed);
+  if (seriesMatch) return Number.parseInt(seriesMatch[2], 10);
+  const shelfMatch = SHELF_PIN_RE.exec(trimmed);
+  return shelfMatch ? Number.parseInt(shelfMatch[1], 10) : null;
+}
+
+function isRetiredPin(id, raw) {
+  return RETIRED_PIN_IDS.has(id) || BLANK_SERIES_PIN_RE.test(raw.trim());
 }
 
 function buildChasmFriendsPins() {
@@ -176,6 +223,7 @@ function main() {
   }
 
   const pins = buildChasmFriendsPins();
+  const retired = [];
   const usedIds = new Set(pins.map((pin) => pin.id));
   let scgCount = 0;
 
@@ -190,11 +238,12 @@ function main() {
         throw new Error(`Pin id fails SKU pattern: ${id}`);
       }
       usedIds.add(id);
+      const name = DISPLAY_NAME_BY_ID[id] ?? entry.name;
       const detailBits = [series];
       if (entry.country) detailBits.push(entry.country);
-      pins.push({
+      const pin = {
         id,
-        name: entry.name,
+        name,
         series,
         catalog: "SCG",
         catalogName: "Sanderson Collectors Guild Pins",
@@ -203,8 +252,13 @@ function main() {
         country: entry.country,
         release: entry.release,
         notes: entry.notes,
-        sourceName: entry.raw !== entry.name ? entry.raw : null,
-      });
+        sourceName: entry.raw !== name ? entry.raw : null,
+      };
+      if (isRetiredPin(id, entry.raw)) {
+        retired.push(pin);
+        continue;
+      }
+      pins.push(pin);
       scgCount += 1;
     }
   }
@@ -248,14 +302,18 @@ function main() {
         "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
         "Each pin has a single SKU with no DUN/FOIL finish variants.",
         "Image URLs from the sheet are omitted until a product decision on asset hosting.",
+        "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
       ],
     },
     pins,
+    retired,
     skus,
   };
 
   fs.writeFileSync(OUT_PATH, `${JSON.stringify(doc, null, 2)}\n`, "utf8");
-  console.log(`Wrote ${pins.length} pins (${scgCount} SCG) → ${path.relative(ROOT, OUT_PATH)}`);
+  console.log(
+    `Wrote ${pins.length} listed pins, ${retired.length} retired (${scgCount} listed SCG) → ${path.relative(ROOT, OUT_PATH)}`,
+  );
 }
 
 main();

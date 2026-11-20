@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuthModal } from "../../../contexts/AuthModalContext.jsx";
-import { resolveSkuId } from "../../../data/collectibles";
+import { isRetiredPinId, resolveSkuId } from "../../../data/collectibles";
 import { useCollectionQuantityMutations } from "../hooks/useCollectionQuantityMutations";
 import { getOwnedQuantity } from "../utils/ownedQuantities";
 
@@ -67,6 +67,7 @@ export default function AddToCollectionButton({
     [isPin, item, ownedBySkuId],
   );
   const pinSkuId = useMemo(() => (isPin && item ? resolveSkuId(item, null) : null), [isPin, item]);
+  const retired = isRetiredPinId(item?.id) || isRetiredPinId(pinSkuId);
   const pinHasSoftZero = Boolean(
     isPin && pinSkuId && Object.hasOwn(ownedBySkuId, pinSkuId) && pinOwnedQuantity === 0,
   );
@@ -259,7 +260,7 @@ export default function AddToCollectionButton({
         type="button"
         className="add-to-collection__button add-to-collection__button--step"
         onClick={onIncrement}
-        disabled={isLoading}
+        disabled={isLoading || retired}
         aria-label={`Increase ${quantityLabel}`}
       >
         {isLoading && isPending && pendingAction === "add" ? "…" : "+"}
@@ -281,6 +282,8 @@ export default function AddToCollectionButton({
               loadingLabel: "Updating…",
               isPending: pendingPinAdd,
             })
+          ) : retired ? (
+            <p>This pin is no longer listed.</p>
           ) : (
             <button
               type="button"

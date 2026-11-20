@@ -144,7 +144,7 @@ describe("Home page", () => {
       expect(within(snapshot).getByText("Pins")).toBeInTheDocument();
       expect(within(snapshot).getByText("2 / 215")).toBeInTheDocument();
       expect(within(snapshot).getByText("1 / 215")).toBeInTheDocument();
-      expect(within(snapshot).getByText("0 / 171")).toBeInTheDocument();
+      expect(within(snapshot).getByText("0 / 161")).toBeInTheDocument();
     });
 
     it("shows Get Started as View Collection link", () => {
