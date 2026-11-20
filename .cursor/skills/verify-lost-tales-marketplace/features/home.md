@@ -7,7 +7,7 @@ Home is the signed-out landing page: a hero that sends collectors into getting s
 - `home-load` shows the ShardStash heading and primary navigation.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
 - `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
-- `home-supported` opens the catalog from Story Deck and ChasmFriends pin tiles.
+- `home-supported` opens the catalog from the Story Deck Cards and Pins tiles.
 - `home-snapshot-signed-out` shows Collection Snapshot values as placeholders with Sign in hints.
 
 ## How to get to it (user POV)
@@ -39,3 +39,5 @@ Preconditions:
 - `Collection`, `Matches`, and `Account` in the nav are visible while signed out; following them redirects to `/auth/login`. That redirect is auth-gate behavior, not a broken home link.
 - Home hero `Sign In` opens the auth modal instead of `/auth/login`. Nav `Sign in` goes to the login page. Do not treat the modal heading `Sign In` as the login page heading.
 - Collection Snapshot loading skeletons disappear; wait for the `Collection Snapshot` heading and the `Sign in` hints, not a fixed sleep.
+- The pin tile label is `Pins`. ChasmFriends is a pin series inside the catalog and the quick pin picker, not the home tile name.
+- `Submit feedback` (the floating button) stays hidden unless a PostHog survey id is configured and that survey is still active. The footer `Feedback` button is a separate control and is not that survey.
