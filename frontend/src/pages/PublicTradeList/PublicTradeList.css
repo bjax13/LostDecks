@@ -1,0 +1,71 @@
+.public-trade-list {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+  color: #f2f0fa;
+}
+
+.public-trade-list h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}
+
+.public-trade-list__header {
+  margin-bottom: 1.5rem;
+}
+
+.public-trade-list__updated,
+.public-trade-list__contact,
+.public-trade-list__status,
+.public-trade-list__empty {
+  margin: 0.35rem 0;
+  color: rgba(242, 240, 250, 0.78);
+  font-size: 0.95rem;
+}
+
+.public-trade-list__stale {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 180, 80, 0.2);
+  color: #ffd59a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.public-trade-list__section {
+  margin-bottom: 1.5rem;
+}
+
+.public-trade-list__section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.public-trade-list__items {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.public-trade-list__items li {
+  margin: 0.25rem 0;
+}
+
+.public-trade-list__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background: #8a2be2;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.public-trade-list__cta:hover {
+  background: #9b45ef;
+}
