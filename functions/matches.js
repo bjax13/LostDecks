@@ -255,6 +255,75 @@ function buildLanesForCounterparty({
   return lanes;
 }
 
+function readStoredCode(value) {
+  return typeof value === "string" ? value.trim().toUpperCase() : "";
+}
+
+function normalizeStoredLocation(preferences) {
+  const countryRaw = readStoredCode(preferences?.matchCountry);
+  const country = /^[A-Z]{2}$/.test(countryRaw) ? countryRaw : "";
+  const regionRaw = readStoredCode(preferences?.matchRegion);
+  const region =
+    country && /^[A-Z]{2}-[A-Z0-9]{1,3}$/.test(regionRaw) && regionRaw.startsWith(`${country}-`)
+      ? regionRaw
+      : "";
+  return { country, region };
+}
+
+function normalizeLocationFilter(value) {
+  return value === "country" || value === "state" ? value : "off";
+}
+
+/**
+ * Same inclusion rules as frontend/src/lib/matchLocationFilter.js.
+ * Location is never copied onto the match row.
+ */
+function passesMatchLocationFilter(filter, caller, other) {
+  const mode = filter === "country" || filter === "state" ? filter : "off";
+  const callerCountry = readStoredCode(caller?.country);
+  const callerRegion = readStoredCode(caller?.region);
+  const otherCountry = readStoredCode(other?.country);
+  const otherRegion = readStoredCode(other?.region);
+
+  if (mode === "off") {
+    return true;
+  }
+
+  if (mode === "country") {
+    if (!callerCountry) {
+      return true;
+    }
+    if (!otherCountry) {
+      return false;
+    }
+    return otherCountry === callerCountry;
+  }
+
+  if (!callerCountry || !callerRegion) {
+    return true;
+  }
+  if (!otherCountry || !otherRegion) {
+    return false;
+  }
+  return otherCountry === callerCountry && otherRegion === callerRegion;
+}
+
+function buildLocationsByUserId(preferencesByUserId) {
+  const locationsByUserId = new Map();
+  if (!preferencesByUserId) {
+    return locationsByUserId;
+  }
+
+  for (const [userId, preferences] of preferencesByUserId.entries()) {
+    if (!userId) {
+      continue;
+    }
+    locationsByUserId.set(userId, normalizeStoredLocation(preferences));
+  }
+
+  return locationsByUserId;
+}
+
 function buildMatchesForCaller({
   callerUid,
   userSkuTotals,
@@ -262,6 +331,8 @@ function buildMatchesForCaller({
   lanePrefsByUserId = new Map(),
   keepByUserId = new Map(),
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
+  locationFilter = "off",
+  locationsByUserId = new Map(),
 }) {
   if (optedOutUserIds.has(callerUid)) {
     return { isCallerOptedOut: true, matches: [] };
@@ -271,10 +342,22 @@ function buildMatchesForCaller({
   const callerKeep = normalizeMatchKeep(keepByUserId.get(callerUid));
   const callerProfile = buildUserMatchProfile(callerTotals, callerKeep);
   const callerLanePrefs = lanePrefsByUserId.get(callerUid);
+  const callerLocation = locationsByUserId.get(callerUid) || { country: "", region: "" };
+  const normalizedLocationFilter = normalizeLocationFilter(locationFilter);
   const matches = [];
 
   for (const [otherUid, otherTotals] of userSkuTotals.entries()) {
     if (otherUid === callerUid || optedOutUserIds.has(otherUid)) {
+      continue;
+    }
+
+    if (
+      !passesMatchLocationFilter(
+        normalizedLocationFilter,
+        callerLocation,
+        locationsByUserId.get(otherUid),
+      )
+    ) {
       continue;
     }
 
@@ -429,18 +512,22 @@ module.exports = {
   buildKeepByUserId,
   buildLanePrefsByUserId,
   buildLanesForCounterparty,
+  buildLocationsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
   isMatchLaneEnabled,
   laneForSkuId,
+  normalizeLocationFilter,
   normalizeMatchContactSharing,
   normalizeMatchCursor,
   normalizeMatchKeep,
   normalizeMatchLanes,
   normalizeMatchPageSize,
   normalizeQuantity,
+  normalizeStoredLocation,
   paginateMatches,
+  passesMatchLocationFilter,
   resolveMatchContact,
   resolvePublicDisplayName,
 };

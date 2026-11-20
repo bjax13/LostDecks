@@ -121,13 +121,18 @@ function normalizeCursor(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+function normalizeLocationFilter(value) {
+  return value === "country" || value === "state" ? value : "off";
+}
+
 export function getMatchesCacheKey(
   userId,
-  { pageSize = DEFAULT_MATCH_PAGE_SIZE, cursor = null } = {},
+  { pageSize = DEFAULT_MATCH_PAGE_SIZE, cursor = null, locationFilter = "off" } = {},
 ) {
   const normalizedPageSize = normalizePageSize(pageSize);
   const normalizedCursor = normalizeCursor(cursor) || "start";
-  return `matches-cache:${userId}:p${normalizedPageSize}:${normalizedCursor}`;
+  const filter = normalizeLocationFilter(locationFilter);
+  return `matches-cache:${userId}:p${normalizedPageSize}:${normalizedCursor}:${filter}`;
 }
 
 export function readMatchesCache(userId, options = {}) {
@@ -218,10 +223,15 @@ function getRefreshAvailableInSeconds(cachedAtMs, nowMs) {
  */
 export function useTradeMatches(
   userId,
-  { pageSize: requestedPageSize = DEFAULT_MATCH_PAGE_SIZE } = {},
+  {
+    pageSize: requestedPageSize = DEFAULT_MATCH_PAGE_SIZE,
+    locationFilter: requestedLocationFilter = "off",
+    ready = true,
+  } = {},
 ) {
   const enabled = Boolean(userId);
   const pageSize = normalizePageSize(requestedPageSize);
+  const locationFilter = normalizeLocationFilter(requestedLocationFilter);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState(null);
   const [callerOptedOut, setCallerOptedOut] = useState(false);
@@ -233,6 +243,12 @@ export function useTradeMatches(
   const [refreshToken, setRefreshToken] = useState(0);
   const [cursor, setCursor] = useState(null);
   const [cursorStack, setCursorStack] = useState([]);
+  const [filterForCursor, setFilterForCursor] = useState(locationFilter);
+  if (filterForCursor !== locationFilter) {
+    setFilterForCursor(locationFilter);
+    setCursor(null);
+    setCursorStack([]);
+  }
   const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [totalOnPage, setTotalOnPage] = useState(0);
@@ -310,7 +326,7 @@ export function useTradeMatches(
       return undefined;
     }
 
-    const cacheKey = getMatchesCacheKey(userId, { pageSize, cursor });
+    const cacheKey = getMatchesCacheKey(userId, { pageSize, cursor, locationFilter });
 
     const onStorage = (event) => {
       if (event.key !== cacheKey) {
@@ -320,7 +336,7 @@ export function useTradeMatches(
         return;
       }
 
-      const cached = readMatchesCache(userId, { pageSize, cursor });
+      const cached = readMatchesCache(userId, { pageSize, cursor, locationFilter });
       if (!cached) {
         return;
       }
@@ -338,7 +354,7 @@ export function useTradeMatches(
     return () => {
       window.removeEventListener("storage", onStorage);
     };
-  }, [applyPayload, cursor, enabled, pageSize, userId]);
+  }, [applyPayload, cursor, enabled, locationFilter, pageSize, userId]);
 
   useEffect(() => {
     if (!enabled || !userId) {
@@ -357,10 +373,15 @@ export function useTradeMatches(
       return;
     }
 
+    if (!ready) {
+      setLoading(true);
+      return;
+    }
+
     // Intentionally read so reload() can re-run this effect after cooldown.
     const fetchGeneration = refreshToken;
     const now = Date.now();
-    const cached = readMatchesCache(userId, { pageSize, cursor });
+    const cached = readMatchesCache(userId, { pageSize, cursor, locationFilter });
     const cacheIsFresh =
       cached &&
       typeof cached.cachedAtMs === "number" &&
@@ -396,6 +417,7 @@ export function useTradeMatches(
     fetchMatches({
       pageSize,
       cursor,
+      locationFilter,
     })
       .then((response) => {
         if (cancelled) {
@@ -424,7 +446,7 @@ export function useTradeMatches(
         };
 
         applyPayload(payload, { showCountdown: false, isCached: false });
-        writeMatchesCache(userId, payload, { pageSize, cursor });
+        writeMatchesCache(userId, payload, { pageSize, cursor, locationFilter });
       })
       .catch((err) => {
         if (cancelled) {
@@ -455,7 +477,17 @@ export function useTradeMatches(
     return () => {
       cancelled = true;
     };
-  }, [applyPayload, cursor, enabled, fetchMatches, pageSize, refreshToken, userId]);
+  }, [
+    applyPayload,
+    cursor,
+    enabled,
+    fetchMatches,
+    locationFilter,
+    pageSize,
+    ready,
+    refreshToken,
+    userId,
+  ]);
 
   return {
     cacheAgeSeconds,

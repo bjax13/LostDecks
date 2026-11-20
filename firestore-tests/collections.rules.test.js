@@ -250,3 +250,60 @@ test("userPreferences create still works (smoke)", async () => {
     }),
   );
 });
+
+test("owner can store and clear a country and state code", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  const ref = doc(db, `userPreferences/${OWNER}`);
+  await assertSucceeds(
+    setDoc(ref, {
+      matchCountry: "US",
+      matchRegion: "US-UT",
+    }),
+  );
+  await assertSucceeds(
+    updateDoc(ref, {
+      matchCountry: "",
+      matchRegion: "",
+    }),
+  );
+});
+
+test("owner can store a country without a state", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    setDoc(doc(db, `userPreferences/${OWNER}`), {
+      matchCountry: "FR",
+      matchRegion: "",
+    }),
+  );
+});
+
+test("location free text and a region from another country are rejected", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  const ref = doc(db, `userPreferences/${OWNER}`);
+  await assertFails(setDoc(ref, { matchCountry: "California" }));
+  await assertFails(setDoc(ref, { matchCountry: "us" }));
+  await assertFails(setDoc(ref, { matchCountry: "USA" }));
+  await assertFails(setDoc(ref, { matchCountry: "US", matchRegion: "Utah" }));
+  await assertFails(setDoc(ref, { matchCountry: "US", matchRegion: "CA-ON" }));
+  await assertFails(setDoc(ref, { matchRegion: "US-UT" }));
+  await assertFails(setDoc(ref, { matchCountry: "US", matchRegion: "US-CALIFORNIA" }));
+});
+
+test("another signed-in user cannot read or write location on preferences", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), `userPreferences/${OWNER}`), {
+      matchCountry: "US",
+      matchRegion: "US-CA",
+    });
+  });
+
+  const other = testEnv.authenticatedContext(OTHER).firestore();
+  await assertFails(getDoc(doc(other, `userPreferences/${OWNER}`)));
+  await assertFails(
+    updateDoc(doc(other, `userPreferences/${OWNER}`), {
+      matchCountry: "CA",
+      matchRegion: "CA-ON",
+    }),
+  );
+});

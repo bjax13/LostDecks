@@ -220,6 +220,40 @@
   margin-top: 0.2rem;
 }
 
+.account-location {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.account-location-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 22rem;
+  color: #e6dcff;
+  font-weight: 600;
+}
+
+.account-location-field select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(132, 105, 221, 0.55);
+  background: rgba(24, 18, 45, 0.85);
+  color: #f4f1ff;
+  font: inherit;
+}
+
+.account-location-field select:focus-visible {
+  outline: 2px solid rgba(177, 157, 255, 0.95);
+  outline-offset: 1px;
+}
+
 .account-match-lanes:disabled .account-lane-row {
   opacity: 0.55;
 }

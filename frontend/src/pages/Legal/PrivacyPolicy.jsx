@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
   return (
     <main className="legal-page">
       <h1>Privacy Policy</h1>
-      <p className="legal-page__updated">Last updated: October 8, 2026</p>
+      <p className="legal-page__updated">Last updated: November 20, 2026</p>
       <div className="legal-page__body">
         <p>
           This template describes how {SITE_NAME} (operated by Bryan Jackson) handles information
@@ -33,6 +33,10 @@ export default function PrivacyPolicy() {
           <li>
             Match preferences: trading email, Discord handle/channel, lanes, keep counts, and
             whether you opt out of matching.
+          </li>
+          <li>
+            We store an optional country and state or province, used only to filter Matches, and
+            never shown to other users.
           </li>
         </ul>
 
