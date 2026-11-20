@@ -105,6 +105,10 @@ creates the `shardstash` Hosting site if it is missing, and deploys Hosting to
 that site. The default `storydeck-16.web.app` site is not deleted and may go
 stale.
 
+### Pin photos
+
+Adding a pin photo (file names, rights, the version map, and catalog regen) is documented in [`frontend/public/pin-images/README.md`](frontend/public/pin-images/README.md).
+
 ### Planning docs
 
 See `docs/plan.md` for a high-level plan of the pages and features considered
