@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { datasetMeta, isRetiredPinId } from "../../data/collectibles";
+import { collectibleDetailPath } from "../../lib/collectibleDetailPath";
+import CollectibleDetailsLink from "../Collectibles/components/CollectibleDetailsLink";
 import { categoryLabels } from "../Collectibles/constants";
 
 export function normalizeQuantity(entry) {
@@ -238,12 +240,10 @@ export function CollectionTable({
       return;
     }
 
-    if (entry.skuId && entry.cardId) {
-      navigate(`/collectibles/${entry.cardId}/${entry.skuId}`);
-    } else if (entry.cardId) {
-      navigate(`/collectibles/${entry.cardId}`);
+    const path = collectibleDetailPath(entry.cardId, entry.skuId);
+    if (path) {
+      navigate(path);
     }
-    // If neither exists, don't navigate
   };
 
   const isBusy = (entry) => Boolean(busySkuId && entry.skuId && busySkuId === entry.skuId);
@@ -260,6 +260,7 @@ export function CollectionTable({
             <th scope="col">Quantity</th>
             <th scope="col">Last Updated</th>
             {readOnly ? null : <th scope="col">Actions</th>}
+            <th scope="col">Details</th>
           </tr>
         </thead>
         <tbody>
@@ -339,6 +340,13 @@ export function CollectionTable({
                   </div>
                 </td>
               )}
+              <td className="collection-table__details" data-label="Details">
+                <CollectibleDetailsLink
+                  collectibleId={entry.cardId}
+                  skuId={entry.skuId}
+                  name={entry.displayName}
+                />
+              </td>
             </tr>
           ))}
         </tbody>
