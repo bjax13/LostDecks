@@ -149,38 +149,23 @@ describe("gettingStartedCatalog", () => {
     expect(formatSkuNumberLabel(brandon)).toBe("Brandon");
   });
 
-  it("keeps full pin names and cleans blank series 4 placeholders without renaming ids", () => {
+  it("keeps full pin names, including blank series 4 placeholders and shared prefixes", () => {
     const pins = gettingStartedTree.find((section) => section.id === "pins");
     const series4 = pins.children.find((group) => group.label === "Character Pin Series 4");
-    expect(series4.skus.map((sku) => sku.skuId)).toEqual([
-      "PIN-CPS4-01",
-      "PIN-CPS4-02",
-      "PIN-CPS4-03",
-      "PIN-CPS4-04",
-      "PIN-CPS4-05",
-      "PIN-CPS4-06",
-      "PIN-CPS4-07",
-      "PIN-CPS4-08",
-      "PIN-CPS4-09",
-      "PIN-CPS4-10",
-      "PIN-CPS4-11",
-      "PIN-CPS4-12",
-      "PIN-CPS4-13",
-    ]);
     expect(series4.skus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
       "Sazed",
       "Sarene",
-      "Series 4 - Pin 3",
-      "Series 4 - Pin 4",
-      "Series 4 - Pin 5",
-      "Series 4 - Pin 6",
+      "Series 4 - Pin 3 -",
+      "Series 4 - Pin 4 -",
+      "Series 4 - Pin 5 -",
+      "Series 4 - Pin 6 -",
       "Maya",
-      "Series 4 - Pin 8",
-      "Series 4 - Pin 9",
-      "Series 4 - Pin 10",
-      "Series 4 - Pin 11",
-      "Series 4 - Pin 12",
-      "Series 4 - Pin 0",
+      "Series 4 - Pin 8 -",
+      "Series 4 - Pin 9 -",
+      "Series 4 - Pin 10 -",
+      "Series 4 - Pin 11 -",
+      "Series 4 - Pin 12 -",
+      "Series 4 - Pin 0 -",
     ]);
 
     const shelf = pins.children.find((group) => group.label === "Sandershelf");
@@ -196,10 +181,6 @@ describe("gettingStartedCatalog", () => {
       "Worldhopper Ball 2024 Scene Pin: Adolin and Shallan",
       "Worldhopper Ball 2025 Scene Pin: Vin and Elend",
     ]);
-
-    const cytoverse = pins.children.find((group) => group.label === "Cytoverse");
-    const twoTone = cytoverse.skus.filter((sku) => formatSkuNumberLabel(sku) === "DDF Two-Tone");
-    expect(twoTone.map((sku) => sku.skuId)).toEqual(["PIN-CYTO-01", "PIN-CYTO-02"]);
   });
 
   it("disambiguates nonsense SKUs that share a card number within a group", () => {

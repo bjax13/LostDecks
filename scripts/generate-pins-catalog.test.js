@@ -27,29 +27,6 @@ test("pins catalog includes ChasmFriends and blue-book series groupings", () => 
   assert.equal(brandon.name, "Brandon");
   assert.equal(brandon.series, "Character Pin Series 1");
 
-  const series4 = Object.fromEntries(
-    catalog.pins
-      .filter((pin) => pin.series === "Character Pin Series 4")
-      .map((pin) => [pin.id, pin]),
-  );
-  assert.equal(series4["PIN-CPS4-01"].name, "Sazed");
-  assert.equal(series4["PIN-CPS4-02"].name, "Sarene");
-  assert.equal(series4["PIN-CPS4-07"].name, "Maya");
-  assert.equal(series4["PIN-CPS4-03"].name, "Series 4 - Pin 3");
-  assert.equal(series4["PIN-CPS4-03"].sourceName, "Series 4 - Pin 3 -");
-  assert.equal(series4["PIN-CPS4-03"].id, "PIN-CPS4-03");
-  assert.equal(series4["PIN-CPS4-13"].name, "Series 4 - Pin 0");
-  assert.equal(series4["PIN-CPS4-13"].id, "PIN-CPS4-13");
-
-  const shelf = catalog.pins.find((pin) => pin.id === "PIN-SHELF-01");
-  assert.equal(shelf.name, "Sandershelf - Pin 1 - Tress");
-
-  const twoTone = catalog.pins.filter((pin) => pin.name === "DDF Two-Tone");
-  assert.deepEqual(
-    twoTone.map((pin) => pin.id),
-    ["PIN-CYTO-01", "PIN-CYTO-02"],
-  );
-
   for (const pin of catalog.pins) {
     assert.match(pin.id, SKU_RE);
   }

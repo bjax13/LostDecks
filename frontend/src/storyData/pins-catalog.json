@@ -829,7 +829,7 @@
     },
     {
       "id": "PIN-CPS4-03",
-      "name": "Series 4 - Pin 3",
+      "name": "Series 4 - Pin 3 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -838,11 +838,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 3 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-04",
-      "name": "Series 4 - Pin 4",
+      "name": "Series 4 - Pin 4 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -851,11 +851,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 4 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-05",
-      "name": "Series 4 - Pin 5",
+      "name": "Series 4 - Pin 5 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -864,11 +864,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 5 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-06",
-      "name": "Series 4 - Pin 6",
+      "name": "Series 4 - Pin 6 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -877,7 +877,7 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 6 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-07",
@@ -894,7 +894,7 @@
     },
     {
       "id": "PIN-CPS4-08",
-      "name": "Series 4 - Pin 8",
+      "name": "Series 4 - Pin 8 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -903,11 +903,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 8 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-09",
-      "name": "Series 4 - Pin 9",
+      "name": "Series 4 - Pin 9 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -916,11 +916,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 9 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-10",
-      "name": "Series 4 - Pin 10",
+      "name": "Series 4 - Pin 10 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -929,11 +929,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 10 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-11",
-      "name": "Series 4 - Pin 11",
+      "name": "Series 4 - Pin 11 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -942,11 +942,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 11 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-12",
-      "name": "Series 4 - Pin 12",
+      "name": "Series 4 - Pin 12 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -955,11 +955,11 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 12 -"
+      "sourceName": null
     },
     {
       "id": "PIN-CPS4-13",
-      "name": "Series 4 - Pin 0",
+      "name": "Series 4 - Pin 0 -",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -968,7 +968,7 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 4 - Pin 0 -"
+      "sourceName": null
     },
     {
       "id": "PIN-KRO-01",

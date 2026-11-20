@@ -962,13 +962,12 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     }
 
     await openGroup("Character Pin Series 4");
-    const pin3 = getSkuQuantityGroup(/character pin series 4 series 4 - pin 3 quantity, 0$/i);
-    expect(within(pin3).getByText("Series 4 - Pin 3 :")).toHaveAttribute(
+    const pin3 = getSkuQuantityGroup(/character pin series 4 series 4 - pin 3 - quantity, 0$/i);
+    expect(within(pin3).getByText("Series 4 - Pin 3 - :")).toHaveAttribute(
       "title",
-      "Series 4 - Pin 3",
+      "Series 4 - Pin 3 -",
     );
     expect(pin3).toHaveClass("has-name-label");
-    expect(pin3.textContent).not.toMatch(/Series 4 - Pin 3 -/);
     expect(within(pin3.closest(".getting-started__sku-list")).getByText("Sazed :")).toHaveAttribute(
       "title",
       "Sazed",
