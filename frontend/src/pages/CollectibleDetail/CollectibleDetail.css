@@ -129,6 +129,21 @@
   word-wrap: break-word;
 }
 
+.card-detail__store {
+  grid-column: 1 / -1;
+}
+
+.card-detail__store-link {
+  color: #cfa8ff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.card-detail__store-link:hover {
+  color: #ffffff;
+}
+
 .card-detail__loading {
   color: #d2c9ff;
   padding: 1rem 0;

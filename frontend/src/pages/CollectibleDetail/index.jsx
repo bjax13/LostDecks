@@ -59,6 +59,21 @@ function formatDate(date) {
   }
 }
 
+const DRAGONSTEEL_STORE_URL = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
+
+function dragonsteelStoreLink(card) {
+  if (card?.collectibleType !== "pin") return null;
+  if (card.storeMatch !== "exact" && card.storeMatch !== "bundle") return null;
+  if (typeof card.storeUrl !== "string" || !DRAGONSTEEL_STORE_URL.test(card.storeUrl)) return null;
+  return {
+    href: card.storeUrl,
+    label:
+      card.storeMatch === "bundle"
+        ? "Sold in a bundle on the Dragonsteel store"
+        : "Dragonsteel store",
+  };
+}
+
 export default function CollectibleDetailPage() {
   const { collectibleId, skuId } = useParams();
   const navigate = useNavigate();
@@ -109,6 +124,8 @@ export default function CollectibleDetailPage() {
     }
     return { [collectionEntry.skuId]: Math.max(0, quantity) };
   }, [collectionEntry, quantity]);
+
+  const storeLink = dragonsteelStoreLink(card);
 
   if (!card) {
     return (
@@ -182,6 +199,21 @@ export default function CollectibleDetailPage() {
                   <div>
                     <dt>Catalog</dt>
                     <dd>{card.catalogName}</dd>
+                  </div>
+                ) : null}
+                {storeLink ? (
+                  <div className="card-detail__store">
+                    <dt>Store</dt>
+                    <dd>
+                      <a
+                        className="card-detail__store-link"
+                        href={storeLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {storeLink.label}
+                      </a>
+                    </dd>
                   </div>
                 ) : null}
               </>
