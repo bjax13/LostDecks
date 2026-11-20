@@ -2,6 +2,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { MAX_COLLECTION_QUANTITY } from "../../lib/collectionLimits";
 import {
   COLLECTIBLE_TYPE_PINS,
+  CONDENSED_PIN_COLUMNS,
+  CONDENSED_PIN_COLUMNS_NARROW,
   formatReviewGroupLabel,
   formatSkuNumberLabel,
   formatSkuQuantityAriaLabel,
@@ -136,7 +138,12 @@ function CondensedSkuCell({
     // biome-ignore lint/a11y/useSemanticElements: quantity cell is a composite control, not a form fieldset
     <div className={cellClassName} role="group" aria-label={`${quantityLabel}, ${quantity}`}>
       <span className="getting-started__sku-condensed-label">
-        <span className="getting-started__sku-condensed-short">{shortLabel} :</span>
+        <span
+          className="getting-started__sku-condensed-short"
+          title={usesNameLabel ? shortLabel : undefined}
+        >
+          {shortLabel} :
+        </span>
         {hasVariantLine ? (
           <span className="getting-started__sku-condensed-variant">{variantLabel}</span>
         ) : null}
@@ -338,7 +345,11 @@ export default function CollectionReviewEditor({
                             <div
                               className="getting-started__tree-children getting-started__sku-list"
                               role="group"
-                              style={getCondensedSkuListStyle(group.skus.length)}
+                              style={getCondensedSkuListStyle(
+                                group.skus.length,
+                                section.id === "pins" ? CONDENSED_PIN_COLUMNS : undefined,
+                                section.id === "pins" ? CONDENSED_PIN_COLUMNS_NARROW : undefined,
+                              )}
                             >
                               {group.skus.map((sku) => {
                                 const numberLabel = formatSkuNumberLabel(sku);

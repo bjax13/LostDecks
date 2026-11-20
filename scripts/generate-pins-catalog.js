@@ -42,6 +42,8 @@ const SET_CODES = [
 ];
 
 const SERIES_PIN_RE = /^Series\s+(\d+)\s*-\s*Pin\s+(\d+)\s*-\s*(.+)$/i;
+/** Same shape with a blank character, e.g. "Series 4 - Pin 3 -". */
+const SERIES_PIN_BLANK_RE = /^Series\s+(\d+)\s*-\s*Pin\s+(\d+)\s*-\s*$/i;
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
 
 const CHASM_FRIENDS = [
@@ -100,8 +102,15 @@ function parseCsv(text) {
 }
 
 function displayName(raw) {
-  const match = SERIES_PIN_RE.exec(raw.trim());
-  return match ? match[3].trim() : raw.trim();
+  const trimmed = raw.trim();
+  const named = SERIES_PIN_RE.exec(trimmed);
+  if (named) return named[3].trim();
+  const blank = SERIES_PIN_BLANK_RE.exec(trimmed);
+  if (blank) {
+    // Keep the pin number visible. Do not invent a character name.
+    return `Series ${blank[1]} - Pin ${Number.parseInt(blank[2], 10)}`;
+  }
+  return trimmed;
 }
 
 function parseNumber(raw) {

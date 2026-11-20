@@ -5,6 +5,8 @@ import {
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
+  CONDENSED_PIN_COLUMNS,
+  CONDENSED_PIN_COLUMNS_NARROW,
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
   deriveReviewStateFromEntries,
@@ -147,6 +149,59 @@ describe("gettingStartedCatalog", () => {
     expect(formatSkuNumberLabel(brandon)).toBe("Brandon");
   });
 
+  it("keeps full pin names and cleans blank series 4 placeholders without renaming ids", () => {
+    const pins = gettingStartedTree.find((section) => section.id === "pins");
+    const series4 = pins.children.find((group) => group.label === "Character Pin Series 4");
+    expect(series4.skus.map((sku) => sku.skuId)).toEqual([
+      "PIN-CPS4-01",
+      "PIN-CPS4-02",
+      "PIN-CPS4-03",
+      "PIN-CPS4-04",
+      "PIN-CPS4-05",
+      "PIN-CPS4-06",
+      "PIN-CPS4-07",
+      "PIN-CPS4-08",
+      "PIN-CPS4-09",
+      "PIN-CPS4-10",
+      "PIN-CPS4-11",
+      "PIN-CPS4-12",
+      "PIN-CPS4-13",
+    ]);
+    expect(series4.skus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
+      "Sazed",
+      "Sarene",
+      "Series 4 - Pin 3",
+      "Series 4 - Pin 4",
+      "Series 4 - Pin 5",
+      "Series 4 - Pin 6",
+      "Maya",
+      "Series 4 - Pin 8",
+      "Series 4 - Pin 9",
+      "Series 4 - Pin 10",
+      "Series 4 - Pin 11",
+      "Series 4 - Pin 12",
+      "Series 4 - Pin 0",
+    ]);
+
+    const shelf = pins.children.find((group) => group.label === "Sandershelf");
+    expect(formatSkuNumberLabel(shelf.skus[0])).toBe("Sandershelf - Pin 1 - Tress");
+
+    const roshar = pins.children.find((group) => group.label === "Roshar");
+    expect(roshar.skus.map((sku) => formatSkuNumberLabel(sku))).toContain(
+      "Wind and Truth - Australian",
+    );
+
+    const scene = pins.children.find((group) => group.label === "Scene Pin");
+    expect(scene.skus.map((sku) => formatSkuNumberLabel(sku))).toEqual([
+      "Worldhopper Ball 2024 Scene Pin: Adolin and Shallan",
+      "Worldhopper Ball 2025 Scene Pin: Vin and Elend",
+    ]);
+
+    const cytoverse = pins.children.find((group) => group.label === "Cytoverse");
+    const twoTone = cytoverse.skus.filter((sku) => formatSkuNumberLabel(sku) === "DDF Two-Tone");
+    expect(twoTone.map((sku) => sku.skuId)).toEqual(["PIN-CYTO-01", "PIN-CYTO-02"]);
+  });
+
   it("disambiguates nonsense SKUs that share a card number within a group", () => {
     const nonsenseDunSection = gettingStartedTree.find((section) => section.id === "nonsense-dun");
     const elsGroup = nonsenseDunSection.children.find((group) =>
@@ -231,6 +286,37 @@ describe("gettingStartedCatalog", () => {
       "--sku-cols": "5",
       "--sku-rows-narrow": "3",
       "--sku-cols-narrow": "2",
+    });
+  });
+
+  it("lays pin review grids out in 3-4 columns, and one column on a phone", () => {
+    expect(CONDENSED_PIN_COLUMNS).toBe(4);
+    expect(CONDENSED_PIN_COLUMNS_NARROW).toBe(1);
+    expect(
+      getCondensedSkuListStyle(13, CONDENSED_PIN_COLUMNS, CONDENSED_PIN_COLUMNS_NARROW),
+    ).toEqual({
+      "--sku-rows": "4",
+      "--sku-cols": "4",
+      "--sku-rows-narrow": "13",
+      "--sku-cols-narrow": "1",
+    });
+    expect(
+      getCondensedSkuListStyle(9, CONDENSED_PIN_COLUMNS, CONDENSED_PIN_COLUMNS_NARROW)[
+        "--sku-cols"
+      ],
+    ).toBe("3");
+    expect(
+      getCondensedSkuListStyle(5, CONDENSED_PIN_COLUMNS, CONDENSED_PIN_COLUMNS_NARROW)[
+        "--sku-cols"
+      ],
+    ).toBe("3");
+    expect(
+      getCondensedSkuListStyle(2, CONDENSED_PIN_COLUMNS, CONDENSED_PIN_COLUMNS_NARROW),
+    ).toEqual({
+      "--sku-rows": "1",
+      "--sku-cols": "2",
+      "--sku-rows-narrow": "2",
+      "--sku-cols-narrow": "1",
     });
   });
 
