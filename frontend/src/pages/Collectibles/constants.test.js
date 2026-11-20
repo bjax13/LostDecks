@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { categoryLabels, defaultSort, sortOptions } from "./constants.js";
+import { categoryLabels, defaultSort, sortOptions, sortOptionsForView } from "./constants.js";
 
 describe("collectibles constants", () => {
   it("exposes category labels", () => {
@@ -28,5 +28,26 @@ describe("collectibles constants", () => {
       "rarity",
     ]);
     expect(sortOptions[0].label).toBe("Grouped");
+  });
+
+  it("relabels card-only sorts for pins and hides rarity", () => {
+    expect(sortOptionsForView("all").map((option) => option.label)).toEqual([
+      "Grouped",
+      "Card Number",
+      "Card ID",
+      "Category",
+      "Story",
+      "Rarity",
+    ]);
+    expect(sortOptionsForView("pin").map((option) => option.label)).toEqual([
+      "Grouped",
+      "Pin Number",
+      "Pin ID",
+      "Category",
+      "Series",
+    ]);
+    expect(sortOptionsForView("story").map((option) => option.label)).toEqual(
+      sortOptionsForView("all").map((option) => option.label),
+    );
   });
 });
