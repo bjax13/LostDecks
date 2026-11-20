@@ -176,6 +176,9 @@ export function getSkuVariantLabel(sku, groupSkus = null) {
 /** Target column counts for the condensed SKU grid (wide / narrow viewports). */
 export const CONDENSED_SKU_COLUMNS = 5;
 export const CONDENSED_SKU_COLUMNS_NARROW = 2;
+/** Pin names are long, so the review grid uses fewer columns and one row on a phone. */
+export const CONDENSED_PIN_COLUMNS = 4;
+export const CONDENSED_PIN_COLUMNS_NARROW = 1;
 
 /**
  * Row/column CSS variables for a column-major condensed SKU grid.
