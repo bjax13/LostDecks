@@ -149,7 +149,11 @@ describe("useTradeMatches cache + cooldown", () => {
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 20, cursor: null });
+    expect(fetchMock).toHaveBeenCalledWith({
+      pageSize: 20,
+      cursor: null,
+      locationFilter: "off",
+    });
     expect(result.current.matches).toHaveLength(1);
     expect(result.current.isUsingCachedResult).toBe(false);
     expect(result.current.showRefreshCountdown).toBe(false);
@@ -366,7 +370,11 @@ describe("useTradeMatches cache + cooldown", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 1, cursor: null });
+    expect(fetchMock).toHaveBeenCalledWith({
+      pageSize: 1,
+      cursor: null,
+      locationFilter: "off",
+    });
     expect(result.current.matches[0].displayName).toBe("Collector A");
     expect(result.current.canGoNext).toBe(true);
     expect(result.current.canGoPrevious).toBe(false);
@@ -379,7 +387,11 @@ describe("useTradeMatches cache + cooldown", () => {
     await waitFor(() => {
       expect(result.current.matches[0]?.displayName).toBe("Collector B");
     });
-    expect(fetchMock).toHaveBeenCalledWith({ pageSize: 1, cursor: "user-a" });
+    expect(fetchMock).toHaveBeenCalledWith({
+      pageSize: 1,
+      cursor: "user-a",
+      locationFilter: "off",
+    });
     expect(result.current.pageIndex).toBe(2);
     expect(result.current.canGoPrevious).toBe(true);
     expect(result.current.canGoNext).toBe(false);
@@ -393,5 +405,24 @@ describe("useTradeMatches cache + cooldown", () => {
     });
     expect(result.current.pageIndex).toBe(1);
     expect(result.current.canGoPrevious).toBe(false);
+  });
+
+  it("sends the location filter and keeps it out of the cached match rows", async () => {
+    const { result } = renderHook(() => useTradeMatches("uid-1", { locationFilter: "state" }));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith({
+      pageSize: 20,
+      cursor: null,
+      locationFilter: "state",
+    });
+    expect(result.current.matches[0]).not.toHaveProperty("country");
+    expect(result.current.matches[0]).not.toHaveProperty("region");
+    expect(getMatchesCacheKey("uid-1", { locationFilter: "state" })).not.toBe(
+      getMatchesCacheKey("uid-1", { locationFilter: "off" }),
+    );
   });
 });

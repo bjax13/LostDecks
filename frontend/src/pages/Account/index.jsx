@@ -8,6 +8,13 @@ import { useAuth } from "../../contexts/AuthContext";
 import { functions } from "../../lib/firebase";
 import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
 import {
+  locationSelectionForCountry,
+  MATCH_COUNTRIES,
+  normalizeMatchCountry,
+  normalizeMatchRegion,
+  subdivisionsForCountry,
+} from "../../lib/matchLocations";
+import {
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_USER_PREFERENCES,
   isValidTradingEmail,
@@ -40,6 +47,8 @@ function AccountPage() {
   const [tradingEmail, setTradingEmail] = useState(DEFAULT_USER_PREFERENCES.tradingEmail);
   const [discordHandle, setDiscordHandle] = useState(DEFAULT_USER_PREFERENCES.discordHandle);
   const [discordChannel, setDiscordChannel] = useState(DEFAULT_USER_PREFERENCES.discordChannel);
+  const [matchCountry, setMatchCountry] = useState("");
+  const [matchRegion, setMatchRegion] = useState("");
   const [preferencesLoading, setPreferencesLoading] = useState(true);
   const [preferencesSaving, setPreferencesSaving] = useState(false);
   const [preferencesError, setPreferencesError] = useState(null);
@@ -66,6 +75,8 @@ function AccountPage() {
       setTradingEmail(DEFAULT_USER_PREFERENCES.tradingEmail);
       setDiscordHandle(DEFAULT_USER_PREFERENCES.discordHandle);
       setDiscordChannel(DEFAULT_USER_PREFERENCES.discordChannel);
+      setMatchCountry("");
+      setMatchRegion("");
       setPreferencesLoading(false);
       setPreferencesError(null);
       setTradingEmailError(null);
@@ -91,6 +102,9 @@ function AccountPage() {
         setTradingEmail(preferences.tradingEmail);
         setDiscordHandle(preferences.discordHandle);
         setDiscordChannel(preferences.discordChannel || DEFAULT_DISCORD_CHANNEL);
+        const country = normalizeMatchCountry(preferences.matchCountry);
+        setMatchCountry(country);
+        setMatchRegion(normalizeMatchRegion(country, preferences.matchRegion));
         setPreferencesLoading(false);
       },
       (err) => {
@@ -191,6 +205,27 @@ function AccountPage() {
     setMatchLanes(nextLanes);
     await persistPreferences({ matchLanes: nextLanes }, () => {
       setMatchLanes(previousLanes);
+    });
+  };
+
+  const handleMatchCountryChange = async (event) => {
+    const next = locationSelectionForCountry(event.target.value);
+    const previousCountry = matchCountry;
+    const previousRegion = matchRegion;
+    setMatchCountry(next.matchCountry);
+    setMatchRegion("");
+    await persistPreferences({ matchCountry: next.matchCountry, matchRegion: "" }, () => {
+      setMatchCountry(previousCountry);
+      setMatchRegion(previousRegion);
+    });
+  };
+
+  const handleMatchRegionChange = async (event) => {
+    const nextRegion = normalizeMatchRegion(matchCountry, event.target.value);
+    const previousRegion = matchRegion;
+    setMatchRegion(nextRegion);
+    await persistPreferences({ matchRegion: nextRegion }, () => {
+      setMatchRegion(previousRegion);
     });
   };
 
@@ -377,6 +412,7 @@ function AccountPage() {
   };
 
   const controlsDisabled = preferencesLoading;
+  const regionOptions = subdivisionsForCountry(matchCountry);
 
   return (
     <AuthGuard fallback={<p>Loading account…</p>}>
@@ -491,6 +527,45 @@ function AccountPage() {
                 </div>
               ))}
               <p className="account-hint account-keep-help">{MATCH_KEEP_HELP}</p>
+            </fieldset>
+
+            <fieldset className="account-location" disabled={controlsDisabled}>
+              <legend>Location for match filters</legend>
+              <p className="account-hint">
+                Optional. Used only to filter Matches. Never shown to other collectors.
+              </p>
+              <div className="account-location-field">
+                <label htmlFor="account-match-country">Country</label>
+                <select
+                  id="account-match-country"
+                  value={matchCountry}
+                  onChange={handleMatchCountryChange}
+                >
+                  <option value="">Not set</option>
+                  {MATCH_COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {regionOptions.length > 0 ? (
+                <div className="account-location-field">
+                  <label htmlFor="account-match-region">State/Province</label>
+                  <select
+                    id="account-match-region"
+                    value={matchRegion}
+                    onChange={handleMatchRegionChange}
+                  >
+                    <option value="">Not set</option>
+                    {regionOptions.map((region) => (
+                      <option key={region.code} value={region.code}>
+                        {region.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
             </fieldset>
 
             <fieldset

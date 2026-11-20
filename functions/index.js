@@ -6,9 +6,11 @@ const { deleteMyAccount, __test: deleteAccountTest } = require("./deleteAccount"
 const {
   buildKeepByUserId,
   buildLanePrefsByUserId,
+  buildLocationsByUserId,
   buildMatchesForCaller,
   buildUserSkuTotals,
   DEFAULT_MATCH_PAGE_SIZE,
+  normalizeLocationFilter,
   normalizeMatchCursor,
   normalizeMatchPageSize,
   paginateMatches,
@@ -92,6 +94,7 @@ exports.getTradeMatches = onCall(
         defaultSize: DEFAULT_MATCH_PAGE_SIZE,
       });
       const cursor = normalizeMatchCursor(request.data?.cursor);
+      const locationFilter = normalizeLocationFilter(request.data?.locationFilter);
 
       const db = admin.firestore();
       await enforceCallCooldown(db, callerUid);
@@ -109,6 +112,7 @@ exports.getTradeMatches = onCall(
       const preferencesByUserId = await loadPreferencesByUserId(db, preferenceUserIds);
       const lanePrefsByUserId = buildLanePrefsByUserId(preferencesByUserId);
       const keepByUserId = buildKeepByUserId(preferencesByUserId);
+      const locationsByUserId = buildLocationsByUserId(preferencesByUserId);
 
       const { isCallerOptedOut, matches } = buildMatchesForCaller({
         callerUid,
@@ -116,6 +120,8 @@ exports.getTradeMatches = onCall(
         optedOutUserIds,
         lanePrefsByUserId,
         keepByUserId,
+        locationFilter,
+        locationsByUserId,
       });
 
       if (isCallerOptedOut) {
@@ -143,6 +149,7 @@ exports.getTradeMatches = onCall(
           trueEmail: profile.email,
         });
 
+        // Location stays on the owner's userPreferences doc. Do not add it here.
         return {
           userId: match.userId,
           displayName: profile.displayName,

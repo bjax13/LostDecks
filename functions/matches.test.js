@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const {
   buildKeepByUserId,
   buildLanePrefsByUserId,
+  buildLocationsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
   buildUserSkuTotals,
@@ -653,4 +654,80 @@ test("resolvePublicDisplayName never uses the Auth email", () => {
     "uid-2",
   );
   assert.equal(resolvePublicDisplayName({ email: "hidden@example.com" }), "Collector");
+});
+
+function locationMatchTotals() {
+  return new Map([
+    ["me", new Map([["LT24-ELS-01-DUN", 2]])],
+    ["utah", new Map([["LT24-HLD-01-DUN", 2]])],
+    ["texas", new Map([["LT24-ELS-02-DUN", 2]])],
+    ["country-only", new Map([["LT24-CHM-01-DUN", 2]])],
+    ["ontario", new Map([["LT24-LOP-01-DUN", 2]])],
+    ["nowhere", new Map([["LT24-ELS-04-DUN", 2]])],
+  ]);
+}
+
+function locationMap() {
+  return new Map([
+    ["me", { country: "US", region: "US-UT" }],
+    ["utah", { country: "US", region: "US-UT" }],
+    ["texas", { country: "US", region: "US-TX" }],
+    ["country-only", { country: "US", region: "" }],
+    ["ontario", { country: "CA", region: "CA-ON" }],
+    ["nowhere", { country: "", region: "" }],
+  ]);
+}
+
+function matchUserIds(result) {
+  return result.matches.map((match) => match.userId);
+}
+
+test("buildMatchesForCaller location filter is off by default and hides unset locations when on", () => {
+  const userSkuTotals = locationMatchTotals();
+  const locationsByUserId = locationMap();
+  const base = {
+    callerUid: "me",
+    userSkuTotals,
+    optedOutUserIds: new Set(),
+    locationsByUserId,
+  };
+
+  assert.deepEqual(matchUserIds(buildMatchesForCaller(base)).sort(), [
+    "country-only",
+    "nowhere",
+    "ontario",
+    "texas",
+    "utah",
+  ]);
+
+  assert.deepEqual(
+    matchUserIds(buildMatchesForCaller({ ...base, locationFilter: "country" })).sort(),
+    ["country-only", "texas", "utah"],
+  );
+
+  const stateFiltered = buildMatchesForCaller({ ...base, locationFilter: "state" });
+  assert.deepEqual(matchUserIds(stateFiltered), ["utah"]);
+  for (const match of stateFiltered.matches) {
+    assert.deepEqual(Object.keys(match).sort(), ["lanes", "userId"]);
+    assert.equal("country" in match, false);
+    assert.equal("region" in match, false);
+    assert.equal("matchCountry" in match, false);
+    assert.equal("matchRegion" in match, false);
+  }
+});
+
+test("buildLocationsByUserId keeps only short codes and drops a region from another country", () => {
+  const locations = buildLocationsByUserId(
+    new Map([
+      ["utah", { matchCountry: "us", matchRegion: "us-ut" }],
+      ["free-text", { matchCountry: "California", matchRegion: "Utah" }],
+      ["mismatch", { matchCountry: "CA", matchRegion: "US-UT" }],
+      ["blank", {}],
+    ]),
+  );
+
+  assert.deepEqual(locations.get("utah"), { country: "US", region: "US-UT" });
+  assert.deepEqual(locations.get("free-text"), { country: "", region: "" });
+  assert.deepEqual(locations.get("mismatch"), { country: "CA", region: "" });
+  assert.deepEqual(locations.get("blank"), { country: "", region: "" });
 });

@@ -2,6 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
+import { MATCH_LOCATION_FILTER_NOTICE } from "../../lib/matchLocationFilter.js";
 import { TestMemoryRouter } from "../../test/router.jsx";
 
 const mockUseAuth = vi.hoisted(() => vi.fn());
@@ -125,6 +126,7 @@ function defaultMatchesHook(overrides = {}) {
 describe("MatchesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.clear();
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockUseAuth.mockReturnValue({
       user: { uid: "me", displayName: "Me", email: "me@example.com" },
@@ -576,7 +578,10 @@ describe("MatchesPage", () => {
 
   it("passes the signed-in user id into the matches hook", () => {
     renderMatches();
-    expect(mockUseTradeMatches).toHaveBeenCalledWith("me");
+    expect(mockUseTradeMatches).toHaveBeenCalledWith(
+      "me",
+      expect.objectContaining({ locationFilter: "off" }),
+    );
   });
 
   it("renders search and lane filter controls", () => {
@@ -631,5 +636,91 @@ describe("MatchesPage", () => {
       "/getting-started?collect=pins",
     );
     expect(screen.getByText(/Pin matching is off in Account/i)).toBeInTheDocument();
+  });
+
+  it("leaves location filters off by default", () => {
+    renderMatches();
+
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Only my country" })).not.toBeChecked();
+    expect(
+      screen.queryByText(/Only showing collectors who've set a location/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("shows a popup and keeps the box unchecked when location is not set", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMatches();
+
+    await user.click(screen.getByRole("checkbox", { name: "Only my country" }));
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveTextContent(MATCH_LOCATION_FILTER_NOTICE);
+    expect(screen.getByRole("link", { name: "Account page" })).toHaveAttribute("href", "/account");
+    expect(screen.getByRole("checkbox", { name: "Only my country" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).not.toBeChecked();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox", { name: "Only my state" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent(MATCH_LOCATION_FILTER_NOTICE);
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).not.toBeChecked();
+  });
+
+  it("requires a state before the state filter can be turned on", async () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext?.({
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchCountry: "US",
+        matchRegion: "",
+      });
+      return () => {};
+    });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    renderMatches();
+
+    await user.click(screen.getByRole("checkbox", { name: "Only my state" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).not.toBeChecked();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("checkbox", { name: "Only my country" }));
+    expect(screen.getByRole("checkbox", { name: "Only my country" })).toBeChecked();
+    expect(screen.getByText("Only showing collectors who've set a location.")).toBeInTheDocument();
+    expect(mockUseTradeMatches).toHaveBeenLastCalledWith(
+      "me",
+      expect.objectContaining({ locationFilter: "country", ready: true }),
+    );
+  });
+
+  it("remembers a state filter and shows the explanatory line", async () => {
+    mockSubscribeUserPreferences.mockImplementation((_uid, onNext) => {
+      onNext?.({
+        matchLanes: { dun: true, foil: true, pins: true },
+        matchCountry: "US",
+        matchRegion: "US-UT",
+      });
+      return () => {};
+    });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const first = renderMatches();
+
+    await user.click(screen.getByRole("checkbox", { name: "Only my state" }));
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).toBeChecked();
+    expect(screen.getByText("Only showing collectors who've set a location.")).toBeInTheDocument();
+    expect(mockUseTradeMatches).toHaveBeenLastCalledWith(
+      "me",
+      expect.objectContaining({ locationFilter: "state", ready: true }),
+    );
+    expect(screen.queryByText("United States")).not.toBeInTheDocument();
+    expect(screen.queryByText("Utah")).not.toBeInTheDocument();
+
+    first.unmount();
+    renderMatches();
+
+    expect(screen.getByRole("checkbox", { name: "Only my state" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Only my country" })).not.toBeChecked();
   });
 });

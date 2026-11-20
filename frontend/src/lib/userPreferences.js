@@ -1,5 +1,6 @@
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import { normalizeMatchCountry, normalizeMatchRegion } from "./matchLocations";
 
 export const MATCH_CONTACT_SHARING = Object.freeze({
   TRUE_EMAIL: "trueEmail",
@@ -41,6 +42,8 @@ export const DEFAULT_USER_PREFERENCES = Object.freeze({
   tradingEmail: "",
   discordHandle: "",
   discordChannel: DEFAULT_DISCORD_CHANNEL,
+  matchCountry: "",
+  matchRegion: "",
 });
 
 function normalizeOptionalString(value, maxLength) {
@@ -102,6 +105,7 @@ export function normalizeUserPreferences(data) {
   }
 
   const discordChannel = normalizeOptionalString(data.discordChannel, MAX_DISCORD_CHANNEL_LENGTH);
+  const matchCountry = normalizeMatchCountry(data.matchCountry);
 
   return {
     matchingOptOut:
@@ -114,6 +118,8 @@ export function normalizeUserPreferences(data) {
     tradingEmail: normalizeOptionalString(data.tradingEmail, MAX_TRADING_EMAIL_LENGTH),
     discordHandle: normalizeOptionalString(data.discordHandle, MAX_DISCORD_HANDLE_LENGTH),
     discordChannel: discordChannel || DEFAULT_DISCORD_CHANNEL,
+    matchCountry,
+    matchRegion: normalizeMatchRegion(matchCountry, data.matchRegion),
   };
 }
 
