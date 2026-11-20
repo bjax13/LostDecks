@@ -1,0 +1,108 @@
+import { describe, expect, it } from "vitest";
+import { gettingStartedTree } from "../pages/GettingStarted/gettingStartedCatalog";
+import {
+  collectiblesIndex,
+  datasetSkus,
+  getCollectibleRecord,
+  getSkuRecord,
+  isRetiredPinId,
+} from "./collectibles.js";
+
+const RETIRED_IDS = [
+  "PIN-CPS4-03",
+  "PIN-CPS4-04",
+  "PIN-CPS4-06",
+  "PIN-CPS4-08",
+  "PIN-CPS4-09",
+  "PIN-CPS4-10",
+  "PIN-CPS4-11",
+  "PIN-CPS4-12",
+  "PIN-CPS4-13",
+  "PIN-CYTO-01",
+];
+
+describe("pin catalog listing", () => {
+  it("keeps retired pins out of browse, search, and the getting-started picker", () => {
+    const listedIds = new Set(collectiblesIndex.map((item) => item.id));
+    const skuIds = new Set(datasetSkus.map((sku) => sku.skuId));
+    const pickerIds = new Set(
+      gettingStartedTree.flatMap((section) =>
+        section.children.flatMap((group) => group.skus.map((sku) => sku.skuId)),
+      ),
+    );
+
+    for (const id of RETIRED_IDS) {
+      expect(listedIds.has(id)).toBe(false);
+      expect(skuIds.has(id)).toBe(false);
+      expect(pickerIds.has(id)).toBe(false);
+      expect(isRetiredPinId(id)).toBe(true);
+      expect(collectiblesIndex.some((item) => item.searchTokens.includes(id.toLowerCase()))).toBe(
+        false,
+      );
+    }
+
+    expect(isRetiredPinId("PIN-CPS4-01")).toBe(false);
+    expect(isRetiredPinId("PIN-CAMP-01")).toBe(false);
+  });
+
+  it("still resolves retired pins and uses the cleaned display names", () => {
+    expect(getCollectibleRecord("PIN-CPS4-03")?.displayName).toBe("Series 4 - Pin 3 -");
+    expect(getSkuRecord("PIN-CPS4-03")?.card?.displayName).toBe("Series 4 - Pin 3 -");
+    expect(getCollectibleRecord("PIN-CPS4-13")?.displayName).toBe("Series 4 - Pin 0 -");
+    expect(getCollectibleRecord("PIN-CYTO-01")?.displayName).toBe("DDF Two-Tone");
+
+    expect(getCollectibleRecord("PIN-CPS4-05")?.displayName).toBe("Captain Tress");
+    expect(getCollectibleRecord("PIN-CYTO-02")?.displayName).toBe("DDF Two-Tone (US)");
+    expect(getCollectibleRecord("PIN-CYTO-03")?.displayName).toBe("DDF Two-Tone (UK)");
+    expect(getCollectibleRecord("PIN-CONV-09")?.displayName).toBe(
+      "Dragonsteel Nexus 2025 - Premium",
+    );
+    expect(getCollectibleRecord("PIN-LOGO-03")?.displayName).toBe("Dragonsteel Logo - Red");
+    expect(getCollectibleRecord("PIN-OTHER-02")?.displayName).toBe("Aviar - Emberdark");
+    expect(getCollectibleRecord("PIN-SHELF-06")?.displayName).toBe("Emberdark");
+    expect(getCollectibleRecord("PIN-SHELF-01")?.displayName).toBe("Tress");
+    expect(getCollectibleRecord("PIN-OTHER-10")?.displayName).toBe("Words of Radiance Backer Pin");
+    expect(getCollectibleRecord("PIN-WHOP-03")?.displayName).toBe("Dragonsteel Nexus Worldhopper");
+    expect(getCollectibleRecord("PIN-CAMP-01")?.displayName).toBe("Fires of December");
+    expect(getCollectibleRecord("PIN-CPS4-01")?.displayName).toBe("Sazed");
+    expect(getCollectibleRecord("PIN-CPS4-07")?.displayName).toBe("Maya");
+  });
+
+  it("exposes Dragonsteel store links on mapped pins only", () => {
+    expect(getCollectibleRecord("PIN-CPS1-00")?.storeUrl).toBe(
+      "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+    );
+    expect(getCollectibleRecord("PIN-CPS1-00")?.storeMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-LOGO-03")?.storeUrl).toBe(
+      "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+    );
+    expect(getCollectibleRecord("PIN-LOGO-03")?.storeMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CAMP-01")?.storeMatch).toBe("bundle");
+    expect(getCollectibleRecord("PIN-CF-01")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CF-01")?.image).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS2-01")?.image).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-03")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("LT24-ELS-01")?.storeUrl).toBeUndefined();
+  });
+
+  it("exposes archived store links on mapped pins that have no live store link", () => {
+    expect(getCollectibleRecord("PIN-CYTO-06")?.archiveUrl).toBe(
+      "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin",
+    );
+    expect(getCollectibleRecord("PIN-CYTO-06")?.archiveMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CYTO-06")?.storeUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CYTDS-01")?.archiveMatch).toBe("bundle");
+    expect(getCollectibleRecord("PIN-CYTDS-01")?.archiveUrl).toBe(
+      "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+    );
+    expect(getCollectibleRecord("PIN-KRO-01")?.archiveMatch).toBe("exact");
+    expect(getCollectibleRecord("PIN-CONV-04")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-SHELF-03")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-SCAD-01")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-01")?.archiveUrl).toBeUndefined();
+    expect(getCollectibleRecord("PIN-CPS4-01")?.storeUrl).toMatch(
+      /^https:\/\/www\.dragonsteelbooks\.com\//,
+    );
+    expect(getCollectibleRecord("LT24-ELS-01")?.archiveUrl).toBeUndefined();
+  });
+});

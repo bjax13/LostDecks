@@ -1,5 +1,5 @@
 import { collection, doc, serverTimestamp, writeBatch } from "firebase/firestore";
-import { datasetSkus, getSkuRecord, toSkuId } from "../../../data/collectibles";
+import { datasetSkus, getSkuRecord, isRetiredPinId, toSkuId } from "../../../data/collectibles";
 import {
   MAX_COLLECTION_NOTES_LENGTH,
   MAX_COLLECTION_QUANTITY,
@@ -311,7 +311,7 @@ export async function applyBulkCollectionUpdate({
     }
 
     const skuRecord = getSkuRecord(skuId);
-    if (!skuRecord) {
+    if (!skuRecord || isRetiredPinId(skuId)) {
       issues.push({ line, message: `SKU "${skuId}" not found in catalog.` });
       return;
     }

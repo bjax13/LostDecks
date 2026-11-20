@@ -1,7 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { datasetMeta } from "../../data/collectibles";
+import { isDoubledCollectibleDetailPath } from "../../lib/collectibleDetailPath";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import {
   CollectionSummary,
@@ -65,10 +67,15 @@ vi.mock("../../lib/firebase", () => ({
   db: {},
 }));
 
+function Pathname() {
+  return <div data-testid="pathname">{useLocation().pathname}</div>;
+}
+
 function renderCollectionPage() {
   return render(
     <TestMemoryRouter initialEntries={["/collection"]}>
       <CollectionPage />
+      <Pathname />
     </TestMemoryRouter>,
   );
 }
@@ -450,6 +457,40 @@ describe("CollectionTable", () => {
     detail: null,
   };
 
+  it("shows a details link and does not repeat the id when the SKU matches the card", async () => {
+    const user = userEvent.setup({ delay: null });
+    const entry = {
+      ...baseEntry,
+      id: "pin-row",
+      displayName: "Howlerina",
+      cardId: "PIN-CF-02",
+      skuId: "PIN-CF-02",
+      categoryLabel: "Pin",
+    };
+    render(
+      <TestMemoryRouter initialEntries={["/collection"]}>
+        <CollectionTable entries={[entry]} />
+        <Pathname />
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("Howlerina").closest("tr");
+    const detailsLink = within(row).getByRole("link", { name: "View details for Howlerina" });
+    expect(detailsLink).toHaveTextContent("details ›");
+    expect(detailsLink).toHaveAttribute("href", "/collectibles/PIN-CF-02");
+    expect(isDoubledCollectibleDetailPath(detailsLink.getAttribute("href"))).toBe(false);
+    expect(detailsLink.closest(".collection-table__actions")).toBeNull();
+    expect(row.querySelector("td:last-child")).toContainElement(detailsLink);
+
+    await user.click(row);
+    expect(mockNavigate).toHaveBeenCalledWith("/collectibles/PIN-CF-02");
+
+    mockNavigate.mockClear();
+    await user.click(detailsLink);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/collectibles/PIN-CF-02");
+  });
+
   it("navigates to the card route when only cardId is set", async () => {
     const user = userEvent.setup({ delay: null });
     render(
@@ -729,12 +770,47 @@ describe("CollectionPage (integration)", () => {
 
     await user.click(elsRow);
     expect(mockNavigate).toHaveBeenCalledWith("/collectibles/LT24-ELS-01/LT24-ELS-01-DUN");
+    expect(within(elsRow).getByRole("link", { name: /View details for/ })).toHaveAttribute(
+      "href",
+      "/collectibles/LT24-ELS-01/LT24-ELS-01-DUN",
+    );
 
     const unknownRow = screen.getAllByText("UNKNOWN-SKU-XYZ")[0].closest("tr");
     expect(unknownRow).toBeTruthy();
     mockNavigate.mockClear();
     await user.click(unknownRow);
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("builds catalog detail hrefs without repeating a pin id", async () => {
+    const user = userEvent.setup({ delay: null });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "pin", skuId: "PIN-CF-02", quantity: 1 },
+        { id: "card", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+      ],
+      loading: false,
+      error: null,
+    });
+    renderCollectionPage();
+
+    const hrefs = [...document.querySelectorAll("a")]
+      .map((anchor) => anchor.getAttribute("href"))
+      .filter((href) => href?.startsWith("/collectibles/"));
+    expect(hrefs).toEqual(
+      expect.arrayContaining([
+        "/collectibles/PIN-CF-02",
+        "/collectibles/LT24-ELS-01/LT24-ELS-01-DUN",
+      ]),
+    );
+    expect(hrefs.filter((href) => isDoubledCollectibleDetailPath(href))).toEqual([]);
+
+    const pinLink = screen.getByRole("link", { name: "View details for Howlerina" });
+    expect(pinLink.closest(".collection-table__actions")).toBeNull();
+    mockNavigate.mockClear();
+    await user.click(pinLink);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/collectibles/PIN-CF-02");
   });
 
   it("does not navigate when the click originates inside an interactive element", async () => {

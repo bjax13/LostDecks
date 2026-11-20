@@ -6,6 +6,7 @@ const mockGetSkuRecord = vi.hoisted(() => vi.fn());
 
 vi.mock("../../../data/collectibles", () => ({
   getSkuRecord: mockGetSkuRecord,
+  isRetiredPinId: (skuId) => skuId === "PIN-CPS4-03",
 }));
 
 import { MATCH_LANE_ALL } from "../constants";
@@ -134,5 +135,46 @@ describe("useMatchesExplorer", () => {
     expect(result.current.matches.map((match) => match.userId)).toEqual(["user-dun", "user-pin"]);
     expect(countTradeItems(MATCHES[0])).toBe(3);
     expect(countTradeItems(MATCHES[1])).toBe(2);
+  });
+
+  it("drops retired pin skus from match piles", () => {
+    const { result } = renderHook(() =>
+      useMatchesExplorer({
+        matches: [
+          {
+            userId: "mixed",
+            displayName: "Mixed",
+            lanes: [
+              {
+                id: "pins",
+                theyCanSend: [
+                  { skuId: "PIN-CPS4-03", owned: 2, extras: 1 },
+                  { skuId: "PIN-CF-01", owned: 2, extras: 1 },
+                ],
+                youCanSend: [{ skuId: "PIN-CPS4-03", owned: 1, extras: 1 }],
+              },
+            ],
+          },
+          {
+            userId: "only-retired",
+            displayName: "Only Retired",
+            lanes: [
+              {
+                id: "pins",
+                theyCanSend: [{ skuId: "PIN-CPS4-03", owned: 2, extras: 1 }],
+                youCanSend: [],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(result.current.totalMatches).toBe(1);
+    expect(result.current.matches).toHaveLength(1);
+    expect(result.current.matches[0].lanes[0].theyCanSend.map((item) => item.skuId)).toEqual([
+      "PIN-CF-01",
+    ]);
+    expect(result.current.matches[0].lanes[0].youCanSend).toEqual([]);
   });
 });

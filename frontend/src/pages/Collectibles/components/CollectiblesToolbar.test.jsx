@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { sortOptions } from "../constants.js";
+import { sortOptions, sortOptionsForView } from "../constants.js";
 import CollectiblesToolbar from "./CollectiblesToolbar.jsx";
 
 const stories = [
@@ -259,6 +259,12 @@ describe("CollectiblesToolbar", () => {
       renderToolbar({ rarityFilter: "none" });
       expect(screen.getByLabelText("Rarity")).toHaveValue("none");
     });
+
+    it("hides the rarity filter when pins are the category in view", () => {
+      renderToolbar({ categoryFilter: "pin", rarityFilter: "Rare" });
+      expect(screen.queryByLabelText("Rarity")).not.toBeInTheDocument();
+      expect(screen.queryByRole("option", { name: "All rarities" })).not.toBeInTheDocument();
+    });
   });
 
   describe("sort controls", () => {
@@ -274,6 +280,26 @@ describe("CollectiblesToolbar", () => {
     it("reflects the current sort field", () => {
       renderToolbar({ sortField: "rarity" });
       expect(screen.getByLabelText("Sort by")).toHaveValue("rarity");
+    });
+
+    it("uses pin sort labels and drops rarity when pins are the category in view", () => {
+      renderToolbar({ categoryFilter: "pin", sortField: "story" });
+      const select = screen.getByLabelText("Sort by");
+      const options = within(select).getAllByRole("option");
+      const pinSorts = sortOptionsForView("pin");
+
+      expect(options.map((option) => option.value)).toEqual(pinSorts.map((option) => option.value));
+      expect(options.map((option) => option.textContent)).toEqual(
+        pinSorts.map((option) => option.label),
+      );
+      expect(select).toHaveValue("story");
+      expect(options.map((option) => option.textContent)).not.toContain("Card Number");
+      expect(options.map((option) => option.textContent)).not.toContain("Rarity");
+    });
+
+    it("falls back when a card-only sort is selected in the pin view", () => {
+      renderToolbar({ categoryFilter: "pin", sortField: "rarity" });
+      expect(screen.getByLabelText("Sort by")).toHaveValue("grouped");
     });
 
     it("calls onSortFieldChange when selection changes", async () => {

@@ -4,6 +4,7 @@ import { MATCHES_VIEWED } from "../../analytics/events.js";
 import { captureEvent } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
+import PinImage from "../../components/PinImage/PinImage.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
 import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
@@ -47,10 +48,32 @@ function formatPileQty(side, item) {
   return `you own ${item.owned}`;
 }
 
+function pinSlotForSku(skuId) {
+  const sku = getSkuRecord(skuId);
+  const card = sku?.card;
+  const id = card?.id || skuId;
+  const isPin =
+    card?.collectibleType === "pin" ||
+    card?.category === "pin" ||
+    /^PIN-[A-Z0-9]{2,6}-\d{2,3}$/.test(typeof id === "string" ? id : "");
+  if (!isPin) return null;
+  return {
+    pinId: id,
+    name: card?.displayName || id,
+    image: card?.image,
+  };
+}
+
 function PileItem({ item, side }) {
+  const pin = pinSlotForSku(item.skuId);
   return (
     <li className="matches-pile-item">
-      <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
+      <span className="matches-pile-item-main">
+        {pin ? (
+          <PinImage pinId={pin.pinId} name={pin.name} image={pin.image} variant="match" />
+        ) : null}
+        <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
+      </span>
       <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
     </li>
   );

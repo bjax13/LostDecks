@@ -38,6 +38,7 @@ const mockResolveSkuId = vi.fn((card, finish) => {
 });
 vi.mock("../../../data/collectibles", () => ({
   resolveSkuId: (...args) => mockResolveSkuId(...args),
+  isRetiredPinId: () => false,
 }));
 
 const { useAddToCollection } = await import("./useAddToCollection.js");

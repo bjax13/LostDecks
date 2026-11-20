@@ -7,6 +7,7 @@ import {
   DEFAULT_MANUAL_QUANTITY,
   filterGettingStartedTree,
   formatCollectionQuantitySummary,
+  getCondensedSkuListStyle,
   gettingStartedTree,
 } from "./gettingStartedCatalog";
 import GettingStartedPage from "./index.jsx";
@@ -611,6 +612,11 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(within(uniqueCell).getByText("#50 :")).toBeInTheDocument();
     expect(within(uniqueCell).queryByText("mouse")).not.toBeInTheDocument();
     expect(uniqueCell).not.toHaveClass("has-variant");
+
+    const cardList = mouseCell.closest(".getting-started__sku-list");
+    const cardCount = cardList.querySelectorAll(".getting-started__sku-condensed").length;
+    expect(cardList).toHaveStyle(getCondensedSkuListStyle(cardCount));
+    expect(within(mouseCell).getByText("#54 :")).not.toHaveAttribute("title");
   });
 
   it("keeps All coverage when bulk-setting positive quantities on an All group", async () => {
@@ -939,6 +945,73 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.getByRole("button", { name: /^collapse pin collections$/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /story foils/i })).not.toBeInTheDocument();
     expect(screen.getByText("ChasmFriends Pins")).toBeInTheDocument();
+  });
+
+  it("shows full pin names with a title and a phone-friendly pin grid", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^pins$/i,
+      reviewHeading: /review your pins/i,
+    });
+
+    async function openGroup(title) {
+      const coverage = screen.getByRole("group", { name: `${title} coverage` });
+      await user.click(within(coverage).getByRole("button", { name: "Some" }));
+    }
+
+    await openGroup("Character Pin Series 4");
+    const captain = getSkuQuantityGroup(/character pin series 4 captain tress quantity, 0$/i);
+    expect(within(captain).getByText("Captain Tress :")).toHaveAttribute("title", "Captain Tress");
+    expect(captain).toHaveClass("has-name-label");
+    expect(
+      within(captain.closest(".getting-started__sku-list")).getByText("Sazed :"),
+    ).toHaveAttribute("title", "Sazed");
+    expect(captain.closest(".getting-started__sku-list")).toHaveStyle({
+      "--sku-cols": "4",
+      "--sku-rows": "1",
+      "--sku-cols-narrow": "1",
+      "--sku-rows-narrow": "4",
+    });
+    expect(screen.queryByText("Series 4 - Pin 3 - :")).not.toBeInTheDocument();
+    expect(screen.queryByText("Series 4 - Pin 0 - :")).not.toBeInTheDocument();
+
+    await openGroup("Scene Pin");
+    const sceneName = "Worldhopper Ball 2024 Scene Pin: Adolin and Shallan";
+    const scene = getSkuQuantityGroup(
+      new RegExp(`scene pin ${sceneName.toLowerCase()} quantity, 0$`, "i"),
+    );
+    expect(within(scene).getByText(`${sceneName} :`)).toHaveAttribute("title", sceneName);
+    expect(scene.closest(".getting-started__sku-list")).toHaveStyle({
+      "--sku-cols": "2",
+      "--sku-cols-narrow": "1",
+    });
+
+    await openGroup("Sandershelf Pins");
+    const tress = getSkuQuantityGroup(/sandershelf pins tress quantity, 0$/i);
+    expect(within(tress).getByText("Tress :")).toHaveAttribute("title", "Tress");
+    expect(screen.queryByText("Sandershelf - Pin 1 - Tress :")).not.toBeInTheDocument();
+
+    await openGroup("Roshar Pins");
+    const australian = getSkuQuantityGroup(/roshar pins wind and truth - australian quantity, 0$/i);
+    expect(within(australian).getByText("Wind and Truth - Australian :")).toHaveAttribute(
+      "title",
+      "Wind and Truth - Australian",
+    );
+
+    await openGroup("Cytoverse Pins");
+    const ddfUs = getSkuQuantityGroup(/cytoverse pins ddf two-tone \(us\) quantity, 0$/i);
+    const ddfUk = getSkuQuantityGroup(/cytoverse pins ddf two-tone \(uk\) quantity, 0$/i);
+    expect(within(ddfUs).getByText("DDF Two-Tone (US) :")).toHaveAttribute(
+      "title",
+      "DDF Two-Tone (US)",
+    );
+    expect(within(ddfUk).getByText("DDF Two-Tone (UK) :")).toHaveAttribute(
+      "title",
+      "DDF Two-Tone (UK)",
+    );
+    expect(screen.queryByText("DDF UK :")).not.toBeInTheDocument();
   });
 
   it("hides Pin Collections for Story Deck-only collectors", async () => {

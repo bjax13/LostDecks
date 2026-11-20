@@ -14,7 +14,10 @@ describe("CollectiblesHeader (unit)", () => {
       />,
     );
     expect(screen.getByText("Set: Lost Tales")).toBeInTheDocument();
-    expect(screen.getByText(/Browse the 100 collectibles/)).toBeInTheDocument();
+    const intro = screen.getByText(/Browse the 100 collectibles/);
+    expect(intro).toHaveTextContent(/cards/i);
+    expect(intro).toHaveTextContent(/pins/i);
+    expect(intro.textContent).not.toMatch(/—/);
   });
 
   it("calls onChangeView with grid when Grid view clicked", async () => {

@@ -2,8 +2,8 @@
   "meta": {
     "setId": "PINS",
     "setName": "Pins",
-    "totalUniquePins": 171,
-    "totalSkus": 171,
+    "totalUniquePins": 161,
+    "totalSkus": 161,
     "sources": [
       {
         "id": "ChasmFriends",
@@ -13,7 +13,7 @@
       {
         "id": "SCG",
         "name": "Sanderson Collectors Guild Pins",
-        "pinCount": 166,
+        "pinCount": 156,
         "sheetTitle": "Sanderson Collectors Guild Pin List",
         "sheetGid": "788070872",
         "dataAsOf": "2026-09-28"
@@ -56,7 +56,10 @@
       "Blue-book rows imported from Sanderson Collectors Guild Pin List (gid=788070872).",
       "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
       "Each pin has a single SKU with no DUN/FOIL finish variants.",
-      "Image URLs from the sheet are omitted until a product decision on asset hosting."
+      "Pin photos use an image version copied from scripts/data/pin-images.json. A positive integer means a photo exists at that version. 0 or a missing image field means no photo, and the app does not request a file.",
+      "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
+      "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped.",
+      "Wayback Machine archive links are archiveUrl and archiveMatch (exact or bundle) on listed pins, copied from scripts/data/pin-archive-map.json. The 14-digit timestamp in archiveUrl is the capture date. Ids missing from the catalog or retired are skipped."
     ]
   },
   "pins": [
@@ -136,7 +139,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 00 - Brandon"
+      "sourceName": "Series 1 - Pin 00 - Brandon",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-01",
@@ -149,7 +154,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 01 - Vin"
+      "sourceName": "Series 1 - Pin 01 - Vin",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/vin-character-pin-series-1-001",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-02",
@@ -162,7 +169,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 02 - Hoid"
+      "sourceName": "Series 1 - Pin 02 - Hoid",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/hoid-character-pin-series-1-002",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-03",
@@ -175,7 +184,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 03 - Steris"
+      "sourceName": "Series 1 - Pin 03 - Steris",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/steris-character-pin-series-1-003",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-04",
@@ -188,7 +199,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 04 - Vasher"
+      "sourceName": "Series 1 - Pin 04 - Vasher",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/vasher-character-pin-series-1-004",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-05",
@@ -201,7 +214,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 05 - Wax"
+      "sourceName": "Series 1 - Pin 05 - Wax",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/wax-character-pin-series-1-005",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-06",
@@ -214,7 +229,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 06 - Raoden"
+      "sourceName": "Series 1 - Pin 06 - Raoden",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/raoden-character-pin-series-1-006",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-07",
@@ -227,7 +244,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 07 - Shallan"
+      "sourceName": "Series 1 - Pin 07 - Shallan",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/shallan-character-pin-series-1-007",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-08",
@@ -240,7 +259,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 08 - Khriss"
+      "sourceName": "Series 1 - Pin 08 - Khriss",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/khriss-character-pin-series-1-008",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-09",
@@ -253,7 +274,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 09 - Vivenna"
+      "sourceName": "Series 1 - Pin 09 - Vivenna",
+      "archiveUrl": "https://web.archive.org/web/20240130165307/https://www.dragonsteelbooks.com/products/vivenna-character-pin-series-1-009",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS1-10",
@@ -266,7 +289,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 10 - Kaladin"
+      "sourceName": "Series 1 - Pin 10 - Kaladin",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/kaladin-character-pin-series-1-010",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-11",
@@ -279,7 +304,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 11 - Syl"
+      "sourceName": "Series 1 - Pin 11 - Syl",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/syl-character-pin-series-1-011",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS1-12",
@@ -292,7 +319,9 @@
       "country": "US",
       "release": "Year of Sanderson Box, later Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 12 - Kelsier"
+      "sourceName": "Series 1 - Pin 12 - Kelsier",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/kelsier-character-pin-series-1-012",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-00",
@@ -305,7 +334,9 @@
       "country": "US",
       "release": "Dragonsteel Nexus 2024",
       "notes": null,
-      "sourceName": "Series 2 - Pin 000 - Queen Emily"
+      "sourceName": "Series 2 - Pin 000 - Queen Emily",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/queen-emily-character-pin-series-2-000",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-01",
@@ -318,7 +349,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 01 - Honorspren"
+      "sourceName": "Series 2 - Pin 01 - Honorspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/windrunner-honorspren-character-pin-series-2-001",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-02",
@@ -331,7 +364,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 02 - Highspren"
+      "sourceName": "Series 2 - Pin 02 - Highspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/skybreaker-highspren-character-pin-series-2-002",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-03",
@@ -344,7 +379,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 03 - Ashspren"
+      "sourceName": "Series 2 - Pin 03 - Ashspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dustbringer-ashspren-character-pin-series-2-003",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-04",
@@ -357,7 +394,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 04 - Cultivationspren"
+      "sourceName": "Series 2 - Pin 04 - Cultivationspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/edgedancer-cultivationspren-character-pin-series-2-004",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-05",
@@ -370,7 +409,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 05 - Mistspren"
+      "sourceName": "Series 2 - Pin 05 - Mistspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/truthwatcher-mistspren-character-pin-series-2-005",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-06",
@@ -383,7 +424,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 06 - Cryptic"
+      "sourceName": "Series 2 - Pin 06 - Cryptic",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lightweaver-cryptic-character-pin-series-2-006",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-07",
@@ -396,7 +439,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 07 - Inkspren"
+      "sourceName": "Series 2 - Pin 07 - Inkspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/elsecaller-inkspren-character-pin-series-2-007",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-08",
@@ -409,7 +454,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 08 - Reacher"
+      "sourceName": "Series 2 - Pin 08 - Reacher",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/willshaper-reacher-character-pin-series-2-008",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-09",
@@ -422,7 +469,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 09 - Peakspren"
+      "sourceName": "Series 2 - Pin 09 - Peakspren",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/stoneward-peakspren-character-pin-series-2-009",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-10",
@@ -435,7 +484,9 @@
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
       "notes": null,
-      "sourceName": "Series 2 - Pin 10 - Stormfather"
+      "sourceName": "Series 2 - Pin 10 - Stormfather",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/bondsmith-stormfather-character-pin-series-2-010",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-11",
@@ -448,7 +499,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 11 - Dalinar"
+      "sourceName": "Series 2 - Pin 11 - Dalinar",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dalinar-character-pin-series-2-012",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-12",
@@ -461,7 +514,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 12 - Adolin"
+      "sourceName": "Series 2 - Pin 12 - Adolin",
+      "archiveUrl": "https://web.archive.org/web/20241030030214/https://www.dragonsteelbooks.com/products/adolin-character-pin-series-2-013",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS2-13",
@@ -474,7 +529,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 13 - Tress"
+      "sourceName": "Series 1 - Pin 13 - Tress",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/tress-character-pin-series-1-013",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-14",
@@ -487,7 +544,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 14 - Mervin"
+      "sourceName": "Series 1 - Pin 14 - Mervin",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mervin-character-pin-series-1-014",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-15",
@@ -500,7 +559,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 15 - Yumi"
+      "sourceName": "Series 1 - Pin 15 - Yumi",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/yumi-character-pin-series-1-015",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-16",
@@ -513,7 +574,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 16 - Nomad"
+      "sourceName": "Series 1 - Pin 16 - Nomad",
+      "archiveUrl": "https://web.archive.org/web/20240118172029/https://www.dragonsteelbooks.com/products/nomad-character-pin-series-1-016",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CPS2-17",
@@ -526,7 +589,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 1 - Pin 17 - Spensa"
+      "sourceName": "Series 1 - Pin 17 - Spensa",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/spensa-character-pin-series-1-017",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-18",
@@ -539,7 +604,9 @@
       "country": "US",
       "release": "WaT Book Bundle",
       "notes": null,
-      "sourceName": "Series 2 - Pin 18 - Szeth"
+      "sourceName": "Series 2 - Pin 18 - Szeth",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/szeth-character-pin-series-2-018",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-19",
@@ -552,7 +619,9 @@
       "country": "US",
       "release": "First sold at DSNX24",
       "notes": null,
-      "sourceName": "Series 2 - Pin 19 - Painter"
+      "sourceName": "Series 2 - Pin 19 - Painter",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/painter-character-pin-series-2-019",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-20",
@@ -565,7 +634,9 @@
       "country": "US",
       "release": "First sold at DSNX24",
       "notes": null,
-      "sourceName": "Series 2 - Pin 20 - Cursed Hoid"
+      "sourceName": "Series 2 - Pin 20 - Cursed Hoid",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/cursed-hoid-character-pin-series-2-020",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-21",
@@ -578,7 +649,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 13 - Renarin"
+      "sourceName": "Series 2 - Pin 13 - Renarin",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/renarin-character-pin-series-2-014",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-22",
@@ -591,7 +664,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 14 - Jasnah"
+      "sourceName": "Series 2 - Pin 14 - Jasnah",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/jasnah-character-pin-series-2-015",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-23",
@@ -604,7 +679,9 @@
       "country": "US",
       "release": "First sold at FanX 2024, later sold in the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 15 - Navani"
+      "sourceName": "Series 2 - Pin 15 - Navani",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/navani-character-pin-series-2-016",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-24",
@@ -617,7 +694,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 16 - Venli"
+      "sourceName": "Series 2 - Pin 16 - Venli",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/venli-character-pin-series-2-018",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS2-25",
@@ -630,7 +709,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 2 - Pin 17 - Lift"
+      "sourceName": "Series 2 - Pin 17 - Lift",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lift-character-pin-series-2-017",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-00",
@@ -643,7 +724,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 0 - Peter Ahlstrom"
+      "sourceName": "Series 3 - Pin 0 - Peter Ahlstrom",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-000-peter",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-01",
@@ -656,7 +739,9 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 1 - Emperor Elend"
+      "sourceName": "Series 3 - Pin 1 - Emperor Elend",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/elend-character-pin-series-3-001",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-02",
@@ -669,7 +754,9 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 2 - Shai"
+      "sourceName": "Series 3 - Pin 2 - Shai",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/shai-character-pin-series-3-002",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-03",
@@ -682,7 +769,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 3 - Pin 3 - Marasi"
+      "sourceName": "Series 3 - Pin 3 - Marasi",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/marasi-character-pin-series-3-003",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-04",
@@ -695,7 +784,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 3 - Pin 4 - Rysn"
+      "sourceName": "Series 3 - Pin 4 - Rysn",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/rysn-character-pin-series-3-004",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-05",
@@ -708,7 +799,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 3 - Pin 5 - Hrathen"
+      "sourceName": "Series 3 - Pin 5 - Hrathen",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/hrathen-character-pin-series-3-005",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-06",
@@ -721,7 +814,9 @@
       "country": "US",
       "release": "Released with Emberdark preorders, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 6 - Sixth of the Dusk"
+      "sourceName": "Series 3 - Pin 6 - Sixth of the Dusk",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dusk-character-pin-series-3-006",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-07",
@@ -734,7 +829,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 3 - Pin 7 - Lightsong"
+      "sourceName": "Series 3 - Pin 7 - Lightsong",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/lightsong-character-pin-series-3-007",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-08",
@@ -747,7 +844,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": "Series 3 - Pin 8 - Blushweaver"
+      "sourceName": "Series 3 - Pin 8 - Blushweaver",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/blushweaver-character-pin-series-3-008",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-09",
@@ -760,7 +859,9 @@
       "country": "US",
       "release": "Released at FanX 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 9 - Wayne"
+      "sourceName": "Series 3 - Pin 9 - Wayne",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-009-wayne",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS3-10",
@@ -773,7 +874,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 10 - Human Form Starling"
+      "sourceName": "Series 3 - Pin 10 - Human Form Starling",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-010-starling-character-pin-set",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-CPS3-11",
@@ -786,7 +889,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 11 - Draconic Form Starling"
+      "sourceName": "Series 3 - Pin 11 - Draconic Form Starling",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-010-starling-character-pin-set",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-CPS3-12",
@@ -799,7 +904,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 3 - Pin 12 - Worldhopper Hoid"
+      "sourceName": "Series 3 - Pin 12 - Worldhopper Hoid",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-012-worldhopper-hoid",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS4-01",
@@ -812,7 +919,9 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 4 - Pin 1 - Sazed"
+      "sourceName": "Series 4 - Pin 1 - Sazed",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-001-sazed",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS4-02",
@@ -825,37 +934,13 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 4 - Pin 2 - Sarene"
-    },
-    {
-      "id": "PIN-CPS4-03",
-      "name": "Series 4 - Pin 3 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 3,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-04",
-      "name": "Series 4 - Pin 4 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 4,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
+      "sourceName": "Series 4 - Pin 2 - Sarene",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-002-sarene",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS4-05",
-      "name": "Series 4 - Pin 5 -",
+      "name": "Captain Tress",
       "series": "Character Pin Series 4",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -864,20 +949,9 @@
       "country": "US",
       "release": null,
       "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-06",
-      "name": "Series 4 - Pin 6 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 6,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
+      "sourceName": "Series 4 - Pin 5 - Captain Tress",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-005-captain-tress",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CPS4-07",
@@ -890,85 +964,9 @@
       "country": "US",
       "release": "Released at Gen Con 2026, later on Dragonsteel store",
       "notes": null,
-      "sourceName": "Series 4 - Pin 7 - Maya"
-    },
-    {
-      "id": "PIN-CPS4-08",
-      "name": "Series 4 - Pin 8 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 8,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-09",
-      "name": "Series 4 - Pin 9 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 9,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-10",
-      "name": "Series 4 - Pin 10 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 10,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-11",
-      "name": "Series 4 - Pin 11 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 11,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-12",
-      "name": "Series 4 - Pin 12 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 12,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
-      "id": "PIN-CPS4-13",
-      "name": "Series 4 - Pin 0 -",
-      "series": "Character Pin Series 4",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 13,
-      "detail": "Character Pin Series 4 · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
+      "sourceName": "Series 4 - Pin 7 - Maya",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dcp-series-4-007-maya",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-KRO-01",
@@ -981,7 +979,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-02",
@@ -994,7 +994,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-03",
@@ -1007,7 +1009,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-04",
@@ -1020,7 +1024,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-05",
@@ -1033,7 +1039,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-06",
@@ -1046,7 +1054,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-07",
@@ -1059,7 +1069,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-08",
@@ -1072,7 +1084,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-09",
@@ -1085,7 +1099,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KRO-10",
@@ -1098,7 +1114,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20211023074544/https://www.dragonsteelbooks.com/products/individual-knights-radiant-order-pins",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-KROG-01",
@@ -1176,7 +1194,9 @@
       "country": "US",
       "release": "Dragonsteel 2021 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220125060426/https://www.dragonsteelbooks.com/products/dragonsteel-2021-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CONV-02",
@@ -1189,7 +1209,9 @@
       "country": "US",
       "release": "Dragonsteel 2022 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20230131064119/https://www.dragonsteelbooks.com/products/dragonsteel-2022-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CONV-03",
@@ -1241,7 +1263,9 @@
       "country": "US",
       "release": "DSNX24 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/nexus-2024-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CONV-07",
@@ -1267,11 +1291,13 @@
       "country": "US",
       "release": "DSNX25 and later the store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dsnx25-convention-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CONV-09",
-      "name": "Dragonsteel Nexus 2025- Premium",
+      "name": "Dragonsteel Nexus 2025 - Premium",
       "series": "Convention",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1309,21 +1335,8 @@
       "sourceName": null
     },
     {
-      "id": "PIN-CYTO-01",
-      "name": "DDF Two-Tone",
-      "series": "Cytoverse",
-      "catalog": "SCG",
-      "catalogName": "Sanderson Collectors Guild Pins",
-      "number": 1,
-      "detail": "Cytoverse · US",
-      "country": "US",
-      "release": null,
-      "notes": null,
-      "sourceName": null
-    },
-    {
       "id": "PIN-CYTO-02",
-      "name": "DDF Two-Tone",
+      "name": "DDF Two-Tone (US)",
       "series": "Cytoverse",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1332,11 +1345,13 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20210514003435/https://store.brandonsanderson.com/products/ddf-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-03",
-      "name": "DDF UK",
+      "name": "DDF Two-Tone (UK)",
       "series": "Cytoverse",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1371,7 +1386,9 @@
       "country": "US",
       "release": "Part of the Defiant release bundle and later sold in store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20240221151126/https://www.dragonsteelbooks.com/products/hesho-mask-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-06",
@@ -1384,7 +1401,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220520175820/https://www.dragonsteelbooks.com/products/m-bot-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-07",
@@ -1397,7 +1416,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20220520180940/https://www.dragonsteelbooks.com/products/m-drone-pin",
+      "archiveMatch": "exact"
     },
     {
       "id": "PIN-CYTO-08",
@@ -1514,7 +1535,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-02",
@@ -1527,7 +1550,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-03",
@@ -1540,7 +1565,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-04",
@@ -1553,7 +1580,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-CYTDS-05",
@@ -1566,11 +1595,13 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Cytoverse Defiant  Ship Pins pack of 5 pins",
-      "sourceName": null
+      "sourceName": null,
+      "archiveUrl": "https://web.archive.org/web/20231124201557/https://www.dragonsteelbooks.com/products/cytoverse-defiant-ships-pin-bundle",
+      "archiveMatch": "bundle"
     },
     {
       "id": "PIN-SHELF-01",
-      "name": "Sandershelf - Pin 1 - Tress",
+      "name": "Tress",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1579,11 +1610,13 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 1 - Tress",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/tress-sandershelf-pin-set-001",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-02",
-      "name": "Sandershelf - Pin 2 - Way of Kings",
+      "name": "Way of Kings",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1592,11 +1625,13 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 2 - Way of Kings",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/way-of-kings-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-03",
-      "name": "Sandershelf - Pin 3 - Elantris",
+      "name": "Elantris",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1605,11 +1640,11 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 3 - Elantris"
     },
     {
       "id": "PIN-SHELF-04",
-      "name": "Sandershelf - Pin 4 - Yumi",
+      "name": "Yumi",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1618,11 +1653,13 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 4 - Yumi",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/yumi-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-05",
-      "name": "Sandershelf - Pin 5 - Mistborn Era 1",
+      "name": "Mistborn Era 1",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1631,11 +1668,13 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 5 - Mistborn Era 1",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-era-1-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-06",
-      "name": "Sandershelf - Pin 6 - Emerdark",
+      "name": "Emberdark",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1644,11 +1683,13 @@
       "country": "US",
       "release": "Released at FanX 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 6 - Emberdark",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/emberdark-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-07",
-      "name": "Sandershelf - Pin 7 - Skyward",
+      "name": "Skyward",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1657,11 +1698,13 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 7 - Skyward",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/skyward-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-08",
-      "name": "Sandershelf - Pin 8 - Warbreaker",
+      "name": "Warbreaker",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1670,11 +1713,13 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 8 - Warbreaker",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/warbreaker-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SHELF-09",
-      "name": "Sandershelf - Pin 9 - Sunlit Man",
+      "name": "Sunlit Man",
       "series": "Sandershelf",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1683,7 +1728,9 @@
       "country": "US",
       "release": "Released at MCM London 2026, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": "Sandershelf - Pin 9 - Sunlit Man",
+      "storeUrl": "https://www.dragonsteelbooks.com/products/the-sunlit-man-sandershelf-pin-set",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-ROSH-01",
@@ -1800,7 +1847,9 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/bridge-four-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-02",
@@ -1813,11 +1862,13 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/cosmere-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-03",
-      "name": "Dragonsteel Logo- Red",
+      "name": "Dragonsteel Logo - Red",
       "series": "Logo Pins",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1826,7 +1877,9 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-04",
@@ -1839,7 +1892,9 @@
       "country": "US",
       "release": "Released at Celsius 232 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/ghostbloods-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-05",
@@ -1852,7 +1907,9 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/scadrial-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-06",
@@ -1865,7 +1922,9 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/space-age-stormlight-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-LOGO-07",
@@ -1878,7 +1937,9 @@
       "country": "US",
       "release": "Released at C2E2 2025, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/space-age-stormlight-pin-copy",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-WHOP-01",
@@ -1908,7 +1969,7 @@
     },
     {
       "id": "PIN-WHOP-03",
-      "name": "DSNX Worldhopper",
+      "name": "Dragonsteel Nexus Worldhopper",
       "series": "Worldhopper Pins",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -1943,7 +2004,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Mistborn World art pin set of 3 pins",
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-MBWA-02",
@@ -1956,7 +2019,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Mistborn World art pin set of 3 pins",
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-MBWA-03",
@@ -1969,7 +2034,9 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": "Part of the Mistborn World art pin set of 3 pins",
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-COSP-01",
@@ -2034,7 +2101,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-scene-pin-adolin-and-shallan",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-SCENE-02",
@@ -2047,7 +2116,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/dragonsteel-scene-pin-vin-and-elend",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-RECK-01",
@@ -2073,7 +2144,9 @@
       "country": "US",
       "release": "Released at DSNX25, later on the Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/worldhopper-ball-2025-commemorative-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-CAMP-01",
@@ -2086,7 +2159,9 @@
       "country": "US",
       "release": "Released with the Hoid Storybook Backerkit campaign Fires of December bundle",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/the-fires-of-december-tor-edition-numbered-bundle",
+      "storeMatch": "bundle"
     },
     {
       "id": "PIN-EVENT-01",
@@ -2164,11 +2239,13 @@
       "country": "US",
       "release": "Sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/ascendent-warrior-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-OTHER-02",
-      "name": "Aviar- Emberdark",
+      "name": "Aviar - Emberdark",
       "series": "Other",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -2255,7 +2332,9 @@
       "country": "US",
       "release": "Released at DSNX25, Later sold in Dragonsteel store",
       "notes": null,
-      "sourceName": null
+      "sourceName": null,
+      "storeUrl": "https://www.dragonsteelbooks.com/products/silverlight-key-cloak-pin",
+      "storeMatch": "exact"
     },
     {
       "id": "PIN-OTHER-09",
@@ -2272,7 +2351,7 @@
     },
     {
       "id": "PIN-OTHER-10",
-      "name": "WoR Backer Pin",
+      "name": "Words of Radiance Backer Pin",
       "series": "Other",
       "catalog": "SCG",
       "catalogName": "Sanderson Collectors Guild Pins",
@@ -2280,6 +2359,138 @@
       "detail": "Other · US",
       "country": "US",
       "release": "Words of Radiance Leatherbound Crowdfunding Campaign",
+      "notes": null,
+      "sourceName": null
+    }
+  ],
+  "retired": [
+    {
+      "id": "PIN-CPS4-03",
+      "name": "Series 4 - Pin 3 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 3,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-04",
+      "name": "Series 4 - Pin 4 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 4,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-06",
+      "name": "Series 4 - Pin 6 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 6,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-08",
+      "name": "Series 4 - Pin 8 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 8,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-09",
+      "name": "Series 4 - Pin 9 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 9,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-10",
+      "name": "Series 4 - Pin 10 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 10,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-11",
+      "name": "Series 4 - Pin 11 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 11,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-12",
+      "name": "Series 4 - Pin 12 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 12,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CPS4-13",
+      "name": "Series 4 - Pin 0 -",
+      "series": "Character Pin Series 4",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 13,
+      "detail": "Character Pin Series 4 · US",
+      "country": "US",
+      "release": null,
+      "notes": null,
+      "sourceName": null
+    },
+    {
+      "id": "PIN-CYTO-01",
+      "name": "DDF Two-Tone",
+      "series": "Cytoverse",
+      "catalog": "SCG",
+      "catalogName": "Sanderson Collectors Guild Pins",
+      "number": 1,
+      "detail": "Cytoverse · US",
+      "country": "US",
+      "release": null,
       "notes": null,
       "sourceName": null
     }
@@ -2581,58 +2792,13 @@
       "finish": null
     },
     {
-      "skuId": "PIN-CPS4-03",
-      "cardId": "PIN-CPS4-03",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-04",
-      "cardId": "PIN-CPS4-04",
-      "finish": null
-    },
-    {
       "skuId": "PIN-CPS4-05",
       "cardId": "PIN-CPS4-05",
       "finish": null
     },
     {
-      "skuId": "PIN-CPS4-06",
-      "cardId": "PIN-CPS4-06",
-      "finish": null
-    },
-    {
       "skuId": "PIN-CPS4-07",
       "cardId": "PIN-CPS4-07",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-08",
-      "cardId": "PIN-CPS4-08",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-09",
-      "cardId": "PIN-CPS4-09",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-10",
-      "cardId": "PIN-CPS4-10",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-11",
-      "cardId": "PIN-CPS4-11",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-12",
-      "cardId": "PIN-CPS4-12",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CPS4-13",
-      "cardId": "PIN-CPS4-13",
       "finish": null
     },
     {
@@ -2763,11 +2929,6 @@
     {
       "skuId": "PIN-COSM-02",
       "cardId": "PIN-COSM-02",
-      "finish": null
-    },
-    {
-      "skuId": "PIN-CYTO-01",
-      "cardId": "PIN-CYTO-01",
       "finish": null
     },
     {

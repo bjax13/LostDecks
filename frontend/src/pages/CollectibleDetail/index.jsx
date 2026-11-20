@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PinImage from "../../components/PinImage/PinImage.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getCollectibleRecord, getSkuRecord } from "../../data/collectibles";
 import AddToCollectionButton from "../Collectibles/components/AddToCollectionButton";
@@ -59,6 +60,61 @@ function formatDate(date) {
   }
 }
 
+const DRAGONSTEEL_STORE_URL = /^https:\/\/www\.dragonsteelbooks\.com\/products\/[a-z0-9-]+$/;
+const WAYBACK_ARCHIVE_URL =
+  /^https:\/\/web\.archive\.org\/web\/(\d{14})\/https:\/\/(?:www\.dragonsteelbooks\.com|store\.brandonsanderson\.com)\/products\/[a-z0-9-]+$/;
+const ARCHIVE_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+function dragonsteelStoreLink(card) {
+  if (card?.collectibleType !== "pin") return null;
+  if (card.storeMatch !== "exact" && card.storeMatch !== "bundle") return null;
+  if (typeof card.storeUrl !== "string" || !DRAGONSTEEL_STORE_URL.test(card.storeUrl)) return null;
+  return {
+    href: card.storeUrl,
+    label:
+      card.storeMatch === "bundle"
+        ? "Sold in a bundle on the Dragonsteel store"
+        : "Dragonsteel store",
+  };
+}
+
+function archiveCaptureLabel(archiveUrl) {
+  if (typeof archiveUrl !== "string") return null;
+  const stamp = WAYBACK_ARCHIVE_URL.exec(archiveUrl)?.[1];
+  if (!stamp) return null;
+  const month = Number(stamp.slice(4, 6));
+  if (month < 1 || month > 12) return null;
+  return `${ARCHIVE_MONTHS[month - 1]} ${stamp.slice(0, 4)}`;
+}
+
+function archivedStoreLink(card) {
+  if (card?.collectibleType !== "pin") return null;
+  if (typeof card.storeUrl === "string" && card.storeUrl.trim().length > 0) return null;
+  if (card.archiveMatch !== "exact" && card.archiveMatch !== "bundle") return null;
+  const captured = archiveCaptureLabel(card.archiveUrl);
+  if (!captured) return null;
+  return {
+    href: card.archiveUrl,
+    label:
+      card.archiveMatch === "bundle"
+        ? `Archived bundle page (Wayback Machine, ${captured})`
+        : `Archived Dragonsteel store page (Wayback Machine, ${captured})`,
+  };
+}
+
 export default function CollectibleDetailPage() {
   const { collectibleId, skuId } = useParams();
   const navigate = useNavigate();
@@ -110,6 +166,9 @@ export default function CollectibleDetailPage() {
     return { [collectionEntry.skuId]: Math.max(0, quantity) };
   }, [collectionEntry, quantity]);
 
+  const storeLink = dragonsteelStoreLink(card);
+  const archiveLink = storeLink ? null : archivedStoreLink(card);
+
   if (!card) {
     return (
       <div className="card-detail-page">
@@ -135,6 +194,9 @@ export default function CollectibleDetailPage() {
       </button>
 
       <div className="card-detail__header">
+        {card.collectibleType === "pin" || card.category === "pin" ? (
+          <PinImage pinId={card.id} name={card.displayName} image={card.image} variant="detail" />
+        ) : null}
         <div className="card-detail__header-main">
           <div className="card-detail__header-top">
             <CategoryPill category={card.category} />
@@ -182,6 +244,35 @@ export default function CollectibleDetailPage() {
                   <div>
                     <dt>Catalog</dt>
                     <dd>{card.catalogName}</dd>
+                  </div>
+                ) : null}
+                {storeLink ? (
+                  <div className="card-detail__store">
+                    <dt>Store</dt>
+                    <dd>
+                      <a
+                        className="card-detail__store-link"
+                        href={storeLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {storeLink.label}
+                      </a>
+                    </dd>
+                  </div>
+                ) : archiveLink ? (
+                  <div className="card-detail__store">
+                    <dt>Store</dt>
+                    <dd>
+                      <a
+                        className="card-detail__store-link"
+                        href={archiveLink.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {archiveLink.label}
+                      </a>
+                    </dd>
                   </div>
                 ) : null}
               </>

@@ -11,6 +11,7 @@ ShardStash is a single-product Vite + React 18 SPA (`frontend/`) backed by Fireb
 | Path | Role |
 |------|------|
 | `frontend/` | Vite + React app; run dev server and frontend tests here |
+| `frontend/public/pin-images/README.md` | How to add pin photos (WebP sizes, `scripts/data/pin-images.json`, `npm run generate:pins-catalog`) |
 | `functions/` | Cloud Functions (`firebase-functions` + `firebase-admin`); emulator loads this code |
 | `firebase.json`, `.firebaserc` | Hosting target `shardstash` (`frontend/dist` → https://shardstash.web.app), emulators, Firestore, Functions; default Firebase project `storydeck-16` |
 | `firestore.rules`, `firestore.indexes.json` | Firestore security rules and composite indexes |
