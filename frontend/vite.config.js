@@ -15,6 +15,13 @@ export default defineConfig({
       include: ["src/**/*.{js,jsx}"],
       // Only exclude test files and test harness so they are not counted as production source.
       exclude: ["src/**/*.test.{js,jsx}", "src/**/*.spec.{js,jsx}", "src/test/**"],
+      // Ratchet: measured 2026-10-17 — stmts 91.68%, branches 84.39%, funcs 93.96%, lines 92.28%
+      thresholds: {
+        statements: 91,
+        branches: 84,
+        functions: 93,
+        lines: 92,
+      },
     },
   },
 });
