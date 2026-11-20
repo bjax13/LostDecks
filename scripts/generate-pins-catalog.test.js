@@ -4,10 +4,21 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
+const { applyDragonsteelStoreMap, STORE_URL_RE } = require("./generate-pins-catalog.js");
+
 const ROOT = path.resolve(__dirname, "..");
 const CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 const SCRIPT_PATH = path.join(ROOT, "scripts/generate-pins-catalog.js");
+const STORE_MAP_PATH = path.join(ROOT, "scripts/data/pin-dragonsteel-store-map.json");
 const SKU_RE = /^PIN-[A-Z0-9]{2,6}-[0-9]{2,3}$/;
+const BUNDLE_IDS = [
+  "PIN-CPS3-10",
+  "PIN-CPS3-11",
+  "PIN-MBWA-01",
+  "PIN-MBWA-02",
+  "PIN-MBWA-03",
+  "PIN-CAMP-01",
+];
 const PIN_KEYS = [
   "id",
   "name",
@@ -290,7 +301,13 @@ test("listed pins omit retired ids, keep every previous id, and use the cleaned 
   assert.equal(byId.get("PIN-CF-01").name, "Shredhead");
 
   for (const pin of [...catalog.pins, ...catalog.retired]) {
-    assert.deepEqual(Object.keys(pin), PIN_KEYS);
+    const keys = Object.keys(pin);
+    if (pin.storeUrl == null && pin.storeMatch == null) {
+      assert.deepEqual(keys, PIN_KEYS);
+    } else {
+      assert.equal(listedIds.includes(pin.id), true, pin.id);
+      assert.deepEqual(keys, [...PIN_KEYS, "storeUrl", "storeMatch"]);
+    }
     assert.equal(
       /^Series\s+\d+\s*-\s*Pin\s+\d+\s*-\s*$/.test(pin.name) && listedIds.includes(pin.id),
       false,
@@ -302,7 +319,7 @@ test("listed pins omit retired ids, keep every previous id, and use the cleaned 
   );
 });
 
-test("generate-pins-catalog.js is idempotent", () => {
+test("regenerating the pins catalog reproduces the committed catalog", () => {
   const before = fs.readFileSync(CATALOG_PATH, "utf8");
   const result = spawnSync(process.execPath, [SCRIPT_PATH], {
     cwd: ROOT,
@@ -311,4 +328,149 @@ test("generate-pins-catalog.js is idempotent", () => {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const after = fs.readFileSync(CATALOG_PATH, "utf8");
   assert.equal(after, before);
+  assert.match(result.stdout, /73 exact, 6 bundle/);
+  assert.doesNotMatch(`${result.stdout}\n${result.stderr}`, /Skipped Dragonsteel store mapping/);
+});
+
+test("every storeUrl is https on www.dragonsteelbooks.com and every id exists in the catalog", () => {
+  const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, "utf8"));
+  const map = JSON.parse(fs.readFileSync(STORE_MAP_PATH, "utf8"));
+  const entries = Object.entries(map.pins);
+  assert.equal(entries.length, 79);
+
+  const listed = new Map(catalog.pins.map((pin) => [pin.id, pin]));
+  const retired = new Map(catalog.retired.map((pin) => [pin.id, pin]));
+  const catalogIds = new Set([...listed.keys(), ...retired.keys()]);
+  let exact = 0;
+  let bundle = 0;
+
+  for (const [id, entry] of entries) {
+    assert.equal(catalogIds.has(id), true, `${id} is not in the catalog`);
+    assert.match(entry.storeUrl, STORE_URL_RE);
+    const url = new URL(entry.storeUrl);
+    assert.equal(url.protocol, "https:");
+    assert.equal(url.hostname, "www.dragonsteelbooks.com");
+    assert.equal(url.pathname.startsWith("/products/"), true);
+
+    const pin = listed.get(id);
+    assert.ok(pin, `${id} is not a listed pin`);
+    assert.equal(retired.has(id), false);
+    assert.equal(pin.storeUrl, entry.storeUrl);
+    assert.equal(pin.storeMatch, entry.storeMatch);
+    if (entry.storeMatch === "exact") exact += 1;
+    else if (entry.storeMatch === "bundle") bundle += 1;
+    else assert.fail(entry.storeMatch);
+  }
+
+  assert.equal(exact, 73);
+  assert.equal(bundle, 6);
+  assert.deepEqual(
+    catalog.pins
+      .filter((pin) => pin.storeMatch === "bundle")
+      .map((pin) => pin.id)
+      .sort(),
+    [...BUNDLE_IDS].sort(),
+  );
+  assert.equal(
+    listed.get("PIN-LOGO-03").storeUrl,
+    "https://www.dragonsteelbooks.com/products/dragonsteel-pin",
+  );
+  assert.equal(listed.get("PIN-LOGO-03").storeMatch, "exact");
+  assert.equal(
+    listed.get("PIN-MBWA-01").storeUrl,
+    "https://www.dragonsteelbooks.com/products/mistborn-word-art-pin-set",
+  );
+  assert.equal(listed.get("PIN-MBWA-02").storeUrl, listed.get("PIN-MBWA-01").storeUrl);
+  assert.equal(listed.get("PIN-MBWA-03").storeUrl, listed.get("PIN-MBWA-01").storeUrl);
+  assert.equal(listed.get("PIN-CPS3-10").storeUrl, listed.get("PIN-CPS3-11").storeUrl);
+  assert.equal(
+    listed.get("PIN-CAMP-01").storeUrl,
+    "https://www.dragonsteelbooks.com/products/the-fires-of-december-tor-edition-numbered-bundle",
+  );
+
+  const mapped = catalog.pins.filter((pin) => pin.storeUrl != null || pin.storeMatch != null);
+  assert.equal(mapped.length, 79);
+  for (const pin of catalog.pins) {
+    if (pin.storeUrl == null && pin.storeMatch == null) {
+      assert.equal(map.pins[pin.id], undefined);
+      continue;
+    }
+    assert.match(pin.storeUrl, STORE_URL_RE);
+    assert.equal(map.pins[pin.id].storeUrl, pin.storeUrl);
+    assert.equal(map.pins[pin.id].storeMatch, pin.storeMatch);
+  }
+  for (const pin of catalog.retired) {
+    assert.equal(pin.storeUrl, undefined);
+    assert.equal(pin.storeMatch, undefined);
+    assert.equal(map.pins[pin.id], undefined);
+  }
+  assert.equal(listed.get("PIN-CF-01").storeUrl, undefined);
+});
+
+test("applyDragonsteelStoreMap skips unknown and retired ids and reports them", () => {
+  const listed = [{ id: "PIN-CPS1-00", name: "Brandon" }];
+  const retired = [{ id: "PIN-CPS4-03", name: "Series 4 - Pin 3 -" }];
+  const retiredBefore = structuredClone(retired);
+  const warnings = [];
+  const result = applyDragonsteelStoreMap(
+    listed,
+    retired,
+    {
+      "PIN-CPS1-00": {
+        storeUrl: "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+        storeMatch: "exact",
+      },
+      "PIN-CPS4-03": {
+        storeUrl: "https://www.dragonsteelbooks.com/products/not-used",
+        storeMatch: "exact",
+      },
+      "PIN-NOPE-01": {
+        storeUrl: "https://www.dragonsteelbooks.com/products/not-used",
+        storeMatch: "bundle",
+      },
+    },
+    { warn: (message) => warnings.push(message) },
+  );
+
+  assert.equal(
+    listed[0].storeUrl,
+    "https://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+  );
+  assert.equal(listed[0].storeMatch, "exact");
+  assert.deepEqual(retired, retiredBefore);
+  assert.equal(retired[0].storeUrl, undefined);
+  assert.deepEqual(result.skipped, [
+    { id: "PIN-CPS4-03", reason: "retired" },
+    { id: "PIN-NOPE-01", reason: "not in catalog" },
+  ]);
+  assert.equal(result.exact, 1);
+  assert.equal(result.bundle, 0);
+  assert.match(warnings.join("\n"), /PIN-CPS4-03: retired/);
+  assert.match(warnings.join("\n"), /PIN-NOPE-01: not in catalog/);
+});
+
+test("applyDragonsteelStoreMap rejects a URL that is not https on www.dragonsteelbooks.com", () => {
+  const listed = [{ id: "PIN-CPS1-00" }];
+  assert.throws(
+    () =>
+      applyDragonsteelStoreMap(listed, [], {
+        "PIN-CPS1-00": {
+          storeUrl: "http://www.dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+          storeMatch: "exact",
+        },
+      }),
+    /Invalid Dragonsteel store URL/,
+  );
+  assert.equal(listed[0].storeUrl, undefined);
+
+  assert.throws(
+    () =>
+      applyDragonsteelStoreMap([{ id: "PIN-CPS1-00" }], [], {
+        "PIN-CPS1-00": {
+          storeUrl: "https://dragonsteelbooks.com/products/brandon-character-pin-series-1-000",
+          storeMatch: "exact",
+        },
+      }),
+    /Invalid Dragonsteel store URL/,
+  );
 });
