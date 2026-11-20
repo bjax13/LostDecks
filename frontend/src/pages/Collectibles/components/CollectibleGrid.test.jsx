@@ -1,9 +1,15 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { isDoubledCollectibleDetailPath } from "../../../lib/collectibleDetailPath";
 import { TestMemoryRouter } from "../../../test/router.jsx";
 import "../Collectibles.css";
 import CollectibleGrid from "./CollectibleGrid.jsx";
+
+function Pathname() {
+  return <div data-testid="pathname">{useLocation().pathname}</div>;
+}
 
 vi.mock("./AddToCollectionButton.jsx", () => ({
   default: ({ collectible, ownedBySkuId = {}, deleteWhenZero = true, onQuantityChange }) => {
@@ -87,20 +93,45 @@ describe("CollectibleGrid (unit)", () => {
     expect(document.querySelector(".category-pill")).toHaveTextContent("Story");
     expect(screen.getByRole("heading", { name: "Story #01" })).toBeVisible();
     expect(screen.getByTestId("add-btn")).toBeVisible();
+    const detailsLink = screen.getByRole("link", { name: "View details for Story #01" });
+    expect(detailsLink).toBeVisible();
+    expect(detailsLink).toHaveTextContent("details ›");
+    expect(detailsLink).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
+    expect(detailsLink.closest("summary")).toBeNull();
+    expect(detailsLink.closest(".card-actions")).toBeNull();
 
     await userEvent.click(screen.getByRole("heading", { name: "Story #01" }));
 
     expect(details).toHaveAttribute("open");
-    expect(screen.getByRole("link", { name: "LT24-ELS-01" })).toHaveAttribute(
-      "href",
-      "/collectibles/LT24-ELS-01",
-    );
+    const skuLink = screen.getByRole("link", { name: "LT24-ELS-01" });
+    expect(skuLink).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
+    expect(skuLink).toHaveClass("card-id--link");
+    const skuStyle = getComputedStyle(skuLink);
+    expect(skuStyle.color).toBe("rgb(207, 168, 255)");
+    expect(`${skuStyle.textDecorationLine} ${skuStyle.textDecoration}`).toMatch(/underline/);
     expect(screen.getByText("Story card")).toBeVisible();
     expect(screen.getByText("Elsecaller")).toBeVisible();
     expect(screen.getByText("Common")).toBeVisible();
     expect(screen.getByText("DUN")).toBeVisible();
     expect(screen.getByText("FOIL")).toBeVisible();
     expect(screen.getByText("Not in binder mosaic")).toBeVisible();
+  });
+
+  it("follows the details link on a collapsed card without expanding it", async () => {
+    render(
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
+        <CollectibleGrid collectibles={[mockCollectible]} />
+        <Pathname />
+      </TestMemoryRouter>,
+    );
+
+    const details = document.querySelector(".card-details");
+    expect(details).not.toHaveAttribute("open");
+    await userEvent.click(screen.getByRole("link", { name: "View details for Story #01" }));
+
+    expect(details).not.toHaveAttribute("open");
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/collectibles/LT24-ELS-01");
+    expect(isDoubledCollectibleDetailPath("/collectibles/LT24-ELS-01")).toBe(false);
   });
 
   it("does not expand details when add-to-collection is clicked", async () => {
@@ -241,6 +272,10 @@ describe("CollectibleGrid (unit)", () => {
 
     const pinTile = screen.getByRole("heading", { name: "Brandon" }).closest(".card-tile");
     expect(pinTile.querySelector(".category-pill")).toHaveTextContent("Pin");
+    const pinDetails = within(pinTile).getByRole("link", { name: "View details for Brandon" });
+    expect(pinDetails).toHaveAttribute("href", "/collectibles/PIN-CPS1-00");
+    expect(isDoubledCollectibleDetailPath(pinDetails.getAttribute("href"))).toBe(false);
+    expect(pinTile.querySelector(".card-details")).not.toContainElement(pinDetails);
     expect(pinTile.querySelector(".card-details")).not.toHaveAttribute("open");
     expect(pinTile).not.toHaveTextContent("Rarity");
     expect(pinTile).not.toHaveTextContent("Finishes");

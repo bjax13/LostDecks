@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { collectibleDetailPath } from "../../../lib/collectibleDetailPath";
 import { categoryLabels } from "../constants";
 import AddToCollectionButton from "./AddToCollectionButton";
 import BinderInfo from "./BinderInfo";
 import CategoryPill from "./CategoryPill";
+import CollectibleDetailsLink from "./CollectibleDetailsLink";
 import FinishPills from "./FinishPills";
 
 function isPinCollectible(collectible) {
@@ -20,10 +22,13 @@ export default function CollectibleTable({
     collectibles.length > 0 && collectibles.every((collectible) => isPinCollectible(collectible));
 
   const handleRowClick = (collectibleId, event) => {
-    if (event.target.closest(".add-to-collection")) {
+    if (event.target.closest(".add-to-collection, a, button")) {
       return;
     }
-    navigate(`/collectibles/${collectibleId}`);
+    const path = collectibleDetailPath(collectibleId);
+    if (path) {
+      navigate(path);
+    }
   };
 
   return (
@@ -44,6 +49,7 @@ export default function CollectibleTable({
               </>
             )}
             <th>Actions</th>
+            <th>Details</th>
           </tr>
         </thead>
         <tbody>
@@ -92,6 +98,12 @@ export default function CollectibleTable({
                     ownedBySkuId={ownedBySkuId}
                     deleteWhenZero={deleteWhenZero}
                     onQuantityChange={onQuantityChange}
+                  />
+                </td>
+                <td className="cards-table__details">
+                  <CollectibleDetailsLink
+                    collectibleId={collectible.id}
+                    name={collectible.displayName}
                   />
                 </td>
               </tr>

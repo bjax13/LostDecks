@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { isDoubledCollectibleDetailPath } from "../../../lib/collectibleDetailPath";
 import { TestMemoryRouter } from "../../../test/router.jsx";
 import CollectibleTable from "./CollectibleTable.jsx";
 
@@ -34,6 +35,31 @@ describe("CollectibleTable (unit)", () => {
     );
     expect(screen.getByText("LT24-ELS-01")).toBeInTheDocument();
     expect(screen.getByText("Story #01")).toBeInTheDocument();
+  });
+
+  it("shows a details link at the end of the row and navigates to the collectible", async () => {
+    render(
+      <TestMemoryRouter initialEntries={["/collectibles"]}>
+        <Routes>
+          <Route
+            path="/collectibles"
+            element={<CollectibleTable collectibles={[mockCollectible]} />}
+          />
+          <Route path="/collectibles/:id" element={<div data-testid="detail">Detail</div>} />
+        </Routes>
+      </TestMemoryRouter>,
+    );
+
+    const row = screen.getByText("LT24-ELS-01").closest("tr");
+    const detailsLink = within(row).getByRole("link", { name: "View details for Story #01" });
+    expect(detailsLink).toHaveTextContent("details ›");
+    expect(detailsLink).toHaveAttribute("href", "/collectibles/LT24-ELS-01");
+    expect(isDoubledCollectibleDetailPath(detailsLink.getAttribute("href"))).toBe(false);
+    expect(detailsLink.closest(".add-to-collection")).toBeNull();
+    expect(row.querySelector("td:last-child")).toContainElement(detailsLink);
+
+    await userEvent.click(detailsLink);
+    expect(screen.getByTestId("detail")).toBeInTheDocument();
   });
 
   it("navigates when row is clicked", async () => {
@@ -111,6 +137,10 @@ describe("CollectibleTable (unit)", () => {
 
     const row = screen.getByText("PIN-CPS1-00").closest("tr");
     expect(row).toHaveTextContent("Character Pin Series 1");
+    expect(within(row).getByRole("link", { name: "View details for Brandon" })).toHaveAttribute(
+      "href",
+      "/collectibles/PIN-CPS1-00",
+    );
     expect(row).toHaveTextContent("Brandon");
     expect(row).not.toHaveTextContent("Mythic");
     expect(row).not.toHaveTextContent("DUN");

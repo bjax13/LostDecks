@@ -963,6 +963,38 @@
   align-items: center;
 }
 
+.collection-table__details {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.collection-table .details-affordance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+  min-height: 1.75rem;
+  color: #cfa8ff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+  white-space: nowrap;
+}
+
+.collection-table .details-affordance:hover {
+  color: #ffffff;
+}
+
+.collection-table .details-affordance:focus-visible {
+  outline: 2px solid rgba(207, 168, 255, 0.8);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .collection-table__action-button {
   border: 1px solid rgba(201, 182, 255, 0.55);
   background: rgba(96, 66, 178, 0.4);
@@ -1136,11 +1168,56 @@
   }
 
   .collection-table tbody tr {
-    display: block;
+    display: flex;
+    flex-direction: column;
     background: rgba(24, 18, 45, 0.85);
     border-radius: 16px;
     border: 1px solid rgba(138, 43, 226, 0.25);
     overflow: hidden;
+  }
+
+  .collection-table tbody td[data-label="Card"] {
+    order: 1;
+  }
+
+  .collection-table tbody td.collection-table__details {
+    order: 2;
+    align-self: stretch;
+    align-items: flex-end;
+    box-sizing: border-box;
+    width: auto;
+    max-width: 100%;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.15);
+  }
+
+  .collection-table tbody td[data-label="Category"] {
+    order: 3;
+  }
+
+  .collection-table tbody td[data-label="Finish"] {
+    order: 4;
+  }
+
+  .collection-table tbody td[data-label="Quantity"] {
+    order: 5;
+  }
+
+  .collection-table tbody td[data-label="Last updated"] {
+    order: 6;
+  }
+
+  .collection-table tbody td[data-label="Actions"] {
+    order: 7;
+    border-bottom: none;
+  }
+
+  .collection-table tbody td.collection-table__details::before {
+    content: none;
+  }
+
+  .collection-table .details-affordance {
+    min-height: 2.75rem;
+    padding-inline: 0.45rem;
   }
 
   .collection-table tbody tr.collection-table__row--clickable {
