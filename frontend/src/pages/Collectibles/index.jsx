@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import CollectibleGrid from "./components/CollectibleGrid";
@@ -8,11 +8,21 @@ import CollectiblesToolbar from "./components/CollectiblesToolbar";
 import CollectibleTable from "./components/CollectibleTable";
 import { useCollectiblesExplorer } from "./hooks/useCollectiblesExplorer";
 import { usePurgeSoftZeroEntriesOnMount } from "./hooks/usePurgeSoftZeroEntriesOnMount";
+import { categoryFilterFromQuery, categoryQueryForFilter } from "./utils/categoryQuery";
 import { buildOwnedQuantityBySkuId } from "./utils/ownedQuantities";
 import "./Collectibles.css";
 
+function searchParamsWithCategory(prev, filter) {
+  const next = new URLSearchParams(prev);
+  const queryValue = categoryQueryForFilter(filter);
+  if (queryValue) next.set("category", queryValue);
+  else next.delete("category");
+  return next;
+}
+
 export default function CollectiblesPage() {
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromQuery = categoryFilterFromQuery(searchParams.get("category"));
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
   const { entries, loading } = useUserCollection(ownerUid);
@@ -38,8 +48,6 @@ export default function CollectiblesPage() {
     });
   };
 
-  const initialCategoryFilter =
-    typeof location.state?.categoryFilter === "string" ? location.state.categoryFilter : "all";
   const [viewMode, setViewMode] = useState("grid");
   const {
     collectibles,
@@ -60,7 +68,23 @@ export default function CollectiblesPage() {
     sortDirection,
     setSortDirection,
     resetFilters,
-  } = useCollectiblesExplorer({ initialCategoryFilter });
+  } = useCollectiblesExplorer({ initialCategoryFilter: categoryFromQuery });
+
+  useEffect(() => {
+    if (categoryFilter !== categoryFromQuery) {
+      setCategoryFilter(categoryFromQuery);
+    }
+  }, [categoryFilter, categoryFromQuery, setCategoryFilter]);
+
+  const handleCategoryChange = (nextCategory) => {
+    setCategoryFilter(nextCategory);
+    setSearchParams((prev) => searchParamsWithCategory(prev, nextCategory), { replace: true });
+  };
+
+  const handleReset = () => {
+    resetFilters();
+    setSearchParams((prev) => searchParamsWithCategory(prev, "all"), { replace: true });
+  };
 
   const handleViewChange = (mode) => {
     setViewMode(mode);
@@ -83,7 +107,7 @@ export default function CollectiblesPage() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         categoryFilter={categoryFilter}
-        onCategoryChange={setCategoryFilter}
+        onCategoryChange={handleCategoryChange}
         storyFilter={storyFilter}
         onStoryChange={setStoryFilter}
         rarityFilter={rarityFilter}
@@ -96,7 +120,7 @@ export default function CollectiblesPage() {
         stories={stories}
         resultCount={collectibles.length}
         totalCount={totalCollectibles}
-        onReset={resetFilters}
+        onReset={handleReset}
       />
 
       {viewMode === "table" ? (

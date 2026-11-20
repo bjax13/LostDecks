@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { resetPostHogUser } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
+import LocationCombobox from "../../components/LocationCombobox.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { functions } from "../../lib/firebase";
 import { ACCOUNT_MATCHING_HELP, MATCH_KEEP_HELP } from "../../lib/matchHelpCopy.js";
@@ -208,8 +209,11 @@ function AccountPage() {
     });
   };
 
-  const handleMatchCountryChange = async (event) => {
-    const next = locationSelectionForCountry(event.target.value);
+  const handleMatchCountryChange = async (nextCode) => {
+    const next = locationSelectionForCountry(nextCode);
+    if (next.matchCountry === matchCountry) {
+      return;
+    }
     const previousCountry = matchCountry;
     const previousRegion = matchRegion;
     setMatchCountry(next.matchCountry);
@@ -220,8 +224,11 @@ function AccountPage() {
     });
   };
 
-  const handleMatchRegionChange = async (event) => {
-    const nextRegion = normalizeMatchRegion(matchCountry, event.target.value);
+  const handleMatchRegionChange = async (nextCode) => {
+    const nextRegion = normalizeMatchRegion(matchCountry, nextCode);
+    if (nextRegion === matchRegion) {
+      return;
+    }
     const previousRegion = matchRegion;
     setMatchRegion(nextRegion);
     await persistPreferences({ matchRegion: nextRegion }, () => {
@@ -536,34 +543,28 @@ function AccountPage() {
               </p>
               <div className="account-location-field">
                 <label htmlFor="account-match-country">Country</label>
-                <select
+                <LocationCombobox
                   id="account-match-country"
+                  label="Country"
+                  options={MATCH_COUNTRIES}
                   value={matchCountry}
-                  onChange={handleMatchCountryChange}
-                >
-                  <option value="">Not set</option>
-                  {MATCH_COUNTRIES.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
+                  onValueChange={handleMatchCountryChange}
+                  pinCode="US"
+                  disabled={controlsDisabled}
+                />
               </div>
               {regionOptions.length > 0 ? (
                 <div className="account-location-field">
                   <label htmlFor="account-match-region">State/Province</label>
-                  <select
+                  <LocationCombobox
+                    key={matchCountry}
                     id="account-match-region"
+                    label="State/Province"
+                    options={regionOptions}
                     value={matchRegion}
-                    onChange={handleMatchRegionChange}
-                  >
-                    <option value="">Not set</option>
-                    {regionOptions.map((region) => (
-                      <option key={region.code} value={region.code}>
-                        {region.name}
-                      </option>
-                    ))}
-                  </select>
+                    onValueChange={handleMatchRegionChange}
+                    disabled={controlsDisabled}
+                  />
                 </div>
               ) : null}
             </fieldset>

@@ -12,9 +12,8 @@ export default function HomeSupportedCollections() {
           <span className="home-supported__tile-action">Browse catalog</span>
         </Link>
         <Link
-          to="/collectibles"
+          to="/collectibles?category=pins"
           className="home-supported__tile home-supported__tile--active"
-          state={{ categoryFilter: "pin" }}
         >
           <span className="home-supported__tile-label">Pins</span>
           <span className="home-supported__tile-meta">{pinDatasetMeta.setName}</span>

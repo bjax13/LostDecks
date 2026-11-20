@@ -343,3 +343,93 @@ export function locationSelectionForCountry(countryCode) {
     matchRegion: "",
   };
 }
+
+function queryNeedle(query) {
+  return typeof query === "string" ? query.trim().toLowerCase() : "";
+}
+
+function pinOptionFirst(options, pinCode) {
+  if (!pinCode) {
+    return options.slice();
+  }
+  const pinned = [];
+  const rest = [];
+  for (const option of options) {
+    if (option.code === pinCode) {
+      pinned.push(option);
+    } else {
+      rest.push(option);
+    }
+  }
+  return [...pinned, ...rest];
+}
+
+/**
+ * Case-insensitive match on the display name, with the code as a fallback.
+ * Name prefix matches stay ahead of other substring matches so "ut" offers Utah
+ * before Connecticut. A pinned code stays first whenever it is in the result.
+ */
+export function filterLocationOptions(options, query, { pinCode = "" } = {}) {
+  const source = Array.isArray(options) ? options : [];
+  const needle = queryNeedle(query);
+  if (!needle) {
+    return pinOptionFirst(source, pinCode);
+  }
+
+  const prefixes = [];
+  const substrings = [];
+  const codes = [];
+  for (const option of source) {
+    const name = String(option.name).toLowerCase();
+    const code = String(option.code).toLowerCase();
+    const nameIndex = name.indexOf(needle);
+    if (nameIndex === 0) {
+      prefixes.push(option);
+    } else if (nameIndex > 0) {
+      substrings.push(option);
+    } else if (code.includes(needle)) {
+      codes.push(option);
+    }
+  }
+
+  return pinOptionFirst([...prefixes, ...substrings, ...codes], pinCode);
+}
+
+/** Exact display name, otherwise exact code. Empty and unknown text do not match. */
+export function resolveLocationOption(options, query) {
+  if (!Array.isArray(options)) {
+    return null;
+  }
+  const needle = queryNeedle(query);
+  if (!needle) {
+    return null;
+  }
+  const byName = options.find((option) => String(option.name).toLowerCase() === needle);
+  if (byName) {
+    return byName;
+  }
+  return options.find((option) => String(option.code).toLowerCase() === needle) ?? null;
+}
+
+/**
+ * Options for the location combobox. An empty filter pins `pinCode` first, then
+ * the clear row, then the remaining names. A typed filter keeps that pin when
+ * the pinned entry still matches, and only includes the clear row when its
+ * label matches the text.
+ */
+export function buildLocationList(options, query, { pinCode = "", clearLabel = "Not set" } = {}) {
+  const filtered = filterLocationOptions(options, query, { pinCode });
+  const needle = queryNeedle(query);
+  const label = typeof clearLabel === "string" && clearLabel.trim() ? clearLabel : "Not set";
+  const clearOption = { code: "", name: label };
+  const includeClear = needle === "" || label.toLowerCase().includes(needle);
+  if (!includeClear) {
+    return filtered;
+  }
+  if (needle === "" && pinCode && filtered.some((option) => option.code === pinCode)) {
+    const pinned = filtered.filter((option) => option.code === pinCode);
+    const rest = filtered.filter((option) => option.code !== pinCode);
+    return [...pinned, clearOption, ...rest];
+  }
+  return [clearOption, ...filtered];
+}

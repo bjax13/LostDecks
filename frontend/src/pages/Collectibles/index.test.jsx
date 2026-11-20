@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import "./Collectibles.css";
@@ -104,6 +105,7 @@ vi.mock("../../data/collectibles", () => ({
   collectiblesIndex: testCollectibles,
   datasetMeta: testDatasetMeta,
   datasetStories: testDatasetStories,
+  pinSeriesOptions: [],
   toSkuId(cardId, finish) {
     if (!cardId || !finish) return null;
     return `${cardId}-${String(finish).toUpperCase()}`;
@@ -118,8 +120,18 @@ vi.mock("../../data/collectibles", () => ({
   },
 }));
 
-function renderWithRouter(ui) {
-  return render(<TestMemoryRouter>{ui}</TestMemoryRouter>);
+function SearchProbe() {
+  const { search } = useLocation();
+  return <div data-testid="search">{search}</div>;
+}
+
+function renderWithRouter(ui, { path = "/collectibles" } = {}) {
+  return render(
+    <TestMemoryRouter initialEntries={[path]}>
+      {ui}
+      <SearchProbe />
+    </TestMemoryRouter>,
+  );
 }
 
 function setupUser() {
@@ -370,5 +382,50 @@ describe("CollectiblesPage (integration)", () => {
         expect.objectContaining({ id: "zero-1", quantity: 0 }),
       ]);
     });
+  });
+
+  it("honors ?category=pins as the Pins category", () => {
+    renderWithRouter(<CollectiblesPage />, { path: "/collectibles?category=pins" });
+    expect(screen.getByLabelText("Category")).toHaveValue("pin");
+    expect(screen.queryByRole("heading", { name: "Test Story #01" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Herald One" })).not.toBeInTheDocument();
+  });
+
+  it("honors the Pins option value and other category params", () => {
+    const { unmount } = renderWithRouter(<CollectiblesPage />, {
+      path: "/collectibles?category=pin",
+    });
+    expect(screen.getByLabelText("Category")).toHaveValue("pin");
+    unmount();
+
+    renderWithRouter(<CollectiblesPage />, { path: "/collectibles?category=herald" });
+    expect(screen.getByLabelText("Category")).toHaveValue("herald");
+    expect(screen.getByRole("heading", { name: "Herald One" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Test Story #01" })).not.toBeInTheDocument();
+  });
+
+  it("ignores an unknown category query", () => {
+    renderWithRouter(<CollectiblesPage />, { path: "/collectibles?category=relics" });
+    expect(screen.getByLabelText("Category")).toHaveValue("all");
+    expect(screen.getByRole("heading", { name: "Test Story #01" })).toBeInTheDocument();
+  });
+
+  it("writes the category query from the Category control and clears it on reset", async () => {
+    const user = setupUser();
+    renderWithRouter(<CollectiblesPage />);
+
+    await user.selectOptions(screen.getByLabelText("Category"), "pin");
+    expect(screen.getByLabelText("Category")).toHaveValue("pin");
+    expect(screen.getByTestId("search")).toHaveTextContent("?category=pins");
+
+    await user.selectOptions(screen.getByLabelText("Category"), "story");
+    expect(screen.getByTestId("search")).toHaveTextContent("?category=story");
+    expect(screen.getByRole("heading", { name: "Test Story #01" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Herald One" })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Reset filters" }));
+    expect(screen.getByLabelText("Category")).toHaveValue("all");
+    expect(screen.getByTestId("search")).toHaveTextContent("");
+    expect(screen.getByRole("heading", { name: "Herald One" })).toBeInTheDocument();
   });
 });
