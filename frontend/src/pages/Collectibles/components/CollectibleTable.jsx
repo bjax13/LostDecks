@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PinImage from "../../../components/PinImage/PinImage.jsx";
 import { collectibleDetailPath } from "../../../lib/collectibleDetailPath";
 import { categoryLabels } from "../constants";
 import AddToCollectionButton from "./AddToCollectionButton";
@@ -61,7 +62,19 @@ export default function CollectibleTable({
                 className="cards-table__row--clickable"
                 onClick={(e) => handleRowClick(collectible.id, e)}
               >
-                <td className="mono">{collectible.id}</td>
+                <td className="mono">
+                  <div className="cards-table__identity">
+                    {pin ? (
+                      <PinImage
+                        pinId={collectible.id}
+                        name={collectible.displayName}
+                        image={collectible.image}
+                        variant="row"
+                      />
+                    ) : null}
+                    <span>{collectible.id}</span>
+                  </div>
+                </td>
                 <td>
                   <CategoryPill
                     category={collectible.category}

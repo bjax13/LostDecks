@@ -1,0 +1,177 @@
+.pin-image {
+  --pin-hue: 262;
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  container-type: inline-size;
+  border-radius: 8px;
+  border: 1px solid hsl(var(--pin-hue) 48% 72% / 0.45);
+  background: hsl(var(--pin-hue) 38% 32% / 0.92);
+  color: #f7f4ff;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.pin-image--grid {
+  width: 64px;
+  height: 64px;
+}
+
+.pin-image--row {
+  width: 40px;
+  height: 40px;
+}
+
+.pin-image--match {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.pin-image--detail {
+  width: 320px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 16px;
+}
+
+button.pin-image {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: zoom-in;
+  appearance: none;
+}
+
+.pin-image--empty {
+  flex-direction: column;
+  gap: 0.15rem;
+  text-align: center;
+}
+
+.pin-image--detail.pin-image--empty {
+  gap: 0.85rem;
+  padding: 1.25rem;
+}
+
+.pin-image__code {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 20cqw;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-inline: 2px;
+}
+
+.pin-image--detail .pin-image__code {
+  font-size: 1.65rem;
+  letter-spacing: 0.14em;
+}
+
+.pin-image__camera {
+  width: 22cqw;
+  height: 22cqw;
+  opacity: 0.9;
+}
+
+.pin-image__placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.pin-image__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.pin-image__photo--shown {
+  opacity: 1;
+}
+
+.pin-image__cta {
+  margin: 0;
+  max-width: 16rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+.pin-image__cta a {
+  color: #e4d4ff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pin-image__cta a:hover {
+  color: #ffffff;
+}
+
+.pin-image__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(8, 5, 18, 0.84);
+}
+
+.pin-image__lightbox img {
+  max-width: min(800px, 100%);
+  max-height: calc(100vh - 6rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(20, 14, 40, 0.9);
+}
+
+.pin-image__lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-out;
+}
+
+.pin-image__lightbox img,
+.pin-image__lightbox-close {
+  position: relative;
+  z-index: 1;
+}
+
+.pin-image__lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: 1px solid rgba(201, 182, 255, 0.7);
+  background: rgba(20, 14, 40, 0.92);
+  color: #f4f1ff;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .pin-image--detail {
+    width: 100%;
+  }
+}

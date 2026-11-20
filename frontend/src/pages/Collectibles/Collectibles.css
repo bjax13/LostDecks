@@ -243,6 +243,12 @@
   border-bottom: 1px solid rgba(121, 97, 208, 0.25);
 }
 
+.cards-table__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .cards-table tbody tr:nth-child(even) {
   background: rgba(45, 31, 82, 0.35);
 }
@@ -382,6 +388,21 @@
   cursor: pointer;
   list-style: none;
   color: inherit;
+}
+
+.card-glance--pin {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.card-glance__body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .card-glance__meta {

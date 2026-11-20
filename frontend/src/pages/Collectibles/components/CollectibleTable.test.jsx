@@ -136,6 +136,12 @@ describe("CollectibleTable (unit)", () => {
     expect(screen.queryByRole("columnheader", { name: "Binder" })).not.toBeInTheDocument();
 
     const row = screen.getByText("PIN-CPS1-00").closest("tr");
+    const slot = within(row).getByRole("img", { name: "no photo yet" });
+    expect(slot).toHaveTextContent("CPS1");
+    expect(row.querySelector("td")?.contains(slot)).toBe(true);
+    expect(slot.querySelector("img")).toBeNull();
+    expect(getComputedStyle(slot).width).toBe("40px");
+    expect(getComputedStyle(slot).height).toBe("40px");
     expect(row).toHaveTextContent("Character Pin Series 1");
     expect(within(row).getByRole("link", { name: "View details for Brandon" })).toHaveAttribute(
       "href",

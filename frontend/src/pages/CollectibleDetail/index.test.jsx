@@ -786,9 +786,16 @@ describe("CollectibleDetailPage – Dragonsteel store link", () => {
     renderWithRoute("/collectibles/PIN-CF-01");
 
     expect(screen.getByRole("heading", { name: "Shredhead" })).toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByText("CF")).toBeInTheDocument();
+    expect(screen.getByText(/No photo yet\. Have this pin\?/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Send us a photo." })).toHaveAttribute(
+      "href",
+      "/about",
+    );
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
     expect(screen.queryByText("Store")).not.toBeInTheDocument();
     expect(screen.queryByText(/dragonsteel/i)).not.toBeInTheDocument();
+    expect(document.querySelector("img")).toBeNull();
   });
 
   it("shows no Dragonsteel store link on a card page", () => {
@@ -804,6 +811,7 @@ describe("CollectibleDetailPage – Dragonsteel store link", () => {
 
     expect(screen.getByRole("heading", { name: CARD.displayName })).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByText("No photo yet. Have this pin?")).not.toBeInTheDocument();
     expect(screen.queryByText("Store")).not.toBeInTheDocument();
     expect(screen.queryByText("Dragonsteel store")).not.toBeInTheDocument();
   });
@@ -817,7 +825,11 @@ describe("CollectibleDetailPage – Dragonsteel store link", () => {
     });
     renderWithRoute("/collectibles/PIN-CPS1-00");
 
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Dragonsteel store" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Send us a photo." })).toHaveAttribute(
+      "href",
+      "/about",
+    );
     expect(screen.queryByText("Store")).not.toBeInTheDocument();
   });
 });

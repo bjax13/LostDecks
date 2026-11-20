@@ -56,7 +56,7 @@
       "Blue-book rows imported from Sanderson Collectors Guild Pin List (gid=788070872).",
       "SKU scheme: PIN-CF-## for ChasmFriends; PIN-{SETCODE}-{##|###} for guild sets.",
       "Each pin has a single SKU with no DUN/FOIL finish variants.",
-      "Image URLs from the sheet are omitted until a product decision on asset hosting.",
+      "Pin photos use an image version copied from scripts/data/pin-images.json. A positive integer means a photo exists at that version. 0 or a missing image field means no photo, and the app does not request a file.",
       "Retired pins are omitted from pins and skus. Saved collection rows can still resolve them.",
       "Dragonsteel store links are storeUrl and storeMatch on listed pins, copied from scripts/data/pin-dragonsteel-store-map.json. Ids missing from the catalog or retired are skipped."
     ]

@@ -165,6 +165,7 @@ function formatPinCollectible(pin) {
     release,
     notes,
     sourceName: pin.sourceName ?? null,
+    ...(Number.isInteger(pin.image) && pin.image > 0 ? { image: pin.image } : {}),
     ...(typeof pin.storeUrl === "string" &&
     (pin.storeMatch === "exact" || pin.storeMatch === "bundle")
       ? { storeUrl: pin.storeUrl, storeMatch: pin.storeMatch }
