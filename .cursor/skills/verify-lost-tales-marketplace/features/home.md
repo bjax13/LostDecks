@@ -29,7 +29,7 @@ Preconditions:
 - **Hero getting started.** From home, choose the first Getting Started control. Run `$VERIFY drive click --role link --name "Getting Started" --nth 0`. The heading `Build your collection without entering every card.` is visible.
 - **Hero catalog.** Return home, then choose View Collectibles. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "View Collectibles"`. The heading `Collectibles` is visible.
 - **Supported collections.** Return home and choose Browse catalog. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse catalog"`. The heading `Collectibles` is visible and the page still shows all categories.
-- **Pin tile.** Return home and choose Browse pins. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse pins"`. The Category filter is `Pins` (the catalog heading remains `Collectibles`).
+- **Pin tile.** Return home and choose Browse pins. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse pins"`. The Category filter is `Pins` (the catalog heading remains `Collectibles`). The Rarity filter is not shown.
 - **Signed-out snapshot.** Return home. Run `$VERIFY drive goto --path /` and `$VERIFY drive expect --role heading --name "Collection Snapshot"`. Snapshot stats include the hint `Sign in` rather than owned counts.
 - **Proof.** Capture home signed-out. Run `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/home/signed-out.png --full-page` and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/home/signed-out.aria.txt`. Artifacts show the hero heading, Supported Collections, and primary nav Sign in.
 
