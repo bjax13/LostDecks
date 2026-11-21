@@ -57,12 +57,12 @@ export function groupCollectionEntriesBySku(entries) {
       grouped.set(key, {
         skuId: key,
         quantity,
-        docs: [{ id: entry.id, notes: entry.notes }],
+        docs: [{ id: entry.id, notes: entry.notes, tradeFlag: entry.tradeFlag }],
       });
       continue;
     }
     existing.quantity += quantity;
-    existing.docs.push({ id: entry.id, notes: entry.notes });
+    existing.docs.push({ id: entry.id, notes: entry.notes, tradeFlag: entry.tradeFlag });
   }
 
   return grouped;
@@ -352,6 +352,31 @@ export async function applyBulkCollectionUpdate({
     const existingDocs = existingGroup?.docs ?? [];
 
     if (normalizedQuantity === 0) {
+      const isoDoc = existingDocs.find((existingDoc) => existingDoc.tradeFlag === "iso");
+      if (isoDoc?.id) {
+        operations.push({
+          type: "set",
+          ref: doc(collectionRef, isoDoc.id),
+          data: {
+            ownerUid,
+            skuId,
+            quantity: 0,
+            tradeFlag: "iso",
+            updatedAt: serverTimestamp(),
+          },
+          merge: true,
+        });
+        updated += 1;
+        existingDocs.forEach((existingDoc) => {
+          if (!existingDoc.id || existingDoc.id === isoDoc.id) {
+            return;
+          }
+          operations.push({ type: "delete", ref: doc(collectionRef, existingDoc.id) });
+          deleted += 1;
+        });
+        return;
+      }
+
       existingDocs.forEach((existingDoc) => {
         if (!existingDoc.id) {
           return;

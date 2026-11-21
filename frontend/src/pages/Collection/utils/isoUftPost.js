@@ -1,5 +1,6 @@
 import { SITE_URL } from "../../../brand.js";
 import { datasetSkus, datasetStories, getCollectibleRecord } from "../../../data/collectibles";
+import { normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
 
 /** Story deck codes → single-letter shorthand prefix (ELS→E, LOP→L, CHM→C). */
@@ -203,6 +204,18 @@ function resolveEntrySkuId(entry) {
   return null;
 }
 
+function buildTradeFlagsBySku(entries) {
+  const flags = new Map();
+  if (!Array.isArray(entries)) return flags;
+  for (const entry of entries) {
+    const skuId = resolveEntrySkuId(entry);
+    const flag = normalizeTradeFlag(entry?.tradeFlag);
+    if (!skuId || !flag) continue;
+    flags.set(skuId, flag);
+  }
+  return flags;
+}
+
 function buildOwnedSkuCounts(entries) {
   const ownedSkuCounts = new Map();
   let skippedEntries = 0;
@@ -269,23 +282,29 @@ function collectSectionTradeRows(
   storyRank,
   format,
   matchKeep,
+  tradeFlags = new Map(),
 ) {
   const { predicate, groupSuffix, lane } = section;
   const keepThreshold = normalizeMatchKeep(matchKeep)[lane] ?? 1;
   const groups = new Map();
   const skuRows = [];
+  const seenSkuIds = new Set();
   const startedStories = mode === "iso" ? buildStartedStoryTitles(predicate, ownedSkuCounts) : null;
-  if (mode === "iso" && startedStories.size === 0) {
-    return { stories: [], skuRows: [] };
-  }
 
   datasetSkus.forEach((sku) => {
+    const skuId = skuKey(sku.skuId);
+    if (seenSkuIds.has(skuId)) {
+      return;
+    }
     const ownedCount = ownedCountForSku(ownedSkuCounts, sku);
+    const flag = tradeFlags.get(skuId) || null;
+    const flaggedForMode =
+      (mode === "iso" && flag === "iso") || (mode === "uft" && flag === "uft" && ownedCount >= 1);
     if (mode === "iso") {
-      if (ownedCount > 0 || ownedCardIds.has(sku.cardId)) {
+      if (!flaggedForMode && (ownedCount > 0 || ownedCardIds.has(sku.cardId))) {
         return;
       }
-    } else if (ownedCount <= keepThreshold) {
+    } else if (!flaggedForMode && ownedCount <= keepThreshold) {
       return;
     }
 
@@ -295,7 +314,7 @@ function collectSectionTradeRows(
     }
 
     const storyTitle = getStoryTitle(card);
-    if (mode === "iso" && !startedStories.has(storyTitle)) {
+    if (mode === "iso" && !flaggedForMode && !startedStories.has(storyTitle)) {
       return;
     }
 
@@ -304,12 +323,14 @@ function collectSectionTradeRows(
       return;
     }
 
+    seenSkuIds.add(skuId);
     if (mode === "iso") {
-      skuRows.push({ skuId: skuKey(sku.skuId), quantity: 1 });
+      skuRows.push({ skuId, quantity: 1 });
     } else {
+      const normalExtras = ownedCount - keepThreshold;
       skuRows.push({
-        skuId: skuKey(sku.skuId),
-        quantity: ownedCount - keepThreshold,
+        skuId,
+        quantity: flag === "uft" ? Math.max(1, normalExtras) : normalExtras,
       });
     }
 
@@ -350,6 +371,7 @@ export function buildIsoUftPostTree(
   { matchKeep = DEFAULT_MATCH_KEEP_BY_LANE, format = "classic" } = {},
 ) {
   const { ownedSkuCounts, skippedEntries } = buildOwnedSkuCounts(entries);
+  const tradeFlags = buildTradeFlagsBySku(entries);
   const ownedCardIds = buildOwnedCardIds(ownedSkuCounts);
 
   const storyOrder = datasetStories.map((story) => story.title);
@@ -373,6 +395,7 @@ export function buildIsoUftPostTree(
         storyRank,
         format,
         matchKeep,
+        tradeFlags,
       );
       if (stories.length === 0) {
         return null;
@@ -397,6 +420,7 @@ export function buildIsoUftPostTree(
 
 export function buildIsoUftSkuLists(entries, { matchKeep = DEFAULT_MATCH_KEEP_BY_LANE } = {}) {
   const { ownedSkuCounts, skippedEntries } = buildOwnedSkuCounts(entries);
+  const tradeFlags = buildTradeFlagsBySku(entries);
   const ownedCardIds = buildOwnedCardIds(ownedSkuCounts);
 
   const storyOrder = datasetStories.map((story) => story.title);
@@ -418,6 +442,7 @@ export function buildIsoUftSkuLists(entries, { matchKeep = DEFAULT_MATCH_KEEP_BY
         storyRank,
         "classic",
         matchKeep,
+        tradeFlags,
       );
       if (mode === "iso") {
         for (const row of skuRows) {

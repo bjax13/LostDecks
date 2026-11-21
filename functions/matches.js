@@ -33,6 +33,19 @@ function normalizeQuantity(value) {
   return Math.max(0, Math.floor(value));
 }
 
+function normalizeTradeFlag(value) {
+  return value === "iso" || value === "uft" ? value : null;
+}
+
+function ensureSkuMap(byUser, ownerUid) {
+  let skuMap = byUser.get(ownerUid);
+  if (!skuMap) {
+    skuMap = new Map();
+    byUser.set(ownerUid, skuMap);
+  }
+  return skuMap;
+}
+
 function buildUserSkuTotals(collectionDocs) {
   const userSkuTotals = new Map();
 
@@ -44,19 +57,33 @@ function buildUserSkuTotals(collectionDocs) {
     }
 
     const quantity = normalizeQuantity(entry.quantity);
-    if (quantity <= 0) {
+    const tradeFlag = normalizeTradeFlag(entry?.tradeFlag);
+    if (quantity <= 0 && !tradeFlag) {
       continue;
     }
 
-    let skuTotals = userSkuTotals.get(ownerUid);
-    if (!skuTotals) {
-      skuTotals = new Map();
-      userSkuTotals.set(ownerUid, skuTotals);
-    }
+    const skuTotals = ensureSkuMap(userSkuTotals, ownerUid);
     skuTotals.set(skuId, (skuTotals.get(skuId) || 0) + quantity);
   }
 
   return userSkuTotals;
+}
+
+function buildUserSkuFlags(collectionDocs) {
+  const userSkuFlags = new Map();
+
+  for (const entry of collectionDocs) {
+    const ownerUid = typeof entry?.ownerUid === "string" ? entry.ownerUid.trim() : "";
+    const skuId = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
+    const tradeFlag = normalizeTradeFlag(entry?.tradeFlag);
+    if (!ownerUid || !skuId || !tradeFlag) {
+      continue;
+    }
+
+    ensureSkuMap(userSkuFlags, ownerUid).set(skuId, tradeFlag);
+  }
+
+  return userSkuFlags;
 }
 
 function normalizeMatchKeepCount(value) {
@@ -81,14 +108,15 @@ function normalizeMatchKeep(value) {
   };
 }
 
-function buildUserMatchProfile(skuTotals, keepByLane) {
+function buildUserMatchProfile(skuTotals, keepByLane, skuFlags = new Map()) {
   const extras = new Set();
   const keep = normalizeMatchKeep(keepByLane);
 
   for (const [skuId, owned] of skuTotals.entries()) {
     const lane = laneForSkuId(skuId);
     const threshold = lane ? keep[lane] : DEFAULT_MATCH_KEEP;
-    if (owned > threshold) {
+    const tradeFlag = skuFlags.get(skuId) || null;
+    if (owned > threshold || (tradeFlag === "uft" && owned >= 1)) {
       extras.add(skuId);
     }
   }
@@ -122,6 +150,8 @@ function buildPileItems(
   senderKeep,
   recipientKeep,
   itemLimit,
+  senderFlags = new Map(),
+  recipientFlags = new Map(),
 ) {
   const items = [];
   const limit =
@@ -137,21 +167,39 @@ function buildPileItems(
     }
 
     const owned = ownerTotals.get(skuId) || 0;
-    const extraCount = owned - keep;
+    const normalExtras = owned - keep;
+    const senderFlag = senderFlags.get(skuId) || null;
+    const uftOffer = senderFlag === "uft" && owned >= 1;
+    const extraCount = uftOffer ? Math.max(1, normalExtras) : normalExtras;
     if (extraCount <= 0) {
       continue;
     }
 
     const recipientOwned = recipientTotals.get(skuId) || 0;
-    if (recipientOwned >= needBelow) {
+    const recipientFlag = recipientFlags.get(skuId) || null;
+    const belowKeep = recipientOwned < needBelow;
+    const isoNeed = recipientFlag === "iso";
+    if (!belowKeep && !isoNeed) {
       continue;
     }
 
-    items.push({
+    const tradeFlags = [];
+    if (uftOffer && normalExtras <= 0) {
+      tradeFlags.push("uft");
+    }
+    if (isoNeed && !belowKeep) {
+      tradeFlags.push("iso");
+    }
+
+    const item = {
       skuId,
       owned,
       extras: extraCount,
-    });
+    };
+    if (tradeFlags.length > 0) {
+      item.tradeFlags = tradeFlags;
+    }
+    items.push(item);
   }
 
   items.sort((a, b) => a.skuId.localeCompare(b.skuId));
@@ -212,6 +260,8 @@ function buildLanesForCounterparty({
   otherLanePrefs,
   callerKeep,
   otherKeep,
+  callerFlags = new Map(),
+  otherFlags = new Map(),
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
 }) {
   const lanes = [];
@@ -231,6 +281,8 @@ function buildLanesForCounterparty({
       normalizedOtherKeep[lane],
       normalizedCallerKeep[lane],
       itemLimit,
+      otherFlags,
+      callerFlags,
     );
     const youCanSend = buildPileItems(
       callerExtras,
@@ -240,6 +292,8 @@ function buildLanesForCounterparty({
       normalizedCallerKeep[lane],
       normalizedOtherKeep[lane],
       itemLimit,
+      callerFlags,
+      otherFlags,
     );
     if (!theyCanSend.length || !youCanSend.length) {
       continue;
@@ -330,6 +384,7 @@ function buildMatchesForCaller({
   optedOutUserIds = new Set(),
   lanePrefsByUserId = new Map(),
   keepByUserId = new Map(),
+  userSkuFlags = new Map(),
   itemLimit = DEFAULT_PILE_ITEM_LIMIT,
   locationFilter = "off",
   locationsByUserId = new Map(),
@@ -339,8 +394,9 @@ function buildMatchesForCaller({
   }
 
   const callerTotals = userSkuTotals.get(callerUid) || new Map();
+  const callerFlags = userSkuFlags.get(callerUid) || new Map();
   const callerKeep = normalizeMatchKeep(keepByUserId.get(callerUid));
-  const callerProfile = buildUserMatchProfile(callerTotals, callerKeep);
+  const callerProfile = buildUserMatchProfile(callerTotals, callerKeep, callerFlags);
   const callerLanePrefs = lanePrefsByUserId.get(callerUid);
   const callerLocation = locationsByUserId.get(callerUid) || { country: "", region: "" };
   const normalizedLocationFilter = normalizeLocationFilter(locationFilter);
@@ -361,8 +417,9 @@ function buildMatchesForCaller({
       continue;
     }
 
+    const otherFlags = userSkuFlags.get(otherUid) || new Map();
     const otherKeep = normalizeMatchKeep(keepByUserId.get(otherUid));
-    const otherProfile = buildUserMatchProfile(otherTotals, otherKeep);
+    const otherProfile = buildUserMatchProfile(otherTotals, otherKeep, otherFlags);
     const lanes = buildLanesForCounterparty({
       callerTotals,
       callerExtras: callerProfile.extras,
@@ -372,6 +429,8 @@ function buildMatchesForCaller({
       otherLanePrefs: lanePrefsByUserId.get(otherUid),
       callerKeep,
       otherKeep,
+      callerFlags,
+      otherFlags,
       itemLimit,
     });
 
@@ -515,6 +574,7 @@ module.exports = {
   buildLocationsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
+  buildUserSkuFlags,
   buildUserSkuTotals,
   isMatchLaneEnabled,
   laneForSkuId,

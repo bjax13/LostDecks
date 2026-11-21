@@ -925,6 +925,35 @@
   gap: 0.35rem;
 }
 
+.collection-table__finish-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.collection-page__trade-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 16rem;
+  margin-bottom: 1rem;
+}
+
+.collection-page__trade-filter label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a998ff;
+}
+
+.collection-page__empty-filter,
+.collection-page__toast {
+  margin: 0 0 1rem;
+  color: #d2c9ff;
+}
+
 .collection-table__finish-chip {
   display: inline-flex;
   align-items: center;

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { useCollectionQuantityMutations } from "./useCollectionQuantityMutations";
 
 function isZeroQuantityEntry(entry) {
@@ -6,7 +7,7 @@ function isZeroQuantityEntry(entry) {
     typeof entry?.quantity === "number" && Number.isFinite(entry.quantity)
       ? Math.max(0, Math.floor(entry.quantity))
       : 0;
-  return quantity <= 0;
+  return quantity <= 0 && !normalizeTradeFlag(entry?.tradeFlag);
 }
 
 /**

@@ -170,6 +170,13 @@ describe("CollectiblesPage (integration)", () => {
     expect(screen.getByRole("heading", { name: "Collectibles" })).toBeInTheDocument();
     expect(screen.getByText(/Browse the/)).toBeInTheDocument();
     expect(screen.getByLabelText("Sort by")).toHaveValue("grouped");
+    expect(screen.queryByLabelText("Trade status")).not.toBeInTheDocument();
+  });
+
+  it("shows the trade status filter only after sign-in", () => {
+    authState.user = { uid: "user-1" };
+    renderWithRouter(<CollectiblesPage />);
+    expect(screen.getByLabelText("Trade status")).toBeInTheDocument();
   });
 
   it("toggles between grid and table view", async () => {

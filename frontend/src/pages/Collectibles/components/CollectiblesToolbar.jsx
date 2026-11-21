@@ -9,6 +9,9 @@ export default function CollectiblesToolbar({
   onStoryChange,
   rarityFilter,
   onRarityChange,
+  tradeStatusFilter = "all",
+  onTradeStatusChange,
+  showTradeStatus = true,
   sortField,
   onSortFieldChange,
   sortDirection,
@@ -97,6 +100,22 @@ export default function CollectiblesToolbar({
             </select>
           </div>
         )}
+
+        {showTradeStatus ? (
+          <div className="filter-control">
+            <label htmlFor="trade-status-filter">Trade status</label>
+            <select
+              id="trade-status-filter"
+              value={tradeStatusFilter}
+              onChange={(event) => onTradeStatusChange?.(event.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="iso">ISO</option>
+              <option value="uft">UFT</option>
+              <option value="flagged">Flagged</option>
+            </select>
+          </div>
+        ) : null}
 
         <div className="filter-control">
           <label htmlFor="sort-by">Sort by</label>

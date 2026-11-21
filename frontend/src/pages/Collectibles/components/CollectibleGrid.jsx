@@ -14,6 +14,7 @@ function isPinCollectible(collectible) {
 export default function CollectibleGrid({
   collectibles,
   ownedBySkuId = {},
+  tradeFlagBySkuId = {},
   deleteWhenZero = true,
   onQuantityChange,
 }) {
@@ -108,6 +109,7 @@ export default function CollectibleGrid({
                 collectible={collectible}
                 variant="card"
                 ownedBySkuId={ownedBySkuId}
+                tradeFlagBySkuId={tradeFlagBySkuId}
                 deleteWhenZero={deleteWhenZero}
                 onQuantityChange={onQuantityChange}
               />

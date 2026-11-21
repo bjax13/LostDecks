@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import PinImage from "../../../components/PinImage/PinImage.jsx";
+import TradeFlagTag from "../../../components/TradeFlagTag.jsx";
+import { resolveSkuId } from "../../../data/collectibles";
 import { collectibleDetailPath } from "../../../lib/collectibleDetailPath";
+import { normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { categoryLabels } from "../constants";
 import AddToCollectionButton from "./AddToCollectionButton";
 import BinderInfo from "./BinderInfo";
@@ -12,9 +15,25 @@ function isPinCollectible(collectible) {
   return collectible?.collectibleType === "pin" || collectible?.category === "pin";
 }
 
+function tradeFlagByFinish(collectible, tradeFlagBySkuId) {
+  const flags = {};
+  for (const finish of collectible?.finishes ?? []) {
+    const skuId = resolveSkuId(collectible, finish);
+    const flag = normalizeTradeFlag(tradeFlagBySkuId?.[skuId]);
+    if (flag) flags[finish] = flag;
+  }
+  return flags;
+}
+
+function pinTradeFlag(collectible, tradeFlagBySkuId) {
+  const skuId = resolveSkuId(collectible, null);
+  return normalizeTradeFlag(tradeFlagBySkuId?.[skuId]);
+}
+
 export default function CollectibleTable({
   collectibles,
   ownedBySkuId = {},
+  tradeFlagBySkuId = {},
   deleteWhenZero = true,
   onQuantityChange,
 }) {
@@ -90,14 +109,21 @@ export default function CollectibleTable({
                 {pinsOnly ? null : pin ? (
                   <>
                     <td />
-                    <td />
+                    <td>
+                      {pinTradeFlag(collectible, tradeFlagBySkuId) ? (
+                        <TradeFlagTag flag={pinTradeFlag(collectible, tradeFlagBySkuId)} />
+                      ) : null}
+                    </td>
                     <td />
                   </>
                 ) : (
                   <>
                     <td>{collectible.rarity ?? "—"}</td>
                     <td>
-                      <FinishPills finishes={collectible.finishes} />
+                      <FinishPills
+                        finishes={collectible.finishes}
+                        tradeFlagByFinish={tradeFlagByFinish(collectible, tradeFlagBySkuId)}
+                      />
                     </td>
                     <td>
                       <BinderInfo binder={collectible.binder} layout="table" />
@@ -109,6 +135,7 @@ export default function CollectibleTable({
                     collectible={collectible}
                     variant="table"
                     ownedBySkuId={ownedBySkuId}
+                    tradeFlagBySkuId={tradeFlagBySkuId}
                     deleteWhenZero={deleteWhenZero}
                     onQuantityChange={onQuantityChange}
                   />

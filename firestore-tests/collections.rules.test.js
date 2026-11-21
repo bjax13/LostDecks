@@ -62,6 +62,23 @@ test("owner can create a valid collection entry", async () => {
   await assertSucceeds(setDoc(doc(db, "collections/entry-1"), validEntry()));
 });
 
+test("owner can create a quantity 0 entry with an ISO flag", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    setDoc(doc(db, "collections/entry-iso"), validEntry({ quantity: 0, tradeFlag: "iso" })),
+  );
+});
+
+test("owner can create an entry with a UFT flag", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(setDoc(doc(db, "collections/entry-uft"), validEntry({ tradeFlag: "uft" })));
+});
+
+test("create with an unknown tradeFlag is rejected", async () => {
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertFails(setDoc(doc(db, "collections/entry-1"), validEntry({ tradeFlag: "keep" })));
+});
+
 test("create with an extra field is rejected", async () => {
   const db = testEnv.authenticatedContext(OWNER).firestore();
   await assertFails(setDoc(doc(db, "collections/entry-1"), validEntry({ extra: "nope" })));
@@ -141,6 +158,40 @@ test("update changing skuId is rejected", async () => {
     updateDoc(doc(db, "collections/entry-1"), {
       skuId: "LT24-ELS-01-FOIL",
       quantity: 2,
+      updatedAt: serverTimestamp(),
+    }),
+  );
+});
+
+test("owner can set and clear tradeFlag", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    updateDoc(doc(db, "collections/entry-1"), {
+      tradeFlag: "iso",
+      updatedAt: serverTimestamp(),
+    }),
+  );
+  await assertSucceeds(
+    updateDoc(doc(db, "collections/entry-1"), {
+      tradeFlag: "uft",
+      updatedAt: serverTimestamp(),
+    }),
+  );
+});
+
+test("update with an unknown tradeFlag is rejected", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    await setDoc(doc(context.firestore(), "collections/entry-1"), validEntry());
+  });
+
+  const db = testEnv.authenticatedContext(OWNER).firestore();
+  await assertFails(
+    updateDoc(doc(db, "collections/entry-1"), {
+      tradeFlag: "nft",
       updatedAt: serverTimestamp(),
     }),
   );

@@ -154,6 +154,30 @@ describe("isoUftPost", () => {
     expect(uftBlock).not.toMatch(/Chasm Dun:.*\b3\b/);
   });
 
+  it("includes flagged finishes once, even when keep counts would skip them", () => {
+    collectiblesState.skus = [
+      { skuId: "chm-01-dun", cardId: "c-chm-01", finish: "DUN" },
+      { skuId: "chm-01-foil", cardId: "c-chm-01", finish: "FOIL" },
+      { skuId: "chm-02-dun", cardId: "c-chm-02", finish: "DUN" },
+    ];
+    collectiblesState.cardById = {
+      "c-chm-01": { category: "story", number: 1, storyTitle: "Chasm" },
+      "c-chm-02": { category: "story", number: 2, storyTitle: "Chasm" },
+    };
+
+    const { text } = buildIsoUftPost([
+      { skuId: "chm-01-dun", quantity: 1, tradeFlag: "iso" },
+      { skuId: "chm-01-foil", quantity: 1, tradeFlag: "uft" },
+      { skuId: "chm-02-dun", quantity: 0, tradeFlag: "iso" },
+    ]);
+
+    const [isoBlock, uftBlock] = text.split("UFT:");
+    expect(isoBlock).toMatch(/Chasm Dun: 1, 2\b/);
+    expect(isoBlock.match(/\b1\b/g)).toHaveLength(1);
+    expect(uftBlock).toMatch(/Chasm Foils: 1\b/);
+    expect(uftBlock.match(/\b1\b/g)).toHaveLength(1);
+  });
+
   it("omits other finishes of an owned card from ISO once that finish group is started", () => {
     collectiblesState.skus = [
       { skuId: "chm-01-dun", cardId: "c-chm-01", finish: "DUN" },

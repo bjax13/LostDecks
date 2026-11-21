@@ -3,6 +3,8 @@
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
   color: #f4f1ff;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .card-detail__back-button {
@@ -81,6 +83,7 @@
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+  overflow: visible;
 }
 
 .card-detail__section-title {
@@ -159,10 +162,104 @@
   margin: 0;
 }
 
-.card-detail__collection-actions {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(116, 92, 190, 0.3);
+.finish-trade-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.finish-trade-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.finish-trade-row__main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.finish-trade-row__name {
+  font-weight: 600;
+  color: #f6f2ff;
+}
+
+.finish-trade-row__qty {
+  font-variant-numeric: tabular-nums;
+  color: #d2c9ff;
+}
+
+.finish-trade-row__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.finish-trade-row .add-to-collection {
+  flex-direction: row;
+  align-items: center;
+}
+
+.trade-status {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.trade-status__legend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a998ff;
+}
+
+.trade-status__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.trade-status__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #f6f2ff;
+  font-size: 0.85rem;
+}
+
+.trade-status__hint,
+.trade-status__error {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: #d2c9ff;
+}
+
+.trade-status__error {
+  color: #ff9fbf;
+}
+
+.trade-status .info-bubble__panel--end {
+  width: min(22.5rem, calc(100vw - 3rem));
+}
+
+@media (max-width: 520px) {
+  .trade-status .info-bubble__panel--end {
+    left: 0;
+    right: auto;
+    width: min(22.5rem, calc(100vw - 4.5rem));
+  }
 }
 
 .card-detail__error {
@@ -204,6 +301,10 @@
 }
 
 @media (max-width: 520px) {
+  .card-detail-page {
+    padding-inline: 1rem;
+  }
+
   .card-detail__title {
     font-size: 1.75rem;
   }
@@ -211,5 +312,41 @@
   .card-detail__stats,
   .card-detail__collection-stats {
     grid-template-columns: 1fr;
+  }
+
+  .finish-trade-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .finish-trade-row__main {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .finish-trade-row__controls {
+    flex: 1 1 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .trade-status {
+    flex: 1 1 100%;
+  }
+
+  .trade-status__options {
+    width: 100%;
+  }
+
+  .trade-status__option {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .finish-trade-row .add-to-collection__button,
+  .finish-trade-row .add-to-collection__button--step {
+    min-width: 44px;
+    min-height: 44px;
   }
 }

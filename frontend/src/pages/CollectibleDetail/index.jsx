@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PinImage from "../../components/PinImage/PinImage.jsx";
 import { useAuth } from "../../contexts/AuthContext";
-import { getCollectibleRecord, getSkuRecord } from "../../data/collectibles";
-import AddToCollectionButton from "../Collectibles/components/AddToCollectionButton";
+import { getCollectibleRecord, getSkuRecord, resolveSkuId } from "../../data/collectibles";
 import BinderInfo from "../Collectibles/components/BinderInfo";
 import CategoryPill from "../Collectibles/components/CategoryPill";
 import FinishPills from "../Collectibles/components/FinishPills";
 import { categoryLabels } from "../Collectibles/constants";
 import { usePurgeSoftZeroEntriesOnMount } from "../Collectibles/hooks/usePurgeSoftZeroEntriesOnMount";
+import FinishTradeList from "./components/FinishTradeList";
 import { useCollectibleCollectionEntry } from "./hooks/useCollectibleCollectionEntry";
 import "./CollectibleDetail.css";
 
@@ -129,19 +129,15 @@ export default function CollectibleDetailPage() {
 
   const card = skuRecord?.card ?? cardRecord;
 
-  const { entry: collectionEntry, loading: collectionLoading } = useCollectibleCollectionEntry(
-    ownerUid,
-    collectibleId,
-    skuId,
-  );
+  const {
+    entry: collectionEntry,
+    entries: collectionEntries,
+    loading: collectionLoading,
+  } = useCollectibleCollectionEntry(ownerUid, collectibleId, skuId);
+  const collectionRows = collectionEntries ?? (collectionEntry ? [collectionEntry] : []);
 
-  const softZeroEntries = useMemo(
-    () => (collectionEntry ? [collectionEntry] : []),
-    [collectionEntry],
-  );
-  usePurgeSoftZeroEntriesOnMount(ownerUid, softZeroEntries, collectionLoading);
+  usePurgeSoftZeroEntriesOnMount(ownerUid, collectionRows, collectionLoading);
 
-  const quantity = useMemo(() => normalizeQuantity(collectionEntry), [collectionEntry]);
   const notes = useMemo(() => {
     if (!collectionEntry) return null;
     return typeof collectionEntry.notes === "string" && collectionEntry.notes.trim().length > 0
@@ -160,11 +156,20 @@ export default function CollectibleDetailPage() {
   );
 
   const ownedBySkuId = useMemo(() => {
-    if (!collectionEntry?.skuId) {
-      return {};
+    const owned = {};
+    for (const entry of collectionRows) {
+      if (!entry?.skuId) continue;
+      owned[entry.skuId] = Math.max(0, normalizeQuantity(entry));
     }
-    return { [collectionEntry.skuId]: Math.max(0, quantity) };
-  }, [collectionEntry, quantity]);
+    const finishes = card?.finishes ?? [];
+    const skuIds = finishes.length
+      ? finishes.map((finish) => resolveSkuId(card, finish))
+      : [resolveSkuId(card, null)];
+    for (const id of skuIds) {
+      if (id && !Object.hasOwn(owned, id)) owned[id] = 0;
+    }
+    return owned;
+  }, [card, collectionRows]);
 
   const storeLink = dragonsteelStoreLink(card);
   const archiveLink = storeLink ? null : archivedStoreLink(card);
@@ -322,20 +327,17 @@ export default function CollectibleDetailPage() {
 
             {collectionLoading ? (
               <div className="card-detail__loading">Loading collection data…</div>
-            ) : collectionEntry ? (
+            ) : null}
+
+            <FinishTradeList
+              card={card}
+              entries={collectionRows}
+              loading={collectionLoading}
+              ownedBySkuId={ownedBySkuId}
+            />
+
+            {collectionEntry ? (
               <dl className="card-detail__collection-stats">
-                <div>
-                  <dt>Quantity Owned</dt>
-                  <dd>{quantity}</dd>
-                </div>
-                {finish && (
-                  <div>
-                    <dt>Finish</dt>
-                    <dd>
-                      <span className="finish-pill">{finish}</span>
-                    </dd>
-                  </div>
-                )}
                 {updatedAtLabel && (
                   <div>
                     <dt>Last Updated</dt>
@@ -349,18 +351,7 @@ export default function CollectibleDetailPage() {
                   </div>
                 )}
               </dl>
-            ) : (
-              <p className="card-detail__not-in-collection">Not in your collection</p>
-            )}
-
-            <div className="card-detail__collection-actions">
-              <AddToCollectionButton
-                collectible={card}
-                variant="card"
-                ownedBySkuId={ownedBySkuId}
-                deleteWhenZero={false}
-              />
-            </div>
+            ) : null}
           </section>
         )}
       </div>

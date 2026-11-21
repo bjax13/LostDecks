@@ -8,6 +8,7 @@ const {
   buildLocationsByUserId,
   buildMatchesForCaller,
   buildUserMatchProfile,
+  buildUserSkuFlags,
   buildUserSkuTotals,
   DEFAULT_DISCORD_CHANNEL,
   DEFAULT_MATCH_KEEP_BY_LANE,
@@ -42,6 +43,63 @@ test("buildUserSkuTotals aggregates duplicate sku documents", () => {
   assert.equal(totals.get("user-a").get("SKU-1"), 3);
   assert.equal(totals.get("user-a").has("SKU-2"), false);
   assert.equal(totals.get("user-b").get("SKU-2"), 3);
+});
+
+test("buildUserSkuTotals keeps flagged zero-quantity rows", () => {
+  const totals = buildUserSkuTotals([
+    { ownerUid: "user-a", skuId: "LT24-ELS-01-FOIL", quantity: 0, tradeFlag: "iso" },
+    { ownerUid: "user-a", skuId: "LT24-ELS-01-DUN", quantity: 0 },
+  ]);
+
+  assert.equal(totals.get("user-a").get("LT24-ELS-01-FOIL"), 0);
+  assert.equal(totals.get("user-a").has("LT24-ELS-01-DUN"), false);
+});
+
+test("ISO at keep matches a UFT copy held at keep in the same foil lane", () => {
+  const docs = [
+    { ownerUid: "collector-a", skuId: "LT24-ELS-01-FOIL", quantity: 1, tradeFlag: "iso" },
+    { ownerUid: "collector-a", skuId: "LT24-HLD-01-FOIL", quantity: 2 },
+    { ownerUid: "collector-b", skuId: "LT24-ELS-01-FOIL", quantity: 1, tradeFlag: "uft" },
+  ];
+  const keepByUserId = new Map([
+    ["collector-a", { dun: 1, foil: 1, pins: 1 }],
+    ["collector-b", { dun: 1, foil: 1, pins: 1 }],
+  ]);
+
+  const result = buildMatchesForCaller({
+    callerUid: "collector-a",
+    userSkuTotals: buildUserSkuTotals(docs),
+    userSkuFlags: buildUserSkuFlags(docs),
+    keepByUserId,
+    optedOutUserIds: new Set(),
+  });
+
+  assert.equal(result.matches.length, 1);
+  assert.equal(result.matches[0].userId, "collector-b");
+  assert.deepEqual(result.matches[0].lanes, [
+    {
+      id: "foil",
+      theyCanSend: [
+        {
+          skuId: "LT24-ELS-01-FOIL",
+          owned: 1,
+          extras: 1,
+          tradeFlags: ["uft", "iso"],
+        },
+      ],
+      youCanSend: [{ skuId: "LT24-HLD-01-FOIL", owned: 2, extras: 1 }],
+    },
+  ]);
+
+  const withoutReciprocal = docs.filter((entry) => entry.skuId !== "LT24-HLD-01-FOIL");
+  const blocked = buildMatchesForCaller({
+    callerUid: "collector-a",
+    userSkuTotals: buildUserSkuTotals(withoutReciprocal),
+    userSkuFlags: buildUserSkuFlags(withoutReciprocal),
+    keepByUserId,
+    optedOutUserIds: new Set(),
+  });
+  assert.deepEqual(blocked.matches, []);
 });
 
 test("buildUserMatchProfile tracks only extras", () => {

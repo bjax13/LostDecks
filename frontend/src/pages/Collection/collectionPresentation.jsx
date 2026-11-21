@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import PinImage from "../../components/PinImage/PinImage.jsx";
+import TradeFlagTag from "../../components/TradeFlagTag.jsx";
 import { datasetMeta, getCollectibleRecord, isRetiredPinId } from "../../data/collectibles";
 import { collectibleDetailPath } from "../../lib/collectibleDetailPath";
+import { normalizeTradeFlag } from "../../lib/tradeFlag.js";
 import CollectibleDetailsLink from "../Collectibles/components/CollectibleDetailsLink";
 import { categoryLabels } from "../Collectibles/constants";
 
@@ -315,11 +317,16 @@ export function CollectionTable({
                 </td>
                 <td data-label="Finish">
                   <div className="collection-table__finish">
-                    {entry.finish ? (
-                      <span className="collection-table__finish-chip">{entry.finish}</span>
-                    ) : (
-                      <span>—</span>
-                    )}
+                    <div className="collection-table__finish-line">
+                      {entry.finish ? (
+                        <span className="collection-table__finish-chip">{entry.finish}</span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                      {normalizeTradeFlag(entry.tradeFlag) ? (
+                        <TradeFlagTag flag={entry.tradeFlag} />
+                      ) : null}
+                    </div>
                     {entry.skuId ? (
                       <span className="collection-table__sku">{entry.skuId}</span>
                     ) : null}
