@@ -1,0 +1,21 @@
+.trade-flag-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.trade-flag-tag--iso {
+  background: #0e7490;
+  color: #ffffff;
+}
+
+.trade-flag-tag--uft {
+  background: #fbbf24;
+  color: #1c1917;
+}

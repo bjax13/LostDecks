@@ -70,7 +70,14 @@ function normalizePileItem(item) {
     return null;
   }
 
-  return { skuId, owned, extras };
+  const tradeFlags = Array.isArray(item?.tradeFlags)
+    ? item.tradeFlags.filter((flag) => flag === "iso" || flag === "uft")
+    : [];
+  const normalized = { skuId, owned, extras };
+  if (tradeFlags.length > 0) {
+    normalized.tradeFlags = tradeFlags;
+  }
+  return normalized;
 }
 
 function normalizeLane(lane) {

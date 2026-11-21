@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import {
+  buildTradeFlagBySkuId,
+  tradeStatusEmptyMessage,
+  withFlaggedZeroQuantities,
+} from "../../lib/tradeFlag.js";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import CollectibleGrid from "./components/CollectibleGrid";
 import CollectiblesHeader from "./components/CollectiblesHeader";
@@ -30,8 +35,9 @@ export default function CollectiblesPage() {
 
   usePurgeSoftZeroEntriesOnMount(ownerUid, entries, loading);
 
+  const tradeFlagBySkuId = useMemo(() => buildTradeFlagBySkuId(entries), [entries]);
   const ownedBySkuId = useMemo(() => {
-    const base = buildOwnedQuantityBySkuId(entries);
+    const base = withFlaggedZeroQuantities(buildOwnedQuantityBySkuId(entries), entries);
     return { ...base, ...quantityOverrides };
   }, [entries, quantityOverrides]);
 
@@ -63,12 +69,17 @@ export default function CollectiblesPage() {
     setStoryFilter,
     rarityFilter,
     setRarityFilter,
+    tradeStatusFilter,
+    setTradeStatusFilter,
     sortField,
     setSortField,
     sortDirection,
     setSortDirection,
     resetFilters,
-  } = useCollectiblesExplorer({ initialCategoryFilter: categoryFromQuery });
+  } = useCollectiblesExplorer({
+    initialCategoryFilter: categoryFromQuery,
+    tradeFlagBySkuId,
+  });
 
   useEffect(() => {
     if (categoryFilter !== categoryFromQuery) {
@@ -112,6 +123,8 @@ export default function CollectiblesPage() {
         onStoryChange={setStoryFilter}
         rarityFilter={rarityFilter}
         onRarityChange={setRarityFilter}
+        tradeStatusFilter={tradeStatusFilter}
+        onTradeStatusChange={setTradeStatusFilter}
         sortField={sortField}
         onSortFieldChange={setSortField}
         sortDirection={sortDirection}
@@ -123,10 +136,15 @@ export default function CollectiblesPage() {
         onReset={handleReset}
       />
 
+      {tradeStatusEmptyMessage(tradeStatusFilter) && collectibles.length === 0 ? (
+        <p className="cards-empty">{tradeStatusEmptyMessage(tradeStatusFilter)}</p>
+      ) : null}
+
       {viewMode === "table" ? (
         <CollectibleTable
           collectibles={collectibles}
           ownedBySkuId={ownedBySkuId}
+          tradeFlagBySkuId={tradeFlagBySkuId}
           deleteWhenZero={false}
           onQuantityChange={handleQuantityChange}
         />
@@ -134,6 +152,7 @@ export default function CollectiblesPage() {
         <CollectibleGrid
           collectibles={collectibles}
           ownedBySkuId={ownedBySkuId}
+          tradeFlagBySkuId={tradeFlagBySkuId}
           deleteWhenZero={false}
           onQuantityChange={handleQuantityChange}
         />

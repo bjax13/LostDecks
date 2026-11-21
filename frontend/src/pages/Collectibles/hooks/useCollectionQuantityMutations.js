@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDocs,
   query,
@@ -16,6 +17,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { isRetiredPinId, resolveSkuId } from "../../../data/collectibles";
 import { MAX_COLLECTION_QUANTITY } from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
+import { normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 
 const COLLECTIONS_PATH = "collections";
 
@@ -73,6 +75,20 @@ function sumQuantities(existingDocs) {
     summedQuantity += normalizeQuantity(existingDoc.data()?.quantity);
   }
   return summedQuantity;
+}
+
+function readGroupTradeFlag(existingDocs) {
+  let flag = null;
+  for (const existingDoc of existingDocs) {
+    const next = normalizeTradeFlag(existingDoc.data()?.tradeFlag);
+    if (next === "iso") return "iso";
+    if (next) flag = next;
+  }
+  return flag;
+}
+
+function entryKeepsZeroQuantity(entry) {
+  return Boolean(normalizeTradeFlag(entry?.tradeFlag));
 }
 
 async function deleteExtraDocs(existingDocs) {
@@ -203,14 +219,21 @@ export function useCollectionQuantityMutations() {
 
         const summedQuantity = sumQuantities(existingDocs);
         const nextQuantity = Math.max(0, summedQuantity - removeQuantity);
+        let tradeFlag = readGroupTradeFlag(existingDocs);
+        const clearedUft = nextQuantity <= 0 && tradeFlag === "uft";
+        if (clearedUft) {
+          tradeFlag = null;
+        }
 
-        if (nextQuantity <= 0 && deleteWhenZero) {
+        if (nextQuantity <= 0 && !tradeFlag && (deleteWhenZero || clearedUft)) {
           await deleteAllDocs(existingDocs);
           return {
             ownerUid: user.uid,
             skuId,
             quantity: 0,
+            tradeFlag: null,
             deleted: true,
+            clearedUft,
           };
         }
 
@@ -219,6 +242,11 @@ export function useCollectionQuantityMutations() {
           quantity: nextQuantity,
           updatedAt: serverTimestamp(),
         };
+        if (tradeFlag) {
+          updatePayload.tradeFlag = tradeFlag;
+        } else if (readGroupTradeFlag(existingDocs)) {
+          updatePayload.tradeFlag = deleteField();
+        }
         await updateDoc(keeper.ref, updatePayload);
         await deleteExtraDocs(existingDocs);
 
@@ -226,7 +254,9 @@ export function useCollectionQuantityMutations() {
           ownerUid: user.uid,
           skuId,
           quantity: nextQuantity,
+          tradeFlag,
           deleted: false,
+          clearedUft,
           updatedAt: updatePayload.updatedAt,
         };
       });
@@ -255,8 +285,77 @@ export function useCollectionQuantityMutations() {
     [runMutation, user],
   );
 
+  const setCollectionTradeFlag = useCallback(
+    async ({ card, finish = null, tradeFlag = null }) => {
+      requireAuth(user);
+      const { skuId } = resolveTargetSku(card, finish);
+      if (isRetiredPinId(skuId) || isRetiredPinId(card?.id)) {
+        throw new Error("This pin is no longer listed.");
+      }
+      const nextFlag = normalizeTradeFlag(tradeFlag);
+
+      return runMutation("set trade status", async () => {
+        const { collectionRef, existingDocs } = await loadExistingDocs(user.uid, skuId);
+        const quantity = sumQuantities(existingDocs);
+
+        if (nextFlag === "uft" && quantity < 1) {
+          throw new Error("own at least 1 to mark up for trade.");
+        }
+
+        if (existingDocs.length === 0) {
+          if (!nextFlag) {
+            return {
+              ownerUid: user.uid,
+              skuId,
+              quantity: 0,
+              tradeFlag: null,
+              deleted: false,
+            };
+          }
+          const payload = {
+            ownerUid: user.uid,
+            skuId,
+            quantity: 0,
+            tradeFlag: nextFlag,
+            updatedAt: serverTimestamp(),
+          };
+          await addDoc(collectionRef, payload);
+          return { ...payload, deleted: false };
+        }
+
+        if (!nextFlag && quantity <= 0) {
+          await deleteAllDocs(existingDocs);
+          return {
+            ownerUid: user.uid,
+            skuId,
+            quantity: 0,
+            tradeFlag: null,
+            deleted: true,
+          };
+        }
+
+        const keeper = existingDocs[0];
+        const updatePayload = {
+          updatedAt: serverTimestamp(),
+        };
+        updatePayload.tradeFlag = nextFlag ?? deleteField();
+        await updateDoc(keeper.ref, updatePayload);
+        await deleteExtraDocs(existingDocs);
+        return {
+          ownerUid: user.uid,
+          skuId,
+          quantity,
+          tradeFlag: nextFlag,
+          deleted: false,
+          updatedAt: updatePayload.updatedAt,
+        };
+      });
+    },
+    [runMutation, user],
+  );
+
   /**
-   * Hard-delete all collection docs with quantity <= 0 for the signed-in user.
+   * Hard-delete collection docs with quantity <= 0 and no trade flag.
    * Used by Collectibles page to purge soft-zero rows after a reload.
    */
   const purgeZeroQuantityEntries = useCallback(
@@ -264,7 +363,10 @@ export function useCollectionQuantityMutations() {
       requireAuth(user);
       const zeroEntries = (Array.isArray(entries) ? entries : []).filter(
         (entry) =>
-          entry?.id && entry?.ownerUid === user.uid && normalizeQuantity(entry.quantity) <= 0,
+          entry?.id &&
+          entry?.ownerUid === user.uid &&
+          normalizeQuantity(entry.quantity) <= 0 &&
+          !entryKeepsZeroQuantity(entry),
       );
       if (zeroEntries.length === 0) {
         return { deleted: 0 };
@@ -289,6 +391,7 @@ export function useCollectionQuantityMutations() {
     addToCollection,
     decrementFromCollection,
     removeFromCollection,
+    setCollectionTradeFlag,
     purgeZeroQuantityEntries,
     status,
     error,

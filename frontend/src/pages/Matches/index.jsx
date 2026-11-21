@@ -5,9 +5,15 @@ import { captureEvent } from "../../analytics/posthog.js";
 import AuthGuard from "../../components/Auth/AuthGuard";
 import InfoBubble from "../../components/InfoBubble.jsx";
 import PinImage from "../../components/PinImage/PinImage.jsx";
+import TradeFlagTag from "../../components/TradeFlagTag.jsx";
 import { useAuth } from "../../contexts/AuthContext";
 import { getSkuRecord } from "../../data/collectibles";
-import { MATCHES_KEEP_TIP, MATCHES_PAGE_HELP } from "../../lib/matchHelpCopy.js";
+import {
+  MATCHES_EMPTY_BODY,
+  MATCHES_KEEP_TIP,
+  MATCHES_PAGE_HELP,
+  MATCHES_WELCOME_BODY,
+} from "../../lib/matchHelpCopy.js";
 import {
   MATCH_LOCATION_FILTER_NOTE,
   MATCH_LOCATION_FILTER_NOTICE_AFTER,
@@ -18,6 +24,7 @@ import {
   writeStoredMatchLocationFilter,
 } from "../../lib/matchLocationFilter";
 import { normalizeMatchCountry, normalizeMatchRegion } from "../../lib/matchLocations";
+import { pileTradeFlagTag } from "../../lib/tradeFlag.js";
 import {
   isValidTradingEmail,
   MATCH_CONTACT_SHARING,
@@ -76,6 +83,7 @@ function pinSlotForSku(skuId) {
 
 function PileItem({ item, side }) {
   const pin = pinSlotForSku(item.skuId);
+  const flags = Array.isArray(item.tradeFlags) ? item.tradeFlags : [];
   return (
     <li className="matches-pile-item">
       <span className="matches-pile-item-main">
@@ -84,7 +92,12 @@ function PileItem({ item, side }) {
         ) : null}
         <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
       </span>
-      <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
+      <span className="matches-pile-item-meta">
+        {flags.map((flag) => (
+          <TradeFlagTag key={flag} flag={flag} label={pileTradeFlagTag(side, flag)} />
+        ))}
+        <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
+      </span>
     </li>
   );
 }
@@ -469,10 +482,7 @@ function MatchesContent() {
       {welcome ? (
         <section className="matches-panel matches-welcome">
           <h2>You&apos;re in!</h2>
-          <p>
-            We&apos;ll match you with collectors who have spares of what you need. You&apos;ll get
-            more matches if you mark spares.
-          </p>
+          <p>{MATCHES_WELCOME_BODY}</p>
           <div className="matches-welcome-actions">
             <Link className="matches-contact-button" to="/getting-started?collect=pins">
               Add spares
@@ -541,11 +551,7 @@ function MatchesContent() {
       {showEmptyMatches ? (
         <section className="matches-panel">
           <h2>No reciprocal matches yet</h2>
-          <p>
-            {welcome
-              ? "We'll match you with collectors who have spares of what you need. You'll get more matches if you mark spares."
-              : "Collect copies above what you keep, then check back as more collectors join."}
-          </p>
+          <p>{welcome ? MATCHES_WELCOME_BODY : MATCHES_EMPTY_BODY}</p>
         </section>
       ) : null}
 

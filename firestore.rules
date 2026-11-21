@@ -18,14 +18,18 @@ service cloud.firestore {
     }
     function validQuantity(v) { return v is int && v >= 0 && v <= 999; }
     function validNotes(d) { return !("notes" in d) || (d.notes is string && d.notes.size() <= 500); }
+    function validTradeFlag(d) {
+      return !("tradeFlag" in d) || d.tradeFlag == "iso" || d.tradeFlag == "uft";
+    }
     function validCollectionEntry(d) {
-      return d.keys().hasOnly(["ownerUid", "skuId", "quantity", "updatedAt", "notes"])
+      return d.keys().hasOnly(["ownerUid", "skuId", "quantity", "updatedAt", "notes", "tradeFlag"])
         && d.keys().hasAll(["ownerUid", "skuId", "quantity", "updatedAt"])
         && d.ownerUid is string
         && validSkuId(d.skuId)
         && validQuantity(d.quantity)
         && d.updatedAt is timestamp
-        && validNotes(d);
+        && validNotes(d)
+        && validTradeFlag(d);
     }
 
     // Collections collection - user's card collection entries
@@ -40,10 +44,11 @@ service cloud.firestore {
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.skuId == resource.data.skuId
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(["quantity", "updatedAt", "notes", "skuId", "ownerUid"])
+             .hasOnly(["quantity", "updatedAt", "notes", "skuId", "ownerUid", "tradeFlag"])
         && validQuantity(request.resource.data.quantity)
         && request.resource.data.updatedAt is timestamp
-        && validNotes(request.resource.data);
+        && validNotes(request.resource.data)
+        && validTradeFlag(request.resource.data);
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 

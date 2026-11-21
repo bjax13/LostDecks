@@ -434,12 +434,42 @@ describe("useCollectibleCollectionEntry", () => {
     });
   });
 
-  describe("skuId takes precedence over collectibleId", () => {
-    it("when both skuId and collectibleId are provided, uses skuId path", () => {
-      renderHook(() => useCollectibleCollectionEntry("user-123", "LT24-ELS-01", "LT24-ELS-01-DUN"));
+  describe("collectibleId loads every finish", () => {
+    it("when both skuId and collectibleId are provided, loads every finish entry", () => {
+      mockGetSkuIdsForCollectible.mockReturnValue(["LT24-ELS-01-DUN", "LT24-ELS-01-FOIL"]);
 
-      expect(mockGetSkuIdsForCollectible).not.toHaveBeenCalled();
-      expect(mockWhere).toHaveBeenCalledWith("skuId", "==", "LT24-ELS-01-DUN");
+      const { result } = renderHook(() =>
+        useCollectibleCollectionEntry("user-123", "LT24-ELS-01", "LT24-ELS-01-DUN"),
+      );
+
+      expect(mockGetSkuIdsForCollectible).toHaveBeenCalledWith("LT24-ELS-01");
+      expect(mockWhere).toHaveBeenCalledWith("skuId", "in", [
+        "LT24-ELS-01-DUN",
+        "LT24-ELS-01-FOIL",
+      ]);
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNext({
+          docs: [
+            createFakeDoc("doc-1", {
+              skuId: "LT24-ELS-01-DUN",
+              ownerUid: "user-123",
+              quantity: 2,
+              tradeFlag: "uft",
+            }),
+            createFakeDoc("doc-2", {
+              skuId: "LT24-ELS-01-FOIL",
+              ownerUid: "user-123",
+              quantity: 0,
+              tradeFlag: "iso",
+            }),
+          ],
+        }),
+      );
+
+      expect(result.current.entries).toHaveLength(2);
+      expect(result.current.entry.skuId).toBe("LT24-ELS-01-DUN");
     });
   });
 });

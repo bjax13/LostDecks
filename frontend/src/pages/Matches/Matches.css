@@ -389,6 +389,14 @@
   min-width: 0;
 }
 
+.matches-pile-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .matches-pile-item-qty {
   color: #d2c9ff;
   font-size: 0.88rem;

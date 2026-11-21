@@ -471,7 +471,7 @@ describe("MatchesPage", () => {
     expect(screen.getByRole("heading", { name: "No reciprocal matches yet" })).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Collect copies above what you keep, then check back as more collectors join.",
+        "Collect copies above what you keep, or mark ISO or UFT on an item's page, then check back as more collectors join.",
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/2\+/)).not.toBeInTheDocument();
