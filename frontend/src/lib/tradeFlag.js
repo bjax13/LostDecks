@@ -64,9 +64,12 @@ export function withFlaggedZeroQuantities(ownedBySkuId, entries) {
   return next;
 }
 
-export function pileTradeFlagTag(side, flag) {
-  const label = tradeFlagLabel(flag);
-  if (!label) return "";
-  if (side === "they") return `They can send you · ${label}`;
-  return `You can send them · ${label}`;
+export function pileTradeFlagTag(side, flags) {
+  const list = Array.isArray(flags) ? flags : [flags];
+  const labels = [];
+  if (list.includes(TRADE_FLAG_ISO)) labels.push("ISO");
+  if (list.includes(TRADE_FLAG_UFT)) labels.push("UFT");
+  if (labels.length === 0) return "";
+  const prefix = side === "they" ? "They can send you" : "You can send them";
+  return `${prefix} · ${labels.join(" · ")}`;
 }

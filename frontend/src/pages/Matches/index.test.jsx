@@ -243,6 +243,56 @@ describe("MatchesPage", () => {
     expect(screen.getByText(MATCHES_PAGE_HELP)).toBeVisible();
   });
 
+  it("shows one pile-matching flag tag when both ISO and UFT apply", () => {
+    mockUseTradeMatches.mockReturnValue(
+      defaultMatchesHook({
+        matches: [
+          {
+            userId: "user-2",
+            displayName: "Lost Tester 2",
+            contact: {
+              method: "trueEmail",
+              email: "two@example.com",
+              usedFallback: false,
+              fallbackReason: null,
+            },
+            lanes: [
+              {
+                id: "foil",
+                theyCanSend: [
+                  {
+                    skuId: "LT24-CHM-01-FOIL",
+                    owned: 1,
+                    extras: 1,
+                    tradeFlags: ["uft", "iso"],
+                  },
+                ],
+                youCanSend: [
+                  {
+                    skuId: "LT24-ELS-01-FOIL",
+                    owned: 2,
+                    extras: 1,
+                    tradeFlags: ["iso"],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    mockGetSkuRecord.mockImplementation((skuId) =>
+      skuCard(skuId, skuId.includes("CHM") ? "The Chasmfriends get a Pet! #01" : "Elsecaller #01"),
+    );
+
+    renderMatches();
+
+    expect(screen.getByText("They can send you · ISO · UFT")).toBeInTheDocument();
+    expect(screen.getByText("You can send them · ISO")).toBeInTheDocument();
+    expect(screen.queryByText("You can send them · UFT")).not.toBeInTheDocument();
+    expect(screen.queryByText("They can send you · ISO")).not.toBeInTheDocument();
+  });
+
   it("renders a person card with dun and pin piles and no sentence rows", () => {
     renderMatches();
 

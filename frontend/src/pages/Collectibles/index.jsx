@@ -87,6 +87,10 @@ export default function CollectiblesPage() {
     }
   }, [categoryFilter, categoryFromQuery, setCategoryFilter]);
 
+  useEffect(() => {
+    if (!user) setTradeStatusFilter("all");
+  }, [user, setTradeStatusFilter]);
+
   const handleCategoryChange = (nextCategory) => {
     setCategoryFilter(nextCategory);
     setSearchParams((prev) => searchParamsWithCategory(prev, nextCategory), { replace: true });
@@ -125,6 +129,7 @@ export default function CollectiblesPage() {
         onRarityChange={setRarityFilter}
         tradeStatusFilter={tradeStatusFilter}
         onTradeStatusChange={setTradeStatusFilter}
+        showTradeStatus={Boolean(user)}
         sortField={sortField}
         onSortFieldChange={setSortField}
         sortDirection={sortDirection}

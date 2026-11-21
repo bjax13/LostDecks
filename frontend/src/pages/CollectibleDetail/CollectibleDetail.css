@@ -83,6 +83,7 @@
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+  overflow: visible;
 }
 
 .card-detail__section-title {
@@ -247,6 +248,18 @@
 
 .trade-status__error {
   color: #ff9fbf;
+}
+
+.trade-status .info-bubble__panel--end {
+  width: min(22.5rem, calc(100vw - 3rem));
+}
+
+@media (max-width: 520px) {
+  .trade-status .info-bubble__panel--end {
+    left: 0;
+    right: auto;
+    width: min(22.5rem, calc(100vw - 4.5rem));
+  }
 }
 
 .card-detail__error {

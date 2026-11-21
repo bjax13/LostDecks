@@ -93,9 +93,12 @@ function PileItem({ item, side }) {
         <span className="matches-pile-item-name">{formatSkuLabel(item.skuId)}</span>
       </span>
       <span className="matches-pile-item-meta">
-        {flags.map((flag) => (
-          <TradeFlagTag key={flag} flag={flag} label={pileTradeFlagTag(side, flag)} />
-        ))}
+        {flags.length > 0 ? (
+          <TradeFlagTag
+            flag={flags.length === 1 ? flags[0] : "mixed"}
+            label={pileTradeFlagTag(side, flags)}
+          />
+        ) : null}
         <span className="matches-pile-item-qty">{formatPileQty(side, item)}</span>
       </span>
     </li>

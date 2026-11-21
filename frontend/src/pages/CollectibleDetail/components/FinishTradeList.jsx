@@ -48,11 +48,13 @@ function TradeStatusSwitch({ name, value, quantity, loading, onChange }) {
   ];
 
   return (
-    <fieldset className="trade-status">
-      <legend className="trade-status__legend">
+    <div className="trade-status">
+      <div className="trade-status__legend">
         Trade status
-        <InfoBubble label="About trade status">{TRADE_STATUS_HELP}</InfoBubble>
-      </legend>
+        <InfoBubble label="About trade status" placement="end">
+          {TRADE_STATUS_HELP}
+        </InfoBubble>
+      </div>
       <div className="trade-status__options" role="radiogroup" aria-label="Trade status">
         {options.map((option) => (
           <label key={option.value} className="trade-status__option">
@@ -70,7 +72,7 @@ function TradeStatusSwitch({ name, value, quantity, loading, onChange }) {
       </div>
       {uftDisabled ? <p className="trade-status__hint">{TRADE_STATUS_UFT_HINT}</p> : null}
       {saveError ? <p className="trade-status__error">{TRADE_STATUS_SAVE_ERROR}</p> : null}
-    </fieldset>
+    </div>
   );
 }
 
