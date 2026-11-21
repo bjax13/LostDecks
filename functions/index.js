@@ -8,6 +8,7 @@ const {
   buildLanePrefsByUserId,
   buildLocationsByUserId,
   buildMatchesForCaller,
+  buildUserSkuFlags,
   buildUserSkuTotals,
   DEFAULT_MATCH_PAGE_SIZE,
   normalizeLocationFilter,
@@ -105,6 +106,7 @@ exports.getTradeMatches = onCall(
 
       const collectionDocs = collectionsSnapshot.docs.map((snapshot) => snapshot.data());
       const userSkuTotals = buildUserSkuTotals(collectionDocs);
+      const userSkuFlags = buildUserSkuFlags(collectionDocs);
       const optedOutUserIds = new Set(
         optedOutSnapshot.docs.map((snapshot) => uidOrEmpty(snapshot.id)).filter(Boolean),
       );
@@ -120,6 +122,7 @@ exports.getTradeMatches = onCall(
         optedOutUserIds,
         lanePrefsByUserId,
         keepByUserId,
+        userSkuFlags,
         locationFilter,
         locationsByUserId,
       });

@@ -62,6 +62,12 @@ describe("CollectiblesToolbar", () => {
       expect(screen.getByLabelText("Sort by")).toHaveAttribute("id", "sort-by");
     });
 
+    it("hides the trade status filter when showTradeStatus is false", () => {
+      renderToolbar({ showTradeStatus: false });
+      expect(screen.queryByLabelText("Trade status")).not.toBeInTheDocument();
+      expect(screen.getByLabelText("Category")).toBeInTheDocument();
+    });
+
     it("renders sort direction button with descriptive aria-label", () => {
       renderToolbar({ sortDirection: "asc" });
       expect(screen.getByRole("button", { name: "Sort ascending" })).toBeInTheDocument();

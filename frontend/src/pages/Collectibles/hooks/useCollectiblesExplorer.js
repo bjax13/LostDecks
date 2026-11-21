@@ -4,7 +4,9 @@ import {
   datasetMeta,
   datasetStories,
   pinSeriesOptions,
+  resolveSkuId,
 } from "../../../data/collectibles";
+import { entryMatchesTradeStatus, normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { defaultSort } from "../constants";
 import { compareCollectibles } from "../utils/compareCollectibles";
 
@@ -15,11 +17,23 @@ function pinSeriesMatches(collectible, seriesFilter) {
   return series === seriesFilter;
 }
 
-export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) {
+function collectibleTradeFlags(collectible, tradeFlagBySkuId) {
+  const finishes = collectible?.finishes ?? [];
+  const skuIds = finishes.length
+    ? finishes.map((finish) => resolveSkuId(collectible, finish))
+    : [resolveSkuId(collectible, null)];
+  return skuIds.map((skuId) => normalizeTradeFlag(tradeFlagBySkuId?.[skuId])).filter(Boolean);
+}
+
+export function useCollectiblesExplorer({
+  initialCategoryFilter = "all",
+  tradeFlagBySkuId = {},
+} = {}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilterState] = useState(initialCategoryFilter);
   const [storyFilter, setStoryFilter] = useState("all");
   const [rarityFilter, setRarityFilter] = useState("all");
+  const [tradeStatusFilter, setTradeStatusFilter] = useState("all");
   const [sortField, setSortField] = useState(defaultSort.field);
   const [sortDirection, setSortDirection] = useState(defaultSort.direction);
 
@@ -71,6 +85,14 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
           return false;
         }
       }
+      if (
+        !collectibleTradeFlags(c, tradeFlagBySkuId).some((flag) =>
+          entryMatchesTradeStatus(flag, tradeStatusFilter),
+        ) &&
+        tradeStatusFilter !== "all"
+      ) {
+        return false;
+      }
       if (!term) return true;
       return c.searchTokens.includes(term);
     });
@@ -83,6 +105,8 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     categoryFilter,
     storyFilter,
     rarityFilter,
+    tradeStatusFilter,
+    tradeFlagBySkuId,
     sortField,
     sortDirection,
     isPinSubCategory,
@@ -94,6 +118,7 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     setCategoryFilterState("all");
     setStoryFilter("all");
     setRarityFilter("all");
+    setTradeStatusFilter("all");
     setSortField(defaultSort.field);
     setSortDirection(defaultSort.direction);
   }, []);
@@ -114,6 +139,8 @@ export function useCollectiblesExplorer({ initialCategoryFilter = "all" } = {}) 
     setStoryFilter,
     rarityFilter,
     setRarityFilter,
+    tradeStatusFilter,
+    setTradeStatusFilter,
     sortField,
     setSortField,
     sortDirection,
