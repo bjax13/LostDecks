@@ -268,6 +268,37 @@ describe("bulkImport (unit)", () => {
       );
     });
 
+    it("keeps a zero-quantity ISO doc and deletes an unflagged duplicate", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "0" }],
+        existingEntries: [
+          { id: "iso-doc", skuId: "LT24-ELS-01-DUN", quantity: 1, tradeFlag: "iso" },
+          { id: "plain-doc", skuId: "LT24-ELS-01-DUN", quantity: 1 },
+        ],
+      });
+      expect(result.deleted).toBe(1);
+      expect(result.updated).toBe(1);
+      expect(mockBatchDelete).toHaveBeenCalledWith({ id: "plain-doc" });
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "iso-doc" },
+        expect.objectContaining({ quantity: 0, tradeFlag: "iso" }),
+        { merge: true },
+      );
+    });
+
+    it("deletes a UFT doc when the CSV quantity is 0", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ __lineNumber: 2, skuId: "LT24-ELS-01-DUN", quantity: "0" }],
+        existingEntries: [
+          { id: "uft-doc", skuId: "LT24-ELS-01-DUN", quantity: 1, tradeFlag: "uft" },
+        ],
+      });
+      expect(result.deleted).toBe(1);
+      expect(mockBatchDelete).toHaveBeenCalledWith({ id: "uft-doc" });
+    });
+
     it("deletes all duplicate docs when quantity is 0", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",

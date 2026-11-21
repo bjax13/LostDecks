@@ -327,6 +327,18 @@
   gap: 0.4rem;
 }
 
+.finish-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.cards-empty {
+  margin: 0.5rem 0 0;
+  color: #d2c9ff;
+}
+
 .finish-pill {
   padding: 0.25rem 0.75rem;
   border-radius: 999px;

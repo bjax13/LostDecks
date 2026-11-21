@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import TradeFlagTag from "../../../components/TradeFlagTag.jsx";
 import { useAuthModal } from "../../../contexts/AuthModalContext.jsx";
 import { isRetiredPinId, resolveSkuId } from "../../../data/collectibles";
+import { CLEARED_UFT_TOAST, normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { useCollectionQuantityMutations } from "../hooks/useCollectionQuantityMutations";
 import { getOwnedQuantity } from "../utils/ownedQuantities";
 
@@ -33,12 +35,29 @@ export function formatOwnedQuantityLabel({ label, ownedQuantity, isPin = false }
   return `${label} · x${ownedQuantity}`;
 }
 
+function QuantityLabel({ label, flag }) {
+  const tradeFlag = normalizeTradeFlag(flag);
+  return (
+    <>
+      {label}
+      {tradeFlag ? (
+        <>
+          <span aria-hidden="true"> · </span>
+          <TradeFlagTag flag={tradeFlag} />
+        </>
+      ) : null}
+    </>
+  );
+}
+
 export default function AddToCollectionButton({
   collectible,
   card,
   variant = "card",
   ownedBySkuId = {},
+  tradeFlagBySkuId = {},
   deleteWhenZero = true,
+  onlyFinish = null,
   onQuantityChange,
 }) {
   const item = collectible ?? card;
@@ -51,6 +70,7 @@ export default function AddToCollectionButton({
   const [lastFinish, setLastFinish] = useState(null);
   const [lastAction, setLastAction] = useState(null);
   const [pendingPinAdd, setPendingPinAdd] = useState(false);
+  const [clearedUft, setClearedUft] = useState(false);
 
   const isPin = isPinCollectible(item);
   const finishes = useMemo(() => item?.finishes ?? [], [item]);
@@ -87,7 +107,9 @@ export default function AddToCollectionButton({
     if (status === "success") {
       const finishLabel = lastFinish ? formatFinishLabel(lastFinish) : null;
       let message = successMessage;
-      if (lastAction === "decrement") {
+      if (clearedUft) {
+        message = CLEARED_UFT_TOAST;
+      } else if (lastAction === "decrement") {
         message = finishLabel ? `Removed one ${finishLabel}.` : "Removed one from your collection.";
       } else if (finishLabel) {
         message = `Added ${finishLabel} to your collection!`;
@@ -98,6 +120,7 @@ export default function AddToCollectionButton({
       });
       const timer = setTimeout(() => {
         setFeedback(null);
+        setClearedUft(false);
         reset();
       }, 2500);
       return () => clearTimeout(timer);
@@ -108,7 +131,7 @@ export default function AddToCollectionButton({
     }
 
     return undefined;
-  }, [status, reset, lastFinish, lastAction]);
+  }, [status, reset, lastFinish, lastAction, clearedUft]);
 
   useEffect(() => () => reset(), [reset]);
 
@@ -181,6 +204,7 @@ export default function AddToCollectionButton({
       }
       setPendingAction("decrement");
       setLastAction("decrement");
+      setClearedUft(false);
       setFeedback(null);
       const result = await decrementFromCollection({
         card: item,
@@ -188,6 +212,9 @@ export default function AddToCollectionButton({
         quantity: 1,
         deleteWhenZero,
       });
+      if (result?.clearedUft) {
+        setClearedUft(true);
+      }
       notifyQuantityChange(result);
     } catch (err) {
       if (err?.code === "auth-required") {
@@ -202,11 +229,12 @@ export default function AddToCollectionButton({
   const finishButtons = useMemo(
     () =>
       ["DUN", "FOIL"]
-        .filter((finish) => availableFinishes[finish])
+        .filter((finish) => availableFinishes[finish] && (!onlyFinish || finish === onlyFinish))
         .map((finish) => {
           const label = formatFinishLabel(finish);
           const skuId = resolveSkuId(item, finish);
           const ownedQuantity = getOwnedQuantity(ownedBySkuId, item, finish);
+          const tradeFlag = skuId ? normalizeTradeFlag(tradeFlagBySkuId?.[skuId]) : null;
           const hasExplicitZero =
             Boolean(skuId) && Object.hasOwn(ownedBySkuId, skuId) && ownedQuantity === 0;
           const showStepper = ownedQuantity > 0 || hasExplicitZero;
@@ -215,11 +243,12 @@ export default function AddToCollectionButton({
             label,
             ownedQuantity,
             showStepper,
+            tradeFlag,
             buttonLabel: formatOwnedAddLabel({ label, ownedQuantity }),
             quantityLabel: formatOwnedQuantityLabel({ label, ownedQuantity }),
           };
         }),
-    [availableFinishes, item, ownedBySkuId],
+    [availableFinishes, item, onlyFinish, ownedBySkuId, tradeFlagBySkuId],
   );
 
   const pinButtonLabel = formatOwnedAddLabel({
@@ -232,11 +261,13 @@ export default function AddToCollectionButton({
     ownedQuantity: pinOwnedQuantity,
     isPin: true,
   });
+  const pinTradeFlag = pinSkuId ? normalizeTradeFlag(tradeFlagBySkuId?.[pinSkuId]) : null;
   const showPinStepper = pinOwnedQuantity > 0 || pinHasSoftZero;
 
   const renderStepper = ({
     key,
     quantityLabel,
+    tradeFlag = null,
     ownedQuantity,
     onDecrement,
     onIncrement,
@@ -254,7 +285,11 @@ export default function AddToCollectionButton({
         {isLoading && isPending && pendingAction === "decrement" ? "…" : "−"}
       </button>
       <span className="add-to-collection__quantity" aria-live="polite">
-        {isLoading && isPending ? loadingLabel : quantityLabel}
+        {isLoading && isPending ? (
+          loadingLabel
+        ) : (
+          <QuantityLabel label={quantityLabel} flag={tradeFlag} />
+        )}
       </span>
       <button
         type="button"
@@ -276,6 +311,7 @@ export default function AddToCollectionButton({
             renderStepper({
               key: "pin",
               quantityLabel: pinQuantityLabel,
+              tradeFlag: pinTradeFlag,
               ownedQuantity: pinOwnedQuantity,
               onDecrement: () => handleDecrement(null),
               onIncrement: () => handleAdd(null),
@@ -298,11 +334,20 @@ export default function AddToCollectionButton({
       ) : finishButtons.length > 0 ? (
         <div className="add-to-collection__buttons">
           {finishButtons.map(
-            ({ finish, label, buttonLabel, quantityLabel, ownedQuantity, showStepper }) =>
+            ({
+              finish,
+              label,
+              buttonLabel,
+              quantityLabel,
+              ownedQuantity,
+              showStepper,
+              tradeFlag,
+            }) =>
               showStepper ? (
                 renderStepper({
                   key: finish,
                   quantityLabel,
+                  tradeFlag,
                   ownedQuantity,
                   onDecrement: () => handleDecrement(finish),
                   onIncrement: () => handleAdd(finish),

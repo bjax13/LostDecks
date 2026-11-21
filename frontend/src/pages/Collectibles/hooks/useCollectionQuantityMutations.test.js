@@ -20,6 +20,7 @@ vi.mock("firebase/firestore", () => ({
   query: (...args) => mockQuery(...args),
   serverTimestamp: () => mockServerTimestamp(),
   updateDoc: (...args) => mockUpdateDoc(...args),
+  deleteField: () => ({ _type: "deleteField" }),
   where: (...args) => mockWhere(...args),
 }));
 
@@ -230,6 +231,58 @@ describe("useCollectionQuantityMutations", () => {
       );
     });
 
+    it("keeps an ISO flag when quantity reaches zero", async () => {
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "existing-1", data: { quantity: 1, tradeFlag: "iso" } }]),
+      );
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.decrementFromCollection({
+          card,
+          finish: "DUN",
+          quantity: 1,
+          deleteWhenZero: true,
+        });
+      });
+
+      expect(mockDeleteDoc).not.toHaveBeenCalled();
+      expect(mockUpdateDoc).toHaveBeenCalledWith(
+        { id: "existing-1" },
+        expect.objectContaining({ quantity: 0, tradeFlag: "iso" }),
+      );
+      expect(payload.deleted).toBe(false);
+      expect(payload.tradeFlag).toBe("iso");
+    });
+
+    it("clears UFT and deletes the doc when quantity reaches zero", async () => {
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "existing-1", data: { quantity: 1, tradeFlag: "uft" } }]),
+      );
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.decrementFromCollection({
+          card,
+          finish: "DUN",
+          quantity: 1,
+          deleteWhenZero: false,
+        });
+      });
+
+      expect(mockDeleteDoc).toHaveBeenCalledWith({ id: "existing-1" });
+      expect(payload).toEqual(
+        expect.objectContaining({
+          quantity: 0,
+          deleted: true,
+          clearedUft: true,
+          tradeFlag: null,
+        }),
+      );
+    });
+
     it("writes quantity 0 when deleteWhenZero is false (soft zero)", async () => {
       mockGetDocs.mockResolvedValueOnce(
         makeExistingDocs([{ id: "existing-1", data: { quantity: 1 } }]),
@@ -362,6 +415,80 @@ describe("useCollectionQuantityMutations", () => {
       expect(mockDoc).toHaveBeenCalledWith({ type: "mock-firestore" }, "collections", "zero-1");
       expect(mockDeleteDoc).toHaveBeenCalledTimes(1);
       expect(payload.deleted).toBe(1);
+    });
+
+    it("leaves zero-quantity docs that still have a trade flag", async () => {
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.purgeZeroQuantityEntries([
+          {
+            id: "iso-zero",
+            ownerUid: "user-123",
+            quantity: 0,
+            skuId: "LT24-ELS-01-FOIL",
+            tradeFlag: "iso",
+          },
+          { id: "plain-zero", ownerUid: "user-123", quantity: 0, skuId: "LT24-ELS-01-DUN" },
+        ]);
+      });
+
+      expect(mockDeleteDoc).toHaveBeenCalledTimes(1);
+      expect(payload.deleted).toBe(1);
+    });
+  });
+
+  describe("setCollectionTradeFlag", () => {
+    it("creates a quantity 0 doc when marking ISO on an unowned finish", async () => {
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.setCollectionTradeFlag({
+          card,
+          finish: "FOIL",
+          tradeFlag: "iso",
+        });
+      });
+
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        "collections-ref",
+        expect.objectContaining({
+          skuId: "LT24-ELS-01-FOIL",
+          quantity: 0,
+          tradeFlag: "iso",
+        }),
+      );
+      expect(payload.tradeFlag).toBe("iso");
+    });
+
+    it("deletes a quantity 0 doc when the flag is cleared", async () => {
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "iso-zero", data: { quantity: 0, tradeFlag: "iso" } }]),
+      );
+      const { result } = renderHook(() => useCollectionQuantityMutations());
+
+      let payload;
+      await act(async () => {
+        payload = await result.current.removeFromCollection({ card, finish: "DUN" });
+      });
+
+      expect(payload.deleted).toBe(true);
+
+      mockGetDocs.mockResolvedValueOnce(
+        makeExistingDocs([{ id: "iso-zero", data: { quantity: 0, tradeFlag: "iso" } }]),
+      );
+      await act(async () => {
+        payload = await result.current.setCollectionTradeFlag({
+          card,
+          finish: "DUN",
+          tradeFlag: null,
+        });
+      });
+
+      expect(mockDeleteDoc).toHaveBeenCalledWith({ id: "iso-zero" });
+      expect(payload.deleted).toBe(true);
     });
   });
 

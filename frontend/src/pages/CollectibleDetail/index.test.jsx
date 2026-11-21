@@ -22,6 +22,14 @@ vi.mock("../../contexts/AuthContext", () => ({
 vi.mock("../../data/collectibles", () => ({
   getCollectibleRecord: vi.fn(() => null),
   getSkuRecord: vi.fn(() => null),
+  resolveSkuId: (collectible, finish) => {
+    if (!collectible?.id) return null;
+    if (collectible.collectibleType === "pin" || collectible.category === "pin") {
+      return collectible.id;
+    }
+    if (!finish) return null;
+    return `${collectible.id}-${String(finish).toUpperCase()}`;
+  },
 }));
 
 vi.mock("./hooks/useCollectibleCollectionEntry", () => ({
@@ -33,7 +41,17 @@ vi.mock("./hooks/useCollectibleCollectionEntry", () => ({
 }));
 
 vi.mock("../Collectibles/components/AddToCollectionButton", () => ({
+  formatFinishLabel: (finish) => {
+    const lower = String(finish ?? "").toLowerCase();
+    return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+  },
   default: ({ collectible }) => <div data-testid="add-to-collection">{collectible?.id}</div>,
+}));
+
+vi.mock("../Collectibles/hooks/useCollectionQuantityMutations", () => ({
+  useCollectionQuantityMutations: () => ({
+    setCollectionTradeFlag: vi.fn(),
+  }),
 }));
 
 /* ------------------------------------------------------------------ */
@@ -273,18 +291,20 @@ describe("CollectibleDetailPage – collection section", () => {
     expect(screen.getByText(/loading collection data/i)).toBeInTheDocument();
   });
 
-  it("shows 'Not in your collection' when no entry exists", () => {
+  it("shows a trade status switch for each finish when nothing is owned", () => {
     setDefaults({ card: CARD, user: USER });
     renderWithRoute("/collectibles/LT24-ELS-01");
 
-    expect(screen.getByText(/not in your collection/i)).toBeInTheDocument();
+    expect(screen.getAllByRole("radio", { name: "ISO" })).toHaveLength(2);
+    expect(screen.getAllByRole("radio", { name: "UFT" })[0]).toBeDisabled();
+    expect(screen.getAllByText(/own at least 1 to mark up for trade/i).length).toBeGreaterThan(0);
   });
 
   it("renders AddToCollectionButton for authenticated users", () => {
     setDefaults({ card: CARD, user: USER });
     renderWithRoute("/collectibles/LT24-ELS-01");
 
-    expect(screen.getByTestId("add-to-collection")).toBeInTheDocument();
+    expect(screen.getAllByTestId("add-to-collection")).toHaveLength(2);
   });
 });
 
@@ -297,7 +317,8 @@ describe("normalizeQuantity (via component)", () => {
 
   it("reads entry.quantity", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { quantity: 5 },
+      entry: { skuId: "LT24-ELS-01-DUN", quantity: 5 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", quantity: 5 }],
       loading: false,
       error: null,
     });
@@ -307,7 +328,8 @@ describe("normalizeQuantity (via component)", () => {
 
   it("falls back to entry.count when quantity is absent", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { count: 3 },
+      entry: { skuId: "LT24-ELS-01-DUN", count: 3 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", count: 3 }],
       loading: false,
       error: null,
     });
@@ -317,7 +339,8 @@ describe("normalizeQuantity (via component)", () => {
 
   it("falls back to entry.copies", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { copies: 7 },
+      entry: { skuId: "LT24-ELS-01-DUN", copies: 7 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", copies: 7 }],
       loading: false,
       error: null,
     });
@@ -327,7 +350,8 @@ describe("normalizeQuantity (via component)", () => {
 
   it("falls back to entry.total", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { total: 12 },
+      entry: { skuId: "LT24-ELS-01-DUN", total: 12 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", total: 12 }],
       loading: false,
       error: null,
     });
@@ -337,17 +361,19 @@ describe("normalizeQuantity (via component)", () => {
 
   it("returns 0 for entry with no recognized numeric field", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { foo: "bar" },
+      entry: { skuId: "LT24-ELS-01-DUN", foo: "bar" },
+      entries: [{ skuId: "LT24-ELS-01-DUN", foo: "bar" }],
       loading: false,
       error: null,
     });
     renderWithRoute("/collectibles/LT24-ELS-01");
-    expect(screen.getByText("0")).toBeInTheDocument();
+    expect(screen.getAllByText("0").length).toBeGreaterThan(0);
   });
 
   it("skips NaN and falls through to next candidate", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { quantity: Number.NaN, count: 4 },
+      entry: { skuId: "LT24-ELS-01-DUN", quantity: Number.NaN, count: 4 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", quantity: Number.NaN, count: 4 }],
       loading: false,
       error: null,
     });
@@ -357,7 +383,8 @@ describe("normalizeQuantity (via component)", () => {
 
   it("skips Infinity and falls through to next candidate", () => {
     useCollectibleCollectionEntry.mockReturnValue({
-      entry: { quantity: Number.POSITIVE_INFINITY, copies: 2 },
+      entry: { skuId: "LT24-ELS-01-DUN", quantity: Number.POSITIVE_INFINITY, copies: 2 },
+      entries: [{ skuId: "LT24-ELS-01-DUN", quantity: Number.POSITIVE_INFINITY, copies: 2 }],
       loading: false,
       error: null,
     });
