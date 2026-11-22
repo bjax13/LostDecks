@@ -1,3 +1,8 @@
+import {
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "../pages/Collection/utils/collectionEntrySku.js";
+
 const STORAGE_KEY = "pendingPinPicks";
 const VERSION = 1;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -134,10 +139,9 @@ export function clearPendingPicks() {
 export function mergePickRows(picks, existingEntries = []) {
   const existingBySku = new Map();
   for (const entry of existingEntries ?? []) {
-    const skuId = typeof entry?.skuId === "string" ? entry.skuId.trim().toUpperCase() : "";
+    const skuId = resolveCollectionEntrySkuId(entry);
     if (!skuId) continue;
-    const raw = entry.quantity ?? entry.count ?? entry.copies ?? entry.total;
-    const qty = typeof raw === "number" && Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
+    const qty = ownedQuantityFromEntry(entry);
     existingBySku.set(skuId, (existingBySku.get(skuId) ?? 0) + qty);
   }
 

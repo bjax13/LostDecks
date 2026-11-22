@@ -1213,6 +1213,62 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("preserves All coverage when Firestore entries arrive after in-session edits", async () => {
+    function EntriesArriveHarness() {
+      const [entries, setEntries] = useState([]);
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockImplementation(() => ({
+        entries,
+        status: "ready",
+        error: null,
+      }));
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button
+            type="button"
+            onClick={() => setEntries([{ id: "LT24-CHM-01-DUN", quantity: 1 }])}
+          >
+            Load saved rows
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<EntriesArriveHarness />);
+
+    await goToCardReview(user);
+
+    const elsecallerCoverage = () =>
+      screen.getByRole("group", { name: /elsecaller story foils coverage/i });
+    await user.click(within(elsecallerCoverage()).getByRole("button", { name: "All" }));
+    await user.click(screen.getByRole("button", { name: "Load saved rows" }));
+
+    await waitFor(() => {
+      expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: /about you/i }));
+    await user.click(screen.getByRole("button", { name: /card review/i }));
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
   it("preserves in-progress review edits when navigating back to About you and returning", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({

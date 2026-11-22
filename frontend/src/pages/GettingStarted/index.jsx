@@ -469,8 +469,8 @@ export default function GettingStartedPage() {
     const entriesChangedSinceHydrate =
       hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
     const shouldHydrate =
-      collectionSeedPendingRef.current ||
-      (!collectionHydratedRef.current && hasEntries) ||
+      (collectionSeedPendingRef.current && !userTouchedReview) ||
+      (!collectionHydratedRef.current && hasEntries && !userTouchedReview) ||
       (!userTouchedReview && entriesChangedSinceHydrate);
     if (!shouldHydrate) {
       return;

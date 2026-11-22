@@ -1,7 +1,7 @@
-import { render, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearPendingPicks, savePendingPicks } from "../lib/pendingPicks.js";
-import { PendingPicksApplier } from "./useApplyPendingPicks.js";
+import { PENDING_PICKS_APPLY_MAX_ATTEMPTS, PendingPicksApplier } from "./useApplyPendingPicks.js";
 
 const mockNavigate = vi.hoisted(() => vi.fn());
 const mockApplyBulk = vi.hoisted(() => vi.fn());
@@ -25,6 +25,10 @@ vi.mock("../pages/Collection/utils/bulkImport", () => ({
 }));
 
 describe("PendingPicksApplier", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     clearPendingPicks();
@@ -62,5 +66,68 @@ describe("PendingPicksApplier", () => {
       expect(mockApplyBulk).not.toHaveBeenCalled();
     });
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { label: "idle", status: "idle", entries: [] },
+    { label: "loading", status: "loading", entries: [] },
+    { label: "error", status: "error", entries: [{ skuId: "PIN-CF-01", quantity: 1 }] },
+  ])("does not apply picks while collection status is $label", async ({ status, entries }) => {
+    savePendingPicks({ "PIN-CF-01": 2 });
+    mockUseUserCollection.mockReturnValue({ entries, status });
+
+    const { rerender } = render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).not.toHaveBeenCalled();
+    });
+    expect(mockNavigate).not.toHaveBeenCalled();
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+    });
+    rerender(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+  });
+
+  it("retries apply after a failure once the collection is ready", async () => {
+    vi.useFakeTimers();
+    savePendingPicks({ "PIN-CF-01": 2 });
+    mockApplyBulk.mockRejectedValueOnce(new Error("network"));
+    mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
+
+    render(<PendingPicksApplier />);
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
+    expect(mockApplyBulk).toHaveBeenCalledTimes(2);
+    expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+  });
+
+  it("stops after max attempts, keeps pending picks, and surfaces an alert", async () => {
+    vi.useFakeTimers();
+    savePendingPicks({ "PIN-CF-01": 2 });
+    mockApplyBulk.mockRejectedValue(new Error("permission-denied"));
+
+    render(<PendingPicksApplier />);
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockApplyBulk).toHaveBeenCalledTimes(PENDING_PICKS_APPLY_MAX_ATTEMPTS);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("pendingPinPicks")).not.toBeNull();
+    expect(screen.getByRole("alert")).toHaveTextContent(/couldn't save your QR pin picks/i);
   });
 });
