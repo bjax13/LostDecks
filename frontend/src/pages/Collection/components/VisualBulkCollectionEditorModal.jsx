@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import CollectionReviewEditor from "../../../components/CollectionReviewEditor/CollectionReviewEditor.jsx";
 import { useCollectionReviewEditor } from "../../../components/CollectionReviewEditor/useCollectionReviewEditor.js";
 import {
-  buildCollectionRows,
+  buildSessionChangedCollectionRows,
   COLLECTIBLE_TYPE_BOTH,
   deriveReviewStateFromEntries,
   filterGettingStartedTree,
@@ -24,6 +24,13 @@ function VisualBulkCollectionEditorModalContent({ ownerUid, entries, onClose, on
 
   const [coverage, setCoverage] = useState(seeded.coverage);
   const [quantities, setQuantities] = useState(seeded.quantities);
+  const sessionBaselineRef = useRef(null);
+  if (sessionBaselineRef.current === null) {
+    sessionBaselineRef.current = {
+      coverage: { ...seeded.coverage },
+      quantities: { ...seeded.quantities },
+    };
+  }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
@@ -45,7 +52,13 @@ function VisualBulkCollectionEditorModalContent({ ownerUid, entries, onClose, on
     try {
       const result = await applyBulkCollectionUpdate({
         ownerUid,
-        rows: buildCollectionRows(coverage, quantities, undefined, reviewTree),
+        rows: buildSessionChangedCollectionRows(
+          coverage,
+          quantities,
+          sessionBaselineRef.current,
+          reviewTree,
+          undefined,
+        ),
         existingEntries: entries ?? [],
         allowPins: true,
       });
