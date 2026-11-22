@@ -5,7 +5,7 @@ const assert = require("node:assert/strict");
 const {
   deleteQueryInBatches,
   deleteMyAccountHandler,
-  deleteUserOwnedShares,
+  tombstoneUserOwnedShares,
 } = require("./deleteAccount");
 
 function createFakeQuery(docsByPage) {
@@ -17,6 +17,9 @@ function createFakeQuery(docsByPage) {
         return {
           delete(ref) {
             ops.push(ref);
+          },
+          set(ref, data) {
+            ops.push({ kind: "set", ref, data });
           },
           async commit() {
             query._committed.push([...ops]);
@@ -58,11 +61,11 @@ test("deleteQueryInBatches deletes pages until empty", async () => {
   await deleteQueryInBatches(query, 2);
   assert.equal(query._committed.length, 2);
   assert.deepEqual(
-    query._committed[0].map((ref) => ref.id),
+    query._committed[0].map((entry) => entry.id ?? entry.ref?.id),
     ["a", "b"],
   );
   assert.deepEqual(
-    query._committed[1].map((ref) => ref.id),
+    query._committed[1].map((entry) => entry.id ?? entry.ref?.id),
     ["c"],
   );
 });
@@ -87,7 +90,7 @@ test("deleteMyAccountHandler requires DELETE confirmation", async () => {
   );
 });
 
-test("deleteUserOwnedShares deletes every share doc for the owner", async () => {
+test("tombstoneUserOwnedShares writes minimal tombstones for each owned share", async () => {
   const query = createFakeQuery([[{ ref: { id: "share-a", collection: "shares" } }], []]);
   const db = {
     collection(name) {
@@ -101,9 +104,16 @@ test("deleteUserOwnedShares deletes every share doc for the owner", async () => 
         },
       };
     },
+    batch() {
+      return query.firestore.batch();
+    },
   };
 
-  await deleteUserOwnedShares(db, "user-1");
+  await tombstoneUserOwnedShares(db, "user-1");
   assert.equal(query._committed.length, 1);
-  assert.equal(query._committed[0][0].id, "share-a");
+  const op = query._committed[0][0];
+  assert.equal(op.kind, "set");
+  assert.equal(op.ref.id, "share-a");
+  assert.deepEqual(Object.keys(op.data).sort(), ["revokedAt", "updatedAt", "version"]);
+  assert.equal(op.data.version, 1);
 });
