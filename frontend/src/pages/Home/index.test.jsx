@@ -48,7 +48,7 @@ function renderHome() {
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseAuth.mockReturnValue({ user: null, loading: false });
-  mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });
 });
 
 describe("Home page", () => {
@@ -141,7 +141,7 @@ describe("Home page", () => {
           { id: "e2", skuId: "LT24-ELS-01-FOIL", quantity: 1 },
           { id: "e3", skuId: "LT24-ELS-02-DUN", quantity: 1 },
         ],
-        loading: false,
+        status: "ready",
         error: null,
       });
     });
@@ -174,7 +174,7 @@ describe("Home page", () => {
     it("shows onboarding footer with View Collection when signed in with no items", () => {
       mockUseUserCollection.mockReturnValue({
         entries: [],
-        loading: false,
+        status: "ready",
         error: null,
       });
       renderHome();
@@ -230,7 +230,7 @@ describe("Home page", () => {
     });
     mockUseUserCollection.mockReturnValue({
       entries: [],
-      loading: true,
+      status: "loading",
       error: null,
     });
 

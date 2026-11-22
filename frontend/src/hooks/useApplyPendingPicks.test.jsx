@@ -31,7 +31,7 @@ describe("PendingPicksApplier", () => {
     mockUseAuth.mockReturnValue({ user: { uid: "u1" } });
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
-      loading: false,
+      status: "ready",
     });
     mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
   });

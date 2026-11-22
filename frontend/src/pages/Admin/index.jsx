@@ -134,7 +134,8 @@ function AdminDirectory() {
 
 function AdminUserCollection({ uid }) {
   const { users, loading: directoryLoading } = useAdminCollectors(true);
-  const { entries, loading, error } = useUserCollection(uid);
+  const { entries, status, error } = useUserCollection(uid);
+  const loading = status === "loading";
   const collector = users.find((user) => user.uid === uid) ?? null;
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }),

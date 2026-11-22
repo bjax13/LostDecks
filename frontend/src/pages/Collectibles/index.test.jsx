@@ -10,7 +10,7 @@ const mockOpenAuthModal = vi.hoisted(() => vi.fn());
 const authState = vi.hoisted(() => ({ user: null }));
 const collectionState = vi.hoisted(() => ({
   entries: [],
-  loading: false,
+  status: "ready",
   error: null,
 }));
 const mutationsState = vi.hoisted(() => ({
@@ -142,7 +142,7 @@ describe("CollectiblesPage (integration)", () => {
   beforeEach(() => {
     authState.user = null;
     collectionState.entries = [];
-    collectionState.loading = false;
+    collectionState.status = "ready";
     collectionState.error = null;
     mutationsState.addToCollection = vi.fn().mockResolvedValue({
       skuId: "LT24-ELS-01-DUN",
