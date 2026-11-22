@@ -3,6 +3,7 @@ import {
   datasetStories,
   getCollectibleRecord,
   pinDatasetMeta,
+  toSkuId,
 } from "../../data/collectibles";
 
 export const DEFAULT_MANUAL_QUANTITY = 0;
@@ -401,17 +402,49 @@ function inferGroupCoverageFromQuantities(group, quantities) {
 }
 
 /**
+ * Match Firestore collection doc shapes: skuId when present, else cardId + finish (cards) or cardId (pins).
+ */
+function ownedQuantityFromEntry(entry) {
+  const candidates = [entry?.quantity, entry?.count, entry?.copies, entry?.total];
+  for (const candidate of candidates) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return Math.max(0, Math.floor(candidate));
+    }
+  }
+  return 0;
+}
+
+export function resolveCollectionEntrySkuId(entry) {
+  const rawSku = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
+  if (rawSku) {
+    return rawSku.toUpperCase();
+  }
+
+  const cardId = typeof entry?.cardId === "string" ? entry.cardId.trim() : "";
+  if (!cardId) {
+    return null;
+  }
+
+  const finish = entry?.finish;
+  if (finish) {
+    const resolved = toSkuId(cardId, finish);
+    return resolved ? resolved.toUpperCase() : null;
+  }
+
+  return cardId.toUpperCase();
+}
+
+/**
  * Build coverage + per-SKU quantity map from saved collection entries (for visual bulk editor).
- * @param {Array<{ skuId?: string, quantity?: number }>} [entries]
+ * @param {Array<{ skuId?: string, cardId?: string, finish?: string, quantity?: number }>} [entries]
  * @param {typeof gettingStartedTree} [tree]
  */
 export function deriveReviewStateFromEntries(entries = [], tree = gettingStartedTree) {
   const qtyBySku = new Map();
   for (const entry of entries) {
-    if (!entry?.skuId) continue;
-    const parsed = Number(entry.quantity);
-    const quantity = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
-    const skuKey = String(entry.skuId).trim().toUpperCase();
+    const skuKey = resolveCollectionEntrySkuId(entry);
+    if (!skuKey) continue;
+    const quantity = ownedQuantityFromEntry(entry);
     qtyBySku.set(skuKey, (qtyBySku.get(skuKey) ?? 0) + quantity);
   }
 
@@ -447,4 +480,62 @@ export function buildCollectionRows(
       }));
     }),
   );
+}
+
+function findReviewGroupForSku(skuId, tree = gettingStartedTree) {
+  const skuKey = String(skuId).trim().toUpperCase();
+  for (const section of tree) {
+    for (const group of section.children) {
+      if (group.skus.some((sku) => String(sku.skuId).trim().toUpperCase() === skuKey)) {
+        return group;
+      }
+    }
+  }
+  return null;
+}
+
+function seededQuantityForSku(seededQuantities, skuId) {
+  const raw = seededQuantities?.[skuId];
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+}
+
+/**
+ * Rows safe to send from Getting Started: omit unseeded zero-quantity deletes unless the
+ * collector explicitly cleared that group during this session.
+ */
+export function buildGettingStartedSaveRows(
+  coverage,
+  quantities,
+  tree,
+  {
+    seededQuantities = {},
+    explicitZeroGroupIds = new Set(),
+    sessionScopedGroupIds = new Set(),
+  } = {},
+) {
+  const rows = buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, tree);
+
+  return rows.filter((row) => {
+    const quantity = Number(row.quantity);
+    if (Number.isFinite(quantity) && quantity > 0) {
+      return true;
+    }
+
+    const skuId = row.skuId;
+    if (seededQuantityForSku(seededQuantities, skuId) > 0) {
+      return true;
+    }
+
+    const group = findReviewGroupForSku(skuId, tree);
+    if (!group) {
+      return false;
+    }
+
+    if (explicitZeroGroupIds.has(group.id) || sessionScopedGroupIds.has(group.id)) {
+      return true;
+    }
+
+    return false;
+  });
 }

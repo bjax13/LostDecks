@@ -27,7 +27,12 @@ export function useCollectionReviewEditor({
   quantities,
   setQuantities,
   initialExpandedReviewIds = null,
+  onReviewGroupScoped = null,
+  onReviewGroupExplicitNone = null,
 }) {
+  const markGroupScoped = (groupId) => {
+    onReviewGroupScoped?.(groupId);
+  };
   const [expandedReviewIds, setExpandedReviewIds] = useState(
     () => initialExpandedReviewIds ?? getDefaultExpandedReviewIds(coverage, reviewTree),
   );
@@ -101,6 +106,7 @@ export function useCollectionReviewEditor({
     String(resolveSkuQuantity(skuId, coverage[groupId], quantities, DEFAULT_MANUAL_QUANTITY));
 
   const setGroupQuantities = (group, quantity) => {
+    markGroupScoped(group.id);
     const parsed = parseBulkQuantity(String(quantity));
     if (!parsed.valid) return;
     const nextValue = String(parsed.quantity);
@@ -134,6 +140,7 @@ export function useCollectionReviewEditor({
   const setReviewGroupCoverage = (group, section, status) => {
     const previousGroupStatus = coverage[group.id];
 
+    markGroupScoped(group.id);
     setGroupCoverage(group.id, status);
 
     if (status === "some") {
@@ -151,6 +158,7 @@ export function useCollectionReviewEditor({
       return;
     }
 
+    onReviewGroupExplicitNone?.(group.id);
     setQuantities((current) => {
       const next = { ...current };
       for (const sku of group.skus) {
@@ -184,6 +192,7 @@ export function useCollectionReviewEditor({
     const group = findReviewGroup(groupId);
     if (!group) return;
 
+    markGroupScoped(groupId);
     const groupStatus = coverage[groupId];
     const base = resolveSkuQuantity(skuId, groupStatus, quantities, DEFAULT_MANUAL_QUANTITY);
     const nextQuantities = {

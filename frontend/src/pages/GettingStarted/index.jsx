@@ -17,12 +17,11 @@ import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
-  buildCollectionRows,
+  buildGettingStartedSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
   createCoverageState,
-  DEFAULT_MANUAL_QUANTITY,
   deriveReviewStateFromEntries,
   filterChasmFriendsTree,
   filterGettingStartedTree,
@@ -191,6 +190,10 @@ export default function GettingStartedPage() {
   const pendingSaveRef = useRef(false);
   const chasmTrackedRef = useRef(false);
   const collectionSeedPendingRef = useRef(false);
+  const collectionHydratedRef = useRef(false);
+  const hydratedSeedQuantitiesRef = useRef({});
+  const explicitZeroGroupIdsRef = useRef(new Set());
+  const sessionScopedGroupIdsRef = useRef(new Set());
   const fullPinReviewSeededRef = useRef(false);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -213,6 +216,12 @@ export default function GettingStartedPage() {
     quantities,
     setQuantities,
     initialExpandedReviewIds: chasmFriendsShortcut ? expandedIdsForTree(reviewTree) : null,
+    onReviewGroupScoped: (groupId) => {
+      sessionScopedGroupIdsRef.current.add(groupId);
+    },
+    onReviewGroupExplicitNone: (groupId) => {
+      explicitZeroGroupIdsRef.current.add(groupId);
+    },
   });
 
   const spreadsheetDisabled = collectibleType === COLLECTIBLE_TYPE_PINS;
@@ -243,7 +252,7 @@ export default function GettingStartedPage() {
 
   const resolveCollectionSeedSource = () => {
     if (!user?.uid || collectionLoading) {
-      collectionSeedPendingRef.current = Boolean(user?.uid);
+      collectionSeedPendingRef.current = true;
       return null;
     }
     collectionSeedPendingRef.current = false;
@@ -251,17 +260,23 @@ export default function GettingStartedPage() {
   };
 
   const applyManualReviewSeed = (tree, sourceEntries) => {
-    if (sourceEntries?.length) {
-      const seeded = deriveReviewStateFromEntries(sourceEntries, tree);
-      setCoverage(seeded.coverage);
-      setQuantities(seeded.quantities);
-      reviewEditor.resetExpandedReviewIds(seeded.coverage);
+    if (sourceEntries === null) {
+      collectionHydratedRef.current = false;
+      hydratedSeedQuantitiesRef.current = {};
+      const newCoverage = createCoverageState("none", tree);
+      setCoverage(newCoverage);
+      setQuantities({});
+      reviewEditor.resetExpandedReviewIds(newCoverage);
       return;
     }
-    const newCoverage = createCoverageState("none", tree);
-    setCoverage(newCoverage);
-    setQuantities({});
-    reviewEditor.resetExpandedReviewIds(newCoverage);
+
+    const seeded = deriveReviewStateFromEntries(sourceEntries, tree);
+    setCoverage(seeded.coverage);
+    setQuantities(seeded.quantities);
+    reviewEditor.resetExpandedReviewIds(seeded.coverage);
+    hydratedSeedQuantitiesRef.current = { ...seeded.quantities };
+    collectionHydratedRef.current = true;
+    collectionSeedPendingRef.current = false;
   };
 
   const seedManualReviewForTree = (tree) => {
@@ -368,20 +383,42 @@ export default function GettingStartedPage() {
     seedManualReviewForTree(tree);
   }, [fullPinReview, chasmFriendsShortcut, step]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: seed step 2 once when collection finishes loading
+  // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
-    if (step !== "manual" || collectionLoading || !collectionSeedPendingRef.current) {
+    if (step !== "manual" || collectionLoading || chasmFriendsShortcut) {
       return;
     }
+
+    if (!user?.uid) {
+      collectionSeedPendingRef.current = true;
+      return;
+    }
+
+    const hasEntries = (entries?.length ?? 0) > 0;
+    const shouldHydrate =
+      collectionSeedPendingRef.current || (!collectionHydratedRef.current && hasEntries);
+    if (!shouldHydrate) {
+      return;
+    }
+
+    if (!hasEntries && !collectionSeedPendingRef.current) {
+      return;
+    }
+
     collectionSeedPendingRef.current = false;
-    if (!user?.uid || !entries?.length) {
+    applyManualReviewSeed(reviewTree, entries ?? []);
+  }, [step, collectionLoading, entries, reviewTree, user]);
+
+  useEffect(() => {
+    if (step === "manual") {
       return;
     }
-    const seeded = deriveReviewStateFromEntries(entries, reviewTree);
-    setCoverage(seeded.coverage);
-    setQuantities(seeded.quantities);
-    reviewEditor.resetExpandedReviewIds(seeded.coverage);
-  }, [step, collectionLoading, entries, reviewTree, user]);
+    collectionHydratedRef.current = false;
+    collectionSeedPendingRef.current = false;
+    hydratedSeedQuantitiesRef.current = {};
+    explicitZeroGroupIdsRef.current = new Set();
+    sessionScopedGroupIdsRef.current = new Set();
+  }, [step]);
 
   const handleSave = async () => {
     if (!user) {
@@ -405,7 +442,11 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, reviewTree),
+          rows: buildGettingStartedSaveRows(coverage, quantities, reviewTree, {
+            seededQuantities: hydratedSeedQuantitiesRef.current,
+            explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
+            sessionScopedGroupIds: sessionScopedGroupIdsRef.current,
+          }),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),
         }),

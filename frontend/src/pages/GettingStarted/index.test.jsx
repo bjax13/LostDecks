@@ -1029,6 +1029,36 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
   });
 
+  it("prefills step 2 from legacy cardId + finish collection docs", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "card", cardId: "LT24-CHM-01", finish: "DUN", count: 1 },
+        { id: "pin", cardId: "PIN-CF-01", copies: 1 },
+      ],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const chasmDunCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    expect(within(chasmDunCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    const chasmPinCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+    expect(within(chasmPinCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
   it("prefills step 2 from a signed-in collector's saved items", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
@@ -1057,6 +1087,24 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       "aria-pressed",
       "true",
     );
+  });
+
+  it("sends no delete rows when review state never matched owned SKUs", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "legacy", skuId: "NOT-IN-REVIEW-TREE", quantity: 3 }],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    expect(screen.getByRole("status", { name: "Collection summary" })).toHaveTextContent(/0 total/);
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+    expect(mockApplyBulkCollectionUpdate).toHaveBeenCalled();
+    expect(mockApplyBulkCollectionUpdate.mock.calls[0][0].rows).toEqual([]);
   });
 
   it("does not zero an owned SKU when a signed-in collector saves without edits", async () => {
