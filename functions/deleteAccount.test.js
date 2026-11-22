@@ -2,7 +2,11 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { deleteQueryInBatches, deleteMyAccountHandler } = require("./deleteAccount");
+const {
+  deleteQueryInBatches,
+  deleteMyAccountHandler,
+  deleteUserOwnedShares,
+} = require("./deleteAccount");
 
 function createFakeQuery(docsByPage) {
   let pageIndex = 0;
@@ -81,4 +85,25 @@ test("deleteMyAccountHandler requires DELETE confirmation", async () => {
     () => deleteMyAccountHandler({ auth: { uid: "user-1" }, data: { confirm: "nope" } }),
     (err) => err.code === "invalid-argument",
   );
+});
+
+test("deleteUserOwnedShares deletes every share doc for the owner", async () => {
+  const query = createFakeQuery([[{ ref: { id: "share-a", collection: "shares" } }], []]);
+  const db = {
+    collection(name) {
+      assert.equal(name, "shares");
+      return {
+        where(field, op, value) {
+          assert.equal(field, "ownerUid");
+          assert.equal(op, "==");
+          assert.equal(value, "user-1");
+          return query;
+        },
+      };
+    },
+  };
+
+  await deleteUserOwnedShares(db, "user-1");
+  assert.equal(query._committed.length, 1);
+  assert.equal(query._committed[0][0].id, "share-a");
 });
