@@ -198,6 +198,7 @@ export default function GettingStartedPage() {
   const sessionScopedGroupIdsRef = useRef(new Set());
   const fullPinReviewSeededRef = useRef(false);
   const manualReviewCollectibleTypeRef = useRef(null);
+  const hydratedOwnerUidRef = useRef(null);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -282,11 +283,26 @@ export default function GettingStartedPage() {
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
     manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    hydratedOwnerUidRef.current = user?.uid ?? null;
   };
 
   const resetManualReviewSessionScopes = () => {
     explicitZeroGroupIdsRef.current = new Set();
     sessionScopedGroupIdsRef.current = new Set();
+  };
+
+  const resetReviewStateForOwnerChange = () => {
+    resetManualReviewSessionScopes();
+    collectionHydratedRef.current = false;
+    collectionSeedPendingRef.current = Boolean(user?.uid);
+    hydratedEntriesKeyRef.current = "";
+    hydratedSeedQuantitiesRef.current = {};
+    manualReviewCollectibleTypeRef.current = null;
+    hydratedOwnerUidRef.current = null;
+
+    setCoverage({});
+    setQuantities({});
+    reviewEditor.resetExpandedReviewIds({});
   };
 
   const seedManualReviewForTree = (tree) => {
@@ -296,7 +312,13 @@ export default function GettingStartedPage() {
   const beginManualReview = (nextCollectibleType = collectibleType) => {
     const type = nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH;
     const tree = filterGettingStartedTree(gettingStartedTree, type);
-    const hasExistingReview = collectionHydratedRef.current && Object.keys(coverage).length > 0;
+    const ownerUid = user?.uid ?? null;
+    const sameOwner = hydratedOwnerUidRef.current === ownerUid;
+    const userScopedReview =
+      sessionScopedGroupIdsRef.current.size > 0 || explicitZeroGroupIdsRef.current.size > 0;
+    const hasExistingReview =
+      Object.keys(coverage).length > 0 &&
+      (userScopedReview || (collectionHydratedRef.current && sameOwner));
     const sameCollectibleScope = manualReviewCollectibleTypeRef.current === type;
 
     if (!hasExistingReview || !sameCollectibleScope) {
@@ -398,6 +420,20 @@ export default function GettingStartedPage() {
     const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
     seedManualReviewForTree(tree);
   }, [fullPinReview, chasmFriendsShortcut, step]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: drop hydrated review when auth uid changes
+  useEffect(() => {
+    const uid = user?.uid ?? null;
+    const seededUid = hydratedOwnerUidRef.current;
+
+    if (seededUid === uid) {
+      return;
+    }
+
+    if (seededUid !== null && seededUid !== uid) {
+      resetReviewStateForOwnerChange();
+    }
+  }, [user?.uid]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
