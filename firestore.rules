@@ -124,38 +124,24 @@ service cloud.firestore {
         || validShareId(data.publicShareId);
     }
 
-    function validUftItem(item) {
-      return item.keys().hasOnly(["skuId", "quantity"])
-        && validSkuId(item.skuId)
-        && validQuantity(item.quantity)
-        && item.quantity >= 1;
+    function shareSkuRegexAlt() {
+      return 'LT[0-9]{2}-(ELS|LOP|CHM|HLD)-[0-9]{2}-(DUN|FOIL)|LT[0-9]{2}-NS-(ELS|LOP|CHM)-[0-9]{2}-(DUN|FOIL)(-[A-Z]+)?|PIN-[A-Z0-9]{2,6}-[0-9]{2,3}';
     }
 
-    function uftIndexOk(list, i) {
-      return list.size() <= i || (list[i] is map && validUftItem(list[i]));
+    function validShareIsoField(iso) {
+      let sku = shareSkuRegexAlt();
+      return iso is string
+        && iso.size() <= 16384
+        && (iso.size() == 0
+          || iso.matches('^(' + sku + ')(,(' + sku + '))*$'));
     }
 
-    // Firestore caps rule evaluations (~1000); ten per-element checks is the practical max.
-    function validUftList(list) {
-      return list is list
-        && list.size() <= 10
-        && uftIndexOk(list, 0) && uftIndexOk(list, 1) && uftIndexOk(list, 2)
-        && uftIndexOk(list, 3) && uftIndexOk(list, 4) && uftIndexOk(list, 5)
-        && uftIndexOk(list, 6) && uftIndexOk(list, 7) && uftIndexOk(list, 8)
-        && uftIndexOk(list, 9);
-    }
-
-    function isoIndexOk(list, i) {
-      return list.size() <= i || (list[i] is string && validSkuId(list[i]));
-    }
-
-    function validIsoList(list) {
-      return list is list
-        && list.size() <= 10
-        && isoIndexOk(list, 0) && isoIndexOk(list, 1) && isoIndexOk(list, 2)
-        && isoIndexOk(list, 3) && isoIndexOk(list, 4) && isoIndexOk(list, 5)
-        && isoIndexOk(list, 6) && isoIndexOk(list, 7) && isoIndexOk(list, 8)
-        && isoIndexOk(list, 9);
+    function validShareUftField(uft) {
+      let sku = shareSkuRegexAlt();
+      return uft is string
+        && uft.size() <= 20000
+        && (uft.size() == 0
+          || uft.matches('^(' + sku + '):[1-9][0-9]{0,2}(,(' + sku + '):[1-9][0-9]{0,2})*$'));
     }
 
     function validShareSnapshot(data) {
@@ -175,12 +161,12 @@ service cloud.firestore {
         && data.displayName is string
         && data.displayName.size() >= 1
         && data.displayName.size() <= 60
-        && validIsoList(data.iso)
-        && validUftList(data.uft)
+        && validShareIsoField(data.iso)
+        && validShareUftField(data.uft)
         && data.updatedAt is timestamp
         && data.updatedAt == request.time
         && data.version is int
-        && data.version == 1
+        && data.version == 2
         && (!("discordHandle" in data)
           || (data.discordHandle is string && data.discordHandle.size() <= 100))
         && (!("region" in data)
@@ -196,7 +182,7 @@ service cloud.firestore {
         && data.updatedAt is timestamp
         && data.updatedAt == request.time
         && data.version is int
-        && data.version == 1;
+        && data.version == 2;
     }
 
     function validUserPreferences(data) {
