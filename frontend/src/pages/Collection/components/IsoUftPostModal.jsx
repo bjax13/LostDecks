@@ -3,7 +3,8 @@ import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
 import {
   buildIsoUftPostTree,
   buildShareUrl,
-  formatIsoUftPost,
+  DISCORD_MESSAGE_CHAR_LIMIT,
+  formatIsoUftPostWithDiscordChunks,
   getDefaultExcludedIds,
 } from "../utils/isoUftPost";
 
@@ -217,10 +218,20 @@ export default function IsoUftPostModal({
 
   const footerUrl = includeLink ? buildShareUrl({ shareId }) : null;
 
-  const previewText = useMemo(
-    () => formatIsoUftPost(tree, excludedIds, { format, footerUrl }),
+  const {
+    text: previewText,
+    chunks,
+    exceedsLimit,
+  } = useMemo(
+    () =>
+      formatIsoUftPostWithDiscordChunks(tree, excludedIds, {
+        format,
+        footerUrl,
+      }),
     [tree, excludedIds, format, footerUrl],
   );
+
+  const discordChunks = exceedsLimit ? chunks : [previewText];
 
   const handleToggleCollapse = (nodeId) => {
     setCollapsedIds((prev) => {
@@ -253,15 +264,23 @@ export default function IsoUftPostModal({
     });
   };
 
-  const handleCopy = async () => {
-    if (!previewText) {
+  const handleCopyChunk = async (chunkText, partIndex) => {
+    if (!chunkText) {
       return;
     }
 
     try {
-      await copyTextToClipboard(previewText);
-      onCopied({ skippedEntries, format, includeLink });
-      onClose();
+      await copyTextToClipboard(chunkText);
+      onCopied({
+        skippedEntries,
+        format,
+        includeLink,
+        discordPart: partIndex,
+        discordPartCount: discordChunks.length,
+      });
+      if (!exceedsLimit || partIndex === discordChunks.length) {
+        onClose();
+      }
     } catch (err) {
       console.error("Failed to copy ISO/UFT post", err);
       onCopyError();
@@ -295,7 +314,9 @@ export default function IsoUftPostModal({
         >
           <div className="collection-bulk-post-modal__header">
             <h2>ISO/UFT post preview</h2>
-            <p>Select sections to include, then copy the formatted post to your clipboard.</p>
+            <p>
+              Select sections to include, then copy the Discord-formatted post to your clipboard.
+            </p>
           </div>
 
           <div className="collection-bulk-post-modal__options">
@@ -351,19 +372,57 @@ export default function IsoUftPostModal({
 
             <div className="collection-bulk-post-modal__preview-pane">
               <h3 className="collection-bulk-post-modal__pane-title">Preview</h3>
-              <pre className="collection-bulk-post-modal__preview">{previewText}</pre>
+              {exceedsLimit ? (
+                <p className="collection-bulk-post-modal__discord-warning" role="status">
+                  This post is longer than Discord&apos;s{" "}
+                  {DISCORD_MESSAGE_CHAR_LIMIT.toLocaleString()}
+                  -character limit. Copy each part below and paste them as separate messages (in
+                  order).
+                </p>
+              ) : null}
+              {discordChunks.map((chunkText, index) => (
+                <div
+                  key={
+                    exceedsLimit
+                      ? `discord-chunk-part-${index + 1}-of-${discordChunks.length}`
+                      : "discord-chunk-single"
+                  }
+                  className="collection-bulk-post-modal__chunk"
+                >
+                  {exceedsLimit ? (
+                    <h4 className="collection-bulk-post-modal__chunk-title">
+                      Part {index + 1} of {discordChunks.length}
+                    </h4>
+                  ) : null}
+                  <pre className="collection-bulk-post-modal__preview">{chunkText}</pre>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="collection-bulk-post-modal__actions">
-            <button
-              type="button"
-              className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
-              onClick={handleCopy}
-              disabled={!previewText}
-            >
-              Copy to clipboard
-            </button>
+            {exceedsLimit ? (
+              discordChunks.map((chunkText, index) => (
+                <button
+                  key={chunkText.split("\n")[0] ?? `discord-copy-${chunkText.length}`}
+                  type="button"
+                  className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
+                  onClick={() => handleCopyChunk(chunkText, index + 1)}
+                  disabled={!chunkText}
+                >
+                  Copy part {index + 1}
+                </button>
+              ))
+            ) : (
+              <button
+                type="button"
+                className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
+                onClick={() => handleCopyChunk(previewText, 1)}
+                disabled={!previewText}
+              >
+                Copy to clipboard
+              </button>
+            )}
             <button
               type="button"
               className="collection-bulk-post-modal__button collection-bulk-post-modal__button--secondary"

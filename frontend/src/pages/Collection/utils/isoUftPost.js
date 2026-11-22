@@ -428,20 +428,23 @@ export function buildIsoUftSkuLists(entries, { matchKeep = DEFAULT_MATCH_KEEP_BY
   return { iso, uft, skippedEntries };
 }
 
-export function formatIsoUftPost(
-  tree,
-  excludedIds = new Set(),
-  { format = "classic", footerUrl = null } = {},
-) {
-  const lines = [];
+/** Discord standard message character limit (4,000 with Nitro — we target the default). */
+export const DISCORD_MESSAGE_CHAR_LIMIT = 2000;
+
+const ISO_MODE_SUBTITLE = "(looking for)";
+const UFT_MODE_SUBTITLE = "(up for trade)";
+
+export const DEFAULT_DISCORD_HEADING = "My ShardStash trade list";
+
+function collectVisiblePostContent(tree, excludedIds) {
+  const modes = [];
 
   for (const modeNode of tree) {
     if (excludedIds.has(modeNode.id)) {
       continue;
     }
 
-    const modeLines = [`${modeNode.label}:`, ""];
-
+    const sections = [];
     let hasVisibleContent = false;
 
     for (const section of modeNode.children) {
@@ -458,19 +461,43 @@ export function formatIsoUftPost(
       }
 
       hasVisibleContent = true;
-      modeLines.push(`${section.label}:`);
-      for (const leaf of visibleLeaves) {
-        modeLines.push(leaf.line);
+      sections.push({
+        label: section.label,
+        items: visibleLeaves.map((leaf) => leaf.line),
+      });
+    }
+
+    modes.push({
+      id: modeNode.id,
+      label: modeNode.label,
+      subtitle: modeNode.id === "iso" ? ISO_MODE_SUBTITLE : UFT_MODE_SUBTITLE,
+      sections,
+      emptyFallback: modeNode.id === "iso" ? "None needed yet." : "None available yet.",
+      hasVisibleContent,
+    });
+  }
+
+  return modes;
+}
+
+function formatPlainIsoUftPost(modes, { footerUrl = null } = {}) {
+  const lines = [];
+
+  for (const mode of modes) {
+    lines.push(`${mode.label}:`, "");
+
+    if (!mode.hasVisibleContent) {
+      lines.push(mode.emptyFallback, "");
+      continue;
+    }
+
+    for (const section of mode.sections) {
+      lines.push(`${section.label}:`);
+      for (const item of section.items) {
+        lines.push(item);
       }
-      modeLines.push("");
+      lines.push("");
     }
-
-    if (!hasVisibleContent) {
-      modeLines.push(modeNode.id === "iso" ? "None needed yet." : "None available yet.");
-      modeLines.push("");
-    }
-
-    lines.push(...modeLines);
   }
 
   while (lines.length > 0 && lines.at(-1) === "") {
@@ -483,6 +510,397 @@ export function formatIsoUftPost(
   }
 
   return lines.join("\n");
+}
+
+function formatDiscordFooterLine(footerUrl) {
+  if (!footerUrl) {
+    return null;
+  }
+  const updated = new Date().toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return `-# Updated ${updated} · [ShardStash](${footerUrl})`;
+}
+
+function discordBulletsForMode(mode) {
+  if (!mode.hasVisibleContent) {
+    return [{ modeId: mode.id, text: `- ${mode.emptyFallback}` }];
+  }
+
+  const bullets = [];
+  for (const section of mode.sections) {
+    for (const item of section.items) {
+      bullets.push({ modeId: mode.id, text: `- ${item}` });
+    }
+  }
+  return bullets;
+}
+
+function buildDiscordPostSegments(
+  modes,
+  { footerUrl = null, heading = DEFAULT_DISCORD_HEADING } = {},
+) {
+  const segments = [{ kind: "heading", text: `## ${heading}` }];
+
+  for (const mode of modes) {
+    segments.push({
+      kind: "modeHeader",
+      modeId: mode.id,
+      text: `**${mode.label}** ${mode.subtitle}`,
+    });
+    for (const bullet of discordBulletsForMode(mode)) {
+      segments.push({ kind: "bullet", modeId: bullet.modeId, text: bullet.text });
+    }
+    segments.push({ kind: "spacer" });
+  }
+
+  while (segments.length > 0 && segments.at(-1).kind === "spacer") {
+    segments.pop();
+  }
+
+  const footerLine = formatDiscordFooterLine(footerUrl);
+  if (footerLine) {
+    segments.push({ kind: "footer", text: footerLine });
+  }
+
+  return segments;
+}
+
+function renderDiscordSegments(segments) {
+  const lines = [];
+  for (const segment of segments) {
+    if (segment.kind === "spacer") {
+      lines.push("");
+    } else {
+      lines.push(segment.text);
+    }
+  }
+  return lines.join("\n");
+}
+
+function formatDiscordIsoUftPost(
+  modes,
+  { footerUrl = null, heading = DEFAULT_DISCORD_HEADING } = {},
+) {
+  return renderDiscordSegments(buildDiscordPostSegments(modes, { footerUrl, heading }));
+}
+
+function renderChunkFromUnits(
+  units,
+  { partIndex, partCount, headingBase, footerLine, headerByMode = null },
+) {
+  const lines = [];
+  const numberedHeading =
+    partCount > 1 ? `${headingBase} (${partIndex}/${partCount})` : headingBase;
+  lines.push(numberedHeading, "");
+
+  let lastModeId = null;
+  for (const unit of units) {
+    if (unit.kind === "modeHeader") {
+      if (lastModeId !== null) {
+        lines.push("");
+      }
+      lines.push(unit.text);
+      lastModeId = unit.modeId;
+      continue;
+    }
+
+    if (unit.kind !== "bullet") {
+      continue;
+    }
+
+    if (lastModeId !== unit.modeId) {
+      const header =
+        headerByMode?.get(unit.modeId) ??
+        units.find(
+          (candidate) => candidate.kind === "modeHeader" && candidate.modeId === unit.modeId,
+        );
+      if (header) {
+        if (lines.length > 2) {
+          lines.push("");
+        }
+        lines.push(header.text);
+      }
+      lastModeId = unit.modeId;
+    }
+    lines.push(unit.text);
+  }
+
+  if (footerLine) {
+    lines.push("", footerLine);
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Splits a Discord-formatted post into numbered chunks under `limit` characters.
+ * Splits only at item bullet boundaries.
+ */
+export function splitDiscordIsoUftPost(
+  text,
+  { limit = DISCORD_MESSAGE_CHAR_LIMIT, heading = DEFAULT_DISCORD_HEADING } = {},
+) {
+  if (text.length <= limit) {
+    return { chunks: [text], exceedsLimit: false };
+  }
+
+  const lines = text.split("\n");
+  const footerLine = lines.find((line) => line.startsWith("-# ")) ?? null;
+  const headingBase =
+    (lines[0] ?? `## ${heading}`).replace(/\s*\(\d+\/\d+\)\s*$/, "") || `## ${heading}`;
+
+  const modeHeaders = new Map();
+  const bullets = [];
+  let activeModeId = "iso";
+
+  for (const line of lines) {
+    if (line.startsWith("**ISO**") || line.startsWith("**UFT**")) {
+      activeModeId = line.startsWith("**ISO**") ? "iso" : "uft";
+      modeHeaders.set(activeModeId, { kind: "modeHeader", modeId: activeModeId, text: line });
+    } else if (line.startsWith("- ")) {
+      bullets.push({ kind: "bullet", modeId: activeModeId, text: line });
+    }
+  }
+
+  if (bullets.length === 0) {
+    return { chunks: [text.slice(0, limit)], exceedsLimit: true };
+  }
+
+  const headerByMode = modeHeaders;
+  const greedyChunks = [];
+  let index = 0;
+  while (index < bullets.length) {
+    let end = index;
+    let lastFittingEnd = index;
+
+    while (end < bullets.length) {
+      const units = bullets.slice(index, end + 1);
+      const tentativeParts = greedyChunks.length + 1;
+      const { fits } = measureChunkSize(units, {
+        partIndex: tentativeParts,
+        partCount: tentativeParts,
+        headingBase,
+        footerLine: null,
+        headerByMode,
+        limit,
+      });
+      if (fits) {
+        lastFittingEnd = end + 1;
+        end += 1;
+        continue;
+      }
+      if (end === index) {
+        lastFittingEnd = index + 1;
+      }
+      break;
+    }
+
+    if (lastFittingEnd <= index) {
+      lastFittingEnd = index + 1;
+    }
+    greedyChunks.push(bullets.slice(index, lastFittingEnd));
+    index = lastFittingEnd;
+  }
+
+  let partCount = greedyChunks.length;
+  let chunks = greedyChunks.map((units, idx) =>
+    renderChunkFromUnits(units, {
+      partIndex: idx + 1,
+      partCount,
+      headingBase,
+      footerLine: idx === partCount - 1 ? footerLine : null,
+      headerByMode,
+    }),
+  );
+
+  for (let i = 0; i < 8; i += 1) {
+    const oversized = chunks.findIndex((chunk) => chunk.length > limit);
+    if (oversized === -1) {
+      break;
+    }
+    const units = greedyChunks[oversized];
+    if (units.length <= 1) {
+      break;
+    }
+    const mid = Math.ceil(units.length / 2);
+    greedyChunks.splice(oversized, 1, units.slice(0, mid), units.slice(mid));
+    partCount = greedyChunks.length;
+    chunks = greedyChunks.map((unitList, idx) =>
+      renderChunkFromUnits(unitList, {
+        partIndex: idx + 1,
+        partCount,
+        headingBase,
+        footerLine: idx === partCount - 1 ? footerLine : null,
+        headerByMode,
+      }),
+    );
+  }
+
+  return { chunks, exceedsLimit: true };
+}
+
+function measureChunkSize(
+  units,
+  { partIndex, partCount, headingBase, footerLine, headerByMode, limit },
+) {
+  const chunkText = renderChunkFromUnits(units, {
+    partIndex,
+    partCount,
+    headingBase,
+    footerLine,
+    headerByMode,
+  });
+  return { chunkText, fits: chunkText.length <= limit };
+}
+
+export function splitDiscordPostSegments(
+  segments,
+  { limit = DISCORD_MESSAGE_CHAR_LIMIT, heading = DEFAULT_DISCORD_HEADING } = {},
+) {
+  const fullText = renderDiscordSegments(segments);
+  if (fullText.length <= limit) {
+    return { chunks: [fullText], exceedsLimit: false };
+  }
+
+  const headingBase = `## ${heading}`;
+  const footerSegment = segments.find((segment) => segment.kind === "footer");
+  const footerLine = footerSegment?.text ?? null;
+  const modeHeaders = segments.filter((segment) => segment.kind === "modeHeader");
+  const bullets = segments.filter((segment) => segment.kind === "bullet");
+
+  const headerByMode = new Map(modeHeaders.map((segment) => [segment.modeId, segment]));
+
+  const greedyChunks = [];
+  let index = 0;
+  while (index < bullets.length) {
+    let end = index;
+    let lastFittingEnd = index;
+
+    while (end < bullets.length) {
+      const units = bullets.slice(index, end + 1);
+      const tentativeParts = greedyChunks.length + 1;
+      const { fits } = measureChunkSize(units, {
+        partIndex: tentativeParts,
+        partCount: tentativeParts,
+        headingBase,
+        footerLine: null,
+        headerByMode,
+        limit,
+      });
+      if (fits) {
+        lastFittingEnd = end + 1;
+        end += 1;
+        continue;
+      }
+      if (end === index) {
+        lastFittingEnd = index + 1;
+      }
+      break;
+    }
+
+    if (lastFittingEnd <= index) {
+      lastFittingEnd = index + 1;
+    }
+    greedyChunks.push(bullets.slice(index, lastFittingEnd));
+    index = lastFittingEnd;
+  }
+
+  let partCount = greedyChunks.length;
+  let chunks = greedyChunks.map((units, idx) =>
+    renderChunkFromUnits(units, {
+      partIndex: idx + 1,
+      partCount,
+      headingBase,
+      footerLine: idx === partCount - 1 ? footerLine : null,
+      headerByMode,
+    }),
+  );
+
+  if (footerLine && chunks.length > 0) {
+    const last = chunks[chunks.length - 1];
+    if (last.length > limit) {
+      const lastUnits = greedyChunks[greedyChunks.length - 1];
+      if (lastUnits.length > 1) {
+        const splitPoint = Math.max(1, lastUnits.length - 1);
+        const headUnits = lastUnits.slice(0, splitPoint);
+        const tailUnits = lastUnits.slice(splitPoint);
+        greedyChunks.splice(greedyChunks.length - 1, 1, headUnits, tailUnits);
+        partCount = greedyChunks.length;
+        chunks = greedyChunks.map((units, idx) =>
+          renderChunkFromUnits(units, {
+            partIndex: idx + 1,
+            partCount,
+            headingBase,
+            footerLine: idx === partCount - 1 ? footerLine : null,
+            headerByMode,
+          }),
+        );
+      }
+    }
+  }
+
+  for (let i = 0; i < 8; i += 1) {
+    const oversized = chunks.findIndex((chunk) => chunk.length > limit);
+    if (oversized === -1) {
+      break;
+    }
+    const units = greedyChunks[oversized];
+    if (units.length <= 1) {
+      chunks[oversized] = units[0]?.text?.slice(0, limit - 1) ?? chunks[oversized].slice(0, limit);
+      break;
+    }
+    const mid = Math.ceil(units.length / 2);
+    const left = units.slice(0, mid);
+    const right = units.slice(mid);
+    greedyChunks.splice(oversized, 1, left, right);
+    partCount = greedyChunks.length;
+    chunks = greedyChunks.map((unitList, idx) =>
+      renderChunkFromUnits(unitList, {
+        partIndex: idx + 1,
+        partCount,
+        headingBase,
+        footerLine: idx === partCount - 1 ? footerLine : null,
+        headerByMode,
+      }),
+    );
+  }
+
+  return { chunks, exceedsLimit: true };
+}
+
+export function formatIsoUftPost(
+  tree,
+  excludedIds = new Set(),
+  {
+    format: _itemDisplayFormat = "classic",
+    footerUrl = null,
+    outputFormat = "plain",
+    heading = DEFAULT_DISCORD_HEADING,
+  } = {},
+) {
+  void _itemDisplayFormat;
+  const modes = collectVisiblePostContent(tree, excludedIds);
+
+  if (outputFormat === "discord") {
+    return formatDiscordIsoUftPost(modes, { footerUrl, heading });
+  }
+
+  return formatPlainIsoUftPost(modes, { footerUrl });
+}
+
+export function formatIsoUftPostWithDiscordChunks(tree, excludedIds = new Set(), options = {}) {
+  const heading = options.heading ?? DEFAULT_DISCORD_HEADING;
+  const modes = collectVisiblePostContent(tree, excludedIds);
+  const segments = buildDiscordPostSegments(modes, {
+    footerUrl: options.footerUrl ?? null,
+    heading,
+  });
+  const text = renderDiscordSegments(segments);
+  const { chunks, exceedsLimit } = splitDiscordPostSegments(segments, { heading });
+  return { text, chunks, exceedsLimit };
 }
 
 export function buildIsoUftPost(
