@@ -108,6 +108,11 @@ describe("bulkImport (unit)", () => {
       expect(grouped.get("LT24-ELS-01-DUN").docs).toHaveLength(2);
       expect(grouped.get("LT24-ELS-01-FOIL").quantity).toBe(1);
     });
+
+    it("groups legacy rows whose catalog sku is only in the Firestore doc id", () => {
+      const grouped = groupCollectionEntriesBySku([{ id: "PIN-CF-01", copies: 1 }]);
+      expect(grouped.get("PIN-CF-01").quantity).toBe(1);
+    });
   });
 
   describe("createStoryDeckCollectionCsv", () => {
