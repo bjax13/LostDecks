@@ -43,16 +43,15 @@ function createFakeDoc(id, data) {
 
 describe("useUserCollection", () => {
   describe("when ownerUid is falsy", () => {
-    it("returns empty entries, loading=false, error=null", async () => {
+    it("returns idle with empty entries", async () => {
       const { result } = renderHook(() => useUserCollection(null));
 
       await waitFor(() => {
-        expect(result.current.loading).toBe(false);
+        expect(result.current.status).toBe("idle");
       });
 
       expect(result.current.entries).toEqual([]);
       expect(result.current.error).toBe(null);
-      expect(result.current.ready).toBe(true);
     });
 
     it("does not subscribe to Firestore for undefined ownerUid", async () => {
@@ -68,7 +67,7 @@ describe("useUserCollection", () => {
 
       await waitFor(() => {
         expect(mockOnSnapshot).not.toHaveBeenCalled();
-        expect(result.current.loading).toBe(false);
+        expect(result.current.status).toBe("idle");
       });
 
       expect(result.current.entries).toEqual([]);
@@ -85,12 +84,11 @@ describe("useUserCollection", () => {
       expect(mockQuery).toHaveBeenCalledWith("collections-ref", "where-constraint");
     });
 
-    it("sets loading=true while waiting for snapshot", () => {
+    it("sets status loading while waiting for snapshot", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
-      expect(result.current.loading).toBe(true);
+      expect(result.current.status).toBe("loading");
       expect(result.current.error).toBe(null);
-      expect(result.current.ready).toBe(false);
     });
 
     it("subscribes to onSnapshot with the query and callbacks", () => {
@@ -104,41 +102,39 @@ describe("useUserCollection", () => {
       );
     });
 
-    it("on success: maps snapshot docs to entries and clears loading", () => {
+    it("on success: maps prod-shaped id-only docs to entries and marks ready", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
       const onNext = mockOnSnapshot.mock.calls[0][1];
       const fakeSnap = {
         docs: [
-          createFakeDoc("doc-1", { ownerUid: "user-abc", skuId: "LT24-ELS-01-DUN", quantity: 2 }),
-          createFakeDoc("doc-2", { ownerUid: "user-abc", skuId: "LT24-WOK-01-DUN", quantity: 1 }),
+          createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 2 }),
+          createFakeDoc("LT24-WOK-01-DUN", { ownerUid: "user-abc", quantity: 1 }),
         ],
       };
 
       act(() => onNext(fakeSnap));
 
       expect(result.current.entries).toEqual([
-        { id: "doc-1", ownerUid: "user-abc", skuId: "LT24-ELS-01-DUN", quantity: 2 },
-        { id: "doc-2", ownerUid: "user-abc", skuId: "LT24-WOK-01-DUN", quantity: 1 },
+        { id: "LT24-CHM-01-DUN", ownerUid: "user-abc", quantity: 2 },
+        { id: "LT24-WOK-01-DUN", ownerUid: "user-abc", quantity: 1 },
       ]);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.status).toBe("ready");
       expect(result.current.error).toBe(null);
-      expect(result.current.ready).toBe(true);
     });
 
-    it("on success: empty snapshot docs maps to entries []", () => {
+    it("on success: empty snapshot still means ready (not idle)", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
       const onNext = mockOnSnapshot.mock.calls[0][1];
       act(() => onNext({ docs: [] }));
 
       expect(result.current.entries).toEqual([]);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.status).toBe("ready");
       expect(result.current.error).toBe(null);
-      expect(result.current.ready).toBe(true);
     });
 
-    it("on error: sets error, stops loading, and logs", () => {
+    it("on error before ready: marks error with empty entries", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
@@ -148,10 +144,33 @@ describe("useUserCollection", () => {
       act(() => onError(fakeError));
 
       expect(result.current.error).toBe(fakeError);
-      expect(result.current.loading).toBe(false);
+      expect(result.current.status).toBe("error");
       expect(result.current.entries).toEqual([]);
-      expect(result.current.ready).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith("Failed to load collection entries", fakeError);
+
+      consoleSpy.mockRestore();
+    });
+
+    it("on error after ready: keeps the last loaded entries", () => {
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const { result } = renderHook(() => useUserCollection("user-abc"));
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNext({
+          docs: [createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 1 })],
+        }),
+      );
+
+      const onError = mockOnSnapshot.mock.calls[0][2];
+      const fakeError = new Error("transient-read-failure");
+      act(() => onError(fakeError));
+
+      expect(result.current.status).toBe("error");
+      expect(result.current.error).toBe(fakeError);
+      expect(result.current.entries).toEqual([
+        { id: "LT24-CHM-01-DUN", ownerUid: "user-abc", quantity: 1 },
+      ]);
 
       consoleSpy.mockRestore();
     });
@@ -200,9 +219,8 @@ describe("useUserCollection", () => {
       act(() =>
         onNext({
           docs: [
-            createFakeDoc("doc-1", {
+            createFakeDoc("LT24-CHM-01-DUN", {
               ownerUid: "user-A",
-              skuId: "LT24-ELS-01-DUN",
               quantity: 1,
             }),
           ],
@@ -216,12 +234,12 @@ describe("useUserCollection", () => {
 
       await waitFor(() => {
         expect(result.current.entries).toEqual([]);
-        expect(result.current.loading).toBe(false);
+        expect(result.current.status).toBe("idle");
         expect(result.current.error).toBe(null);
       });
     });
 
-    it("sets loading true again when ownerUid changes after a completed load", () => {
+    it("sets loading again when ownerUid changes after a completed load", () => {
       const unsub1 = vi.fn();
       const unsub2 = vi.fn();
       mockOnSnapshot.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
@@ -233,38 +251,32 @@ describe("useUserCollection", () => {
       const onNextA = mockOnSnapshot.mock.calls[0][1];
       act(() =>
         onNextA({
-          docs: [createFakeDoc("doc-1", { ownerUid: "user-A", skuId: "x", quantity: 1 })],
+          docs: [createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-A", quantity: 1 })],
         }),
       );
-      expect(result.current.loading).toBe(false);
+      expect(result.current.status).toBe("ready");
 
       rerender({ ownerUid: "user-B" });
 
-      expect(result.current.loading).toBe(true);
-      expect(result.current.ready).toBe(false);
+      expect(result.current.status).toBe("loading");
     });
 
-    it("is not ready with stale loading:false until the new ownerUid snapshot arrives", () => {
-      const unsub1 = vi.fn();
-      const unsub2 = vi.fn();
-      mockOnSnapshot.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
-
+    it("does not return to loading when ownerUid is unchanged after ready", () => {
       const { rerender, result } = renderHook(({ ownerUid }) => useUserCollection(ownerUid), {
-        initialProps: { ownerUid: null },
+        initialProps: { ownerUid: "user-A" },
       });
-
-      rerender({ ownerUid: "user-abc" });
-
-      expect(result.current.ready).toBe(false);
 
       const onNext = mockOnSnapshot.mock.calls[0][1];
       act(() =>
         onNext({
-          docs: [createFakeDoc("doc-1", { ownerUid: "user-abc", skuId: "PIN-1", quantity: 1 })],
+          docs: [createFakeDoc("LT24-CHM-01-DUN", { quantity: 1 })],
         }),
       );
+      expect(result.current.status).toBe("ready");
 
-      expect(result.current.ready).toBe(true);
+      rerender({ ownerUid: "user-A" });
+
+      expect(result.current.status).toBe("ready");
       expect(result.current.entries).toHaveLength(1);
     });
 

@@ -24,12 +24,13 @@ function sleep(ms) {
 export function useApplyPendingPicks() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { entries, ready } = useUserCollection(user?.uid ?? null);
+  const { entries, status } = useUserCollection(user?.uid ?? null);
+  const collectionReady = status === "ready";
   const appliedRef = useRef(false);
   const [applyFailure, setApplyFailure] = useState(null);
 
   useEffect(() => {
-    if (!user?.uid || !ready || appliedRef.current) {
+    if (!user?.uid || !collectionReady || appliedRef.current) {
       return undefined;
     }
 
@@ -82,7 +83,7 @@ export function useApplyPendingPicks() {
       cancelled = true;
       appliedRef.current = false;
     };
-  }, [user?.uid, ready, entries, navigate]);
+  }, [user?.uid, collectionReady, entries, navigate]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset apply latch when signed-in user changes
   useEffect(() => {

@@ -25,7 +25,8 @@ function countOwnedFoilSkus(decoratedEntries) {
 export function useHomeCollectionStats() {
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
-  const { entries, loading, error } = useUserCollection(ownerUid);
+  const { entries, status, error } = useUserCollection(ownerUid);
+  const loading = status === "loading";
   const isSignedIn = Boolean(ownerUid);
 
   const dateFormatter = useMemo(

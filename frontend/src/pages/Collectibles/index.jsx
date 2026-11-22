@@ -30,7 +30,8 @@ export default function CollectiblesPage() {
   const categoryFromQuery = categoryFilterFromQuery(searchParams.get("category"));
   const { user } = useAuth();
   const ownerUid = user?.uid ?? null;
-  const { entries, loading } = useUserCollection(ownerUid);
+  const { entries, status } = useUserCollection(ownerUid);
+  const loading = status === "loading";
   const [quantityOverrides, setQuantityOverrides] = useState({});
 
   usePurgeSoftZeroEntriesOnMount(ownerUid, entries, loading);

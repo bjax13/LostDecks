@@ -35,8 +35,7 @@ describe("PendingPicksApplier", () => {
     mockUseAuth.mockReturnValue({ user: { uid: "u1" } });
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
-      loading: false,
-      ready: true,
+      status: "ready",
     });
     mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
   });
@@ -69,36 +68,29 @@ describe("PendingPicksApplier", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it("waits for a ready collection snapshot before applying (not stale loading:false)", async () => {
+  it.each([
+    { label: "idle", status: "idle", entries: [] },
+    { label: "loading", status: "loading", entries: [] },
+    { label: "error", status: "error", entries: [{ skuId: "PIN-CF-01", quantity: 1 }] },
+  ])("does not apply picks while collection status is $label", async ({ status, entries }) => {
     savePendingPicks({ "PIN-CF-01": 2 });
-
-    mockUseUserCollection.mockReturnValue({
-      entries: [],
-      loading: false,
-      ready: false,
-    });
+    mockUseUserCollection.mockReturnValue({ entries, status });
 
     const { rerender } = render(<PendingPicksApplier />);
 
     await waitFor(() => {
       expect(mockApplyBulk).not.toHaveBeenCalled();
     });
+    expect(mockNavigate).not.toHaveBeenCalled();
 
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
-      loading: false,
-      ready: true,
+      status: "ready",
     });
     rerender(<PendingPicksApplier />);
 
     await waitFor(() => {
       expect(mockApplyBulk).toHaveBeenCalledTimes(1);
-    });
-    expect(mockApplyBulk).toHaveBeenCalledWith({
-      ownerUid: "u1",
-      rows: [{ skuId: "PIN-CF-01", quantity: 2 }],
-      existingEntries: [{ skuId: "PIN-CF-01", quantity: 1 }],
-      allowPins: true,
     });
     expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
   });

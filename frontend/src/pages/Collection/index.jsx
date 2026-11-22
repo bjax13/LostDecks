@@ -29,7 +29,8 @@ function CollectionContent() {
   const { user } = useAuth();
   const location = useLocation();
   const ownerUid = user?.uid ?? null;
-  const { entries, loading, error } = useUserCollection(ownerUid);
+  const { entries, status, error } = useUserCollection(ownerUid);
+  const loading = status === "loading";
   const { addToCollection, decrementFromCollection } = useCollectionQuantityMutations();
   const [busySkuId, setBusySkuId] = useState(null);
   const [tradeStatusFilter, setTradeStatusFilter] = useState("all");
