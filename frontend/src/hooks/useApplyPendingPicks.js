@@ -11,7 +11,8 @@ import { applyBulkCollectionUpdate } from "../pages/Collection/utils/bulkImport"
 export function useApplyPendingPicks() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { entries, loading } = useUserCollection(user?.uid ?? null);
+  const { entries, status } = useUserCollection(user?.uid ?? null);
+  const loading = status === "loading";
   const appliedRef = useRef(false);
 
   useEffect(() => {

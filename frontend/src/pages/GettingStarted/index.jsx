@@ -201,7 +201,13 @@ export default function GettingStartedPage() {
   const hydratedOwnerUidRef = useRef(null);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
-  const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
+  const {
+    entries,
+    status: collectionStatus,
+    error: collectionError,
+  } = useUserCollection(user?.uid ?? null);
+  const collectionLoading = collectionStatus === "loading";
+  const collectionReady = collectionStatus === "ready";
   const navigate = useNavigate();
 
   const haveRaw = searchParams.get("have");
@@ -255,15 +261,22 @@ export default function GettingStartedPage() {
   };
 
   const resolveCollectionSeedSource = () => {
-    if (!user?.uid || collectionLoading) {
-      collectionSeedPendingRef.current = true;
+    if (!user?.uid) {
+      collectionSeedPendingRef.current = false;
       return null;
+    }
+    if (collectionStatus !== "ready") {
+      collectionSeedPendingRef.current = true;
+      return undefined;
     }
     collectionSeedPendingRef.current = false;
     return entries ?? [];
   };
 
   const applyManualReviewSeed = (tree, sourceEntries) => {
+    if (sourceEntries === undefined) {
+      return;
+    }
     if (sourceEntries === null) {
       collectionHydratedRef.current = false;
       hydratedSeedQuantitiesRef.current = {};
@@ -306,7 +319,11 @@ export default function GettingStartedPage() {
   };
 
   const seedManualReviewForTree = (tree) => {
-    applyManualReviewSeed(tree, resolveCollectionSeedSource());
+    const source = resolveCollectionSeedSource();
+    if (source === undefined) {
+      return;
+    }
+    applyManualReviewSeed(tree, source);
   };
 
   const beginManualReview = (nextCollectibleType = collectibleType) => {
@@ -432,7 +449,7 @@ export default function GettingStartedPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
-    if (step !== "manual" || collectionLoading || chasmFriendsShortcut) {
+    if (step !== "manual" || collectionStatus !== "ready" || chasmFriendsShortcut) {
       return;
     }
 
@@ -461,9 +478,12 @@ export default function GettingStartedPage() {
 
     collectionSeedPendingRef.current = false;
     applyManualReviewSeed(reviewTree, entries ?? []);
-  }, [step, collectionLoading, entries, reviewTree, user]);
+  }, [step, collectionStatus, entries, reviewTree, user]);
 
   const handleSave = async () => {
+    if (user && !collectionReady) {
+      return;
+    }
     if (!user) {
       pendingSaveRef.current = true;
       captureEvent(SIGN_IN_PROMPTED, { reason: "getting-started-save" });
@@ -529,12 +549,12 @@ export default function GettingStartedPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: retry save once after auth modal success
   useEffect(() => {
-    if (!user || !pendingSaveRef.current || saving || collectionLoading) {
+    if (!user || !pendingSaveRef.current || saving || !collectionReady) {
       return;
     }
     pendingSaveRef.current = false;
     void handleSave();
-  }, [user, saving, collectionLoading]);
+  }, [user, saving, collectionReady]);
 
   const handleQuickPickerSubmit = async (pickQuantities) => {
     const source = {
@@ -772,39 +792,51 @@ export default function GettingStartedPage() {
                 <p>{reviewIntro}</p>
               </div>
             )}
-            <CollectionReviewEditor
-              reviewTree={reviewTree}
-              collectibleType={collectibleType ?? COLLECTIBLE_TYPE_BOTH}
-              editor={reviewEditor}
-              error={error}
-              footerStart={
-                chasmFriendsShortcut ? null : (
-                  <button
-                    type="button"
-                    className="getting-started__button"
-                    onClick={() => setStep("profile")}
-                  >
-                    Back
-                  </button>
-                )
-              }
-              footerPrimary={
-                chasmFriendsShortcut && chasmSaved ? null : (
-                  <button
-                    type="button"
-                    className="getting-started__button is-primary"
-                    disabled={saving || collectionLoading}
-                    onClick={handleSave}
-                  >
-                    {saving
-                      ? "Saving collection..."
-                      : user
-                        ? "Save collection"
-                        : "Sign in and save"}
-                  </button>
-                )
-              }
-            />
+            {user && collectionLoading ? (
+              <div
+                className="getting-started__collection-loading"
+                role="status"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <div className="getting-started__collection-loading-spinner" aria-hidden="true" />
+                <p>Loading your saved collection…</p>
+              </div>
+            ) : (
+              <CollectionReviewEditor
+                reviewTree={reviewTree}
+                collectibleType={collectibleType ?? COLLECTIBLE_TYPE_BOTH}
+                editor={reviewEditor}
+                error={error ?? (collectionStatus === "error" ? collectionError?.message : null)}
+                footerStart={
+                  chasmFriendsShortcut ? null : (
+                    <button
+                      type="button"
+                      className="getting-started__button"
+                      onClick={() => setStep("profile")}
+                    >
+                      Back
+                    </button>
+                  )
+                }
+                footerPrimary={
+                  chasmFriendsShortcut && chasmSaved ? null : (
+                    <button
+                      type="button"
+                      className="getting-started__button is-primary"
+                      disabled={saving || (user && !collectionReady)}
+                      onClick={handleSave}
+                    >
+                      {saving
+                        ? "Saving collection..."
+                        : user
+                          ? "Save collection"
+                          : "Sign in and save"}
+                    </button>
+                  )
+                }
+              />
+            )}
           </>
         ) : null}
 
