@@ -96,6 +96,12 @@ describe("mergePickRows", () => {
     ).toEqual([]);
   });
 
+  it("emits no rows when Have matches owned Shredhead exactly (picked = owned)", () => {
+    expect(
+      mergePickRows({ "PIN-CF-01": 1 }, [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }]),
+    ).toEqual([]);
+  });
+
   it("treats presence-only legacy docs as already owned x1", () => {
     expect(mergePickRows({ "PIN-CF-01": 1 }, [{ id: "PIN-CF-01" }])).toEqual([]);
     expect(mergePickRows({ "PIN-CF-01": 2 }, [{ id: "PIN-CF-01" }])).toEqual([

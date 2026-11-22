@@ -32,13 +32,21 @@ service cloud.firestore {
         && validTradeFlag(d);
     }
 
+    // Catalog SKUs use hyphens only (validSkuId); auto-ids and legacy sku-only paths have no underscore.
+    // Block squatting on collections/{victimUid}_{sku} by requiring auth uid as the prefix.
+    function collectionCreateEntryIdAllowed(entryId) {
+      return !entryId.matches('^[^_]+_.*')
+        || entryId.matches('^' + request.auth.uid + '_.*');
+    }
+
     // Collections collection - user's card collection entries
     match /collections/{entryId} {
       allow read: if isSiteAdmin()
         || (signedIn() && request.auth.uid == resource.data.ownerUid);
       allow create: if signedIn()
         && request.auth.uid == request.resource.data.ownerUid
-        && validCollectionEntry(request.resource.data);
+        && validCollectionEntry(request.resource.data)
+        && collectionCreateEntryIdAllowed(entryId);
       allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
         && request.resource.data.ownerUid == resource.data.ownerUid

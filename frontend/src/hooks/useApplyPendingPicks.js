@@ -24,11 +24,12 @@ function sleep(ms) {
 export function useApplyPendingPicks() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { entries, status } = useUserCollection(user?.uid ?? null);
-  const collectionReady = status === "ready";
+  const { entries, status, serverConfirmed } = useUserCollection(user?.uid ?? null);
+  const collectionReady = status === "ready" && serverConfirmed;
   const appliedRef = useRef(false);
   const [applyFailure, setApplyFailure] = useState(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: entries captured when collectionReady; ignore live listener updates mid-apply
   useEffect(() => {
     if (!user?.uid || !collectionReady || appliedRef.current) {
       return undefined;
@@ -41,25 +42,19 @@ export function useApplyPendingPicks() {
 
     appliedRef.current = true;
     setApplyFailure(null);
-    let cancelled = false;
+    const entriesSnapshot = entries;
 
     (async () => {
       for (let attempt = 0; attempt < PENDING_PICKS_APPLY_MAX_ATTEMPTS; attempt += 1) {
-        if (cancelled) {
-          return;
-        }
         try {
-          const rows = mergePickRows(pending.quantities, entries);
+          const rows = mergePickRows(pending.quantities, entriesSnapshot);
           if (rows.length > 0) {
             await applyBulkCollectionUpdate({
               ownerUid: user.uid,
               rows,
-              existingEntries: entries,
+              existingEntries: entriesSnapshot,
               allowPins: true,
             });
-          }
-          if (cancelled) {
-            return;
           }
           clearPendingPicks();
           navigate("/matches?welcome=1", { replace: true });
@@ -79,11 +74,8 @@ export function useApplyPendingPicks() {
       }
     })();
 
-    return () => {
-      cancelled = true;
-      appliedRef.current = false;
-    };
-  }, [user?.uid, collectionReady, entries, navigate]);
+    return undefined;
+  }, [user?.uid, collectionReady, navigate]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset apply latch when signed-in user changes
   useEffect(() => {

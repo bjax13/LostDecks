@@ -36,6 +36,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
       status: "ready",
+      serverConfirmed: true,
     });
     mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
   });
@@ -68,6 +69,31 @@ describe("PendingPicksApplier", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
+  it("does not apply until the server confirms the collection snapshot", async () => {
+    savePendingPicks({ "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      entries: [],
+      status: "ready",
+      serverConfirmed: false,
+    });
+
+    const { rerender } = render(<PendingPicksApplier />);
+    await waitFor(() => {
+      expect(mockApplyBulk).not.toHaveBeenCalled();
+    });
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+      serverConfirmed: true,
+    });
+    rerender(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it.each([
     { label: "idle", status: "idle", entries: [] },
     { label: "loading", status: "loading", entries: [] },
@@ -86,6 +112,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
       status: "ready",
+      serverConfirmed: true,
     });
     rerender(<PendingPicksApplier />);
 
@@ -109,6 +136,91 @@ describe("PendingPicksApplier", () => {
 
     expect(mockApplyBulk).toHaveBeenCalledTimes(2);
     expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+  });
+
+  it("does not call bulk import when owned Shredhead is the only Have pick", async () => {
+    savePendingPicks({ "PIN-CF-01": 1 });
+    mockUseUserCollection.mockReturnValue({
+      status: "ready",
+      serverConfirmed: true,
+      entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+    });
+
+    render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+    });
+    expect(mockApplyBulk).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("pendingPinPicks")).toBeNull();
+  });
+
+  it("writes Howlerina once and still clears when entries change mid-apply", async () => {
+    savePendingPicks({ "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+      serverConfirmed: true,
+    });
+
+    let resolveApply;
+    const applyDeferred = new Promise((resolve) => {
+      resolveApply = () => resolve({ created: 1, updated: 0, deleted: 0 });
+    });
+    mockApplyBulk.mockReturnValue(applyDeferred);
+
+    const { rerender } = render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockApplyBulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingEntries: [{ id: "PIN-CF-01", quantity: 1 }],
+        rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+      }),
+    );
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "PIN-CF-01", quantity: 1 },
+        { id: "auto-id-1", skuId: "PIN-CF-02", quantity: 1 },
+      ],
+      status: "ready",
+      serverConfirmed: true,
+    });
+    rerender(<PendingPicksApplier />);
+
+    await act(async () => {
+      resolveApply();
+    });
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+      expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+    });
+    expect(window.localStorage.getItem("pendingPinPicks")).toBeNull();
+  });
+
+  it("does not bulk-write Shredhead when the server snapshot already shows it owned", async () => {
+    savePendingPicks({ "PIN-CF-01": 1, "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      status: "ready",
+      serverConfirmed: true,
+      entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+    });
+
+    render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockApplyBulk).toHaveBeenCalledWith({
+      ownerUid: "u1",
+      rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+      existingEntries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+      allowPins: true,
+    });
   });
 
   it("stops after max attempts, keeps pending picks, and surfaces an alert", async () => {
