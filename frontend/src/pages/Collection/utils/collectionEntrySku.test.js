@@ -32,6 +32,14 @@ describe("collectionEntrySku", () => {
     expect(ownedQuantityFromEntry({ copies: 1 })).toBe(1);
   });
 
+  it("treats presence-only docs as quantity 1 and keeps explicit zero", () => {
+    expect(ownedQuantityFromEntry({ id: "PIN-CF-01" })).toBe(1);
+    expect(ownedQuantityFromEntry({ id: "LT24-CHM-01-DUN", skuId: "LT24-CHM-01-DUN" })).toBe(1);
+    expect(ownedQuantityFromEntry({ id: "PIN-CF-01", quantity: 0 })).toBe(0);
+    expect(ownedQuantityFromEntry({ id: "PIN-CF-01", quantity: "0" })).toBe(0);
+    expect(ownedQuantityFromEntry(null)).toBe(0);
+  });
+
   it("parses numeric strings like the legacy bulk import grouper", () => {
     expect(ownedQuantityFromEntry({ id: "PIN-CF-01", quantity: "2" })).toBe(2);
     expect(ownedQuantityFromEntry({ id: "LT24-CHM-01-DUN", count: "3" })).toBe(3);

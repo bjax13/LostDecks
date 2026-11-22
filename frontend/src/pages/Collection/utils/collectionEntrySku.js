@@ -13,8 +13,30 @@ export function normalizeQuantityValue(value) {
   return 0;
 }
 
+const OWNED_QUANTITY_FIELDS = ["quantity", "count", "copies", "total"];
+
+/**
+ * Owned quantity from a Firestore collection doc.
+ * Matches collectionPresentation: missing quantity fields imply 1; explicit zero stays zero.
+ */
 export function ownedQuantityFromEntry(entry) {
-  return normalizeQuantityValue(entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total);
+  if (!entry) {
+    return 0;
+  }
+  for (const key of OWNED_QUANTITY_FIELDS) {
+    if (!Object.hasOwn(entry, key)) {
+      continue;
+    }
+    const raw = entry[key];
+    if (raw == null) {
+      continue;
+    }
+    if (typeof raw === "string" && raw.trim().length === 0) {
+      continue;
+    }
+    return normalizeQuantityValue(raw);
+  }
+  return 1;
 }
 
 /**

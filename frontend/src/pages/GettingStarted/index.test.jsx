@@ -1746,6 +1746,46 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       );
     }
 
+    it("partially hydrates chasmfriends when entries arrive after a scoped pin edit", async () => {
+      function ChasmEntriesHarness() {
+        const [entries, setEntries] = useState([]);
+        mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+        mockUseUserCollection.mockImplementation(() => ({
+          entries,
+          status: "ready",
+          error: null,
+        }));
+
+        return (
+          <TestMemoryRouter initialEntries={[chasmPath]}>
+            <button type="button" onClick={() => setEntries([{ id: "PIN-CF-02", quantity: 1 }])}>
+              Load saved Howlerina
+            </button>
+            <GettingStartedPage />
+          </TestMemoryRouter>
+        );
+      }
+
+      const user = setupUser();
+      render(<ChasmEntriesHarness />);
+
+      await user.click(
+        screen.getByRole("button", { name: /increase chasmfriends pins shredhead quantity/i }),
+      );
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Load saved Howlerina" }));
+
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins howlerina quantity, 0$/i }),
+      ).toBeInTheDocument();
+    });
+
     it("hydrates owned chasm pins when Firestore docs only store SKUs in document ids", async () => {
       mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
       mockUseUserCollection.mockReturnValue({
