@@ -17,7 +17,7 @@ import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import {
-  buildGettingStartedSaveRows,
+  buildGettingStartedNonDestructiveSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -442,11 +442,12 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildGettingStartedSaveRows(coverage, quantities, reviewTree, {
-            seededQuantities: hydratedSeedQuantitiesRef.current,
-            explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
-            sessionScopedGroupIds: sessionScopedGroupIdsRef.current,
-          }),
+          rows: buildGettingStartedNonDestructiveSaveRows(
+            coverage,
+            quantities,
+            reviewTree,
+            entries ?? [],
+          ),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),
         }),
