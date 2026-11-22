@@ -30,9 +30,7 @@ describe("collectionEntrySku", () => {
 
   it("parses numeric strings like the legacy bulk import grouper", () => {
     expect(ownedQuantityFromEntry({ id: "PIN-CF-01", quantity: "2" })).toBe(2);
-    expect(
-      ownedQuantityFromEntry({ id: "LT24-CHM-01-DUN", count: "3" }),
-    ).toBe(3);
+    expect(ownedQuantityFromEntry({ id: "LT24-CHM-01-DUN", count: "3" })).toBe(3);
   });
 
   it("builds a hydration signature that changes when resolved SKUs change", () => {

@@ -1311,6 +1311,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
       const rows = mockApplyBulkCollectionUpdate.mock.calls[0][0].rows;
       expect(rows).toEqual([expect.objectContaining({ skuId: "PIN-CF-01", quantity: "1" })]);
+      expect(rows.every((row) => Number(row.quantity) > 0)).toBe(true);
       expectNoCardWord();
     });
 

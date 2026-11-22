@@ -494,10 +494,7 @@ export function buildGettingStartedNonDestructiveSaveRows(
   });
 }
 
-/**
- * Rows safe to send from Getting Started: omit unseeded zero-quantity deletes unless the
- * collector explicitly cleared that group during this session.
- */
+/** @deprecated Use buildGettingStartedNonDestructiveSaveRows for Getting Started saves. */
 export function buildGettingStartedSaveRows(
   coverage,
   quantities,

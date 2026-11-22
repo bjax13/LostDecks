@@ -14,9 +14,7 @@ export function normalizeQuantityValue(value) {
 }
 
 export function ownedQuantityFromEntry(entry) {
-  return normalizeQuantityValue(
-    entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total,
-  );
+  return normalizeQuantityValue(entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total);
 }
 
 /**
