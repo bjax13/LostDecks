@@ -32,6 +32,7 @@ import {
   gettingStartedTree,
   includesCards,
   includesPins,
+  isManualReviewSyncedWithEntries,
   mergeReviewStateFromEntries,
   resolveCollectionEntrySkuId,
   resolveSkuQuantity,
@@ -503,6 +504,33 @@ describe("gettingStartedCatalog", () => {
       .flatMap((section) => section.children)
       .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
     expect(coverage[chasmDunGroup.id]).toBe("some");
+  });
+
+  it("detects when review UI is still on defaults but owned entries imply a seeded state", () => {
+    const tree = filterChasmFriendsTree();
+    const group = tree[0].children[0];
+    const coverage = createCoverageState("none", tree);
+    const quantities = {};
+
+    expect(
+      isManualReviewSyncedWithEntries(
+        [{ id: "PIN-CF-01", quantity: 1 }],
+        tree,
+        coverage,
+        quantities,
+      ),
+    ).toBe(false);
+
+    const seeded = deriveReviewStateFromEntries([{ id: "PIN-CF-01", quantity: 1 }], tree);
+    expect(
+      isManualReviewSyncedWithEntries(
+        [{ id: "PIN-CF-01", quantity: 1 }],
+        tree,
+        seeded.coverage,
+        seeded.quantities,
+      ),
+    ).toBe(true);
+    expect(coverage[group.id]).toBe("none");
   });
 
   it("merges entry-derived state only for groups not preserved in session", () => {
