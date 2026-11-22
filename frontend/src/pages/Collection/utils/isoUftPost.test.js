@@ -4,10 +4,15 @@ import {
   buildIsoUftPostTree,
   buildIsoUftSkuLists,
   buildShareUrl,
+  DEFAULT_DISCORD_HEADING,
   DEFAULT_EXCLUDED_SECTION_IDS,
+  DISCORD_MESSAGE_CHAR_LIMIT,
   formatIsoUftPost,
+  formatIsoUftPostWithDiscordChunks,
   getDefaultExcludedIds,
   SHORTHAND_STORY_PREFIX,
+  splitDiscordIsoUftPost,
+  splitDiscordPostSegments,
 } from "./isoUftPost.js";
 
 const collectiblesState = vi.hoisted(() => ({
@@ -408,6 +413,98 @@ describe("isoUftPost", () => {
     const uftSectionIds = tree[1].children.map((section) => section.id);
     expect(uftSectionIds).toContain("uft:story-dun");
     expect(uftSectionIds).not.toContain("uft:story-foils");
+  });
+
+  it("formats Discord markdown with heading, bold mode labels, bullets, and masked footer link", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-19T12:00:00Z"));
+
+    const { tree } = buildIsoUftPostTree(entries);
+    const text = formatIsoUftPost(tree, new Set(), {
+      outputFormat: "discord",
+      footerUrl: buildShareUrl({ shareId: "abc123" }),
+    });
+
+    expect(text).toMatch(/^## My ShardStash trade list/);
+    expect(text).toContain("**ISO** (looking for)");
+    expect(text).toContain("**UFT** (up for trade)");
+    expect(text).toContain("- Alpha Foils: 9");
+    expect(text).toContain("-# Updated Nov 19, 2026 · [ShardStash]");
+    expect(text).toContain("/t/abc123");
+    expect(text).not.toContain("Trade with me on ShardStash:");
+
+    vi.useRealTimers();
+  });
+
+  it("keeps plain-text output unchanged when outputFormat is omitted", () => {
+    const { tree } = buildIsoUftPostTree(entries);
+    const text = formatIsoUftPost(tree);
+
+    expect(text).toContain("ISO:");
+    expect(text).toContain("UFT:");
+    expect(text).not.toContain("## ");
+    expect(text).not.toContain("**ISO**");
+  });
+
+  it("splits Discord posts at bullet boundaries under the character limit", () => {
+    const bullets = [];
+    for (let i = 0; i < 120; i += 1) {
+      bullets.push({
+        kind: "bullet",
+        modeId: i % 2 === 0 ? "iso" : "uft",
+        text: `- Story Foils: Alpha ${i}, ${i + 1}, ${i + 2}`,
+      });
+    }
+
+    const segments = [
+      { kind: "heading", text: `## ${DEFAULT_DISCORD_HEADING}` },
+      { kind: "modeHeader", modeId: "iso", text: "**ISO** (looking for)" },
+      ...bullets.filter((bullet) => bullet.modeId === "iso"),
+      { kind: "spacer" },
+      { kind: "modeHeader", modeId: "uft", text: "**UFT** (up for trade)" },
+      ...bullets.filter((bullet) => bullet.modeId === "uft"),
+      {
+        kind: "footer",
+        text: "-# Updated Nov 19, 2026 · [ShardStash](https://shardstash.web.app/getting-started)",
+      },
+    ];
+
+    const { chunks, exceedsLimit } = splitDiscordPostSegments(segments, {
+      limit: DISCORD_MESSAGE_CHAR_LIMIT,
+    });
+
+    expect(exceedsLimit).toBe(true);
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(chunk.length).toBeLessThanOrEqual(DISCORD_MESSAGE_CHAR_LIMIT);
+    }
+    expect(chunks[0]).toMatch(/\(1\/\d+\)/);
+    expect(chunks.at(-1)).toContain("[ShardStash]");
+  });
+
+  it("formatIsoUftPostWithDiscordChunks returns a single chunk when under the limit", () => {
+    const { chunks, exceedsLimit } = formatIsoUftPostWithDiscordChunks(
+      buildIsoUftPostTree(entries).tree,
+    );
+    expect(exceedsLimit).toBe(false);
+    expect(chunks).toHaveLength(1);
+  });
+
+  it("splitDiscordIsoUftPost honors item boundaries from rendered markdown", () => {
+    const longBody = [
+      "## My ShardStash trade list",
+      "",
+      "**ISO** (looking for)",
+      ...Array.from({ length: 80 }, (_, i) => `- Alpha Foils: ${i}, ${i + 1}, ${i + 2}`),
+    ].join("\n");
+
+    const { chunks, exceedsLimit } = splitDiscordIsoUftPost(longBody, { limit: 500 });
+    expect(exceedsLimit).toBe(true);
+    expect(chunks.length).toBeGreaterThan(1);
+    for (const chunk of chunks) {
+      expect(chunk.length).toBeLessThanOrEqual(500);
+      expect(chunk).toMatch(/^## /);
+    }
   });
 
   it("buildIsoUftSkuLists returns ISO sku ids and UFT quantity extras", () => {
