@@ -440,6 +440,36 @@ export function deriveReviewStateFromEntries(entries = [], tree = gettingStarted
   return { coverage, quantities };
 }
 
+/**
+ * Merge Firestore-derived review state into the current UI, preserving groups the
+ * collector scoped or explicitly set to None this session.
+ */
+export function mergeReviewStateFromEntries(
+  entries,
+  tree,
+  currentCoverage,
+  currentQuantities,
+  preservedGroupIds = new Set(),
+) {
+  const seeded = deriveReviewStateFromEntries(entries, tree);
+  const coverage = { ...currentCoverage };
+  const quantities = { ...currentQuantities };
+
+  for (const section of tree) {
+    for (const group of section.children) {
+      if (preservedGroupIds.has(group.id)) {
+        continue;
+      }
+      coverage[group.id] = seeded.coverage[group.id];
+      for (const sku of group.skus) {
+        quantities[sku.skuId] = seeded.quantities[sku.skuId];
+      }
+    }
+  }
+
+  return { coverage, quantities };
+}
+
 export function buildCollectionRows(
   coverage,
   quantities,

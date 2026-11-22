@@ -28,6 +28,7 @@ import {
   filterGettingStartedTree,
   gettingStartedTree,
   includesPins,
+  mergeReviewStateFromEntries,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
 import QuickPinPicker from "./QuickPinPicker.jsx";
@@ -299,6 +300,32 @@ export default function GettingStartedPage() {
     hydratedOwnerUidRef.current = user?.uid ?? null;
   };
 
+  const applyPartialManualReviewSeed = (tree, sourceEntries, preservedGroupIds) => {
+    if (sourceEntries === undefined) {
+      return;
+    }
+    if (sourceEntries === null || sourceEntries.length === 0) {
+      return;
+    }
+
+    const merged = mergeReviewStateFromEntries(
+      sourceEntries,
+      tree,
+      coverage,
+      quantities,
+      preservedGroupIds,
+    );
+    setCoverage(merged.coverage);
+    setQuantities(merged.quantities);
+    reviewEditor.resetExpandedReviewIds(merged.coverage);
+    hydratedSeedQuantitiesRef.current = { ...merged.quantities };
+    hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
+    collectionHydratedRef.current = true;
+    collectionSeedPendingRef.current = false;
+    manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    hydratedOwnerUidRef.current = user?.uid ?? null;
+  };
+
   const resetManualReviewSessionScopes = () => {
     explicitZeroGroupIdsRef.current = new Set();
     sessionScopedGroupIdsRef.current = new Set();
@@ -465,9 +492,9 @@ export default function GettingStartedPage() {
     const entriesChangedSinceHydrate =
       hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
     const shouldHydrate =
-      (collectionSeedPendingRef.current && !userTouchedReview) ||
-      (!collectionHydratedRef.current && hasEntries && !userTouchedReview) ||
-      (!userTouchedReview && entriesChangedSinceHydrate);
+      collectionSeedPendingRef.current ||
+      (!collectionHydratedRef.current && hasEntries) ||
+      entriesChangedSinceHydrate;
     if (!shouldHydrate) {
       return;
     }
@@ -477,6 +504,14 @@ export default function GettingStartedPage() {
     }
 
     collectionSeedPendingRef.current = false;
+    if (userTouchedReview) {
+      const preservedGroupIds = new Set([
+        ...sessionScopedGroupIdsRef.current,
+        ...explicitZeroGroupIdsRef.current,
+      ]);
+      applyPartialManualReviewSeed(reviewTree, entries ?? [], preservedGroupIds);
+      return;
+    }
     applyManualReviewSeed(reviewTree, entries ?? []);
   }, [step, collectionStatus, entries, reviewTree, user]);
 

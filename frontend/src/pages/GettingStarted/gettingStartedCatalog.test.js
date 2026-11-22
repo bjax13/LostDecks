@@ -32,6 +32,7 @@ import {
   gettingStartedTree,
   includesCards,
   includesPins,
+  mergeReviewStateFromEntries,
   resolveCollectionEntrySkuId,
   resolveSkuQuantity,
 } from "./gettingStartedCatalog";
@@ -502,6 +503,33 @@ describe("gettingStartedCatalog", () => {
       .flatMap((section) => section.children)
       .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
     expect(coverage[chasmDunGroup.id]).toBe("some");
+  });
+
+  it("merges entry-derived state only for groups not preserved in session", () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree, "both");
+    const elsecallerGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.label === "Elsecaller");
+    const chasmDunGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    const elsecallerSku = elsecallerGroup.skus[0].skuId;
+    const currentCoverage = { [elsecallerGroup.id]: "all" };
+    const currentQuantities = { [elsecallerSku]: "1" };
+    const preservedGroupIds = new Set([elsecallerGroup.id]);
+
+    const { coverage, quantities } = mergeReviewStateFromEntries(
+      [{ id: "LT24-CHM-01-DUN", quantity: 1 }],
+      reviewTree,
+      currentCoverage,
+      currentQuantities,
+      preservedGroupIds,
+    );
+
+    expect(coverage[elsecallerGroup.id]).toBe("all");
+    expect(coverage[chasmDunGroup.id]).toBe("some");
+    expect(quantities[elsecallerSku]).toBe("1");
+    expect(quantities["LT24-CHM-01-DUN"]).toBe("1");
   });
 
   it("resolves legacy Firestore docs stored as cardId + finish with count", () => {
