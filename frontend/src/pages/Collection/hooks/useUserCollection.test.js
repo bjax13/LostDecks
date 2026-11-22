@@ -52,6 +52,7 @@ describe("useUserCollection", () => {
 
       expect(result.current.entries).toEqual([]);
       expect(result.current.error).toBe(null);
+      expect(result.current.ready).toBe(true);
     });
 
     it("does not subscribe to Firestore for undefined ownerUid", async () => {
@@ -89,6 +90,7 @@ describe("useUserCollection", () => {
 
       expect(result.current.loading).toBe(true);
       expect(result.current.error).toBe(null);
+      expect(result.current.ready).toBe(false);
     });
 
     it("subscribes to onSnapshot with the query and callbacks", () => {
@@ -121,6 +123,7 @@ describe("useUserCollection", () => {
       ]);
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
+      expect(result.current.ready).toBe(true);
     });
 
     it("on success: empty snapshot docs maps to entries []", () => {
@@ -132,6 +135,7 @@ describe("useUserCollection", () => {
       expect(result.current.entries).toEqual([]);
       expect(result.current.loading).toBe(false);
       expect(result.current.error).toBe(null);
+      expect(result.current.ready).toBe(true);
     });
 
     it("on error: sets error, stops loading, and logs", () => {
@@ -146,6 +150,7 @@ describe("useUserCollection", () => {
       expect(result.current.error).toBe(fakeError);
       expect(result.current.loading).toBe(false);
       expect(result.current.entries).toEqual([]);
+      expect(result.current.ready).toBe(true);
       expect(consoleSpy).toHaveBeenCalledWith("Failed to load collection entries", fakeError);
 
       consoleSpy.mockRestore();
@@ -236,6 +241,31 @@ describe("useUserCollection", () => {
       rerender({ ownerUid: "user-B" });
 
       expect(result.current.loading).toBe(true);
+      expect(result.current.ready).toBe(false);
+    });
+
+    it("is not ready with stale loading:false until the new ownerUid snapshot arrives", () => {
+      const unsub1 = vi.fn();
+      const unsub2 = vi.fn();
+      mockOnSnapshot.mockReturnValueOnce(unsub1).mockReturnValueOnce(unsub2);
+
+      const { rerender, result } = renderHook(({ ownerUid }) => useUserCollection(ownerUid), {
+        initialProps: { ownerUid: null },
+      });
+
+      rerender({ ownerUid: "user-abc" });
+
+      expect(result.current.ready).toBe(false);
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNext({
+          docs: [createFakeDoc("doc-1", { ownerUid: "user-abc", skuId: "PIN-1", quantity: 1 })],
+        }),
+      );
+
+      expect(result.current.ready).toBe(true);
+      expect(result.current.entries).toHaveLength(1);
     });
 
     it("unmount with falsy ownerUid does not throw", async () => {

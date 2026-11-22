@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { clearPendingPicks, loadPendingPicks, mergePickRows } from "../lib/pendingPicks.js";
@@ -11,11 +11,13 @@ import { applyBulkCollectionUpdate } from "../pages/Collection/utils/bulkImport"
 export function useApplyPendingPicks() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { entries, loading } = useUserCollection(user?.uid ?? null);
+  const { entries, ready } = useUserCollection(user?.uid ?? null);
   const appliedRef = useRef(false);
+  const [retryToken, setRetryToken] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retryToken retriggers apply after failure
   useEffect(() => {
-    if (!user?.uid || loading || appliedRef.current) {
+    if (!user?.uid || !ready || appliedRef.current) {
       return undefined;
     }
 
@@ -44,13 +46,14 @@ export function useApplyPendingPicks() {
       } catch (error) {
         console.error("Failed to apply pending pin picks", error);
         appliedRef.current = false;
+        setRetryToken((token) => token + 1);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [user?.uid, loading, entries, navigate]);
+  }, [user?.uid, ready, entries, navigate, retryToken]);
 }
 
 export function PendingPicksApplier() {

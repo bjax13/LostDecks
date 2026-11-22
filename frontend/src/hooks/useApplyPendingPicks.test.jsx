@@ -32,6 +32,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
       loading: false,
+      ready: true,
     });
     mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
   });
@@ -62,5 +63,59 @@ describe("PendingPicksApplier", () => {
       expect(mockApplyBulk).not.toHaveBeenCalled();
     });
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("waits for a ready collection snapshot before applying (not stale loading:false)", async () => {
+    savePendingPicks({ "PIN-CF-01": 2 });
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [],
+      loading: false,
+      ready: false,
+    });
+
+    const { rerender } = render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).not.toHaveBeenCalled();
+    });
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
+      loading: false,
+      ready: true,
+    });
+    rerender(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockApplyBulk).toHaveBeenCalledWith({
+      ownerUid: "u1",
+      rows: [{ skuId: "PIN-CF-01", quantity: 2 }],
+      existingEntries: [{ skuId: "PIN-CF-01", quantity: 1 }],
+      allowPins: true,
+    });
+    expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+  });
+
+  it("retries apply after a failure once the collection is ready", async () => {
+    savePendingPicks({ "PIN-CF-01": 2 });
+    mockApplyBulk.mockRejectedValueOnce(new Error("network"));
+
+    render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("pendingPinPicks")).not.toBeNull();
+
+    mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(2);
+    });
+    expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
   });
 });
