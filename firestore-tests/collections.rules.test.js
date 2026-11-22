@@ -304,10 +304,7 @@ test("cannot squat another user's owner-scoped doc id on create", async () => {
   const otherDb = testEnv.authenticatedContext(OTHER).firestore();
 
   await assertFails(
-    setDoc(
-      doc(otherDb, "collections", victimScopedId),
-      validEntry({ ownerUid: OTHER, skuId }),
-    ),
+    setDoc(doc(otherDb, "collections", victimScopedId), validEntry({ ownerUid: OTHER, skuId })),
   );
 });
 
