@@ -282,17 +282,15 @@ export default function IsoUftPostModal({
 
   const refreshPublicShareIfNeeded = async () => {
     if (!resolvedShareId || !onRefreshPublicShare || shareRefreshAttemptedRef.current) {
-      return null;
+      return false;
     }
     shareRefreshAttemptedRef.current = true;
     try {
       await onRefreshPublicShare();
-      return null;
+      return false;
     } catch (err) {
       console.error("Public share refresh failed; copying anyway", err);
-      const warning = "Copied, but the public link may be stale until you update it.";
-      setCopyWarning(warning);
-      return warning;
+      return true;
     }
   };
 
@@ -301,13 +299,18 @@ export default function IsoUftPostModal({
       return;
     }
 
-    let refreshWarning = null;
+    let refreshFailed = false;
     if (partIndex === 1) {
-      refreshWarning = await refreshPublicShareIfNeeded();
+      refreshFailed = await refreshPublicShareIfNeeded();
     }
 
     try {
       await copyTextToClipboard(chunkText);
+      if (refreshFailed) {
+        setCopyWarning("Copied, but the public link may be stale until you update it.");
+      } else if (partIndex === 1) {
+        setCopyWarning(null);
+      }
       onCopied({
         skippedEntries,
         format,
@@ -316,7 +319,7 @@ export default function IsoUftPostModal({
         discordPartCount: discordChunks.length,
       });
       const isLastPart = !exceedsLimit || partIndex === discordChunks.length;
-      if (isLastPart && !refreshWarning && !copyWarning) {
+      if (isLastPart && !refreshFailed) {
         onClose();
       }
     } catch (err) {
