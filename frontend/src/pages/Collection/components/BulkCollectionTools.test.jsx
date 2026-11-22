@@ -21,6 +21,22 @@ vi.mock("../../../analytics/posthog.js", () => ({
   captureEvent: (...args) => mockCaptureEvent(...args),
 }));
 
+vi.mock("../../../contexts/AuthContext.jsx", () => ({
+  useAuth: () => ({
+    user: { uid: "user-abc", displayName: "Tester", email: "test@example.com" },
+  }),
+}));
+
+vi.mock("../../../hooks/useTradeShare.js", () => ({
+  useTradeShare: () => ({
+    busy: false,
+    error: null,
+    enableShare: vi.fn(),
+    refreshShare: vi.fn(),
+    revokeShare: vi.fn(),
+  }),
+}));
+
 const collectiblesState = vi.hoisted(() => ({
   skus: [],
   stories: [{ title: "Zeta" }, { title: "Alpha" }],

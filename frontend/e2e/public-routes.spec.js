@@ -52,6 +52,12 @@ test.describe("public routes (e2e)", () => {
     await expect(page.getByRole("heading", { name: "Terms of Use" })).toBeVisible();
   });
 
+  test("/t/:shareId shows unavailable state when not shared", async ({ page }) => {
+    await page.goto("/t/does-not-exist");
+    await expect(page.getByRole("heading", { name: /isn't shared anymore/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Start your own collection/i })).toBeVisible();
+  });
+
   test("robots.txt and favicon.svg are real static files", async ({ request }) => {
     const robots = await request.get("/robots.txt");
     expect(robots.ok()).toBeTruthy();

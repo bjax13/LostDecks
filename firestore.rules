@@ -104,6 +104,50 @@ service cloud.firestore {
               && data.matchRegion.matches('^' + data.matchCountry + '-[A-Z0-9]{1,3}$'))));
     }
 
+    function validShareId(id) {
+      return id is string
+        && id.size() >= 8
+        && id.size() <= 32
+        && id.matches('^[A-Za-z0-9_-]+$');
+    }
+
+    function validPublicShareIdField(data) {
+      return !("publicShareId" in data)
+        || validShareId(data.publicShareId);
+    }
+
+    function validIsoList(list) {
+      return list is list && list.size() <= 500;
+    }
+
+    function validShareSnapshot(data) {
+      return data.keys().hasOnly([
+          "ownerUid",
+          "displayName",
+          "iso",
+          "uft",
+          "updatedAt",
+          "version",
+          "discordHandle",
+          "region",
+        ])
+        && data.keys().hasAll(["ownerUid", "displayName", "iso", "uft", "updatedAt", "version"])
+        && data.ownerUid is string
+        && data.displayName is string
+        && data.displayName.size() >= 1
+        && data.displayName.size() <= 60
+        && validIsoList(data.iso)
+        && data.uft is list
+        && data.uft.size() <= 500
+        && data.updatedAt is timestamp
+        && data.version is int
+        && data.version == 1
+        && (!("discordHandle" in data)
+          || (data.discordHandle is string && data.discordHandle.size() <= 100))
+        && (!("region" in data)
+          || (data.region is string && data.region.size() <= 60));
+    }
+
     function validUserPreferences(data) {
       return (!("matchingOptOut" in data) || data.matchingOptOut is bool)
         && validMatchLanes(data)
@@ -118,6 +162,7 @@ service cloud.firestore {
           || (data.discordChannel is string && data.discordChannel.size() <= 100))
         && validMatchCountry(data)
         && validMatchRegion(data)
+        && validPublicShareIdField(data)
         && contactSharingComplete(data);
     }
 
@@ -133,6 +178,19 @@ service cloud.firestore {
     // Server-only (Admin SDK). Clients never read or write rate-limit state.
     match /rateLimits/{userId} {
       allow read, write: if false;
+    }
+
+    // Opt-in public ISO/UFT snapshots for /t/:shareId (ownerUid is world-readable).
+    match /shares/{shareId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.ownerUid
+        && validShareSnapshot(request.resource.data);
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.ownerUid
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && validShareSnapshot(request.resource.data);
+      allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
 
     match /{document=**} {

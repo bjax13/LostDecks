@@ -5,6 +5,10 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
+        "source": "/t/**",
+        "function": "renderShareMeta"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

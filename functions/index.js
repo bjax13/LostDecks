@@ -19,6 +19,7 @@ const {
   resolvePublicDisplayName,
 } = require("./matches");
 const { enforceCallCooldown } = require("./rateLimit");
+const { renderShareMeta } = require("./shareMeta");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -189,6 +190,7 @@ exports.listAdminCollectors = onCall(
 );
 
 exports.deleteMyAccount = deleteMyAccount;
+exports.renderShareMeta = renderShareMeta;
 
 exports.__test = {
   loadPreferencesByUserId,

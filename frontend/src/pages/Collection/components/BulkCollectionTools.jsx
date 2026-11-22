@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { BULK_IMPORT_APPLIED, ISO_UFT_COPIED } from "../../../analytics/events.js";
 import { captureEvent } from "../../../analytics/posthog.js";
+import { useAuth } from "../../../contexts/AuthContext.jsx";
+import { useTradeShare } from "../../../hooks/useTradeShare.js";
 import {
   DEFAULT_MATCH_KEEP_BY_LANE,
   subscribeUserPreferences,
@@ -70,21 +72,59 @@ function downloadCsv(filename, csv) {
 }
 
 export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
+  const { user } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [report, setReport] = useState(null);
   const [issues, setIssues] = useState([]);
   const [error, setError] = useState(null);
   const [matchKeep, setMatchKeep] = useState(() => ({ ...DEFAULT_MATCH_KEEP_BY_LANE }));
+  const [publicShareId, setPublicShareId] = useState("");
+  const [discordHandle, setDiscordHandle] = useState("");
+  const [matchRegion, setMatchRegion] = useState("");
 
   useEffect(() => {
     if (!ownerUid) {
       setMatchKeep({ ...DEFAULT_MATCH_KEEP_BY_LANE });
+      setPublicShareId("");
+      setDiscordHandle("");
+      setMatchRegion("");
       return undefined;
     }
     return subscribeUserPreferences(ownerUid, (prefs) => {
       setMatchKeep(prefs.matchKeep);
+      setPublicShareId(prefs.publicShareId || "");
+      setDiscordHandle(prefs.discordHandle || "");
+      setMatchRegion(prefs.matchRegion || "");
     });
   }, [ownerUid]);
+
+  const existingEntries = useMemo(() => entries ?? [], [entries]);
+
+  const shareDisplayName = useMemo(() => {
+    const fromProfile = typeof user?.displayName === "string" ? user.displayName.trim() : "";
+    if (fromProfile) {
+      return fromProfile;
+    }
+    const emailLocal = typeof user?.email === "string" ? user.email.split("@")[0]?.trim() : "";
+    return emailLocal || "Collector";
+  }, [user?.displayName, user?.email]);
+
+  const {
+    busy: shareBusy,
+    error: shareError,
+    enableShare,
+    refreshShare,
+    revokeShare,
+  } = useTradeShare({
+    userId: ownerUid,
+    entries: existingEntries,
+    matchKeep,
+    displayName: shareDisplayName,
+    discordHandle,
+    region: matchRegion,
+    publicShareId,
+  });
+
   const [lastFileName, setLastFileName] = useState("");
   const [postStatus, setPostStatus] = useState(null);
   const [postError, setPostError] = useState(null);
@@ -92,8 +132,6 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
   const [isVisualEditorOpen, setIsVisualEditorOpen] = useState(false);
   const [visualEditorSession, setVisualEditorSession] = useState(0);
   const [visualReport, setVisualReport] = useState(null);
-
-  const existingEntries = useMemo(() => entries ?? [], [entries]);
 
   const handleDownloadCsv = (mode, filename) => {
     if (!ownerUid || processing) {
@@ -178,6 +216,17 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
 
   const handlePostCopyError = () => {
     setPostError("Unable to copy the post. Please try again.");
+  };
+
+  const handleEnablePublicShare = () => enableShare();
+
+  const handleRevokePublicShare = () => revokeShare();
+
+  const handleRefreshPublicShare = async () => {
+    if (!publicShareId) {
+      return;
+    }
+    await refreshShare();
   };
 
   const handleOpenVisualEditor = () => {
@@ -320,6 +369,12 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
         onCopied={handlePostCopied}
         onCopyError={handlePostCopyError}
         matchKeep={matchKeep}
+        shareId={publicShareId || null}
+        shareBusy={shareBusy}
+        shareError={shareError}
+        onEnablePublicShare={handleEnablePublicShare}
+        onRevokePublicShare={handleRevokePublicShare}
+        onRefreshPublicShare={handleRefreshPublicShare}
       />
       <VisualBulkCollectionEditorModal
         isOpen={isVisualEditorOpen}

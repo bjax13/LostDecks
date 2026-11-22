@@ -45,8 +45,9 @@ async function deleteMyAccountHandler(request) {
 
   const db = admin.firestore();
   await deleteQueryInBatches(db.collection("collections").where("ownerUid", "==", uid));
-  // after plan 08 lands: await deleteQueryInBatches(db.collection("publicTradeLists").where("ownerUid", "==", uid));
-  await db.collection("userPreferences").doc(uid).delete();
+  await deleteQueryInBatches(db.collection("shares").where("ownerUid", "==", uid));
+  const preferencesRef = db.collection("userPreferences").doc(uid);
+  await preferencesRef.delete();
   await db.collection("rateLimits").doc(uid).delete(); // harmless if missing
   await admin.auth().deleteUser(uid);
   return { deleted: true };

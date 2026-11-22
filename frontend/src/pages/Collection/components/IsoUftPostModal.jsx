@@ -172,6 +172,11 @@ export default function IsoUftPostModal({
   onCopyError,
   matchKeep = DEFAULT_MATCH_KEEP_BY_LANE,
   shareId = null,
+  shareBusy = false,
+  shareError = null,
+  onEnablePublicShare,
+  onRevokePublicShare,
+  onRefreshPublicShare,
 }) {
   const [excludedIds, setExcludedIds] = useState(() => new Set());
   const [collapsedIds, setCollapsedIds] = useState(() => new Set());
@@ -215,7 +220,13 @@ export default function IsoUftPostModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  const footerUrl = includeLink ? buildShareUrl({ shareId }) : null;
+  const [resolvedShareId, setResolvedShareId] = useState(shareId);
+
+  useEffect(() => {
+    setResolvedShareId(shareId);
+  }, [shareId]);
+
+  const footerUrl = includeLink ? buildShareUrl({ shareId: resolvedShareId }) : null;
 
   const previewText = useMemo(
     () => formatIsoUftPost(tree, excludedIds, { format, footerUrl }),
@@ -259,12 +270,35 @@ export default function IsoUftPostModal({
     }
 
     try {
+      if (resolvedShareId && onRefreshPublicShare) {
+        await onRefreshPublicShare();
+      }
       await copyTextToClipboard(previewText);
       onCopied({ skippedEntries, format, includeLink });
       onClose();
     } catch (err) {
       console.error("Failed to copy ISO/UFT post", err);
       onCopyError();
+    }
+  };
+
+  const handleShareToggle = async (event) => {
+    if (shareBusy) {
+      event.preventDefault();
+      return;
+    }
+    try {
+      if (event.target.checked) {
+        const nextId = await onEnablePublicShare?.();
+        if (nextId) {
+          setResolvedShareId(nextId);
+        }
+      } else {
+        await onRevokePublicShare?.();
+        setResolvedShareId(null);
+      }
+    } catch {
+      event.target.checked = !event.target.checked;
     }
   };
 
@@ -307,6 +341,20 @@ export default function IsoUftPostModal({
               />
               <span>Include link to ShardStash</span>
             </label>
+            <label className="collection-bulk-post-modal__option">
+              <input
+                type="checkbox"
+                checked={Boolean(resolvedShareId)}
+                onChange={handleShareToggle}
+                disabled={shareBusy}
+              />
+              <span>Share a public trade list link (/t/…)</span>
+            </label>
+            {shareError ? (
+              <p className="collection-bulk-post-modal__share-error" role="alert">
+                Could not update the public link. Try again.
+              </p>
+            ) : null}
             <fieldset className="collection-bulk-post-modal__format">
               <legend>Format</legend>
               <label className="collection-bulk-post-modal__option">

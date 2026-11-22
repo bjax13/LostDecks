@@ -34,6 +34,7 @@ describe("userPreferences normalization", () => {
       discordChannel: "Cosmere Trades",
       matchCountry: "",
       matchRegion: "",
+      publicShareId: "",
     });
   });
 
@@ -53,6 +54,7 @@ describe("userPreferences normalization", () => {
       discordChannel: DEFAULT_DISCORD_CHANNEL,
       matchCountry: "",
       matchRegion: "",
+      publicShareId: "",
     });
   });
 
