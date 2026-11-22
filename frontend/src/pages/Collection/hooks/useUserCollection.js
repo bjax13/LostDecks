@@ -6,23 +6,25 @@ import { db } from "../../../lib/firebase";
 
 /**
  * @param {string | null | undefined} ownerUid
- * @returns {{ entries: object[]; status: UserCollectionStatus; error: Error | null }}
+ * @returns {{ entries: object[]; status: UserCollectionStatus; error: Error | null; serverConfirmed: boolean }}
  */
 function createInitialState(ownerUid) {
   if (!ownerUid) {
-    return { entries: [], status: "idle", error: null };
+    return { entries: [], status: "idle", error: null, serverConfirmed: false };
   }
-  return { entries: [], status: "loading", error: null };
+  return { entries: [], status: "loading", error: null, serverConfirmed: false };
 }
 
 export function useUserCollection(ownerUid) {
   const subscribedOwnerUidRef = useRef(/** @type {string | null} */ (null));
-  const [{ entries, status, error }, setState] = useState(() => createInitialState(ownerUid));
+  const [{ entries, status, error, serverConfirmed }, setState] = useState(() =>
+    createInitialState(ownerUid),
+  );
 
   useEffect(() => {
     if (!ownerUid) {
       subscribedOwnerUidRef.current = null;
-      setState({ entries: [], status: "idle", error: null });
+      setState({ entries: [], status: "idle", error: null, serverConfirmed: false });
       return undefined;
     }
 
@@ -30,7 +32,7 @@ export function useUserCollection(ownerUid) {
     subscribedOwnerUidRef.current = ownerUid;
 
     if (ownerChanged) {
-      setState({ entries: [], status: "loading", error: null });
+      setState({ entries: [], status: "loading", error: null, serverConfirmed: false });
     }
 
     const collectionRef = collection(db, "collections");
@@ -38,12 +40,19 @@ export function useUserCollection(ownerUid) {
 
     const unsubscribe = onSnapshot(
       collectionQuery,
+      { includeMetadataChanges: true },
       (snapshot) => {
         const nextEntries = snapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
         }));
-        setState({ entries: nextEntries, status: "ready", error: null });
+        const fromServer = snapshot.metadata?.fromCache === false;
+        setState((previous) => ({
+          entries: nextEntries,
+          status: "ready",
+          error: null,
+          serverConfirmed: fromServer ? true : previous.serverConfirmed,
+        }));
       },
       (err) => {
         console.error("Failed to load collection entries", err);
@@ -51,6 +60,7 @@ export function useUserCollection(ownerUid) {
           entries: previous.entries,
           status: "error",
           error: err,
+          serverConfirmed: previous.serverConfirmed,
         }));
       },
     );
@@ -58,5 +68,5 @@ export function useUserCollection(ownerUid) {
     return () => unsubscribe();
   }, [ownerUid]);
 
-  return { entries, status, error };
+  return { entries, status, error, serverConfirmed };
 }
