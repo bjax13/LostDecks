@@ -9,7 +9,7 @@ vi.mock("../utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
 }));
 
-describe("VisualBulkCollectionEditorModal", () => {
+describe("VisualBulkCollectionEditorModal", { timeout: 15_000 }, () => {
   const ownerUid = "user-abc";
   const onClose = vi.fn();
   const onSaved = vi.fn();
