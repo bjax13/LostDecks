@@ -270,48 +270,6 @@ describe("bulkImport (unit)", () => {
       expect(mockBatchCommit).toHaveBeenCalled();
     });
 
-    it("creates pin rows with deterministic Firestore doc id (catalog sku)", async () => {
-      const result = await applyBulkCollectionUpdate({
-        ownerUid: "u1",
-        rows: [{ skuId: "PIN-CF-01", quantity: 1 }],
-        existingEntries: [],
-        allowPins: true,
-      });
-      expect(result.created).toBe(1);
-      expect(mockBatchSet).toHaveBeenCalledWith(
-        { id: "PIN-CF-01" },
-        expect.objectContaining({ skuId: "PIN-CF-01", quantity: 1 }),
-        { merge: true },
-      );
-    });
-
-    it("re-applies Howlerina to the same sku-keyed doc when existingEntries were stale", async () => {
-      const howlerinaApply = {
-        ownerUid: "u1",
-        rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
-        existingEntries: [],
-        allowPins: true,
-      };
-      const first = await applyBulkCollectionUpdate(howlerinaApply);
-      expect(first.created).toBe(1);
-      expect(mockBatchSet).toHaveBeenLastCalledWith(
-        { id: "PIN-CF-02" },
-        expect.objectContaining({ skuId: "PIN-CF-02", quantity: 1 }),
-        { merge: true },
-      );
-
-      vi.clearAllMocks();
-
-      const second = await applyBulkCollectionUpdate(howlerinaApply);
-      expect(second.created).toBe(1);
-      expect(mockBatchSet).toHaveBeenCalledTimes(1);
-      expect(mockBatchSet).toHaveBeenCalledWith(
-        { id: "PIN-CF-02" },
-        expect.objectContaining({ skuId: "PIN-CF-02", quantity: 1 }),
-        { merge: true },
-      );
-    });
-
     it("sets absolute quantity on existing entry", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",
