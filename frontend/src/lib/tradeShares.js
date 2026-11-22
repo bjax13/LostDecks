@@ -5,6 +5,8 @@ import { updateUserPreferences } from "./userPreferences.js";
 
 const SHARE_ID_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 export const SHARE_DOC_VERSION = 1;
+/** Mirrors Firestore rules: full per-element validation for at most this many ISO/UFT rows. */
+export const SHARE_LIST_ITEM_CAP = 10;
 export const SHARE_STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function generateShareId(byteLength = 9) {
@@ -42,8 +44,8 @@ export function buildShareDocument({
   const docData = {
     ownerUid,
     displayName: trimmedName || "Collector",
-    iso,
-    uft,
+    iso: iso.slice(0, SHARE_LIST_ITEM_CAP),
+    uft: uft.slice(0, SHARE_LIST_ITEM_CAP),
     updatedAt: serverTimestamp(),
     version: SHARE_DOC_VERSION,
   };
