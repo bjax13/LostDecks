@@ -173,11 +173,19 @@ export default function IsoUftPostModal({
   onCopyError,
   matchKeep = DEFAULT_MATCH_KEEP_BY_LANE,
   shareId = null,
+  shareBusy = false,
+  shareError = null,
+  onEnablePublicShare,
+  onRevokePublicShare,
+  onRefreshPublicShare,
 }) {
   const [excludedIds, setExcludedIds] = useState(() => new Set());
   const [collapsedIds, setCollapsedIds] = useState(() => new Set());
   const [format, setFormat] = useState(() => readStoredPrefs().format);
   const [includeLink, setIncludeLink] = useState(() => readStoredPrefs().includeLink);
+  const [resolvedShareId, setResolvedShareId] = useState(shareId);
+  const [copyWarning, setCopyWarning] = useState(null);
+  const shareRefreshAttemptedRef = useRef(false);
 
   const { tree, skippedEntries } = useMemo(
     () => buildIsoUftPostTree(entries ?? [], { matchKeep, format }),
@@ -193,9 +201,17 @@ export default function IsoUftPostModal({
       setIncludeLink(prefs.includeLink);
       setExcludedIds(getDefaultExcludedIds());
       setCollapsedIds(getDefaultCollapsedIds(tree));
+      shareRefreshAttemptedRef.current = false;
+      setCopyWarning(null);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, tree]);
+
+  useEffect(() => {
+    setResolvedShareId(shareId);
+    setCopyWarning(null);
+    shareRefreshAttemptedRef.current = false;
+  }, [shareId]);
 
   useEffect(() => {
     writeStoredPrefs({ format, includeLink });
@@ -216,7 +232,7 @@ export default function IsoUftPostModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  const footerUrl = includeLink ? buildShareUrl({ shareId }) : null;
+  const footerUrl = includeLink ? buildShareUrl({ shareId: resolvedShareId }) : null;
 
   const {
     text: previewText,
@@ -265,13 +281,37 @@ export default function IsoUftPostModal({
     });
   };
 
+  const refreshPublicShareIfNeeded = async () => {
+    if (!resolvedShareId || !onRefreshPublicShare || shareRefreshAttemptedRef.current) {
+      return false;
+    }
+    shareRefreshAttemptedRef.current = true;
+    try {
+      await onRefreshPublicShare();
+      return false;
+    } catch (err) {
+      console.error("Public share refresh failed; copying anyway", err);
+      return true;
+    }
+  };
+
   const handleCopyChunk = async (chunkText, partIndex) => {
     if (!chunkText) {
       return;
     }
 
+    let refreshFailed = false;
+    if (partIndex === 1) {
+      refreshFailed = await refreshPublicShareIfNeeded();
+    }
+
     try {
       await copyTextToClipboard(chunkText);
+      if (refreshFailed) {
+        setCopyWarning("Copied, but the public link may be stale until you update it.");
+      } else if (partIndex === 1) {
+        setCopyWarning(null);
+      }
       onCopied({
         skippedEntries,
         format,
@@ -279,12 +319,33 @@ export default function IsoUftPostModal({
         discordPart: partIndex,
         discordPartCount: discordChunks.length,
       });
-      if (!exceedsLimit || partIndex === discordChunks.length) {
+      const isLastPart = !exceedsLimit || partIndex === discordChunks.length;
+      if (isLastPart && !refreshFailed) {
         onClose();
       }
     } catch (err) {
       console.error("Failed to copy ISO/UFT post", err);
       onCopyError();
+    }
+  };
+
+  const handleShareToggle = async (event) => {
+    if (shareBusy) {
+      event.preventDefault();
+      return;
+    }
+    try {
+      if (event.target.checked) {
+        const nextId = await onEnablePublicShare?.();
+        if (nextId) {
+          setResolvedShareId(nextId);
+        }
+      } else {
+        await onRevokePublicShare?.();
+        setResolvedShareId(null);
+      }
+    } catch {
+      event.target.checked = !event.target.checked;
     }
   };
 
@@ -329,6 +390,25 @@ export default function IsoUftPostModal({
               />
               <span>Include link to ShardStash</span>
             </label>
+            <label className="collection-bulk-post-modal__option">
+              <input
+                type="checkbox"
+                checked={Boolean(resolvedShareId)}
+                onChange={handleShareToggle}
+                disabled={shareBusy}
+              />
+              <span>Share a public trade list link (/t/…)</span>
+            </label>
+            {shareError ? (
+              <p className="collection-bulk-post-modal__share-error" role="alert">
+                Could not update the public link. Try again.
+              </p>
+            ) : null}
+            {copyWarning ? (
+              <p className="collection-bulk-post-modal__share-error" role="status">
+                {copyWarning}
+              </p>
+            ) : null}
             <fieldset className="collection-bulk-post-modal__format">
               <legend>Format</legend>
               <label className="collection-bulk-post-modal__option">

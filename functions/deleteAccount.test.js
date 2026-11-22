@@ -2,7 +2,11 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { deleteQueryInBatches, deleteMyAccountHandler } = require("./deleteAccount");
+const {
+  deleteQueryInBatches,
+  deleteMyAccountHandler,
+  tombstoneUserOwnedShares,
+} = require("./deleteAccount");
 
 function createFakeQuery(docsByPage) {
   let pageIndex = 0;
@@ -13,6 +17,9 @@ function createFakeQuery(docsByPage) {
         return {
           delete(ref) {
             ops.push(ref);
+          },
+          set(ref, data) {
+            ops.push({ kind: "set", ref, data });
           },
           async commit() {
             query._committed.push([...ops]);
@@ -54,11 +61,11 @@ test("deleteQueryInBatches deletes pages until empty", async () => {
   await deleteQueryInBatches(query, 2);
   assert.equal(query._committed.length, 2);
   assert.deepEqual(
-    query._committed[0].map((ref) => ref.id),
+    query._committed[0].map((entry) => entry.id ?? entry.ref?.id),
     ["a", "b"],
   );
   assert.deepEqual(
-    query._committed[1].map((ref) => ref.id),
+    query._committed[1].map((entry) => entry.id ?? entry.ref?.id),
     ["c"],
   );
 });
@@ -81,4 +88,32 @@ test("deleteMyAccountHandler requires DELETE confirmation", async () => {
     () => deleteMyAccountHandler({ auth: { uid: "user-1" }, data: { confirm: "nope" } }),
     (err) => err.code === "invalid-argument",
   );
+});
+
+test("tombstoneUserOwnedShares writes minimal tombstones for each owned share", async () => {
+  const query = createFakeQuery([[{ ref: { id: "share-a", collection: "shares" } }], []]);
+  const db = {
+    collection(name) {
+      assert.equal(name, "shares");
+      return {
+        where(field, op, value) {
+          assert.equal(field, "ownerUid");
+          assert.equal(op, "==");
+          assert.equal(value, "user-1");
+          return query;
+        },
+      };
+    },
+    batch() {
+      return query.firestore.batch();
+    },
+  };
+
+  await tombstoneUserOwnedShares(db, "user-1");
+  assert.equal(query._committed.length, 1);
+  const op = query._committed[0][0];
+  assert.equal(op.kind, "set");
+  assert.equal(op.ref.id, "share-a");
+  assert.deepEqual(Object.keys(op.data).sort(), ["revokedAt", "updatedAt", "version"]);
+  assert.equal(op.data.version, 1);
 });

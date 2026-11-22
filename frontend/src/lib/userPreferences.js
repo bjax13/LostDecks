@@ -34,6 +34,8 @@ export const DEFAULT_MATCH_KEEP_BY_LANE = Object.freeze({
 
 export const MATCH_KEEP_OPTIONS = Object.freeze([1, 2, 3]);
 
+export const MAX_PUBLIC_SHARE_ID_LENGTH = 32;
+
 export const DEFAULT_USER_PREFERENCES = Object.freeze({
   matchingOptOut: false,
   matchLanes: DEFAULT_MATCH_LANES,
@@ -44,6 +46,7 @@ export const DEFAULT_USER_PREFERENCES = Object.freeze({
   discordChannel: DEFAULT_DISCORD_CHANNEL,
   matchCountry: "",
   matchRegion: "",
+  publicShareId: "",
 });
 
 function normalizeOptionalString(value, maxLength) {
@@ -120,6 +123,7 @@ export function normalizeUserPreferences(data) {
     discordChannel: discordChannel || DEFAULT_DISCORD_CHANNEL,
     matchCountry,
     matchRegion: normalizeMatchRegion(matchCountry, data.matchRegion),
+    publicShareId: normalizeOptionalString(data.publicShareId, MAX_PUBLIC_SHARE_ID_LENGTH),
   };
 }
 
