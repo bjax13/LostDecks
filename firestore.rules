@@ -135,16 +135,14 @@ service cloud.firestore {
       return list.size() <= i || (list[i] is map && validUftItem(list[i]));
     }
 
+    // Firestore caps rule evaluations (~1000); ten per-element checks is the practical max.
     function validUftList(list) {
       return list is list
-        && list.size() <= 500
+        && list.size() <= 10
         && uftIndexOk(list, 0) && uftIndexOk(list, 1) && uftIndexOk(list, 2)
         && uftIndexOk(list, 3) && uftIndexOk(list, 4) && uftIndexOk(list, 5)
         && uftIndexOk(list, 6) && uftIndexOk(list, 7) && uftIndexOk(list, 8)
-        && uftIndexOk(list, 9) && uftIndexOk(list, 10) && uftIndexOk(list, 11)
-        && uftIndexOk(list, 12) && uftIndexOk(list, 13) && uftIndexOk(list, 14)
-        && uftIndexOk(list, 15) && uftIndexOk(list, 16) && uftIndexOk(list, 17)
-        && uftIndexOk(list, 18) && uftIndexOk(list, 19);
+        && uftIndexOk(list, 9);
     }
 
     function isoIndexOk(list, i) {
@@ -153,14 +151,11 @@ service cloud.firestore {
 
     function validIsoList(list) {
       return list is list
-        && list.size() <= 500
+        && list.size() <= 10
         && isoIndexOk(list, 0) && isoIndexOk(list, 1) && isoIndexOk(list, 2)
         && isoIndexOk(list, 3) && isoIndexOk(list, 4) && isoIndexOk(list, 5)
         && isoIndexOk(list, 6) && isoIndexOk(list, 7) && isoIndexOk(list, 8)
-        && isoIndexOk(list, 9) && isoIndexOk(list, 10) && isoIndexOk(list, 11)
-        && isoIndexOk(list, 12) && isoIndexOk(list, 13) && isoIndexOk(list, 14)
-        && isoIndexOk(list, 15) && isoIndexOk(list, 16) && isoIndexOk(list, 17)
-        && isoIndexOk(list, 18) && isoIndexOk(list, 19);
+        && isoIndexOk(list, 9);
     }
 
     function validShareSnapshot(data) {
@@ -183,6 +178,7 @@ service cloud.firestore {
         && validIsoList(data.iso)
         && validUftList(data.uft)
         && data.updatedAt is timestamp
+        && data.updatedAt == request.time
         && data.version is int
         && data.version == 1
         && (!("discordHandle" in data)
@@ -196,7 +192,9 @@ service cloud.firestore {
         && data.keys().hasAll(["ownerUid", "revokedAt", "updatedAt", "version"])
         && data.ownerUid is string
         && data.revokedAt is timestamp
+        && data.revokedAt == request.time
         && data.updatedAt is timestamp
+        && data.updatedAt == request.time
         && data.version is int
         && data.version == 1;
     }
@@ -250,7 +248,8 @@ service cloud.firestore {
         && (
           (request.resource.data.ownerUid == resource.data.ownerUid
             && validShareSnapshot(request.resource.data))
-          || validShareOwnerTombstone(request.resource.data)
+          || (validShareOwnerTombstone(request.resource.data)
+            && request.resource.data.ownerUid == resource.data.ownerUid)
         );
       allow delete: if false;
     }
