@@ -105,11 +105,11 @@ export async function revokePublicShare({ userId, shareId }) {
     throw new Error("Firestore or user is not configured.");
   }
 
-  await updateDoc(doc(db, "shares", shareId), {
-    iso: [],
-    uft: [],
+  await setDoc(doc(db, "shares", shareId), {
+    ownerUid: userId,
     revokedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    version: SHARE_DOC_VERSION,
   });
   await updateUserPreferences(userId, { publicShareId: deleteField() });
 }
