@@ -195,6 +195,7 @@ export default function GettingStartedPage() {
   const explicitZeroGroupIdsRef = useRef(new Set());
   const sessionScopedGroupIdsRef = useRef(new Set());
   const fullPinReviewSeededRef = useRef(false);
+  const manualReviewCollectibleTypeRef = useRef(null);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -277,6 +278,12 @@ export default function GettingStartedPage() {
     hydratedSeedQuantitiesRef.current = { ...seeded.quantities };
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
+    manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+  };
+
+  const resetManualReviewSessionScopes = () => {
+    explicitZeroGroupIdsRef.current = new Set();
+    sessionScopedGroupIdsRef.current = new Set();
   };
 
   const seedManualReviewForTree = (tree) => {
@@ -284,12 +291,18 @@ export default function GettingStartedPage() {
   };
 
   const beginManualReview = (nextCollectibleType = collectibleType) => {
-    const tree = filterGettingStartedTree(
-      gettingStartedTree,
-      nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH,
-    );
-    seedManualReviewForTree(tree);
-    goToStep("manual", nextCollectibleType);
+    const type = nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    const tree = filterGettingStartedTree(gettingStartedTree, type);
+    const hasExistingReview = collectionHydratedRef.current && Object.keys(coverage).length > 0;
+    const sameCollectibleScope = manualReviewCollectibleTypeRef.current === type;
+
+    if (!hasExistingReview || !sameCollectibleScope) {
+      resetManualReviewSessionScopes();
+      seedManualReviewForTree(tree);
+      manualReviewCollectibleTypeRef.current = type;
+    }
+
+    goToStep("manual", type);
   };
 
   const beginProfile = () => {
@@ -408,17 +421,6 @@ export default function GettingStartedPage() {
     collectionSeedPendingRef.current = false;
     applyManualReviewSeed(reviewTree, entries ?? []);
   }, [step, collectionLoading, entries, reviewTree, user]);
-
-  useEffect(() => {
-    if (step === "manual") {
-      return;
-    }
-    collectionHydratedRef.current = false;
-    collectionSeedPendingRef.current = false;
-    hydratedSeedQuantitiesRef.current = {};
-    explicitZeroGroupIdsRef.current = new Set();
-    sessionScopedGroupIdsRef.current = new Set();
-  }, [step]);
 
   const handleSave = async () => {
     if (!user) {

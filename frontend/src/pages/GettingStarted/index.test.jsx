@@ -1029,6 +1029,45 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
   });
 
+  it("preserves in-progress review edits when navigating back to About you and returning", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "existing", skuId: "LT24-CHM-01-DUN", quantity: 1 }],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const elsecallerCoverage = screen.getByRole("group", {
+      name: /elsecaller story foils coverage/i,
+    });
+    expect(within(elsecallerCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: /what best describes you/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /card review/i }));
+
+    expect(
+      within(screen.getByRole("group", { name: /elsecaller story foils coverage/i })).getByRole(
+        "button",
+        { name: "Some" },
+      ),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      within(
+        screen.getByRole("group", { name: /the chasmfriends get a pet! story dun coverage/i }),
+      ).getByRole("button", { name: "Some" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
   it("prefills step 2 from legacy cardId + finish collection docs", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
