@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { datasetSkus } from "../../data/collectibles";
 import {
   buildCollectionRows,
+  buildGettingStartedSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -29,6 +30,7 @@ import {
   gettingStartedTree,
   includesCards,
   includesPins,
+  resolveCollectionEntrySkuId,
   resolveSkuQuantity,
 } from "./gettingStartedCatalog";
 
@@ -484,6 +486,33 @@ describe("gettingStartedCatalog", () => {
     expect(coverage[emptyGroup.id]).toBe("none");
   });
 
+  it("resolves legacy Firestore docs stored as cardId + finish with count", () => {
+    const { coverage, quantities } = deriveReviewStateFromEntries(
+      [
+        { cardId: "LT24-CHM-01", finish: "DUN", count: 1 },
+        { cardId: "PIN-CF-01", copies: 1 },
+      ],
+      gettingStartedTree,
+    );
+
+    expect(resolveCollectionEntrySkuId({ cardId: "LT24-CHM-01", finish: "DUN" })).toBe(
+      "LT24-CHM-01-DUN",
+    );
+    expect(quantities["LT24-CHM-01-DUN"]).toBe("1");
+    expect(quantities["PIN-CF-01"]).toBe("1");
+
+    const chasmDunGroup = gettingStartedTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    expect(chasmDunGroup).toBeTruthy();
+    expect(coverage[chasmDunGroup.id]).toBe("some");
+
+    const pinGroup = gettingStartedTree
+      .find((section) => section.id === "pins")
+      ?.children.find((group) => group.label === "ChasmFriends");
+    expect(coverage[pinGroup.id]).toBe("some");
+  });
+
   it("sums duplicate collection documents for the same SKU", () => {
     const allGroup = gettingStartedTree[0].children[0];
     const skuWithQty = allGroup.skus[0].skuId;
@@ -534,5 +563,25 @@ describe("gettingStartedCatalog", () => {
     ]);
     expect(pinSkuIds).toContain("PIN-CPS1-00");
     expect(pinSkuIds.length).toBeGreaterThan(5);
+  });
+
+  it("omits unseeded zero-quantity rows from Getting Started saves", () => {
+    const coverage = createCoverageState("none", gettingStartedTree);
+    const scopedGroup = gettingStartedTree[0].children[0];
+
+    const unscopedRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree);
+    expect(unscopedRows).toEqual([]);
+
+    const ownedSku = "LT24-CHM-01-DUN";
+    const seededRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree, {
+      seededQuantities: { [ownedSku]: "1" },
+    });
+    expect(seededRows.some((row) => row.skuId === ownedSku && row.quantity === "0")).toBe(true);
+
+    const scopedRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree, {
+      sessionScopedGroupIds: new Set([scopedGroup.id]),
+    });
+    expect(scopedRows.length).toBeGreaterThan(0);
+    expect(scopedRows.every((row) => row.quantity === "0")).toBe(true);
   });
 });
