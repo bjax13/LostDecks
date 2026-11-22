@@ -233,6 +233,9 @@ export default function GettingStartedPage() {
     onReviewGroupExplicitNone: (groupId) => {
       explicitZeroGroupIdsRef.current.add(groupId);
     },
+    onReviewGroupLeftExplicitNone: (groupId) => {
+      explicitZeroGroupIdsRef.current.delete(groupId);
+    },
   });
 
   const spreadsheetDisabled = collectibleType === COLLECTIBLE_TYPE_PINS;
@@ -515,7 +518,7 @@ export default function GettingStartedPage() {
               explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
               collectionConfirmedLoaded: isCollectionConfirmedLoadedForOwner({
                 ownerUid: user.uid,
-                collectionLoading,
+                collectionReady,
               }),
             },
           ),

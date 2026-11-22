@@ -29,6 +29,7 @@ export function useCollectionReviewEditor({
   initialExpandedReviewIds = null,
   onReviewGroupScoped = null,
   onReviewGroupExplicitNone = null,
+  onReviewGroupLeftExplicitNone = null,
 }) {
   const markGroupScoped = (groupId) => {
     onReviewGroupScoped?.(groupId);
@@ -47,6 +48,9 @@ export function useCollectionReviewEditor({
   );
 
   const setGroupCoverage = (groupId, status) => {
+    if (status !== "none") {
+      onReviewGroupLeftExplicitNone?.(groupId);
+    }
     setCoverage((current) => ({ ...current, [groupId]: status }));
   };
 

@@ -184,14 +184,42 @@ describe("Getting Started explicit None removals", () => {
 
   it("isCollectionConfirmedLoadedForOwner gates deletes without review UI hydration", () => {
     expect(
-      isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionLoading: true }),
+      isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionReady: false }),
     ).toBe(false);
-    expect(isCollectionConfirmedLoadedForOwner({ ownerUid: null, collectionLoading: false })).toBe(
+    expect(isCollectionConfirmedLoadedForOwner({ ownerUid: null, collectionReady: false })).toBe(
       false,
     );
-    expect(
-      isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionLoading: false }),
-    ).toBe(true);
+    expect(isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionReady: true })).toBe(
+      true,
+    );
+  });
+
+  it("does not emit zero rows for owned SKUs left unselected after partial edit (no explicit None)", () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree);
+    const chasmGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    const keptSku = "LT24-CHM-01-DUN";
+    const otherSku = chasmGroup.skus.find((sku) => sku.skuId !== keptSku)?.skuId;
+    expect(otherSku).toBeTruthy();
+
+    const coverage = createCoverageState("none", reviewTree);
+    coverage[chasmGroup.id] = "some";
+    const existing = [
+      { id: keptSku, quantity: 1 },
+      { id: otherSku, quantity: 1 },
+    ];
+
+    const rows = buildGettingStartedManualReviewSaveRows(
+      coverage,
+      { [keptSku]: "1", [otherSku]: "0" },
+      reviewTree,
+      existing,
+      { explicitZeroGroupIds: new Set(), collectionConfirmedLoaded: true },
+    );
+
+    expect(rows.some((row) => row.skuId === otherSku && row.quantity === "0")).toBe(false);
+    expect(rows.filter((row) => Number(row.quantity) === 0)).toEqual([]);
   });
 
   it("allows explicit None deletes on the Chasm Friends tree when collection is confirmed loaded", () => {
