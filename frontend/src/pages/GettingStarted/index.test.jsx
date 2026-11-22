@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+import { Link, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TestMemoryRouter } from "../../test/router.jsx";
 import {
@@ -1805,6 +1806,42 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       expect(
         screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
       ).toBeInTheDocument();
+    });
+
+    it("prefills chasmfriends on in-app navigation when collection is already ready on mount", async () => {
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockReturnValue({
+        entries: [{ id: "PIN-CF-01", quantity: 1 }],
+        status: "ready",
+        error: null,
+      });
+
+      const user = setupUser();
+      render(
+        <TestMemoryRouter initialEntries={["/collections"]}>
+          <Routes>
+            <Route
+              path="/collections"
+              element={<Link to={chasmPath}>Review ChasmFriends pins</Link>}
+            />
+            <Route path="/getting-started" element={<GettingStartedPage />} />
+          </Routes>
+        </TestMemoryRouter>,
+      );
+
+      await user.click(screen.getByRole("link", { name: /review chasmfriends pins/i }));
+
+      const coverage = await screen.findByRole("group", { name: /chasmfriends pins coverage/i });
+      await waitFor(() => {
+        expect(within(coverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+      });
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/1 total/);
     });
 
     it("deletes an id-only owned pin after explicit None on the chasmfriends shortcut", async () => {

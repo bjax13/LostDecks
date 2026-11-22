@@ -470,6 +470,28 @@ export function mergeReviewStateFromEntries(
   return { coverage, quantities };
 }
 
+/** True when coverage/quantities match what Firestore entries imply for this review tree. */
+export function isManualReviewSyncedWithEntries(entries, tree, coverage, quantities) {
+  const expected = deriveReviewStateFromEntries(entries ?? [], tree);
+
+  for (const section of tree) {
+    for (const group of section.children) {
+      if (coverage[group.id] !== expected.coverage[group.id]) {
+        return false;
+      }
+      for (const sku of group.skus) {
+        const now = String(quantities[sku.skuId] ?? "0");
+        const want = String(expected.quantities[sku.skuId] ?? "0");
+        if (now !== want) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 export function buildCollectionRows(
   coverage,
   quantities,
