@@ -3,6 +3,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  renderShareMeta,
   escapeHtml,
   escapeHtmlAttr,
   injectShareMeta,
@@ -49,6 +50,7 @@ const HOSTED_SHELL = `<!DOCTYPE html>
 
 test.beforeEach(() => {
   __test.setBaseHtmlForTests(SAMPLE_HTML);
+  __test.setShareSnapshotLoaderForTests(null);
 });
 
 test.after(() => {
@@ -74,6 +76,17 @@ test("buildShareDescription summarizes ISO and UFT counts", () => {
     "ISO: 1 item — public trade list on ShardStash.",
   );
   assert.equal(buildShareDescription({ iso: "", uft: "" }), "Public trade list on ShardStash.");
+});
+
+test("buildShareDescription counts sanitized array fields", () => {
+  const sanitized = sanitizeShareForMeta({
+    iso: `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`,
+    uft: "PIN-CF-01:2",
+  });
+  assert.equal(
+    buildShareDescription(sanitized),
+    "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.",
+  );
 });
 
 test("buildShareTitle uses display name", () => {
@@ -127,6 +140,74 @@ test("renderShareMetaHtml injects share-specific meta", async () => {
   };
   const html = await renderShareMetaHtml("shareId12ab", share);
   assert.match(html, /Alex&#39;s trade list on ShardStash/);
+});
+
+test("renderShareMetaHtml injects ISO/UFT counts in og and twitter descriptions", async () => {
+  const isoCsv = `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`;
+  const html = await renderShareMetaHtml("shareId12ab", {
+    displayName: "Pat",
+    iso: isoCsv,
+    uft: "PIN-CF-01:2",
+  });
+  const description = "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.";
+  const escaped = escapeHtmlAttr(description);
+  assert.match(
+    html,
+    new RegExp(`property="og:description" content="${escaped.replaceAll("$", "\\$")}"`),
+  );
+  assert.match(
+    html,
+    new RegExp(`name="twitter:description" content="${escaped.replaceAll("$", "\\$")}"`),
+  );
+});
+
+test("renderShareMeta handler uses Firestore csv lists for og and twitter descriptions", async () => {
+  const shareId = "shareId12ab";
+  const isoCsv = `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`;
+  const doc = {
+    displayName: "Pat",
+    iso: isoCsv,
+    uft: "PIN-CF-01:2",
+    ownerUid: "user-1",
+    version: 2,
+    updatedAt: {},
+  };
+
+  __test.setShareSnapshotLoaderForTests(async (id) => {
+    assert.equal(id, shareId);
+    return doc;
+  });
+
+  const expectedDescription = "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.";
+  const escapedDescription = escapeHtmlAttr(expectedDescription);
+
+  const res = {
+    statusCode: 200,
+    headers: {},
+    body: "",
+    setHeader(key, value) {
+      this.headers[key] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    send(body) {
+      this.body = body;
+      return this;
+    },
+  };
+
+  await renderShareMeta({ path: `/t/${shareId}`, url: `/t/${shareId}` }, res);
+  assert.equal(res.statusCode, 200);
+  assert.match(
+    res.body,
+    new RegExp(`property="og:description" content="${escapedDescription.replaceAll("$", "\\$")}"`),
+  );
+  assert.match(
+    res.body,
+    new RegExp(`name="twitter:description" content="${escapedDescription.replaceAll("$", "\\$")}"`),
+  );
 });
 
 test("sanitizeShareForMeta parses csv iso/uft for full-list OG counts", () => {

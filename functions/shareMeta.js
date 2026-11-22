@@ -15,7 +15,6 @@ const CACHE_CONTROL_MISS = "public, max-age=300, s-maxage=300";
 const SHARE_ID_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
 const HOSTED_SHELL_TTL_MS = 60_000;
 const HOSTED_SHELL_FETCH_MS = 2_000;
-/** Matches Firestore rules full list validation cap. */
 const {
   parseIsoSkuField,
   parseUftSkuField,
@@ -137,9 +136,16 @@ function sanitizeShareForMeta(share) {
   return sanitizeIsoUftForMeta(share);
 }
 
+function listCount(value, parseField) {
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+  return parseField(value).length;
+}
+
 function buildShareDescription(share) {
-  const isoCount = parseIsoSkuField(share?.iso).length;
-  const uftCount = parseUftSkuField(share?.uft).length;
+  const isoCount = listCount(share?.iso, parseIsoSkuField);
+  const uftCount = listCount(share?.uft, parseUftSkuField);
   const parts = [];
   if (isoCount > 0) {
     parts.push(`ISO: ${isoCount} item${isoCount === 1 ? "" : "s"}`);
@@ -235,7 +241,13 @@ function buildMetaFromShare(share, shareId) {
   };
 }
 
+/** @type {((shareId: string) => Promise<Record<string, unknown> | null>) | null} */
+let shareSnapshotLoaderOverride = null;
+
 async function loadShareSnapshot(shareId) {
+  if (shareSnapshotLoaderOverride) {
+    return shareSnapshotLoaderOverride(shareId);
+  }
   if (!shareId || !SHARE_ID_PATTERN.test(shareId)) {
     return null;
   }
@@ -244,7 +256,8 @@ async function loadShareSnapshot(shareId) {
   if (!snapshot.exists) {
     return null;
   }
-  return sanitizeShareForMeta(snapshot.data());
+  const data = snapshot.data();
+  return isShareActive(data) ? data : null;
 }
 
 async function renderShareMetaHtml(shareId, share) {
@@ -342,6 +355,9 @@ module.exports = {
     resetBaseHtmlCache() {
       testBaseHtmlOverride = null;
       hostedShellCache = { html: null, fetchedAt: 0 };
+    },
+    setShareSnapshotLoaderForTests(loader) {
+      shareSnapshotLoaderOverride = typeof loader === "function" ? loader : null;
     },
     setHostedShellFetchForTests(fetchImpl) {
       module.exports.__test._fetchOverride = fetchImpl;

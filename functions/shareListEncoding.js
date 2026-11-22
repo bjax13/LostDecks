@@ -58,15 +58,26 @@ function isValidShareUftField(value) {
   );
 }
 
-function sanitizeIsoUftForMeta(share) {
-  const iso = parseIsoSkuField(share?.iso).filter((id) => SHARE_SKU_PATTERN.test(id));
-  const uft = parseUftSkuField(share?.uft).filter(
-    (row) =>
-      SHARE_SKU_PATTERN.test(row.skuId) &&
-      Number.isInteger(row.quantity) &&
-      row.quantity >= 1 &&
-      row.quantity <= 999,
+function isSanitizedUftRow(row) {
+  return (
+    row &&
+    typeof row.skuId === "string" &&
+    Number.isInteger(row.quantity) &&
+    row.quantity >= 1 &&
+    row.quantity <= 999 &&
+    SHARE_SKU_PATTERN.test(row.skuId)
   );
+}
+
+function sanitizeIsoUftForMeta(share) {
+  const isoRaw = share?.iso;
+  const iso = Array.isArray(isoRaw)
+    ? isoRaw.filter((id) => typeof id === "string" && SHARE_SKU_PATTERN.test(id))
+    : parseIsoSkuField(isoRaw).filter((id) => SHARE_SKU_PATTERN.test(id));
+  const uftRaw = share?.uft;
+  const uft = Array.isArray(uftRaw)
+    ? uftRaw.filter(isSanitizedUftRow)
+    : parseUftSkuField(uftRaw).filter(isSanitizedUftRow);
   return { ...share, iso, uft };
 }
 
