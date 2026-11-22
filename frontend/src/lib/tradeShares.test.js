@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildShareDocument,
   generateShareId,
@@ -8,13 +8,9 @@ import {
 import { DEFAULT_MATCH_KEEP_BY_LANE } from "./userPreferences.js";
 
 describe("tradeShares", () => {
-  it("generateShareId returns URL-safe ids", () => {
-    vi.spyOn(crypto, "getRandomValues").mockImplementation((bytes) => {
-      bytes.fill(7);
-      return bytes;
-    });
-    const id = generateShareId();
-    expect(id.length).toBe(9);
+  it("generateShareId returns URL-safe ids of the requested length", () => {
+    const id = generateShareId(12);
+    expect(id.length).toBe(12);
     expect(id).toMatch(/^[0-9A-Za-z]+$/);
   });
 

@@ -1,12 +1,4 @@
-import {
-  deleteDoc,
-  deleteField,
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { deleteField, doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { buildIsoUftSkuLists } from "../pages/Collection/utils/isoUftPost.js";
 import { db } from "./firebase";
 import { updateUserPreferences } from "./userPreferences.js";
@@ -16,11 +8,21 @@ export const SHARE_DOC_VERSION = 1;
 export const SHARE_STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function generateShareId(byteLength = 9) {
-  const bytes = new Uint8Array(byteLength);
-  crypto.getRandomValues(bytes);
+  const alphabetLength = SHARE_ID_ALPHABET.length;
+  const unbiasedLimit = Math.floor(256 / alphabetLength) * alphabetLength;
   let id = "";
-  for (const byte of bytes) {
-    id += SHARE_ID_ALPHABET[byte % SHARE_ID_ALPHABET.length];
+  while (id.length < byteLength) {
+    const bytes = new Uint8Array(byteLength);
+    crypto.getRandomValues(bytes);
+    for (const byte of bytes) {
+      if (byte >= unbiasedLimit) {
+        continue;
+      }
+      id += SHARE_ID_ALPHABET[byte % alphabetLength];
+      if (id.length >= byteLength) {
+        break;
+      }
+    }
   }
   return id;
 }
@@ -68,7 +70,12 @@ export async function fetchShareSnapshot(shareId) {
     return null;
   }
 
-  return { id: snapshot.id, ...snapshot.data() };
+  const data = snapshot.data();
+  if (data?.revokedAt) {
+    return null;
+  }
+
+  return { id: snapshot.id, ...data };
 }
 
 export async function enablePublicShare({ userId, shareId, payload }) {
@@ -98,7 +105,12 @@ export async function revokePublicShare({ userId, shareId }) {
     throw new Error("Firestore or user is not configured.");
   }
 
-  await deleteDoc(doc(db, "shares", shareId));
+  await updateDoc(doc(db, "shares", shareId), {
+    iso: [],
+    uft: [],
+    revokedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
   await updateUserPreferences(userId, { publicShareId: deleteField() });
 }
 
