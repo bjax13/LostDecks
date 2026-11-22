@@ -21,8 +21,18 @@ export function ownedQuantityFromEntry(entry) {
  * Match Firestore collection docs: skuId field, cardId + finish (cards), pin cardId,
  * or a catalog SKU stored only in the document id (legacy rows).
  */
+function rawLegacySkuField(entry) {
+  for (const key of ["skuId", "sku", "skuid"]) {
+    const raw = entry?.[key];
+    if (typeof raw === "string" && raw.trim().length > 0) {
+      return raw.trim();
+    }
+  }
+  return "";
+}
+
 export function resolveCollectionEntrySkuId(entry) {
-  const rawSku = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
+  const rawSku = rawLegacySkuField(entry);
   if (rawSku) {
     return rawSku.toUpperCase();
   }

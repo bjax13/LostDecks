@@ -1,5 +1,8 @@
 import { resolveSkuId } from "../../../data/collectibles";
-import { normalizeQuantity } from "../../Collection/collectionPresentation.jsx";
+import {
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "../../Collection/utils/collectionEntrySku.js";
 
 /**
  * Aggregate owned quantities by skuId from the user's collection entries.
@@ -12,10 +15,11 @@ export function buildOwnedQuantityBySkuId(entries) {
   }
 
   for (const entry of entries) {
-    if (!entry?.skuId) continue;
-    const quantity = Math.max(0, normalizeQuantity(entry));
+    const skuId = resolveCollectionEntrySkuId(entry);
+    if (!skuId) continue;
+    const quantity = Math.max(0, ownedQuantityFromEntry(entry));
     if (quantity <= 0) continue;
-    ownedBySkuId[entry.skuId] = (ownedBySkuId[entry.skuId] ?? 0) + quantity;
+    ownedBySkuId[skuId] = (ownedBySkuId[skuId] ?? 0) + quantity;
   }
 
   return ownedBySkuId;

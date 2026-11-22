@@ -40,8 +40,8 @@ export function useUserCollection(ownerUid) {
       collectionQuery,
       (snapshot) => {
         const nextEntries = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         setState({ entries: nextEntries, status: "ready", error: null });
       },

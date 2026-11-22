@@ -20,6 +20,10 @@ describe("collectionEntrySku", () => {
       "LT24-CHM-01-DUN",
     );
     expect(resolveCollectionEntrySkuId({ id: "PIN-CF-01", quantity: 1 })).toBe("PIN-CF-01");
+    expect(resolveCollectionEntrySkuId({ sku: "PIN-CF-01", quantity: 1 })).toBe("PIN-CF-01");
+    expect(resolveCollectionEntrySkuId({ skuid: "lt24-chm-01-dun", quantity: 1 })).toBe(
+      "LT24-CHM-01-DUN",
+    );
   });
 
   it("reads quantity from legacy count/copies fields", () => {
