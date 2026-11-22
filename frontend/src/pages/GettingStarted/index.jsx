@@ -191,6 +191,7 @@ export default function GettingStartedPage() {
   const pendingSaveRef = useRef(false);
   const chasmTrackedRef = useRef(false);
   const collectionSeedPendingRef = useRef(false);
+  const fullPinReviewSeededRef = useRef(false);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -240,6 +241,15 @@ export default function GettingStartedPage() {
     setProfile(nextProfile);
   };
 
+  const resolveCollectionSeedSource = () => {
+    if (!user?.uid || collectionLoading) {
+      collectionSeedPendingRef.current = Boolean(user?.uid);
+      return null;
+    }
+    collectionSeedPendingRef.current = false;
+    return entries ?? [];
+  };
+
   const applyManualReviewSeed = (tree, sourceEntries) => {
     if (sourceEntries?.length) {
       const seeded = deriveReviewStateFromEntries(sourceEntries, tree);
@@ -254,22 +264,16 @@ export default function GettingStartedPage() {
     reviewEditor.resetExpandedReviewIds(newCoverage);
   };
 
+  const seedManualReviewForTree = (tree) => {
+    applyManualReviewSeed(tree, resolveCollectionSeedSource());
+  };
+
   const beginManualReview = (nextCollectibleType = collectibleType) => {
     const tree = filterGettingStartedTree(
       gettingStartedTree,
       nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH,
     );
-    let seededEntries = [];
-    if (user?.uid) {
-      if (collectionLoading) {
-        collectionSeedPendingRef.current = true;
-        seededEntries = null;
-      } else {
-        collectionSeedPendingRef.current = false;
-        seededEntries = entries ?? [];
-      }
-    }
-    applyManualReviewSeed(tree, seededEntries);
+    seedManualReviewForTree(tree);
     goToStep("manual", nextCollectibleType);
   };
 
@@ -350,6 +354,19 @@ export default function GettingStartedPage() {
       collectibleType: COLLECTIBLE_TYPE_PINS,
     });
   }, [chasmFriendsShortcut]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pins=all lands on manual without beginManualReview
+  useEffect(() => {
+    if (!fullPinReview || chasmFriendsShortcut || fullPinReviewSeededRef.current) {
+      return;
+    }
+    if (step !== "manual") {
+      return;
+    }
+    fullPinReviewSeededRef.current = true;
+    const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
+    seedManualReviewForTree(tree);
+  }, [fullPinReview, chasmFriendsShortcut, step]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: seed step 2 once when collection finishes loading
   useEffect(() => {
@@ -471,11 +488,11 @@ export default function GettingStartedPage() {
   };
 
   const openFullPinReview = () => {
-    const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
     setCollectibleType(COLLECTIBLE_TYPE_PINS);
     setProfile("manual");
     setChasmSaved(false);
-    applyManualReviewSeed(tree, user?.uid && !collectionLoading ? (entries ?? []) : []);
+    const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
+    seedManualReviewForTree(tree);
     goToStep("manual", COLLECTIBLE_TYPE_PINS);
   };
 

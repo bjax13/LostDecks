@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -1261,6 +1261,77 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       expect(
         screen.queryByRole("heading", { name: /which pins do you have/i }),
       ).not.toBeInTheDocument();
+    });
+
+    function FullPinReviewLoadHarness() {
+      const [collection, setCollection] = useState({ entries: [], loading: true });
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockImplementation(() => ({
+        entries: collection.entries,
+        loading: collection.loading,
+        error: null,
+      }));
+
+      return (
+        <TestMemoryRouter initialEntries={[chasmPath]}>
+          <button type="button" onClick={() => setCollection({ entries: [], loading: false })}>
+            Allow save
+          </button>
+          <button type="button" onClick={() => setCollection({ entries: [], loading: true })}>
+            Loading again
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setCollection({
+                entries: [{ id: "pin", skuId: "PIN-CF-01", quantity: 1 }],
+                loading: false,
+              })
+            }
+          >
+            Load collection
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    it("prefills full pin review after the collection snapshot loads", async () => {
+      const user = setupUser();
+      mockApplyBulkCollectionUpdate.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        issues: [],
+      });
+      render(<FullPinReviewLoadHarness />);
+
+      await user.click(screen.getByRole("button", { name: "Allow save" }));
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+      await user.click(screen.getByRole("button", { name: "Loading again" }));
+      await user.click(await screen.findByRole("link", { name: "add the rest of your pins" }));
+
+      const chasmCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+      expect(within(chasmCoverage).getByRole("button", { name: "None" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      await user.click(screen.getByRole("button", { name: "Load collection" }));
+
+      await waitFor(() => {
+        expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+      });
+
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+      const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)[0];
+      expect(call.rows.find((row) => row.skuId === "PIN-CF-01")?.quantity).toBe("1");
+      expect(
+        call.rows.filter((row) => row.skuId === "PIN-CF-01" && row.quantity === "0"),
+      ).toHaveLength(0);
     });
 
     it("opens the unfiltered pin review from the after-save link", async () => {
