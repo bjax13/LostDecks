@@ -4,6 +4,7 @@ import {
   buildCollectionRows,
   buildGettingStartedNonDestructiveSaveRows,
   buildGettingStartedSaveRows,
+  buildSessionChangedCollectionRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -580,6 +581,36 @@ describe("gettingStartedCatalog", () => {
     ]);
     expect(pinSkuIds).toContain("PIN-CPS1-00");
     expect(pinSkuIds.length).toBeGreaterThan(5);
+  });
+
+  it("emits rows only for SKUs whose effective quantity changed since a session baseline", () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_BOTH);
+    const baseline = deriveReviewStateFromEntries(
+      [
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "LT24-ELS-01-DUN", quantity: 1 },
+      ],
+      reviewTree,
+    );
+    const chasmGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    const coverage = { ...baseline.coverage };
+    const quantities = { ...baseline.quantities, "LT24-ELS-01-DUN": "2" };
+    coverage[chasmGroup.id] = "none";
+
+    const rows = buildSessionChangedCollectionRows(
+      coverage,
+      quantities,
+      baseline,
+      reviewTree,
+      undefined,
+    );
+    const skuIds = rows.map((row) => row.skuId);
+
+    expect(skuIds).toEqual(["LT24-ELS-01-DUN"]);
+    expect(rows[0].quantity).toBe("2");
+    expect(skuIds).not.toContain("LT24-CHM-01-DUN");
   });
 
   it("never emits destructive rows for non-destructive Getting Started saves", () => {
