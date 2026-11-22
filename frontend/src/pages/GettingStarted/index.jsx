@@ -363,12 +363,7 @@ export default function GettingStartedPage() {
       ) {
         setProfile("manual");
       }
-      if (Object.keys(coverage).length === 0) {
-        beginManualReview(nextCollectibleType);
-        return;
-      }
-      reviewEditor.resetExpandedReviewIds(coverage);
-      goToStep("manual", nextCollectibleType);
+      beginManualReview(nextCollectibleType);
       return;
     }
 

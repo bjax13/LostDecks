@@ -363,6 +363,25 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeChecked();
   });
 
+  it("re-seeds the review tree when collectible type changes before using the progress indicator", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^story deck cards$/i,
+      reviewHeading: /review your cards/i,
+    });
+    expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /about you/i }));
+    await chooseCollectibleType(user, /^both$/i);
+
+    await user.click(screen.getByRole("button", { name: /card review/i }));
+
+    expect(screen.getByRole("heading", { name: /review your collection/i })).toBeInTheDocument();
+    expect(screen.getByText("ChasmFriends Pins")).toBeInTheDocument();
+  });
+
   it("lets collectors jump back to earlier steps from the progress indicator", async () => {
     const user = setupUser();
     renderPage();
