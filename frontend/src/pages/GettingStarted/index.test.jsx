@@ -1624,6 +1624,52 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/[1-9]/);
   });
 
+  it("deletes an id-only owned card when the user sets that story group to None and saves", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    const existingEntries = [
+      { id: "LT24-CHM-01-DUN", quantity: 1 },
+      { id: "PIN-CF-01", quantity: 1 },
+    ];
+    mockUseUserCollection.mockReturnValue({
+      entries: existingEntries,
+      status: "ready",
+      error: null,
+    });
+    mockApplyBulkCollectionUpdate.mockResolvedValue({
+      created: 0,
+      updated: 0,
+      deleted: 1,
+      issues: [],
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const chasmCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    await waitFor(() => {
+      expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    await user.click(within(chasmCoverage).getByRole("button", { name: "None" }));
+    await confirmNoneCoverage(user);
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+    const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)?.[0];
+    expect(call.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "0" }),
+      ]),
+    );
+    expect(call.rows.some((row) => row.skuId === "PIN-CF-01")).toBe(false);
+    expect(call.existingEntries).toEqual(existingEntries);
+  });
+
   it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
     const user = setupUser();
     renderPage();
@@ -1699,6 +1745,102 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
         </TestMemoryRouter>
       );
     }
+
+    it("partially hydrates chasmfriends when entries arrive after a scoped pin edit", async () => {
+      function ChasmEntriesHarness() {
+        const [entries, setEntries] = useState([]);
+        mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+        mockUseUserCollection.mockImplementation(() => ({
+          entries,
+          status: "ready",
+          error: null,
+        }));
+
+        return (
+          <TestMemoryRouter initialEntries={[chasmPath]}>
+            <button type="button" onClick={() => setEntries([{ id: "PIN-CF-02", quantity: 1 }])}>
+              Load saved Howlerina
+            </button>
+            <GettingStartedPage />
+          </TestMemoryRouter>
+        );
+      }
+
+      const user = setupUser();
+      render(<ChasmEntriesHarness />);
+
+      await user.click(
+        screen.getByRole("button", { name: /increase chasmfriends pins shredhead quantity/i }),
+      );
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Load saved Howlerina" }));
+
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins howlerina quantity, 0$/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("hydrates owned chasm pins when Firestore docs only store SKUs in document ids", async () => {
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockReturnValue({
+        entries: [{ id: "PIN-CF-01", quantity: 1 }],
+        status: "ready",
+        error: null,
+      });
+      renderPage(chasmPath);
+
+      const coverage = await screen.findByRole("group", { name: /chasmfriends pins coverage/i });
+      await waitFor(() => {
+        expect(within(coverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+      });
+      expect(
+        screen.getByRole("group", { name: /chasmfriends pins shredhead quantity, 1$/i }),
+      ).toBeInTheDocument();
+    });
+
+    it("deletes an id-only owned pin after explicit None on the chasmfriends shortcut", async () => {
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      const existingEntries = [{ id: "PIN-CF-01", quantity: 1 }];
+      mockUseUserCollection.mockReturnValue({
+        entries: existingEntries,
+        status: "ready",
+        error: null,
+      });
+      mockApplyBulkCollectionUpdate.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        deleted: 1,
+        issues: [],
+      });
+      const user = setupUser();
+      renderPage(chasmPath);
+
+      const coverage = await screen.findByRole("group", { name: /chasmfriends pins coverage/i });
+      await waitFor(() => {
+        expect(within(coverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+      });
+
+      await user.click(within(coverage).getByRole("button", { name: "None" }));
+      await confirmNoneCoverage(user);
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+      const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)?.[0];
+      expect(call.rows).toEqual([expect.objectContaining({ skuId: "PIN-CF-01", quantity: "0" })]);
+      expect(call.existingEntries).toEqual(existingEntries);
+      expect(call.allowPins).toBe(true);
+    });
 
     it("opens the five ChasmFriends pins expanded, with pin-only copy", async () => {
       const user = setupUser();

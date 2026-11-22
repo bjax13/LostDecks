@@ -480,7 +480,7 @@ export default function GettingStartedPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
-    if (step !== "manual" || collectionStatus !== "ready" || chasmFriendsShortcut) {
+    if (step !== "manual" || collectionStatus !== "ready") {
       return;
     }
 

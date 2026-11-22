@@ -101,4 +101,11 @@ describe("mergePickRows", () => {
       mergePickRows({ "PIN-CF-01": 1 }, [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }]),
     ).toEqual([]);
   });
+
+  it("treats presence-only legacy docs as already owned x1", () => {
+    expect(mergePickRows({ "PIN-CF-01": 1 }, [{ id: "PIN-CF-01" }])).toEqual([]);
+    expect(mergePickRows({ "PIN-CF-01": 2 }, [{ id: "PIN-CF-01" }])).toEqual([
+      { skuId: "PIN-CF-01", quantity: 2 },
+    ]);
+  });
 });

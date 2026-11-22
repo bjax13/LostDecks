@@ -10,14 +10,11 @@ vi.mock("../../../data/collectibles", () => ({
     if (!finish) return null;
     return `${collectible.id}-${String(finish).toUpperCase()}`;
   },
-}));
-
-vi.mock("../../Collection/collectionPresentation.jsx", () => ({
-  normalizeQuantity: (entry) => {
-    if (typeof entry.quantity === "number") return entry.quantity;
-    if (typeof entry.count === "number") return entry.count;
-    return 1;
-  },
+  getSkuRecord: (skuId) =>
+    ["LT24-ELS-01-DUN", "LT24-ELS-01-FOIL", "PIN-CF-01"].includes(String(skuId).toUpperCase())
+      ? { skuId }
+      : null,
+  toSkuId: (cardId, finish) => `${cardId}-${finish}`,
 }));
 
 describe("buildOwnedQuantityBySkuId", () => {
@@ -38,6 +35,12 @@ describe("buildOwnedQuantityBySkuId", () => {
     ).toEqual({
       "LT24-ELS-01-DUN": 3,
       "LT24-ELS-01-FOIL": 3,
+    });
+  });
+
+  it("counts presence-only legacy docs as owned x1", () => {
+    expect(buildOwnedQuantityBySkuId([{ id: "PIN-CF-01" }])).toEqual({
+      "PIN-CF-01": 1,
     });
   });
 });

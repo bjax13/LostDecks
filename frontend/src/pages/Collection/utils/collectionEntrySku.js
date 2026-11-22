@@ -13,8 +13,30 @@ export function normalizeQuantityValue(value) {
   return 0;
 }
 
+const OWNED_QUANTITY_FIELDS = ["quantity", "count", "copies", "total"];
+
+/**
+ * Owned quantity from a Firestore collection doc.
+ * Matches collectionPresentation: missing quantity fields imply 1; explicit zero stays zero.
+ */
 export function ownedQuantityFromEntry(entry) {
-  return normalizeQuantityValue(entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total);
+  if (!entry) {
+    return 0;
+  }
+  for (const key of OWNED_QUANTITY_FIELDS) {
+    if (!Object.hasOwn(entry, key)) {
+      continue;
+    }
+    const raw = entry[key];
+    if (raw == null) {
+      continue;
+    }
+    if (typeof raw === "string" && raw.trim().length === 0) {
+      continue;
+    }
+    return normalizeQuantityValue(raw);
+  }
+  return 1;
 }
 
 /** Deterministic Firestore doc id for a new bulk row (owner-scoped; not a global SKU path). */
@@ -31,8 +53,18 @@ export function collectionEntryDocId(ownerUid, skuId) {
  * Match Firestore collection docs: skuId field, cardId + finish (cards), pin cardId,
  * or a catalog SKU stored only in the document id (legacy rows).
  */
+function rawLegacySkuField(entry) {
+  for (const key of ["skuId", "sku", "skuid"]) {
+    const raw = entry?.[key];
+    if (typeof raw === "string" && raw.trim().length > 0) {
+      return raw.trim();
+    }
+  }
+  return "";
+}
+
 export function resolveCollectionEntrySkuId(entry) {
-  const rawSku = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
+  const rawSku = rawLegacySkuField(entry);
   if (rawSku) {
     return rawSku.toUpperCase();
   }

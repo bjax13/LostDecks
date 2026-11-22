@@ -2,6 +2,7 @@ import { SITE_URL } from "../../../brand.js";
 import { datasetSkus, datasetStories, getCollectibleRecord } from "../../../data/collectibles";
 import { normalizeTradeFlag } from "../../../lib/tradeFlag.js";
 import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
+import { ownedQuantityFromEntry, resolveCollectionEntrySkuId } from "./collectionEntrySku.js";
 
 /** Story deck codes → single-letter shorthand prefix (ELS→E, LOP→L, CHM→C). */
 export const SHORTHAND_STORY_PREFIX = Object.freeze({
@@ -77,30 +78,6 @@ export function buildShareUrl({ shareId = null, campaign = "iso_uft" } = {}) {
     utm_campaign: campaign,
   });
   return `${SITE_URL}/${path}?${params.toString()}`;
-}
-
-function coerceQuantity(value) {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) {
-      return parsed;
-    }
-  }
-  return null;
-}
-
-function normalizeQuantity(entry) {
-  const candidates = [entry.quantity, entry.count, entry.copies, entry.total];
-  for (const candidate of candidates) {
-    const parsed = coerceQuantity(candidate);
-    if (parsed != null) {
-      return parsed;
-    }
-  }
-  return 1;
 }
 
 function skuKey(skuId) {
@@ -196,19 +173,11 @@ function matchSectionSku(sku, predicate) {
   return card;
 }
 
-function resolveEntrySkuId(entry) {
-  const rawSku = entry.skuId ? String(entry.skuId).trim() : "";
-  if (rawSku) {
-    return skuKey(rawSku);
-  }
-  return null;
-}
-
 function buildTradeFlagsBySku(entries) {
   const flags = new Map();
   if (!Array.isArray(entries)) return flags;
   for (const entry of entries) {
-    const skuId = resolveEntrySkuId(entry);
+    const skuId = resolveCollectionEntrySkuId(entry);
     const flag = normalizeTradeFlag(entry?.tradeFlag);
     if (!skuId || !flag) continue;
     flags.set(skuId, flag);
@@ -221,10 +190,10 @@ function buildOwnedSkuCounts(entries) {
   let skippedEntries = 0;
 
   entries.forEach((entry) => {
-    const quantity = Math.max(0, normalizeQuantity(entry));
+    const quantity = ownedQuantityFromEntry(entry);
     if (!quantity) return;
 
-    const skuId = resolveEntrySkuId(entry);
+    const skuId = resolveCollectionEntrySkuId(entry);
     if (!skuId) {
       skippedEntries += 1;
       return;

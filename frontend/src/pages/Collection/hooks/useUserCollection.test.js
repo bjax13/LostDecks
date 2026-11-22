@@ -118,6 +118,25 @@ describe("useUserCollection", () => {
       );
     });
 
+    it("keeps the Firestore document id when stored fields also include an id property", () => {
+      const { result } = renderHook(() => useUserCollection("user-abc"));
+
+      const onNext = getOnNext();
+      act(() =>
+        onNext(
+          createFakeSnapshot([
+            createFakeDoc("PIN-CF-01", {
+              ownerUid: "user-abc",
+              quantity: 1,
+              id: "stale-body-id",
+            }),
+          ]),
+        ),
+      );
+
+      expect(result.current.entries[0].id).toBe("PIN-CF-01");
+    });
+
     it("on success: maps prod-shaped id-only docs to entries and marks ready", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 

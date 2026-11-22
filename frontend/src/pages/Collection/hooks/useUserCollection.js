@@ -43,8 +43,8 @@ export function useUserCollection(ownerUid) {
       { includeMetadataChanges: true },
       (snapshot) => {
         const nextEntries = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         const fromServer = snapshot.metadata?.fromCache === false;
         setState((previous) => ({
