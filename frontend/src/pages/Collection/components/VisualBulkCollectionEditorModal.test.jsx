@@ -44,46 +44,42 @@ describe("VisualBulkCollectionEditorModal", () => {
     );
   }
 
-  it(
-    "saves only session-edited SKUs against live entries when collection changed while open",
-    async () => {
-      const user = userEvent.setup();
-      const { rerender } = renderModal(openEntries);
+  it("saves only session-edited SKUs against live entries when collection changed while open", async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderModal(openEntries);
 
-      rerender(
-        <VisualBulkCollectionEditorModal
-          isOpen
-          onClose={onClose}
-          ownerUid={ownerUid}
-          entries={liveEntriesAfterRemoteChange}
-          onSaved={onSaved}
-          sessionKey="test-session"
-        />,
-      );
+    rerender(
+      <VisualBulkCollectionEditorModal
+        isOpen
+        onClose={onClose}
+        ownerUid={ownerUid}
+        entries={liveEntriesAfterRemoteChange}
+        onSaved={onSaved}
+        sessionKey="test-session"
+      />,
+    );
 
-      const increaseButton = await screen.findByRole(
-        "button",
-        { name: "Increase Elsecaller Story Dun Dun #1 quantity" },
-        { timeout: 10_000 },
-      );
-      await user.click(increaseButton);
+    const increaseButton = await screen.findByRole(
+      "button",
+      { name: "Increase Elsecaller Story Dun Dun #1 quantity" },
+      { timeout: 10_000 },
+    );
+    await user.click(increaseButton);
 
-      await user.click(await screen.findByRole("button", { name: /save collection/i }));
+    await user.click(await screen.findByRole("button", { name: /save collection/i }));
 
-      await waitFor(() => {
-        expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledTimes(1);
-      });
+    await waitFor(() => {
+      expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledTimes(1);
+    });
 
-      const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
-      expect(call.ownerUid).toBe(ownerUid);
-      expect(call.existingEntries).toEqual(liveEntriesAfterRemoteChange);
-      expect(call.rows).toEqual([
-        expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: "2" }),
-      ]);
-      expect(call.rows.some((row) => row.skuId === "LT24-CHM-01-DUN")).toBe(false);
-      expect(onSaved).toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalled();
-    },
-    15_000,
-  );
+    const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
+    expect(call.ownerUid).toBe(ownerUid);
+    expect(call.existingEntries).toEqual(liveEntriesAfterRemoteChange);
+    expect(call.rows).toEqual([
+      expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: "2" }),
+    ]);
+    expect(call.rows.some((row) => row.skuId === "LT24-CHM-01-DUN")).toBe(false);
+    expect(onSaved).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  }, 15_000);
 });
