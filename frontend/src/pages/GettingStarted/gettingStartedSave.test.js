@@ -32,8 +32,8 @@ vi.mock("../../data/collectibles", async (importOriginal) => {
 });
 
 const PROD_EXISTING = [
-  { id: "LT24-CHM-01-DUN", skuId: "LT24-CHM-01-DUN", quantity: 1 },
-  { id: "PIN-CF-01", skuId: "PIN-CF-01", quantity: 1 },
+  { id: "LT24-CHM-01-DUN", quantity: 1 },
+  { id: "PIN-CF-01", quantity: 1 },
 ];
 
 describe("Getting Started non-destructive save", () => {
