@@ -3,6 +3,7 @@ import { datasetSkus } from "../../data/collectibles";
 import {
   buildCollectionRows,
   buildGettingStartedNonDestructiveSaveRows,
+  buildGettingStartedSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -486,6 +487,22 @@ describe("gettingStartedCatalog", () => {
     expect(coverage[emptyGroup.id]).toBe("none");
   });
 
+  it("resolves prod-shaped docs when skuId is only in the Firestore document id", () => {
+    const { coverage, quantities } = deriveReviewStateFromEntries(
+      [
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "PIN-CF-01", copies: 1 },
+      ],
+      gettingStartedTree,
+    );
+    expect(quantities["LT24-CHM-01-DUN"]).toBe("1");
+    expect(quantities["PIN-CF-01"]).toBe("1");
+    const chasmDunGroup = gettingStartedTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    expect(coverage[chasmDunGroup.id]).toBe("some");
+  });
+
   it("resolves legacy Firestore docs stored as cardId + finish with count", () => {
     const { coverage, quantities } = deriveReviewStateFromEntries(
       [
@@ -565,11 +582,11 @@ describe("gettingStartedCatalog", () => {
     expect(pinSkuIds.length).toBeGreaterThan(5);
   });
 
-  it("never emits zero or downgrades for non-destructive Getting Started saves", () => {
+  it("never emits destructive rows for non-destructive Getting Started saves", () => {
     const coverage = createCoverageState("none", gettingStartedTree);
     const existing = [
-      { id: "a", skuId: "LT24-CHM-01-DUN", quantity: 1 },
-      { id: "b", skuId: "PIN-CF-01", quantity: 1 },
+      { id: "LT24-CHM-01-DUN", quantity: 1 },
+      { id: "PIN-CF-01", quantity: 1 },
     ];
 
     expect(
@@ -587,5 +604,14 @@ describe("gettingStartedCatalog", () => {
       existing,
     );
     expect(raised).toEqual([expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "2" })]);
+  });
+
+  it("does not emit zero rows for previously seeded SKUs in legacy save rows helper", () => {
+    const coverage = createCoverageState("none", gettingStartedTree);
+    const ownedSku = "LT24-CHM-01-DUN";
+    const seededRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree, {
+      seededQuantities: { [ownedSku]: "1" },
+    });
+    expect(seededRows.some((row) => row.skuId === ownedSku && row.quantity === "0")).toBe(false);
   });
 });

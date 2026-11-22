@@ -5,6 +5,9 @@ import {
   MAX_COLLECTION_QUANTITY,
 } from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
+import { ownedQuantityFromEntry, resolveCollectionEntrySkuId } from "./collectionEntrySku.js";
+
+export { ownedQuantityFromEntry, resolveCollectionEntrySkuId } from "./collectionEntrySku.js";
 
 const csvHeaders = ["skuId", "quantity", "notes"];
 
@@ -23,19 +26,6 @@ export function getStoryDeckCatalogSkus() {
   return datasetSkus.filter((sku) => !isPinSkuId(sku.skuId));
 }
 
-function normalizeQuantityValue(value) {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.max(0, Math.floor(value));
-  }
-  if (typeof value === "string" && value.trim().length > 0) {
-    const parsed = Number(value.trim());
-    if (Number.isFinite(parsed)) {
-      return Math.max(0, Math.floor(parsed));
-    }
-  }
-  return 0;
-}
-
 /**
  * Group collection docs by uppercased skuId.
  * @returns {Map<string, { skuId: string, quantity: number, docs: Array<{id: string, notes?: string}> }>}
@@ -44,14 +34,11 @@ export function groupCollectionEntriesBySku(entries) {
   const grouped = new Map();
 
   for (const entry of entries ?? []) {
-    const rawSkuId = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
-    if (!rawSkuId) {
+    const key = resolveCollectionEntrySkuId(entry);
+    if (!key) {
       continue;
     }
-    const key = rawSkuId.toUpperCase();
-    const quantity = normalizeQuantityValue(
-      entry.quantity ?? entry.count ?? entry.copies ?? entry.total,
-    );
+    const quantity = ownedQuantityFromEntry(entry);
     const existing = grouped.get(key);
     if (!existing) {
       grouped.set(key, {

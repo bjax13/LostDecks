@@ -16,6 +16,7 @@ import { mergePickRows, savePendingPicks } from "../../lib/pendingPicks.js";
 import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
+import { collectionEntriesHydrationKey } from "../Collection/utils/collectionEntrySku.js";
 import {
   buildGettingStartedNonDestructiveSaveRows,
   COLLECTIBLE_TYPE_BOTH,
@@ -191,6 +192,7 @@ export default function GettingStartedPage() {
   const chasmTrackedRef = useRef(false);
   const collectionSeedPendingRef = useRef(false);
   const collectionHydratedRef = useRef(false);
+  const hydratedEntriesKeyRef = useRef("");
   const hydratedSeedQuantitiesRef = useRef({});
   const explicitZeroGroupIdsRef = useRef(new Set());
   const sessionScopedGroupIdsRef = useRef(new Set());
@@ -275,6 +277,7 @@ export default function GettingStartedPage() {
     setQuantities(seeded.quantities);
     reviewEditor.resetExpandedReviewIds(seeded.coverage);
     hydratedSeedQuantitiesRef.current = { ...seeded.quantities };
+    hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
   };
@@ -395,8 +398,15 @@ export default function GettingStartedPage() {
     }
 
     const hasEntries = (entries?.length ?? 0) > 0;
+    const hydrationKey = collectionEntriesHydrationKey(entries ?? []);
+    const userTouchedReview =
+      sessionScopedGroupIdsRef.current.size > 0 || explicitZeroGroupIdsRef.current.size > 0;
+    const entriesChangedSinceHydrate =
+      hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
     const shouldHydrate =
-      collectionSeedPendingRef.current || (!collectionHydratedRef.current && hasEntries);
+      collectionSeedPendingRef.current ||
+      (!collectionHydratedRef.current && hasEntries) ||
+      (!userTouchedReview && entriesChangedSinceHydrate);
     if (!shouldHydrate) {
       return;
     }
@@ -415,6 +425,7 @@ export default function GettingStartedPage() {
     }
     collectionHydratedRef.current = false;
     collectionSeedPendingRef.current = false;
+    hydratedEntriesKeyRef.current = "";
     hydratedSeedQuantitiesRef.current = {};
     explicitZeroGroupIdsRef.current = new Set();
     sessionScopedGroupIdsRef.current = new Set();

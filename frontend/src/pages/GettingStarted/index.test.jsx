@@ -1136,6 +1136,33 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(call.rows).toEqual([]);
   });
 
+  it("hydrates manual review when Firestore docs only store sku ids in document ids", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "PIN-CF-01", quantity: 1 },
+      ],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const chasmCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    await waitFor(() => {
+      expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+    expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/[1-9]/);
+  });
+
   it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
     const user = setupUser();
     renderPage();

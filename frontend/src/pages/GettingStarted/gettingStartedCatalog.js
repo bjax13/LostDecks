@@ -3,9 +3,17 @@ import {
   datasetStories,
   getCollectibleRecord,
   pinDatasetMeta,
-  toSkuId,
 } from "../../data/collectibles";
 import { groupCollectionEntriesBySku } from "../Collection/utils/bulkImport.js";
+import {
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "../Collection/utils/collectionEntrySku.js";
+
+export {
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "../Collection/utils/collectionEntrySku.js";
 
 export const DEFAULT_MANUAL_QUANTITY = 0;
 
@@ -403,39 +411,6 @@ function inferGroupCoverageFromQuantities(group, quantities) {
 }
 
 /**
- * Match Firestore collection doc shapes: skuId when present, else cardId + finish (cards) or cardId (pins).
- */
-function ownedQuantityFromEntry(entry) {
-  const candidates = [entry?.quantity, entry?.count, entry?.copies, entry?.total];
-  for (const candidate of candidates) {
-    if (typeof candidate === "number" && Number.isFinite(candidate)) {
-      return Math.max(0, Math.floor(candidate));
-    }
-  }
-  return 0;
-}
-
-export function resolveCollectionEntrySkuId(entry) {
-  const rawSku = typeof entry?.skuId === "string" ? entry.skuId.trim() : "";
-  if (rawSku) {
-    return rawSku.toUpperCase();
-  }
-
-  const cardId = typeof entry?.cardId === "string" ? entry.cardId.trim() : "";
-  if (!cardId) {
-    return null;
-  }
-
-  const finish = entry?.finish;
-  if (finish) {
-    const resolved = toSkuId(cardId, finish);
-    return resolved ? resolved.toUpperCase() : null;
-  }
-
-  return cardId.toUpperCase();
-}
-
-/**
  * Build coverage + per-SKU quantity map from saved collection entries (for visual bulk editor).
  * @param {Array<{ skuId?: string, cardId?: string, finish?: string, quantity?: number }>} [entries]
  * @param {typeof gettingStartedTree} [tree]
@@ -495,12 +470,6 @@ function findReviewGroupForSku(skuId, tree = gettingStartedTree) {
   return null;
 }
 
-function seededQuantityForSku(seededQuantities, skuId) {
-  const raw = seededQuantities?.[skuId];
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
-}
-
 /**
  * Getting Started save rows: only net-new or higher quantities. Never emits zero or lower
  * quantities, so applyBulkCollectionUpdate cannot delete or zero existing collection docs.
@@ -530,11 +499,7 @@ export function buildGettingStartedSaveRows(
   coverage,
   quantities,
   tree,
-  {
-    seededQuantities = {},
-    explicitZeroGroupIds = new Set(),
-    sessionScopedGroupIds = new Set(),
-  } = {},
+  { explicitZeroGroupIds = new Set(), sessionScopedGroupIds = new Set() } = {},
 ) {
   const rows = buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, tree);
 
@@ -545,9 +510,6 @@ export function buildGettingStartedSaveRows(
     }
 
     const skuId = row.skuId;
-    if (seededQuantityForSku(seededQuantities, skuId) > 0) {
-      return true;
-    }
 
     const group = findReviewGroupForSku(skuId, tree);
     if (!group) {
