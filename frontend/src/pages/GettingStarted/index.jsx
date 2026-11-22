@@ -18,7 +18,7 @@ import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import { collectionEntriesHydrationKey } from "../Collection/utils/collectionEntrySku.js";
 import {
-  buildGettingStartedNonDestructiveSaveRows,
+  buildGettingStartedManualReviewSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -453,11 +453,15 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildGettingStartedNonDestructiveSaveRows(
+          rows: buildGettingStartedManualReviewSaveRows(
             coverage,
             quantities,
             reviewTree,
             entries ?? [],
+            {
+              explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
+              collectionLoaded: collectionHydratedRef.current,
+            },
           ),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),

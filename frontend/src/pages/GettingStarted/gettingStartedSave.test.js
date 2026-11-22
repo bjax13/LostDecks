@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport.js";
 import {
+  buildGettingStartedManualReviewSaveRows,
   buildGettingStartedNonDestructiveSaveRows,
   createCoverageState,
   filterGettingStartedTree,
@@ -85,5 +86,97 @@ describe("Getting Started non-destructive save", () => {
 
     expect(mockBatchDelete).not.toHaveBeenCalled();
     expect(mockBatchSet).toHaveBeenCalled();
+  });
+});
+
+describe("Getting Started explicit None removals", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockBatchCommit.mockResolvedValue(undefined);
+  });
+
+  it("deletes owned SKUs in a group the user explicitly set to None when collection is loaded", async () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree);
+    const chasmGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    const coverage = createCoverageState("all", reviewTree);
+    coverage[chasmGroup.id] = "none";
+    const explicitZeroGroupIds = new Set([chasmGroup.id]);
+
+    const rows = buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, PROD_EXISTING, {
+      explicitZeroGroupIds,
+      collectionLoaded: true,
+    });
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "0" }),
+      ]),
+    );
+    expect(rows.some((row) => row.skuId === "PIN-CF-01")).toBe(false);
+
+    const result = await applyBulkCollectionUpdate({
+      ownerUid: "user-1",
+      rows,
+      existingEntries: PROD_EXISTING,
+      allowPins: true,
+    });
+
+    expect(mockBatchDelete).toHaveBeenCalled();
+    expect(result.deleted).toBeGreaterThan(0);
+  });
+
+  it("does not emit deletes for untouched all-None review or when collection is not loaded", async () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree);
+    const coverage = createCoverageState("none", reviewTree);
+    const chasmGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+
+    expect(
+      buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, PROD_EXISTING, {
+        explicitZeroGroupIds: new Set(),
+        collectionLoaded: true,
+      }),
+    ).toEqual([]);
+
+    const explicitNone = buildGettingStartedManualReviewSaveRows(
+      coverage,
+      {},
+      reviewTree,
+      PROD_EXISTING,
+      { explicitZeroGroupIds: new Set([chasmGroup.id]), collectionLoaded: false },
+    );
+    expect(explicitNone).toEqual([]);
+
+    await applyBulkCollectionUpdate({
+      ownerUid: "user-1",
+      rows: explicitNone,
+      existingEntries: PROD_EXISTING,
+      allowPins: true,
+    });
+    expect(mockBatchDelete).not.toHaveBeenCalled();
+  });
+
+  it("ignores unresolvable existing docs when building explicit-None deletes", () => {
+    const reviewTree = filterGettingStartedTree(gettingStartedTree);
+    const chasmGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    const coverage = createCoverageState("none", reviewTree);
+    coverage[chasmGroup.id] = "none";
+    const existing = [
+      { id: "weird-doc", quantity: 1 },
+      { id: "LT24-CHM-01-DUN", quantity: 1 },
+    ];
+
+    const rows = buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, existing, {
+      explicitZeroGroupIds: new Set([chasmGroup.id]),
+      collectionLoaded: true,
+    });
+
+    expect(rows).toEqual([expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "0" })]);
+    expect(rows.some((row) => row.skuId === "weird-doc")).toBe(false);
   });
 });

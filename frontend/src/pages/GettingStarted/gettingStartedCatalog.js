@@ -494,6 +494,54 @@ export function buildGettingStartedNonDestructiveSaveRows(
   });
 }
 
+/**
+ * Manual review save: non-destructive adds, plus zero rows only for groups the user
+ * explicitly set to None after collection hydration (resolved SKUs with owned qty > 0).
+ */
+export function buildGettingStartedManualReviewSaveRows(
+  coverage,
+  quantities,
+  tree,
+  existingEntries = [],
+  { explicitZeroGroupIds = new Set(), collectionLoaded = false } = {},
+) {
+  const rows = buildGettingStartedNonDestructiveSaveRows(
+    coverage,
+    quantities,
+    tree,
+    existingEntries,
+  );
+
+  if (!collectionLoaded || explicitZeroGroupIds.size === 0) {
+    return rows;
+  }
+
+  const ownedBySku = groupCollectionEntriesBySku(existingEntries);
+  const candidates = buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, tree);
+  const rowBySku = new Map(rows.map((row) => [String(row.skuId).trim().toUpperCase(), row]));
+
+  for (const row of candidates) {
+    const quantity = Number(row.quantity);
+    if (!Number.isFinite(quantity) || quantity !== 0) {
+      continue;
+    }
+    const group = findReviewGroupForSku(row.skuId, tree);
+    if (!group || !explicitZeroGroupIds.has(group.id)) {
+      continue;
+    }
+    const skuKey = String(row.skuId).trim().toUpperCase();
+    const owned = ownedBySku.get(skuKey)?.quantity ?? 0;
+    if (owned <= 0) {
+      continue;
+    }
+    if (!rowBySku.has(skuKey)) {
+      rowBySku.set(skuKey, row);
+    }
+  }
+
+  return [...rowBySku.values()];
+}
+
 /** @deprecated Use buildGettingStartedNonDestructiveSaveRows for Getting Started saves. */
 export function buildGettingStartedSaveRows(
   coverage,
