@@ -458,6 +458,33 @@ export function buildCollectionRows(
   );
 }
 
+/**
+ * Visual bulk editor save rows: only SKUs whose effective quantity changed since the modal opened.
+ * Untouched rows are omitted so a stale open-time seed cannot delete or zero live collection docs.
+ */
+export function buildSessionChangedCollectionRows(
+  coverage,
+  quantities,
+  sessionBaseline,
+  tree = gettingStartedTree,
+  defaultQuantity = DEFAULT_MANUAL_QUANTITY,
+) {
+  const baseCoverage = sessionBaseline?.coverage ?? {};
+  const baseQuantities = sessionBaseline?.quantities ?? {};
+
+  return buildCollectionRows(coverage, quantities, defaultQuantity, tree).filter((row) => {
+    const group = findReviewGroupForSku(row.skuId, tree);
+    if (!group) {
+      return false;
+    }
+    const statusNow = coverage[group.id];
+    const statusBase = baseCoverage[group.id];
+    const qtyNow = resolveSkuQuantity(row.skuId, statusNow, quantities, defaultQuantity);
+    const qtyBase = resolveSkuQuantity(row.skuId, statusBase, baseQuantities, defaultQuantity);
+    return qtyNow !== qtyBase;
+  });
+}
+
 function findReviewGroupForSku(skuId, tree = gettingStartedTree) {
   const skuKey = String(skuId).trim().toUpperCase();
   for (const section of tree) {
