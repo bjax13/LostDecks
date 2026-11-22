@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -1029,41 +1029,63 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
   });
 
-  it("saves a zeroed default collection for a signed-in non-spreadsheet collector", async () => {
+  it("prefills step 2 from a signed-in collector's saved items", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
-      entries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
+      entries: [
+        { id: "card", skuId: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "pin", skuId: "PIN-CF-01", quantity: 1 },
+      ],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const chasmDunCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    expect(within(chasmDunCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    const chasmPinCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+    expect(within(chasmPinCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("does not zero an owned SKU when a signed-in collector saves without edits", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    const existingEntries = [{ id: "existing", skuId: "LT24-CHM-01-DUN", quantity: 1 }];
+    mockUseUserCollection.mockReturnValue({
+      entries: existingEntries,
       loading: false,
       error: null,
     });
     mockApplyBulkCollectionUpdate.mockResolvedValue({
       created: 0,
-      updated: 2,
-      deleted: 1,
+      updated: 1,
+      deleted: 0,
       issues: [],
     });
     const user = setupUser();
     renderPage();
 
     await goToCardReview(user);
-    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_step_viewed", {
-      step: "manual",
-      collectibleType: "both",
-    });
     await user.click(screen.getByRole("button", { name: "Save collection" }));
 
-    expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledWith({
-      ownerUid: "user-1",
-      rows: expect.arrayContaining([expect.objectContaining({ quantity: "0" })]),
-      existingEntries: [{ id: "existing", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
-      allowPins: true,
-    });
-    expect(mockCaptureEvent).toHaveBeenCalledWith("getting_started_saved", {
-      collectibleType: "both",
-      created: 0,
-      updated: 2,
-      deleted: 1,
-    });
+    const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
+    expect(call.existingEntries).toEqual(existingEntries);
+    const ownedRow = call.rows.find((row) => row.skuId === "LT24-CHM-01-DUN");
+    expect(ownedRow?.quantity).toBe("1");
+    expect(
+      call.rows.filter((row) => row.skuId === "LT24-CHM-01-DUN" && row.quantity === "0"),
+    ).toHaveLength(0);
   });
 
   it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
@@ -1239,6 +1261,77 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       expect(
         screen.queryByRole("heading", { name: /which pins do you have/i }),
       ).not.toBeInTheDocument();
+    });
+
+    function FullPinReviewLoadHarness() {
+      const [collection, setCollection] = useState({ entries: [], loading: true });
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockImplementation(() => ({
+        entries: collection.entries,
+        loading: collection.loading,
+        error: null,
+      }));
+
+      return (
+        <TestMemoryRouter initialEntries={[chasmPath]}>
+          <button type="button" onClick={() => setCollection({ entries: [], loading: false })}>
+            Allow save
+          </button>
+          <button type="button" onClick={() => setCollection({ entries: [], loading: true })}>
+            Loading again
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setCollection({
+                entries: [{ id: "pin", skuId: "PIN-CF-01", quantity: 1 }],
+                loading: false,
+              })
+            }
+          >
+            Load collection
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    it("prefills full pin review after the collection snapshot loads", async () => {
+      const user = setupUser();
+      mockApplyBulkCollectionUpdate.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        issues: [],
+      });
+      render(<FullPinReviewLoadHarness />);
+
+      await user.click(screen.getByRole("button", { name: "Allow save" }));
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+      await user.click(screen.getByRole("button", { name: "Loading again" }));
+      await user.click(await screen.findByRole("link", { name: "add the rest of your pins" }));
+
+      const chasmCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+      expect(within(chasmCoverage).getByRole("button", { name: "None" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      await user.click(screen.getByRole("button", { name: "Load collection" }));
+
+      await waitFor(() => {
+        expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+          "aria-pressed",
+          "true",
+        );
+      });
+
+      await user.click(screen.getByRole("button", { name: "Save collection" }));
+      const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)[0];
+      expect(call.rows.find((row) => row.skuId === "PIN-CF-01")?.quantity).toBe("1");
+      expect(
+        call.rows.filter((row) => row.skuId === "PIN-CF-01" && row.quantity === "0"),
+      ).toHaveLength(0);
     });
 
     it("opens the unfiltered pin review from the after-save link", async () => {

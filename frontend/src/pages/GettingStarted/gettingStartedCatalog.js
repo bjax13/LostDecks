@@ -410,7 +410,9 @@ export function deriveReviewStateFromEntries(entries = [], tree = gettingStarted
   for (const entry of entries) {
     if (!entry?.skuId) continue;
     const parsed = Number(entry.quantity);
-    qtyBySku.set(entry.skuId, Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
+    const quantity = Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+    const skuKey = String(entry.skuId).trim().toUpperCase();
+    qtyBySku.set(skuKey, (qtyBySku.get(skuKey) ?? 0) + quantity);
   }
 
   const quantities = {};
@@ -419,7 +421,8 @@ export function deriveReviewStateFromEntries(entries = [], tree = gettingStarted
   for (const section of tree) {
     for (const group of section.children) {
       for (const sku of group.skus) {
-        quantities[sku.skuId] = String(qtyBySku.get(sku.skuId) ?? 0);
+        const skuKey = String(sku.skuId).trim().toUpperCase();
+        quantities[sku.skuId] = String(qtyBySku.get(skuKey) ?? 0);
       }
       coverage[group.id] = inferGroupCoverageFromQuantities(group, quantities);
     }

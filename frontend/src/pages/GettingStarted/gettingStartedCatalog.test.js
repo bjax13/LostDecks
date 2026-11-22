@@ -484,6 +484,21 @@ describe("gettingStartedCatalog", () => {
     expect(coverage[emptyGroup.id]).toBe("none");
   });
 
+  it("sums duplicate collection documents for the same SKU", () => {
+    const allGroup = gettingStartedTree[0].children[0];
+    const skuWithQty = allGroup.skus[0].skuId;
+
+    const { quantities } = deriveReviewStateFromEntries(
+      [
+        { skuId: skuWithQty, quantity: 1 },
+        { skuId: skuWithQty, quantity: 2 },
+      ],
+      gettingStartedTree,
+    );
+
+    expect(quantities[skuWithQty]).toBe("3");
+  });
+
   it("turns coverage and manual quantities into bulk collection rows", () => {
     const coverage = createCoverageState("none");
     const allGroup = gettingStartedTree[0].children[0];
