@@ -12,7 +12,10 @@ const DEFAULT_DESCRIPTION =
   "Track your Lost Tales Story Deck cards and ChasmFriends pins, and find collectors to trade with.";
 const CACHE_CONTROL = "public, max-age=900, s-maxage=1800";
 
-const SPA_INDEX_PATH = path.join(__dirname, "static", "spa-index.html");
+const SPA_SHELL_CANDIDATES = [
+  path.join(__dirname, "static", "spa-index.html"),
+  path.join(__dirname, "..", "frontend", "dist", "index.html"),
+];
 
 /** @type {string | null} */
 let cachedBaseHtml = null;
@@ -21,7 +24,23 @@ function loadBaseHtml() {
   if (cachedBaseHtml) {
     return cachedBaseHtml;
   }
-  cachedBaseHtml = fs.readFileSync(SPA_INDEX_PATH, "utf8");
+
+  for (const candidate of SPA_SHELL_CANDIDATES) {
+    if (fs.existsSync(candidate)) {
+      cachedBaseHtml = fs.readFileSync(candidate, "utf8");
+      if (!cachedBaseHtml.includes("/src/main.jsx")) {
+        return cachedBaseHtml;
+      }
+    }
+  }
+
+  const fallback = SPA_SHELL_CANDIDATES.find((candidate) => fs.existsSync(candidate));
+  if (!fallback) {
+    throw new Error(
+      "SPA index shell is missing. Run npm run build:frontend && npm run sync:spa-shell.",
+    );
+  }
+  cachedBaseHtml = fs.readFileSync(fallback, "utf8");
   return cachedBaseHtml;
 }
 

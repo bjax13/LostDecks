@@ -6,7 +6,18 @@ const {
   assertSucceeds,
   initializeTestEnvironment,
 } = require("@firebase/rules-unit-testing");
-const { deleteDoc, doc, getDoc, setDoc, Timestamp, updateDoc } = require("firebase/firestore");
+const {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
+} = require("firebase/firestore");
 
 const RULES_PATH = path.join(__dirname, "..", "firestore.rules");
 
@@ -48,7 +59,18 @@ test.beforeEach(async () => {
   await testEnv.clearFirestore();
 });
 
-test("anonymous users can read share snapshots", async () => {
+test("anonymous users cannot list or query shares", async () => {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, `shares/${SHARE_ID}`), validShare());
+  });
+
+  const anonDb = testEnv.unauthenticatedContext().firestore();
+  await assertFails(getDocs(collection(anonDb, "shares")));
+  await assertFails(getDocs(query(collection(anonDb, "shares"), where("ownerUid", "==", OWNER))));
+});
+
+test("anonymous users can read an individual share snapshot", async () => {
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
     await setDoc(doc(db, `shares/${SHARE_ID}`), validShare());

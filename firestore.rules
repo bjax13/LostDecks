@@ -190,7 +190,8 @@ service cloud.firestore {
 
     // Opt-in public ISO/UFT snapshots for /t/:shareId (ownerUid is world-readable).
     match /shares/{shareId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if false;
       allow create: if signedIn()
         && request.auth.uid == request.resource.data.ownerUid
         && validShareSnapshot(request.resource.data);
