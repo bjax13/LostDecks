@@ -930,6 +930,63 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
   });
 
+  it("does not zero owned SKUs left unselected after None then partial edit on save", async () => {
+    const storyDunGroup = gettingStartedTree[1].children[0];
+    const skuKept = storyDunGroup.skus[0].skuId;
+    const skuUnselected = storyDunGroup.skus[1].skuId;
+    const storyDunTitle = `${storyDunGroup.label} Story Dun`;
+
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: skuKept, quantity: 1 },
+        { id: skuUnselected, quantity: 1 },
+      ],
+      status: "ready",
+      error: null,
+    });
+    mockApplyBulkCollectionUpdate.mockResolvedValue({
+      created: 0,
+      updated: 0,
+      deleted: 0,
+      issues: [],
+    });
+
+    const user = setupUser();
+    renderPage();
+    await goToCardReview(user);
+
+    const storyDunCoverage = screen.getByRole("group", { name: `${storyDunTitle} coverage` });
+    await waitFor(() => {
+      expect(within(storyDunCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    await user.click(within(storyDunCoverage).getByRole("button", { name: "None" }));
+    await confirmNoneCoverage(user);
+    const treeToggle = screen.queryByRole("button", {
+      name: new RegExp(`^expand ${storyDunTitle}$`, "i"),
+    });
+    if (treeToggle) {
+      await user.click(treeToggle);
+    }
+    await waitFor(() => {
+      expect(
+        getIncreaseSkuButton(`${storyDunTitle.toLowerCase()} dun #1 quantity`),
+      ).toBeInTheDocument();
+    });
+    await user.click(getIncreaseSkuButton(`${storyDunTitle.toLowerCase()} dun #1 quantity`));
+
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+    const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)?.[0];
+    expect(call.rows.some((row) => row.skuId === skuUnselected && row.quantity === "0")).toBe(
+      false,
+    );
+  });
+
   it("applies None after confirmation and clears quantities", async () => {
     const user = setupUser();
     renderPage();

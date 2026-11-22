@@ -18,7 +18,7 @@ import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import { collectionEntriesHydrationKey } from "../Collection/utils/collectionEntrySku.js";
 import {
-  buildGettingStartedNonDestructiveSaveRows,
+  buildGettingStartedManualReviewSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -28,6 +28,7 @@ import {
   filterGettingStartedTree,
   gettingStartedTree,
   includesPins,
+  isCollectionConfirmedLoadedForOwner,
   mergeReviewStateFromEntries,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
@@ -232,6 +233,9 @@ export default function GettingStartedPage() {
     },
     onReviewGroupExplicitNone: (groupId) => {
       explicitZeroGroupIdsRef.current.add(groupId);
+    },
+    onReviewGroupLeftExplicitNone: (groupId) => {
+      explicitZeroGroupIdsRef.current.delete(groupId);
     },
   });
 
@@ -540,11 +544,18 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildGettingStartedNonDestructiveSaveRows(
+          rows: buildGettingStartedManualReviewSaveRows(
             coverage,
             quantities,
             reviewTree,
             entries ?? [],
+            {
+              explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
+              collectionConfirmedLoaded: isCollectionConfirmedLoadedForOwner({
+                ownerUid: user.uid,
+                collectionReady,
+              }),
+            },
           ),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),
