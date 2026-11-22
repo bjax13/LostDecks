@@ -14,12 +14,16 @@ const {
   getDocs,
   query,
   setDoc,
+  serverTimestamp,
   Timestamp,
   updateDoc,
   where,
 } = require("firebase/firestore");
 
 const RULES_PATH = path.join(__dirname, "..", "firestore.rules");
+const ROOT = path.join(__dirname, "..");
+const STORY_CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/storydeck-lt24-with-skus.json");
+const PINS_CATALOG_PATH = path.join(ROOT, "frontend/src/storyData/pins-catalog.json");
 
 /** @type {import("@firebase/rules-unit-testing").RulesTestEnvironment} */
 let testEnv;
@@ -27,15 +31,34 @@ let testEnv;
 const OWNER = "owner-uid";
 const OTHER = "other-uid";
 const SHARE_ID = "shareId12ab";
+const SHARE_SCHEMA_VERSION = 2;
+
+function loadCatalogSkuIds() {
+  const story = JSON.parse(fs.readFileSync(STORY_CATALOG_PATH, "utf8"));
+  const pins = JSON.parse(fs.readFileSync(PINS_CATALOG_PATH, "utf8"));
+  return [
+    ...new Set(
+      [...(story.skus ?? []), ...(pins.skus ?? [])].map((row) => row.skuId).filter(Boolean),
+    ),
+  ];
+}
+
+function encodeIso(skus) {
+  return skus.join(",");
+}
+
+function encodeUft(rows) {
+  return rows.map((row) => `${row.skuId}:${row.quantity}`).join(",");
+}
 
 function validShare(overrides = {}) {
   return {
     ownerUid: OWNER,
     displayName: "Pat",
-    iso: ["LT24-ELS-01-DUN"],
-    uft: [{ skuId: "LT24-LOP-02-FOIL", quantity: 2 }],
-    updatedAt: Timestamp.now(),
-    version: 1,
+    iso: "LT24-ELS-01-DUN",
+    uft: "LT24-LOP-02-FOIL:2",
+    updatedAt: serverTimestamp(),
+    version: SHARE_SCHEMA_VERSION,
     ...overrides,
   };
 }
@@ -43,9 +66,9 @@ function validShare(overrides = {}) {
 function ownerTombstone(overrides = {}) {
   return {
     ownerUid: OWNER,
-    revokedAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-    version: 1,
+    revokedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    version: SHARE_SCHEMA_VERSION,
     ...overrides,
   };
 }
@@ -95,15 +118,71 @@ test("owner can create a share snapshot", async () => {
   await assertSucceeds(setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare()));
 });
 
-test("reject share create when any iso entry is not a valid sku string", async () => {
+test("allows share with empty iso and uft strings", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ iso: "", uft: "" })),
+  );
+});
+
+test("allows full catalog iso csv round trip", async () => {
+  const skuIds = loadCatalogSkuIds();
+  const isoCsv = encodeIso(skuIds);
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ iso: isoCsv, uft: "" })),
+  );
+});
+
+test("allows full catalog uft csv round trip", async () => {
+  const skuIds = loadCatalogSkuIds();
+  const uftCsv = encodeUft(skuIds.map((skuId) => ({ skuId, quantity: 1 })));
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await assertSucceeds(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}-uft`), validShare({ iso: "", uft: uftCsv })),
+  );
+});
+
+test("rejects iso csv with a bad token", async () => {
   const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
   await assertFails(
-    setDoc(
-      doc(ownerDb, `shares/${SHARE_ID}`),
-      validShare({
-        iso: ["LT24-ELS-01-DUN", 42],
-      }),
-    ),
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ iso: "LT24-ELS-01-DUN,not-a-sku" })),
+  );
+});
+
+test("rejects uft csv with bad quantity", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await assertFails(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ uft: "LT24-LOP-02-FOIL:0" })),
+  );
+  await assertFails(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ uft: "LT24-LOP-02-FOIL:1000" })),
+  );
+  await assertFails(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ uft: "LT24-LOP-02-FOIL:qty" })),
+  );
+});
+
+test("rejects oversize iso and uft strings", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  const longIso = "LT24-ELS-01-DUN,".repeat(1100);
+  const longUft = "LT24-LOP-02-FOIL:1,".repeat(1300);
+  await assertFails(setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ iso: longIso })));
+  await assertFails(setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ uft: longUft })));
+});
+
+test("rejects share writes when updatedAt is not request time", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await assertFails(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare({ updatedAt: Timestamp.fromMillis(0) })),
+  );
+});
+
+test("owner cannot tombstone with a different ownerUid", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  await setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare());
+  await assertFails(
+    setDoc(doc(ownerDb, `shares/${SHARE_ID}`), ownerTombstone({ ownerUid: OTHER })),
   );
 });
 
@@ -119,10 +198,10 @@ test("non-owner cannot create or update a share", async () => {
   await assertFails(
     updateDoc(doc(otherDb, `shares/${SHARE_ID}`), {
       displayName: "Hacked",
-      iso: [],
-      uft: [],
-      updatedAt: Timestamp.now(),
-      version: 1,
+      iso: "",
+      uft: "",
+      updatedAt: serverTimestamp(),
+      version: SHARE_SCHEMA_VERSION,
     }),
   );
 });
@@ -171,10 +250,10 @@ test("revoked share cannot retain profile fields", async () => {
   );
   await assertFails(
     updateDoc(doc(ownerDb, `shares/${SHARE_ID}`), {
-      iso: [],
-      uft: [],
-      revokedAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      iso: "",
+      uft: "",
+      revokedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     }),
   );
 });

@@ -3,6 +3,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
+  renderShareMeta,
   escapeHtml,
   escapeHtmlAttr,
   injectShareMeta,
@@ -11,6 +12,7 @@ const {
   buildShareTitle,
   renderShareMetaHtml,
   isShareActive,
+  sanitizeShareForMeta,
   __test,
 } = require("./shareMeta");
 
@@ -48,6 +50,7 @@ const HOSTED_SHELL = `<!DOCTYPE html>
 
 test.beforeEach(() => {
   __test.setBaseHtmlForTests(SAMPLE_HTML);
+  __test.setShareSnapshotLoaderForTests(null);
 });
 
 test.after(() => {
@@ -69,10 +72,21 @@ test("parseShareIdFromPath extracts id from /t paths", () => {
 
 test("buildShareDescription summarizes ISO and UFT counts", () => {
   assert.equal(
-    buildShareDescription({ iso: ["a"], uft: [] }),
+    buildShareDescription({ iso: "a", uft: "" }),
     "ISO: 1 item — public trade list on ShardStash.",
   );
-  assert.equal(buildShareDescription({ iso: [], uft: [] }), "Public trade list on ShardStash.");
+  assert.equal(buildShareDescription({ iso: "", uft: "" }), "Public trade list on ShardStash.");
+});
+
+test("buildShareDescription counts sanitized array fields", () => {
+  const sanitized = sanitizeShareForMeta({
+    iso: `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`,
+    uft: "PIN-CF-01:2",
+  });
+  assert.equal(
+    buildShareDescription(sanitized),
+    "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.",
+  );
 });
 
 test("buildShareTitle uses display name", () => {
@@ -121,11 +135,131 @@ test("renderShareMetaHtml falls back when share is missing", async () => {
 test("renderShareMetaHtml injects share-specific meta", async () => {
   const share = {
     displayName: "Alex",
-    iso: ["LT24-ELS-01-DUN"],
-    uft: [{ skuId: "LT24-LOP-02-FOIL", quantity: 2 }],
+    iso: "LT24-ELS-01-DUN",
+    uft: "LT24-LOP-02-FOIL:2",
   };
   const html = await renderShareMetaHtml("shareId12ab", share);
   assert.match(html, /Alex&#39;s trade list on ShardStash/);
+});
+
+test("renderShareMetaHtml injects ISO/UFT counts in og and twitter descriptions", async () => {
+  const isoCsv = `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`;
+  const html = await renderShareMetaHtml("shareId12ab", {
+    displayName: "Pat",
+    iso: isoCsv,
+    uft: "PIN-CF-01:2",
+  });
+  const description = "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.";
+  const escaped = escapeHtmlAttr(description);
+  assert.match(
+    html,
+    new RegExp(`property="og:description" content="${escaped.replaceAll("$", "\\$")}"`),
+  );
+  assert.match(
+    html,
+    new RegExp(`name="twitter:description" content="${escaped.replaceAll("$", "\\$")}"`),
+  );
+});
+
+test("renderShareMeta handler uses Firestore csv lists for og and twitter descriptions", async () => {
+  const shareId = "shareId12ab";
+  const isoCsv = `${"LT24-ELS-01-DUN,".repeat(56)}LT24-ELS-01-DUN`;
+  const doc = {
+    displayName: "Pat",
+    iso: isoCsv,
+    uft: "PIN-CF-01:2",
+    ownerUid: "user-1",
+    version: 2,
+    updatedAt: {},
+  };
+
+  __test.setShareSnapshotLoaderForTests(async (id) => {
+    assert.equal(id, shareId);
+    return doc;
+  });
+
+  const expectedDescription = "ISO: 57 items · UFT: 1 item — public trade list on ShardStash.";
+  const escapedDescription = escapeHtmlAttr(expectedDescription);
+
+  const res = {
+    statusCode: 200,
+    headers: {},
+    body: "",
+    setHeader(key, value) {
+      this.headers[key] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    send(body) {
+      this.body = body;
+      return this;
+    },
+  };
+
+  await renderShareMeta({ path: `/t/${shareId}`, url: `/t/${shareId}` }, res);
+  assert.equal(res.statusCode, 200);
+  assert.match(
+    res.body,
+    new RegExp(`property="og:description" content="${escapedDescription.replaceAll("$", "\\$")}"`),
+  );
+  assert.match(
+    res.body,
+    new RegExp(`name="twitter:description" content="${escapedDescription.replaceAll("$", "\\$")}"`),
+  );
+});
+
+test("sanitizeShareForMeta parses csv iso/uft for full-list OG counts", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const story = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "../frontend/src/storyData/storydeck-lt24-with-skus.json"),
+      "utf8",
+    ),
+  );
+  const pins = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "../frontend/src/storyData/pins-catalog.json"), "utf8"),
+  );
+  const skuIds = [
+    ...new Set(
+      [...(story.skus ?? []), ...(pins.skus ?? [])].map((row) => row.skuId).filter(Boolean),
+    ),
+  ];
+  const sanitized = sanitizeShareForMeta({
+    displayName: "Pat",
+    iso: skuIds.join(","),
+    uft: "",
+  });
+  assert.equal(sanitized.iso.length, skuIds.length);
+  assert.equal(sanitized.uft.length, 0);
+});
+
+test("loadBaseHtmlAsync falls back when response body stalls", async () => {
+  __test.resetBaseHtmlCache();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (_url, init) =>
+    Promise.resolve({
+      ok: true,
+      text: () =>
+        new Promise((_, reject) => {
+          if (init?.signal) {
+            init.signal.addEventListener("abort", () => {
+              reject(new Error("body read aborted"));
+            });
+          }
+        }),
+    });
+
+  try {
+    const html = await __test.loadBaseHtmlAsync();
+    assert.ok(html);
+    assert.doesNotMatch(html, /index-FRESH\.js/);
+  } finally {
+    globalThis.fetch = originalFetch;
+    __test.setBaseHtmlForTests(SAMPLE_HTML);
+  }
 });
 
 test("loadBaseHtmlAsync falls back when hosted fetch times out", async () => {

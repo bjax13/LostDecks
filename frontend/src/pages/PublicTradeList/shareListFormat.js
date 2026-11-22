@@ -1,4 +1,5 @@
 import { getSkuRecord } from "../../data/collectibles.js";
+import { parseIsoSkuField, parseUftSkuField } from "../../lib/shareListEncoding.js";
 
 function formatUftLine({ skuId, quantity }) {
   const sku = getSkuRecord(skuId);
@@ -15,7 +16,9 @@ function formatIsoLine(skuId) {
 }
 
 export function formatPublicShareLists(share) {
-  const iso = Array.isArray(share?.iso) ? share.iso.map(formatIsoLine) : [];
-  const uft = Array.isArray(share?.uft) ? share.uft.map(formatUftLine) : [];
+  const isoIds = parseIsoSkuField(share?.iso);
+  const uftRows = parseUftSkuField(share?.uft);
+  const iso = isoIds.map(formatIsoLine);
+  const uft = uftRows.map(formatUftLine);
   return { iso, uft };
 }

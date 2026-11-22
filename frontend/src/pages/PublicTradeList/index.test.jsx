@@ -42,8 +42,8 @@ describe("PublicTradeListPage", () => {
     fetchShareSnapshot.mockResolvedValueOnce({
       id: "abc",
       displayName: "Pat",
-      iso: ["LT24-ELS-01-DUN"],
-      uft: [],
+      iso: "LT24-ELS-01-DUN",
+      uft: "",
       updatedAt: { toDate: () => new Date("2025-01-01T12:00:00Z") },
     });
 

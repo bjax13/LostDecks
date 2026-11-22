@@ -15,6 +15,11 @@ const CACHE_CONTROL_MISS = "public, max-age=300, s-maxage=300";
 const SHARE_ID_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
 const HOSTED_SHELL_TTL_MS = 60_000;
 const HOSTED_SHELL_FETCH_MS = 2_000;
+const {
+  parseIsoSkuField,
+  parseUftSkuField,
+  sanitizeIsoUftForMeta,
+} = require("./shareListEncoding");
 
 const SPA_SHELL_CANDIDATES = [
   path.join(__dirname, "static", "spa-index.html"),
@@ -58,21 +63,20 @@ async function loadBaseHtmlAsync() {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), HOSTED_SHELL_FETCH_MS);
-    let response;
     try {
-      response = await fetch(`${SITE_URL}/index.html`, {
+      const response = await fetch(`${SITE_URL}/index.html`, {
         headers: { Accept: "text/html", "Cache-Control": "no-cache" },
         signal: controller.signal,
       });
+      if (response.ok) {
+        const html = await response.text();
+        if (html && !html.includes("/src/main.jsx")) {
+          hostedShellCache = { html, fetchedAt: now };
+          return html;
+        }
+      }
     } finally {
       clearTimeout(timeout);
-    }
-    if (response.ok) {
-      const html = await response.text();
-      if (html && !html.includes("/src/main.jsx")) {
-        hostedShellCache = { html, fetchedAt: now };
-        return html;
-      }
     }
   } catch (err) {
     console.warn("renderShareMeta: could not fetch hosted index.html", err);
@@ -129,22 +133,19 @@ function sanitizeShareForMeta(share) {
   if (!isShareActive(share)) {
     return null;
   }
-  const iso = Array.isArray(share.iso) ? share.iso.filter((id) => typeof id === "string") : [];
-  const uft = Array.isArray(share.uft)
-    ? share.uft.filter(
-        (row) =>
-          row &&
-          typeof row === "object" &&
-          typeof row.skuId === "string" &&
-          typeof row.quantity === "number",
-      )
-    : [];
-  return { ...share, iso, uft };
+  return sanitizeIsoUftForMeta(share);
+}
+
+function listCount(value, parseField) {
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+  return parseField(value).length;
 }
 
 function buildShareDescription(share) {
-  const isoCount = Array.isArray(share?.iso) ? share.iso.length : 0;
-  const uftCount = Array.isArray(share?.uft) ? share.uft.length : 0;
+  const isoCount = listCount(share?.iso, parseIsoSkuField);
+  const uftCount = listCount(share?.uft, parseUftSkuField);
   const parts = [];
   if (isoCount > 0) {
     parts.push(`ISO: ${isoCount} item${isoCount === 1 ? "" : "s"}`);
@@ -240,7 +241,13 @@ function buildMetaFromShare(share, shareId) {
   };
 }
 
+/** @type {((shareId: string) => Promise<Record<string, unknown> | null>) | null} */
+let shareSnapshotLoaderOverride = null;
+
 async function loadShareSnapshot(shareId) {
+  if (shareSnapshotLoaderOverride) {
+    return shareSnapshotLoaderOverride(shareId);
+  }
   if (!shareId || !SHARE_ID_PATTERN.test(shareId)) {
     return null;
   }
@@ -249,7 +256,8 @@ async function loadShareSnapshot(shareId) {
   if (!snapshot.exists) {
     return null;
   }
-  return sanitizeShareForMeta(snapshot.data());
+  const data = snapshot.data();
+  return isShareActive(data) ? data : null;
 }
 
 async function renderShareMetaHtml(shareId, share) {
@@ -325,7 +333,9 @@ module.exports = {
   buildMetaFromShare,
   renderShareMetaHtml,
   isShareActive,
+  sanitizeShareForMeta,
   __test: {
+    sanitizeShareForMeta,
     escapeHtml,
     escapeHtmlAttr,
     injectShareMeta,
@@ -345,6 +355,9 @@ module.exports = {
     resetBaseHtmlCache() {
       testBaseHtmlOverride = null;
       hostedShellCache = { html: null, fetchedAt: 0 };
+    },
+    setShareSnapshotLoaderForTests(loader) {
+      shareSnapshotLoaderOverride = typeof loader === "function" ? loader : null;
     },
     setHostedShellFetchForTests(fetchImpl) {
       module.exports.__test._fetchOverride = fetchImpl;

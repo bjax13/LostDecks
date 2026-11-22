@@ -34,6 +34,28 @@ test("firestore validSkuId regex matches every catalog SKU", () => {
   assert.deepEqual(mismatches, [], `catalog SKUs rejected by rules: ${mismatches.join(", ")}`);
 });
 
+function extractShareSkuAlt(rulesSource) {
+  const match = rulesSource.match(/function shareSkuRegexAlt\(\)[\s\S]*?return '([^']+)'/);
+  assert.ok(match, "shareSkuRegexAlt not found in firestore.rules");
+  return match[1];
+}
+
+test("full catalog fits share iso and uft csv limits and regexes", () => {
+  const rulesSource = fs.readFileSync(RULES_PATH, "utf8");
+  const skuAlt = extractShareSkuAlt(rulesSource);
+  const skuIds = loadCatalogSkuIds();
+  const isoCsv = skuIds.join(",");
+  const uftCsv = skuIds.map((skuId) => `${skuId}:1`).join(",");
+  const isoRegex = new RegExp(`^(${skuAlt})(,(${skuAlt}))*$`);
+  const uftRegex = new RegExp(`^(${skuAlt}):[1-9][0-9]{0,2}(,(${skuAlt}):[1-9][0-9]{0,2})*$`);
+
+  assert.ok(skuIds.length > 0);
+  assert.ok(isoCsv.length <= 16384, `iso csv length ${isoCsv.length}`);
+  assert.ok(uftCsv.length <= 20000, `uft csv length ${uftCsv.length}`);
+  assert.equal(isoRegex.test(isoCsv), true);
+  assert.equal(uftRegex.test(uftCsv), true);
+});
+
 test("firestore validSkuId regex rejects malformed SKUs", () => {
   const rulesSource = fs.readFileSync(RULES_PATH, "utf8");
   const skuPattern = extractValidSkuIdRegex(rulesSource);
