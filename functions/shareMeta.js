@@ -15,6 +15,8 @@ const CACHE_CONTROL_MISS = "public, max-age=300, s-maxage=300";
 const SHARE_ID_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
 const HOSTED_SHELL_TTL_MS = 60_000;
 const HOSTED_SHELL_FETCH_MS = 2_000;
+/** Matches Firestore rules full list validation cap. */
+const SHARE_LIST_ITEM_CAP = 10;
 
 const SPA_SHELL_CANDIDATES = [
   path.join(__dirname, "static", "spa-index.html"),
@@ -58,21 +60,20 @@ async function loadBaseHtmlAsync() {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), HOSTED_SHELL_FETCH_MS);
-    let response;
     try {
-      response = await fetch(`${SITE_URL}/index.html`, {
+      const response = await fetch(`${SITE_URL}/index.html`, {
         headers: { Accept: "text/html", "Cache-Control": "no-cache" },
         signal: controller.signal,
       });
+      if (response.ok) {
+        const html = await response.text();
+        if (html && !html.includes("/src/main.jsx")) {
+          hostedShellCache = { html, fetchedAt: now };
+          return html;
+        }
+      }
     } finally {
       clearTimeout(timeout);
-    }
-    if (response.ok) {
-      const html = await response.text();
-      if (html && !html.includes("/src/main.jsx")) {
-        hostedShellCache = { html, fetchedAt: now };
-        return html;
-      }
     }
   } catch (err) {
     console.warn("renderShareMeta: could not fetch hosted index.html", err);
@@ -129,15 +130,19 @@ function sanitizeShareForMeta(share) {
   if (!isShareActive(share)) {
     return null;
   }
-  const iso = Array.isArray(share.iso) ? share.iso.filter((id) => typeof id === "string") : [];
+  const iso = Array.isArray(share.iso)
+    ? share.iso.filter((id) => typeof id === "string").slice(0, SHARE_LIST_ITEM_CAP)
+    : [];
   const uft = Array.isArray(share.uft)
-    ? share.uft.filter(
-        (row) =>
-          row &&
-          typeof row === "object" &&
-          typeof row.skuId === "string" &&
-          typeof row.quantity === "number",
-      )
+    ? share.uft
+        .filter(
+          (row) =>
+            row &&
+            typeof row === "object" &&
+            typeof row.skuId === "string" &&
+            typeof row.quantity === "number",
+        )
+        .slice(0, SHARE_LIST_ITEM_CAP)
     : [];
   return { ...share, iso, uft };
 }
@@ -325,7 +330,9 @@ module.exports = {
   buildMetaFromShare,
   renderShareMetaHtml,
   isShareActive,
+  sanitizeShareForMeta,
   __test: {
+    sanitizeShareForMeta,
     escapeHtml,
     escapeHtmlAttr,
     injectShareMeta,

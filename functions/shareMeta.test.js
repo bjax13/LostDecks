@@ -11,6 +11,7 @@ const {
   buildShareTitle,
   renderShareMetaHtml,
   isShareActive,
+  sanitizeShareForMeta,
   __test,
 } = require("./shareMeta");
 
@@ -126,6 +127,44 @@ test("renderShareMetaHtml injects share-specific meta", async () => {
   };
   const html = await renderShareMetaHtml("shareId12ab", share);
   assert.match(html, /Alex&#39;s trade list on ShardStash/);
+});
+
+test("sanitizeShareForMeta caps iso and uft rows", () => {
+  const largeIso = Array.from({ length: 30 }, () => "LT24-ELS-01-DUN");
+  const largeUft = Array.from({ length: 30 }, () => ({ skuId: "LT24-LOP-02-FOIL", quantity: 1 }));
+  const sanitized = sanitizeShareForMeta({
+    displayName: "Pat",
+    iso: largeIso,
+    uft: largeUft,
+  });
+  assert.equal(sanitized.iso.length, 10);
+  assert.equal(sanitized.uft.length, 10);
+});
+
+test("loadBaseHtmlAsync falls back when response body stalls", async () => {
+  __test.resetBaseHtmlCache();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (_url, init) =>
+    Promise.resolve({
+      ok: true,
+      text: () =>
+        new Promise((_, reject) => {
+          if (init?.signal) {
+            init.signal.addEventListener("abort", () => {
+              reject(new Error("body read aborted"));
+            });
+          }
+        }),
+    });
+
+  try {
+    const html = await __test.loadBaseHtmlAsync();
+    assert.ok(html);
+    assert.doesNotMatch(html, /index-FRESH\.js/);
+  } finally {
+    globalThis.fetch = originalFetch;
+    __test.setBaseHtmlForTests(SAMPLE_HTML);
+  }
 });
 
 test("loadBaseHtmlAsync falls back when hosted fetch times out", async () => {
