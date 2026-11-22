@@ -70,10 +70,10 @@ test("parseShareIdFromPath extracts id from /t paths", () => {
 
 test("buildShareDescription summarizes ISO and UFT counts", () => {
   assert.equal(
-    buildShareDescription({ iso: ["a"], uft: [] }),
+    buildShareDescription({ iso: "a", uft: "" }),
     "ISO: 1 item — public trade list on ShardStash.",
   );
-  assert.equal(buildShareDescription({ iso: [], uft: [] }), "Public trade list on ShardStash.");
+  assert.equal(buildShareDescription({ iso: "", uft: "" }), "Public trade list on ShardStash.");
 });
 
 test("buildShareTitle uses display name", () => {
@@ -122,23 +122,37 @@ test("renderShareMetaHtml falls back when share is missing", async () => {
 test("renderShareMetaHtml injects share-specific meta", async () => {
   const share = {
     displayName: "Alex",
-    iso: ["LT24-ELS-01-DUN"],
-    uft: [{ skuId: "LT24-LOP-02-FOIL", quantity: 2 }],
+    iso: "LT24-ELS-01-DUN",
+    uft: "LT24-LOP-02-FOIL:2",
   };
   const html = await renderShareMetaHtml("shareId12ab", share);
   assert.match(html, /Alex&#39;s trade list on ShardStash/);
 });
 
-test("sanitizeShareForMeta caps iso and uft rows", () => {
-  const largeIso = Array.from({ length: 30 }, () => "LT24-ELS-01-DUN");
-  const largeUft = Array.from({ length: 30 }, () => ({ skuId: "LT24-LOP-02-FOIL", quantity: 1 }));
+test("sanitizeShareForMeta parses csv iso/uft for full-list OG counts", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const story = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "../frontend/src/storyData/storydeck-lt24-with-skus.json"),
+      "utf8",
+    ),
+  );
+  const pins = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "../frontend/src/storyData/pins-catalog.json"), "utf8"),
+  );
+  const skuIds = [
+    ...new Set(
+      [...(story.skus ?? []), ...(pins.skus ?? [])].map((row) => row.skuId).filter(Boolean),
+    ),
+  ];
   const sanitized = sanitizeShareForMeta({
     displayName: "Pat",
-    iso: largeIso,
-    uft: largeUft,
+    iso: skuIds.join(","),
+    uft: "",
   });
-  assert.equal(sanitized.iso.length, 10);
-  assert.equal(sanitized.uft.length, 10);
+  assert.equal(sanitized.iso.length, skuIds.length);
+  assert.equal(sanitized.uft.length, 0);
 });
 
 test("loadBaseHtmlAsync falls back when response body stalls", async () => {

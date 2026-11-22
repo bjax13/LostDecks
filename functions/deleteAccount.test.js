@@ -115,5 +115,5 @@ test("tombstoneUserOwnedShares writes minimal tombstones for each owned share", 
   assert.equal(op.kind, "set");
   assert.equal(op.ref.id, "share-a");
   assert.deepEqual(Object.keys(op.data).sort(), ["revokedAt", "updatedAt", "version"]);
-  assert.equal(op.data.version, 1);
+  assert.equal(op.data.version, 2);
 });
