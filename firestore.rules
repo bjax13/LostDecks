@@ -131,16 +131,36 @@ service cloud.firestore {
         && item.quantity >= 1;
     }
 
+    function uftIndexOk(list, i) {
+      return list.size() <= i || (list[i] is map && validUftItem(list[i]));
+    }
+
     function validUftList(list) {
       return list is list
         && list.size() <= 500
-        && (list.size() == 0 || (list[0] is map && validUftItem(list[0])));
+        && uftIndexOk(list, 0) && uftIndexOk(list, 1) && uftIndexOk(list, 2)
+        && uftIndexOk(list, 3) && uftIndexOk(list, 4) && uftIndexOk(list, 5)
+        && uftIndexOk(list, 6) && uftIndexOk(list, 7) && uftIndexOk(list, 8)
+        && uftIndexOk(list, 9) && uftIndexOk(list, 10) && uftIndexOk(list, 11)
+        && uftIndexOk(list, 12) && uftIndexOk(list, 13) && uftIndexOk(list, 14)
+        && uftIndexOk(list, 15) && uftIndexOk(list, 16) && uftIndexOk(list, 17)
+        && uftIndexOk(list, 18) && uftIndexOk(list, 19);
+    }
+
+    function isoIndexOk(list, i) {
+      return list.size() <= i || (list[i] is string && validSkuId(list[i]));
     }
 
     function validIsoList(list) {
       return list is list
         && list.size() <= 500
-        && (list.size() == 0 || (list[0] is string && validSkuId(list[0])));
+        && isoIndexOk(list, 0) && isoIndexOk(list, 1) && isoIndexOk(list, 2)
+        && isoIndexOk(list, 3) && isoIndexOk(list, 4) && isoIndexOk(list, 5)
+        && isoIndexOk(list, 6) && isoIndexOk(list, 7) && isoIndexOk(list, 8)
+        && isoIndexOk(list, 9) && isoIndexOk(list, 10) && isoIndexOk(list, 11)
+        && isoIndexOk(list, 12) && isoIndexOk(list, 13) && isoIndexOk(list, 14)
+        && isoIndexOk(list, 15) && isoIndexOk(list, 16) && isoIndexOk(list, 17)
+        && isoIndexOk(list, 18) && isoIndexOk(list, 19);
     }
 
     function validShareSnapshot(data) {
@@ -153,9 +173,9 @@ service cloud.firestore {
           "version",
           "discordHandle",
           "region",
-          "revokedAt",
         ])
         && data.keys().hasAll(["ownerUid", "displayName", "iso", "uft", "updatedAt", "version"])
+        && !("revokedAt" in data)
         && data.ownerUid is string
         && data.displayName is string
         && data.displayName.size() >= 1
@@ -168,8 +188,17 @@ service cloud.firestore {
         && (!("discordHandle" in data)
           || (data.discordHandle is string && data.discordHandle.size() <= 100))
         && (!("region" in data)
-          || (data.region is string && data.region.size() <= 60))
-        && (!("revokedAt" in data) || data.revokedAt is timestamp);
+          || (data.region is string && data.region.size() <= 60));
+    }
+
+    function validShareOwnerTombstone(data) {
+      return data.keys().hasOnly(["ownerUid", "revokedAt", "updatedAt", "version"])
+        && data.keys().hasAll(["ownerUid", "revokedAt", "updatedAt", "version"])
+        && data.ownerUid is string
+        && data.revokedAt is timestamp
+        && data.updatedAt is timestamp
+        && data.version is int
+        && data.version == 1;
     }
 
     function validUserPreferences(data) {
@@ -206,7 +235,10 @@ service cloud.firestore {
 
     // Opt-in public ISO/UFT snapshots for /t/:shareId (ownerUid is world-readable).
     match /shares/{shareId} {
-      allow get: if true;
+      allow get: if !("revokedAt" in resource.data)
+        || (signedIn()
+          && ("ownerUid" in resource.data)
+          && request.auth.uid == resource.data.ownerUid);
       allow list: if false;
       allow create: if signedIn()
         && request.auth.uid == request.resource.data.ownerUid
@@ -214,10 +246,13 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/shares/$(shareId));
       allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
-        && request.resource.data.ownerUid == resource.data.ownerUid
         && !("revokedAt" in resource.data)
-        && validShareSnapshot(request.resource.data);
-      allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
+        && (
+          (request.resource.data.ownerUid == resource.data.ownerUid
+            && validShareSnapshot(request.resource.data))
+          || validShareOwnerTombstone(request.resource.data)
+        );
+      allow delete: if false;
     }
 
     match /{document=**} {
