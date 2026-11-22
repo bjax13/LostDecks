@@ -206,6 +206,23 @@
   align-items: center;
 }
 
+.finish-trade-row .add-to-collection--card .add-to-collection__stepper {
+  gap: 0.5rem;
+}
+
+.finish-trade-row .add-to-collection--card .add-to-collection__quantity {
+  min-width: 4.5rem;
+  padding-inline: 0.35rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+.finish-trade-row .add-to-collection--card .add-to-collection__button--step {
+  padding: 0.45rem 0.85rem;
+  min-width: 2.4rem;
+  font-size: 0.75rem;
+}
+
 .trade-status {
   border: 0;
   margin: 0;
