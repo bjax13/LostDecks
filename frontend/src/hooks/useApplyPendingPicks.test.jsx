@@ -36,6 +36,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
       status: "ready",
+      serverConfirmed: true,
     });
     mockApplyBulk.mockResolvedValue({ created: 0, updated: 1, deleted: 0 });
   });
@@ -68,6 +69,31 @@ describe("PendingPicksApplier", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
+  it("does not apply until the server confirms the collection snapshot", async () => {
+    savePendingPicks({ "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      entries: [],
+      status: "ready",
+      serverConfirmed: false,
+    });
+
+    const { rerender } = render(<PendingPicksApplier />);
+    await waitFor(() => {
+      expect(mockApplyBulk).not.toHaveBeenCalled();
+    });
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+      serverConfirmed: true,
+    });
+    rerender(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it.each([
     { label: "idle", status: "idle", entries: [] },
     { label: "loading", status: "loading", entries: [] },
@@ -86,6 +112,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ skuId: "PIN-CF-01", quantity: 1 }],
       status: "ready",
+      serverConfirmed: true,
     });
     rerender(<PendingPicksApplier />);
 
@@ -115,6 +142,7 @@ describe("PendingPicksApplier", () => {
     savePendingPicks({ "PIN-CF-01": 1 });
     mockUseUserCollection.mockReturnValue({
       status: "ready",
+      serverConfirmed: true,
       entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
     });
 
@@ -132,6 +160,7 @@ describe("PendingPicksApplier", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [{ id: "PIN-CF-01", quantity: 1 }],
       status: "ready",
+      serverConfirmed: true,
     });
 
     let resolveApply;
@@ -158,6 +187,7 @@ describe("PendingPicksApplier", () => {
         { id: "auto-id-1", skuId: "PIN-CF-02", quantity: 1 },
       ],
       status: "ready",
+      serverConfirmed: true,
     });
     rerender(<PendingPicksApplier />);
 
@@ -176,6 +206,7 @@ describe("PendingPicksApplier", () => {
     savePendingPicks({ "PIN-CF-01": 1, "PIN-CF-02": 1 });
     mockUseUserCollection.mockReturnValue({
       status: "ready",
+      serverConfirmed: true,
       entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
     });
 

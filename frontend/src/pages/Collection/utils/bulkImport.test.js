@@ -266,8 +266,30 @@ describe("bulkImport (unit)", () => {
       });
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
-      expect(mockBatchSet).toHaveBeenCalled();
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "LT24-ELS-01-DUN" },
+        expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: 2 }),
+        { merge: true },
+      );
       expect(mockBatchCommit).toHaveBeenCalled();
+    });
+
+    it("applies the same create twice to one sku-keyed doc (idempotent path)", async () => {
+      const payload = {
+        ownerUid: "u1",
+        rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+        existingEntries: [],
+        allowPins: true,
+      };
+
+      await applyBulkCollectionUpdate(payload);
+      await applyBulkCollectionUpdate(payload);
+
+      expect(mockBatchSet).toHaveBeenCalledTimes(2);
+      const firstRef = mockBatchSet.mock.calls[0][0];
+      const secondRef = mockBatchSet.mock.calls[1][0];
+      expect(firstRef).toEqual({ id: "PIN-CF-02" });
+      expect(secondRef).toEqual({ id: "PIN-CF-02" });
     });
 
     it("sets absolute quantity on existing entry", async () => {
@@ -382,7 +404,7 @@ describe("bulkImport (unit)", () => {
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
       expect(mockBatchSet).toHaveBeenCalledWith(
-        { id: "new-doc" },
+        { id: "LT24-ELS-01-DUN" },
         expect.objectContaining({ notes: "n".repeat(500) }),
         { merge: true },
       );

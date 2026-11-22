@@ -24,8 +24,8 @@ function sleep(ms) {
 export function useApplyPendingPicks() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { entries, status } = useUserCollection(user?.uid ?? null);
-  const collectionReady = status === "ready";
+  const { entries, status, serverConfirmed } = useUserCollection(user?.uid ?? null);
+  const collectionReady = status === "ready" && serverConfirmed;
   const appliedRef = useRef(false);
   const [applyFailure, setApplyFailure] = useState(null);
 

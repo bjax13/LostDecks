@@ -375,7 +375,7 @@ export async function applyBulkCollectionUpdate({
     }
 
     const keeper = existingDocs[0];
-    const docRef = keeper?.id ? doc(collectionRef, keeper.id) : doc(collectionRef);
+    const docRef = keeper?.id ? doc(collectionRef, keeper.id) : doc(collectionRef, skuId);
     const payload = {
       ownerUid,
       skuId,

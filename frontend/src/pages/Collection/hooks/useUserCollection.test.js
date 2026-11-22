@@ -296,12 +296,13 @@ describe("useUserCollection", () => {
       expect(result.current.entries).toHaveLength(1);
     });
 
-    it("stays loading on cache-only snapshots until a server snapshot arrives", () => {
+    it("stays cache-ready for offline UI but serverConfirmed latches on a server snapshot", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
       const onNext = getOnNext();
 
       act(() => onNext(createFakeSnapshot([], { fromCache: true })));
-      expect(result.current.status).toBe("loading");
+      expect(result.current.status).toBe("ready");
+      expect(result.current.serverConfirmed).toBe(false);
       expect(result.current.entries).toEqual([]);
 
       act(() =>
@@ -312,7 +313,18 @@ describe("useUserCollection", () => {
         ),
       );
       expect(result.current.status).toBe("ready");
+      expect(result.current.serverConfirmed).toBe(true);
       expect(result.current.entries).toHaveLength(1);
+
+      act(() =>
+        onNext(
+          createFakeSnapshot([createFakeDoc("PIN-CF-01", { ownerUid: "user-abc", quantity: 1 })], {
+            fromCache: true,
+          }),
+        ),
+      );
+      expect(result.current.status).toBe("ready");
+      expect(result.current.serverConfirmed).toBe(true);
     });
 
     it("unmount with falsy ownerUid does not throw", async () => {
