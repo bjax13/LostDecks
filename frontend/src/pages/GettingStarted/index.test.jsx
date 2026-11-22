@@ -930,6 +930,63 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     );
   });
 
+  it("does not zero owned SKUs left unselected after None then partial edit on save", async () => {
+    const storyDunGroup = gettingStartedTree[1].children[0];
+    const skuKept = storyDunGroup.skus[0].skuId;
+    const skuUnselected = storyDunGroup.skus[1].skuId;
+    const storyDunTitle = `${storyDunGroup.label} Story Dun`;
+
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: skuKept, quantity: 1 },
+        { id: skuUnselected, quantity: 1 },
+      ],
+      status: "ready",
+      error: null,
+    });
+    mockApplyBulkCollectionUpdate.mockResolvedValue({
+      created: 0,
+      updated: 0,
+      deleted: 0,
+      issues: [],
+    });
+
+    const user = setupUser();
+    renderPage();
+    await goToCardReview(user);
+
+    const storyDunCoverage = screen.getByRole("group", { name: `${storyDunTitle} coverage` });
+    await waitFor(() => {
+      expect(within(storyDunCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    await user.click(within(storyDunCoverage).getByRole("button", { name: "None" }));
+    await confirmNoneCoverage(user);
+    const treeToggle = screen.queryByRole("button", {
+      name: new RegExp(`^expand ${storyDunTitle}$`, "i"),
+    });
+    if (treeToggle) {
+      await user.click(treeToggle);
+    }
+    await waitFor(() => {
+      expect(
+        getIncreaseSkuButton(`${storyDunTitle.toLowerCase()} dun #1 quantity`),
+      ).toBeInTheDocument();
+    });
+    await user.click(getIncreaseSkuButton(`${storyDunTitle.toLowerCase()} dun #1 quantity`));
+
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+
+    const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)?.[0];
+    expect(call.rows.some((row) => row.skuId === skuUnselected && row.quantity === "0")).toBe(
+      false,
+    );
+  });
+
   it("applies None after confirmation and clears quantities", async () => {
     const user = setupUser();
     renderPage();
@@ -1206,6 +1263,138 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
     await user.click(screen.getByRole("button", { name: /about you/i }));
     await user.click(screen.getByRole("button", { name: /card review/i }));
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    const chasmDunCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    expect(within(chasmDunCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("partially hydrates untouched groups when entries arrive after a scoped edit", async () => {
+    function EntriesArriveHarness() {
+      const [entries, setEntries] = useState([]);
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockImplementation(() => ({
+        entries,
+        status: "ready",
+        error: null,
+      }));
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button
+            type="button"
+            onClick={() => setEntries([{ id: "LT24-CHM-01-DUN", quantity: 1 }])}
+          >
+            Load saved rows
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<EntriesArriveHarness />);
+
+    await goToCardReview(user);
+
+    const elsecallerCoverage = () =>
+      screen.getByRole("group", { name: /elsecaller story foils coverage/i });
+    const chasmDunCoverage = () =>
+      screen.getByRole("group", { name: /the chasmfriends get a pet! story dun coverage/i });
+
+    await user.click(within(elsecallerCoverage()).getByRole("button", { name: "None" }));
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "None" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Load saved rows" }));
+
+    await waitFor(() => {
+      expect(within(chasmDunCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "None" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("updates untouched groups on a later snapshot while preserving scoped edits", async () => {
+    function SnapshotHarness() {
+      const [entries, setEntries] = useState([]);
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockImplementation(() => ({
+        entries,
+        status: "ready",
+        error: null,
+      }));
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button
+            type="button"
+            onClick={() => setEntries([{ id: "LT24-CHM-01-DUN", quantity: 1 }])}
+          >
+            Load snapshot v1
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              setEntries([
+                { id: "LT24-CHM-01-DUN", quantity: 1 },
+                { id: "PIN-CF-01", quantity: 1 },
+              ])
+            }
+          >
+            Load snapshot v2
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<SnapshotHarness />);
+
+    await goToCardReview(user);
+
+    const elsecallerCoverage = () =>
+      screen.getByRole("group", { name: /elsecaller story foils coverage/i });
+    const chasmPinCoverage = () =>
+      screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+
+    await user.click(within(elsecallerCoverage()).getByRole("button", { name: "All" }));
+
+    await user.click(screen.getByRole("button", { name: "Load snapshot v1" }));
+    await waitFor(() => {
+      expect(within(chasmPinCoverage()).getByRole("button", { name: "None" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Load snapshot v2" }));
+    await waitFor(() => {
+      expect(within(chasmPinCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
     expect(within(elsecallerCoverage()).getByRole("button", { name: "All" })).toHaveAttribute(
       "aria-pressed",
       "true",

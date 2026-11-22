@@ -18,7 +18,7 @@ import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
 import { collectionEntriesHydrationKey } from "../Collection/utils/collectionEntrySku.js";
 import {
-  buildGettingStartedNonDestructiveSaveRows,
+  buildGettingStartedManualReviewSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -28,6 +28,8 @@ import {
   filterGettingStartedTree,
   gettingStartedTree,
   includesPins,
+  isCollectionConfirmedLoadedForOwner,
+  mergeReviewStateFromEntries,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
 import QuickPinPicker from "./QuickPinPicker.jsx";
@@ -232,6 +234,9 @@ export default function GettingStartedPage() {
     onReviewGroupExplicitNone: (groupId) => {
       explicitZeroGroupIdsRef.current.add(groupId);
     },
+    onReviewGroupLeftExplicitNone: (groupId) => {
+      explicitZeroGroupIdsRef.current.delete(groupId);
+    },
   });
 
   const spreadsheetDisabled = collectibleType === COLLECTIBLE_TYPE_PINS;
@@ -292,6 +297,32 @@ export default function GettingStartedPage() {
     setQuantities(seeded.quantities);
     reviewEditor.resetExpandedReviewIds(seeded.coverage);
     hydratedSeedQuantitiesRef.current = { ...seeded.quantities };
+    hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
+    collectionHydratedRef.current = true;
+    collectionSeedPendingRef.current = false;
+    manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    hydratedOwnerUidRef.current = user?.uid ?? null;
+  };
+
+  const applyPartialManualReviewSeed = (tree, sourceEntries, preservedGroupIds) => {
+    if (sourceEntries === undefined) {
+      return;
+    }
+    if (sourceEntries === null || sourceEntries.length === 0) {
+      return;
+    }
+
+    const merged = mergeReviewStateFromEntries(
+      sourceEntries,
+      tree,
+      coverage,
+      quantities,
+      preservedGroupIds,
+    );
+    setCoverage(merged.coverage);
+    setQuantities(merged.quantities);
+    reviewEditor.resetExpandedReviewIds(merged.coverage);
+    hydratedSeedQuantitiesRef.current = { ...merged.quantities };
     hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
@@ -465,9 +496,9 @@ export default function GettingStartedPage() {
     const entriesChangedSinceHydrate =
       hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
     const shouldHydrate =
-      (collectionSeedPendingRef.current && !userTouchedReview) ||
-      (!collectionHydratedRef.current && hasEntries && !userTouchedReview) ||
-      (!userTouchedReview && entriesChangedSinceHydrate);
+      collectionSeedPendingRef.current ||
+      (!collectionHydratedRef.current && hasEntries) ||
+      entriesChangedSinceHydrate;
     if (!shouldHydrate) {
       return;
     }
@@ -477,6 +508,14 @@ export default function GettingStartedPage() {
     }
 
     collectionSeedPendingRef.current = false;
+    if (userTouchedReview) {
+      const preservedGroupIds = new Set([
+        ...sessionScopedGroupIdsRef.current,
+        ...explicitZeroGroupIdsRef.current,
+      ]);
+      applyPartialManualReviewSeed(reviewTree, entries ?? [], preservedGroupIds);
+      return;
+    }
     applyManualReviewSeed(reviewTree, entries ?? []);
   }, [step, collectionStatus, entries, reviewTree, user]);
 
@@ -505,11 +544,18 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildGettingStartedNonDestructiveSaveRows(
+          rows: buildGettingStartedManualReviewSaveRows(
             coverage,
             quantities,
             reviewTree,
             entries ?? [],
+            {
+              explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
+              collectionConfirmedLoaded: isCollectionConfirmedLoadedForOwner({
+                ownerUid: user.uid,
+                collectionReady,
+              }),
+            },
           ),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),

@@ -440,6 +440,36 @@ export function deriveReviewStateFromEntries(entries = [], tree = gettingStarted
   return { coverage, quantities };
 }
 
+/**
+ * Merge Firestore-derived review state into the current UI, preserving groups the
+ * collector scoped or explicitly set to None this session.
+ */
+export function mergeReviewStateFromEntries(
+  entries,
+  tree,
+  currentCoverage,
+  currentQuantities,
+  preservedGroupIds = new Set(),
+) {
+  const seeded = deriveReviewStateFromEntries(entries, tree);
+  const coverage = { ...currentCoverage };
+  const quantities = { ...currentQuantities };
+
+  for (const section of tree) {
+    for (const group of section.children) {
+      if (preservedGroupIds.has(group.id)) {
+        continue;
+      }
+      coverage[group.id] = seeded.coverage[group.id];
+      for (const sku of group.skus) {
+        quantities[sku.skuId] = seeded.quantities[sku.skuId];
+      }
+    }
+  }
+
+  return { coverage, quantities };
+}
+
 export function buildCollectionRows(
   coverage,
   quantities,
@@ -519,6 +549,59 @@ export function buildGettingStartedNonDestructiveSaveRows(
     const owned = ownedBySku.get(skuKey)?.quantity ?? 0;
     return quantity > owned;
   });
+}
+
+/** Signed-in owner with collection hook status === 'ready' (independent of review UI hydration). */
+export function isCollectionConfirmedLoadedForOwner({ ownerUid, collectionReady }) {
+  return Boolean(ownerUid && collectionReady);
+}
+
+/**
+ * Manual review save: non-destructive adds, plus zero rows only for groups the user
+ * explicitly set to None once collection is confirmed loaded (resolved SKUs with owned qty > 0).
+ */
+export function buildGettingStartedManualReviewSaveRows(
+  coverage,
+  quantities,
+  tree,
+  existingEntries = [],
+  { explicitZeroGroupIds = new Set(), collectionConfirmedLoaded = false } = {},
+) {
+  const rows = buildGettingStartedNonDestructiveSaveRows(
+    coverage,
+    quantities,
+    tree,
+    existingEntries,
+  );
+
+  if (!collectionConfirmedLoaded || explicitZeroGroupIds.size === 0) {
+    return rows;
+  }
+
+  const ownedBySku = groupCollectionEntriesBySku(existingEntries);
+  const candidates = buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, tree);
+  const rowBySku = new Map(rows.map((row) => [String(row.skuId).trim().toUpperCase(), row]));
+
+  for (const row of candidates) {
+    const quantity = Number(row.quantity);
+    if (!Number.isFinite(quantity) || quantity !== 0) {
+      continue;
+    }
+    const group = findReviewGroupForSku(row.skuId, tree);
+    if (!group || !explicitZeroGroupIds.has(group.id)) {
+      continue;
+    }
+    const skuKey = String(row.skuId).trim().toUpperCase();
+    const owned = ownedBySku.get(skuKey)?.quantity ?? 0;
+    if (owned <= 0) {
+      continue;
+    }
+    if (!rowBySku.has(skuKey)) {
+      rowBySku.set(skuKey, row);
+    }
+  }
+
+  return [...rowBySku.values()];
 }
 
 /** @deprecated Use buildGettingStartedNonDestructiveSaveRows for Getting Started saves. */
