@@ -95,4 +95,10 @@ describe("mergePickRows", () => {
       ]),
     ).toEqual([]);
   });
+
+  it("emits no rows when Have matches owned Shredhead exactly (picked = owned)", () => {
+    expect(
+      mergePickRows({ "PIN-CF-01": 1 }, [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }]),
+    ).toEqual([]);
+  });
 });

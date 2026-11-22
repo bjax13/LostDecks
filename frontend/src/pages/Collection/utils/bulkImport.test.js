@@ -32,6 +32,7 @@ const collectiblesState = vi.hoisted(() => ({
     { skuId: "LT24-ELS-01-DUN", cardId: "LT24-ELS-01", finish: "DUN" },
     { skuId: "LT24-ELS-01-FOIL", cardId: "LT24-ELS-01", finish: "FOIL" },
     { skuId: "PIN-CF-01", cardId: "PIN-CF-01", finish: null },
+    { skuId: "PIN-CF-02", cardId: "PIN-CF-02", finish: null },
   ],
   records: {
     "LT24-ELS-01-DUN": {
@@ -49,6 +50,12 @@ const collectiblesState = vi.hoisted(() => ({
     "PIN-CF-01": {
       skuId: "PIN-CF-01",
       cardId: "PIN-CF-01",
+      finish: null,
+      card: { collectibleType: "pin", category: "pin" },
+    },
+    "PIN-CF-02": {
+      skuId: "PIN-CF-02",
+      cardId: "PIN-CF-02",
       finish: null,
       card: { collectibleType: "pin", category: "pin" },
     },
@@ -274,6 +281,33 @@ describe("bulkImport (unit)", () => {
       expect(mockBatchSet).toHaveBeenCalledWith(
         { id: "PIN-CF-01" },
         expect.objectContaining({ skuId: "PIN-CF-01", quantity: 1 }),
+        { merge: true },
+      );
+    });
+
+    it("re-applies Howlerina to the same sku-keyed doc when existingEntries were stale", async () => {
+      const howlerinaApply = {
+        ownerUid: "u1",
+        rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+        existingEntries: [],
+        allowPins: true,
+      };
+      const first = await applyBulkCollectionUpdate(howlerinaApply);
+      expect(first.created).toBe(1);
+      expect(mockBatchSet).toHaveBeenLastCalledWith(
+        { id: "PIN-CF-02" },
+        expect.objectContaining({ skuId: "PIN-CF-02", quantity: 1 }),
+        { merge: true },
+      );
+
+      vi.clearAllMocks();
+
+      const second = await applyBulkCollectionUpdate(howlerinaApply);
+      expect(second.created).toBe(1);
+      expect(mockBatchSet).toHaveBeenCalledTimes(1);
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "PIN-CF-02" },
+        expect.objectContaining({ skuId: "PIN-CF-02", quantity: 1 }),
         { merge: true },
       );
     });

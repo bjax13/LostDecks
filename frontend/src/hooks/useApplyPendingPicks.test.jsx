@@ -111,7 +111,23 @@ describe("PendingPicksApplier", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
   });
 
-  it("writes once and still clears or navigates when entries change mid-apply", async () => {
+  it("does not call bulk import when owned Shredhead is the only Have pick", async () => {
+    savePendingPicks({ "PIN-CF-01": 1 });
+    mockUseUserCollection.mockReturnValue({
+      status: "ready",
+      entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+    });
+
+    render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+    });
+    expect(mockApplyBulk).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("pendingPinPicks")).toBeNull();
+  });
+
+  it("writes Howlerina once and still clears when entries change mid-apply", async () => {
     savePendingPicks({ "PIN-CF-02": 1 });
     mockUseUserCollection.mockReturnValue({
       entries: [{ id: "PIN-CF-01", quantity: 1 }],
