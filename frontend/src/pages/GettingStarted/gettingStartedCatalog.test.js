@@ -585,8 +585,8 @@ describe("gettingStartedCatalog", () => {
   it("never emits destructive rows for non-destructive Getting Started saves", () => {
     const coverage = createCoverageState("none", gettingStartedTree);
     const existing = [
-      { id: "a", skuId: "LT24-CHM-01-DUN", quantity: 1 },
-      { id: "b", skuId: "PIN-CF-01", quantity: 1 },
+      { id: "LT24-CHM-01-DUN", quantity: 1 },
+      { id: "PIN-CF-01", quantity: 1 },
     ];
 
     expect(

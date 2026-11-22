@@ -113,6 +113,11 @@ describe("bulkImport (unit)", () => {
       const grouped = groupCollectionEntriesBySku([{ id: "PIN-CF-01", copies: 1 }]);
       expect(grouped.get("PIN-CF-01").quantity).toBe(1);
     });
+
+    it("parses string quantities when grouping by sku", () => {
+      const grouped = groupCollectionEntriesBySku([{ id: "PIN-CF-01", quantity: "2" }]);
+      expect(grouped.get("PIN-CF-01").quantity).toBe(2);
+    });
   });
 
   describe("createStoryDeckCollectionCsv", () => {

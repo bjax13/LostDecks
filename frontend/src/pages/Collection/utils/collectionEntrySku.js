@@ -1,13 +1,22 @@
 import { getSkuRecord, toSkuId } from "../../../data/collectibles";
 
-export function ownedQuantityFromEntry(entry) {
-  const candidates = [entry?.quantity, entry?.count, entry?.copies, entry?.total];
-  for (const candidate of candidates) {
-    if (typeof candidate === "number" && Number.isFinite(candidate)) {
-      return Math.max(0, Math.floor(candidate));
+export function normalizeQuantityValue(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value.trim());
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.floor(parsed));
     }
   }
   return 0;
+}
+
+export function ownedQuantityFromEntry(entry) {
+  return normalizeQuantityValue(
+    entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total,
+  );
 }
 
 /**
