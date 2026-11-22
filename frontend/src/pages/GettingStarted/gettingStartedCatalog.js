@@ -5,6 +5,7 @@ import {
   pinDatasetMeta,
   toSkuId,
 } from "../../data/collectibles";
+import { groupCollectionEntriesBySku } from "../Collection/utils/bulkImport.js";
 
 export const DEFAULT_MANUAL_QUANTITY = 0;
 
@@ -501,9 +502,30 @@ function seededQuantityForSku(seededQuantities, skuId) {
 }
 
 /**
- * Rows safe to send from Getting Started: omit unseeded zero-quantity deletes unless the
- * collector explicitly cleared that group during this session.
+ * Getting Started save rows: only net-new or higher quantities. Never emits zero or lower
+ * quantities, so applyBulkCollectionUpdate cannot delete or zero existing collection docs.
  */
+export function buildGettingStartedNonDestructiveSaveRows(
+  coverage,
+  quantities,
+  tree,
+  existingEntries = [],
+) {
+  const ownedBySku = groupCollectionEntriesBySku(existingEntries);
+  const rows = buildCollectionRows(coverage, quantities, DEFAULT_MANUAL_QUANTITY, tree);
+
+  return rows.filter((row) => {
+    const quantity = Number(row.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      return false;
+    }
+    const skuKey = String(row.skuId).trim().toUpperCase();
+    const owned = ownedBySku.get(skuKey)?.quantity ?? 0;
+    return quantity > owned;
+  });
+}
+
+/** @deprecated Use buildGettingStartedNonDestructiveSaveRows for Getting Started saves. */
 export function buildGettingStartedSaveRows(
   coverage,
   quantities,
