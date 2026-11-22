@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InfoBubble from "../../../components/InfoBubble.jsx";
 import { resolveSkuId } from "../../../data/collectibles";
 import {
@@ -21,12 +21,25 @@ function TradeStatusSwitch({ name, value, quantity, loading, onChange }) {
   const [saveError, setSaveError] = useState(false);
   const shown = draft ?? value;
   const uftDisabled = quantity < 1;
+  const prevValueRef = useRef(value);
 
   useEffect(() => {
-    if (draft != null && value === draft) {
+    if (draft == null) return;
+    if (value === draft) {
+      setDraft(null);
+      return;
+    }
+    if (uftDisabled && draft === "uft") {
       setDraft(null);
     }
-  }, [draft, value]);
+  }, [draft, value, uftDisabled]);
+
+  useEffect(() => {
+    const prev = prevValueRef.current;
+    if (prev === value) return;
+    prevValueRef.current = value;
+    setDraft((current) => (current != null && current !== value ? null : current));
+  }, [value]);
 
   async function select(next) {
     if (loading || next === shown) return;

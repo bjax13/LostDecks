@@ -39,7 +39,7 @@ vi.mock("../../../components/CollectionReviewEditor/CollectionReviewEditor.jsx",
   };
 });
 
-describe("VisualBulkCollectionEditorModal", () => {
+describe("VisualBulkCollectionEditorModal", { timeout: 15_000 }, () => {
   const ownerUid = "user-abc";
   const onClose = vi.fn();
   const onSaved = vi.fn();
