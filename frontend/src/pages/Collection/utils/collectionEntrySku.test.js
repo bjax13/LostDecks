@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   collectionEntriesHydrationKey,
+  collectionEntryDocId,
   ownedQuantityFromEntry,
   resolveCollectionEntrySkuId,
 } from "./collectionEntrySku.js";
@@ -24,6 +25,21 @@ describe("collectionEntrySku", () => {
     expect(resolveCollectionEntrySkuId({ skuid: "lt24-chm-01-dun", quantity: 1 })).toBe(
       "LT24-CHM-01-DUN",
     );
+    expect(
+      resolveCollectionEntrySkuId({
+        id: "user-abc_PIN-CF-01",
+        ownerUid: "user-abc",
+        quantity: 1,
+      }),
+    ).toBe("PIN-CF-01");
+    expect(resolveCollectionEntrySkuId({ id: "user-abc_PIN-CF-01", quantity: 1 })).toBe(
+      "PIN-CF-01",
+    );
+  });
+
+  it("builds owner-scoped bulk create doc ids", () => {
+    expect(collectionEntryDocId("user-abc", "pin-cf-02")).toBe("user-abc_PIN-CF-02");
+    expect(collectionEntryDocId("", "PIN-CF-01")).toBeNull();
   });
 
   it("reads quantity from legacy count/copies fields", () => {
