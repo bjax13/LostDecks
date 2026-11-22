@@ -34,7 +34,7 @@ async function deleteQueryInBatches(query, size = 400) {
   }
 }
 
-const SHARE_TOMBSTONE_VERSION = 1;
+const SHARE_TOMBSTONE_VERSION = 2;
 
 async function tombstoneUserOwnedShares(db, uid) {
   const collectionRef = db.collection("shares");

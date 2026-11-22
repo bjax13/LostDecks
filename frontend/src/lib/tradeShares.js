@@ -1,12 +1,11 @@
 import { deleteField, doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import { buildIsoUftSkuLists } from "../pages/Collection/utils/isoUftPost.js";
 import { db } from "./firebase";
+import { encodeIsoSkuList, encodeUftSkuList } from "./shareListEncoding.js";
 import { updateUserPreferences } from "./userPreferences.js";
 
 const SHARE_ID_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-export const SHARE_DOC_VERSION = 1;
-/** Mirrors Firestore rules: full per-element validation for at most this many ISO/UFT rows. */
-export const SHARE_LIST_ITEM_CAP = 10;
+export const SHARE_DOC_VERSION = 2;
 export const SHARE_STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function generateShareId(byteLength = 9) {
@@ -44,8 +43,8 @@ export function buildShareDocument({
   const docData = {
     ownerUid,
     displayName: trimmedName || "Collector",
-    iso: iso.slice(0, SHARE_LIST_ITEM_CAP),
-    uft: uft.slice(0, SHARE_LIST_ITEM_CAP),
+    iso: encodeIsoSkuList(iso),
+    uft: encodeUftSkuList(uft),
     updatedAt: serverTimestamp(),
     version: SHARE_DOC_VERSION,
   };

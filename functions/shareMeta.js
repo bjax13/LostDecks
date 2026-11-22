@@ -16,7 +16,11 @@ const SHARE_ID_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
 const HOSTED_SHELL_TTL_MS = 60_000;
 const HOSTED_SHELL_FETCH_MS = 2_000;
 /** Matches Firestore rules full list validation cap. */
-const SHARE_LIST_ITEM_CAP = 10;
+const {
+  parseIsoSkuField,
+  parseUftSkuField,
+  sanitizeIsoUftForMeta,
+} = require("./shareListEncoding");
 
 const SPA_SHELL_CANDIDATES = [
   path.join(__dirname, "static", "spa-index.html"),
@@ -130,26 +134,12 @@ function sanitizeShareForMeta(share) {
   if (!isShareActive(share)) {
     return null;
   }
-  const iso = Array.isArray(share.iso)
-    ? share.iso.filter((id) => typeof id === "string").slice(0, SHARE_LIST_ITEM_CAP)
-    : [];
-  const uft = Array.isArray(share.uft)
-    ? share.uft
-        .filter(
-          (row) =>
-            row &&
-            typeof row === "object" &&
-            typeof row.skuId === "string" &&
-            typeof row.quantity === "number",
-        )
-        .slice(0, SHARE_LIST_ITEM_CAP)
-    : [];
-  return { ...share, iso, uft };
+  return sanitizeIsoUftForMeta(share);
 }
 
 function buildShareDescription(share) {
-  const isoCount = Array.isArray(share?.iso) ? share.iso.length : 0;
-  const uftCount = Array.isArray(share?.uft) ? share.uft.length : 0;
+  const isoCount = parseIsoSkuField(share?.iso).length;
+  const uftCount = parseUftSkuField(share?.uft).length;
   const parts = [];
   if (isoCount > 0) {
     parts.push(`ISO: ${isoCount} item${isoCount === 1 ? "" : "s"}`);
