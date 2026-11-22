@@ -1,15 +1,45 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import VisualBulkCollectionEditorModal from "./VisualBulkCollectionEditorModal.jsx";
 
 const mockApplyBulkCollectionUpdate = vi.hoisted(() => vi.fn());
+const editedSku = vi.hoisted(() => ({ skuId: "LT24-ELS-01-DUN" }));
 
 vi.mock("../utils/bulkImport", () => ({
   applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
 }));
 
-describe("VisualBulkCollectionEditorModal", () => {
+vi.mock("../../../components/CollectionReviewEditor/CollectionReviewEditor.jsx", async () => {
+  const catalog = await import("../../GettingStarted/gettingStartedCatalog.js");
+  const reviewTree = catalog.filterGettingStartedTree(
+    catalog.gettingStartedTree,
+    catalog.COLLECTIBLE_TYPE_BOTH,
+  );
+  let editedSkuGroupId = "";
+  for (const section of reviewTree) {
+    for (const group of section.children) {
+      if (group.skus.some((sku) => sku.skuId === editedSku.skuId)) {
+        editedSkuGroupId = group.id;
+        break;
+      }
+    }
+  }
+
+  return {
+    default: function StubCollectionReviewEditor({ editor }) {
+      return (
+        <button
+          type="button"
+          onClick={() => editor.adjustSkuQuantity(editedSku.skuId, editedSkuGroupId, 1)}
+        >
+          Increase test ELS quantity
+        </button>
+      );
+    },
+  };
+});
+
+describe("VisualBulkCollectionEditorModal", { timeout: 15_000 }, () => {
   const ownerUid = "user-abc";
   const onClose = vi.fn();
   const onSaved = vi.fn();
@@ -45,7 +75,6 @@ describe("VisualBulkCollectionEditorModal", () => {
   }
 
   it("saves only session-edited SKUs against live entries when collection changed while open", async () => {
-    const user = userEvent.setup();
     const { rerender } = renderModal(openEntries);
 
     rerender(
@@ -59,27 +88,22 @@ describe("VisualBulkCollectionEditorModal", () => {
       />,
     );
 
-    const increaseButton = await screen.findByRole(
-      "button",
-      { name: "Increase Elsecaller Story Dun Dun #1 quantity" },
-      { timeout: 10_000 },
-    );
-    await user.click(increaseButton);
-
-    await user.click(await screen.findByRole("button", { name: /save collection/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Increase test ELS quantity" }));
+    fireEvent.click(screen.getByRole("button", { name: /save collection/i }));
 
     await waitFor(() => {
-      expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledTimes(1);
+      expect(mockApplyBulkCollectionUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ownerUid,
+          existingEntries: liveEntriesAfterRemoteChange,
+          rows: [expect.objectContaining({ skuId: editedSku.skuId, quantity: "2" })],
+        }),
+      );
     });
 
-    const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
-    expect(call.ownerUid).toBe(ownerUid);
-    expect(call.existingEntries).toEqual(liveEntriesAfterRemoteChange);
-    expect(call.rows).toEqual([
-      expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: "2" }),
-    ]);
-    expect(call.rows.some((row) => row.skuId === "LT24-CHM-01-DUN")).toBe(false);
+    const { rows } = mockApplyBulkCollectionUpdate.mock.calls[0][0];
+    expect(rows.some((row) => row.skuId === "LT24-CHM-01-DUN")).toBe(false);
     expect(onSaved).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
-  }, 15_000);
+  });
 });

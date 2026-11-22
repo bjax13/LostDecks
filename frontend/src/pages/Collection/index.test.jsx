@@ -83,7 +83,7 @@ function renderCollectionPage() {
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseAuth.mockReturnValue({ user: { uid: "test-user" }, loading: false });
-  mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });
   mutationsState.addToCollection = vi.fn().mockResolvedValue({
     skuId: "LT24-ELS-01-DUN",
     quantity: 2,
@@ -641,7 +641,7 @@ describe("CollectionPage (integration)", () => {
   });
 
   it("shows loading state while the collection hook reports loading", () => {
-    mockUseUserCollection.mockReturnValue({ entries: [], loading: true, error: null });
+    mockUseUserCollection.mockReturnValue({ entries: [], status: "loading", error: null });
     renderCollectionPage();
     const loadingMessage = screen.getByText("Fetching your collectibles…");
     const backup = screen.getByRole("region", { name: "Download my collection" });
@@ -674,7 +674,7 @@ describe("CollectionPage (integration)", () => {
   it("shows error message when the collection hook reports an error", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [],
-      loading: false,
+      status: "error",
       error: new Error("Network down"),
     });
     renderCollectionPage();
@@ -685,7 +685,7 @@ describe("CollectionPage (integration)", () => {
   it("uses a generic error hint when the error has no message", () => {
     mockUseUserCollection.mockReturnValue({
       entries: [],
-      loading: false,
+      status: "error",
       error: {},
     });
     renderCollectionPage();
@@ -746,7 +746,7 @@ describe("CollectionPage (integration)", () => {
           quantity: 0,
         },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
 
@@ -789,7 +789,7 @@ describe("CollectionPage (integration)", () => {
         { id: "pin", skuId: "PIN-CF-02", quantity: 1 },
         { id: "card", skuId: "LT24-ELS-01-DUN", quantity: 1 },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
     renderCollectionPage();
@@ -823,7 +823,7 @@ describe("CollectionPage (integration)", () => {
           quantity: 1,
         },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
 
@@ -850,7 +850,7 @@ describe("CollectionPage (integration)", () => {
           quantity: 2,
         },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
 
@@ -889,7 +889,7 @@ describe("CollectionPage (integration)", () => {
           quantity: 0,
         },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
 
@@ -908,7 +908,7 @@ describe("CollectionPage (integration)", () => {
     datasetMeta.totalUniqueCards = 0;
     mockUseUserCollection.mockReturnValue({
       entries: [{ id: "e1", skuId: "LT24-ELS-01-DUN", quantity: 1 }],
-      loading: false,
+      status: "ready",
       error: null,
     });
 
