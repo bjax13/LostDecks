@@ -197,6 +197,8 @@ export default function GettingStartedPage() {
   const explicitZeroGroupIdsRef = useRef(new Set());
   const sessionScopedGroupIdsRef = useRef(new Set());
   const fullPinReviewSeededRef = useRef(false);
+  const manualReviewCollectibleTypeRef = useRef(null);
+  const hydratedOwnerUidRef = useRef(null);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const {
@@ -293,6 +295,27 @@ export default function GettingStartedPage() {
     hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
+    manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    hydratedOwnerUidRef.current = user?.uid ?? null;
+  };
+
+  const resetManualReviewSessionScopes = () => {
+    explicitZeroGroupIdsRef.current = new Set();
+    sessionScopedGroupIdsRef.current = new Set();
+  };
+
+  const resetReviewStateForOwnerChange = () => {
+    resetManualReviewSessionScopes();
+    collectionHydratedRef.current = false;
+    collectionSeedPendingRef.current = Boolean(user?.uid);
+    hydratedEntriesKeyRef.current = "";
+    hydratedSeedQuantitiesRef.current = {};
+    manualReviewCollectibleTypeRef.current = null;
+    hydratedOwnerUidRef.current = null;
+
+    setCoverage({});
+    setQuantities({});
+    reviewEditor.resetExpandedReviewIds({});
   };
 
   const seedManualReviewForTree = (tree) => {
@@ -304,12 +327,24 @@ export default function GettingStartedPage() {
   };
 
   const beginManualReview = (nextCollectibleType = collectibleType) => {
-    const tree = filterGettingStartedTree(
-      gettingStartedTree,
-      nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH,
-    );
-    seedManualReviewForTree(tree);
-    goToStep("manual", nextCollectibleType);
+    const type = nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH;
+    const tree = filterGettingStartedTree(gettingStartedTree, type);
+    const ownerUid = user?.uid ?? null;
+    const sameOwner = hydratedOwnerUidRef.current === ownerUid;
+    const userScopedReview =
+      sessionScopedGroupIdsRef.current.size > 0 || explicitZeroGroupIdsRef.current.size > 0;
+    const hasExistingReview =
+      Object.keys(coverage).length > 0 &&
+      (userScopedReview || (collectionHydratedRef.current && sameOwner));
+    const sameCollectibleScope = manualReviewCollectibleTypeRef.current === type;
+
+    if (!hasExistingReview || !sameCollectibleScope) {
+      resetManualReviewSessionScopes();
+      seedManualReviewForTree(tree);
+      manualReviewCollectibleTypeRef.current = type;
+    }
+
+    goToStep("manual", type);
   };
 
   const beginProfile = () => {
@@ -345,12 +380,7 @@ export default function GettingStartedPage() {
       ) {
         setProfile("manual");
       }
-      if (Object.keys(coverage).length === 0) {
-        beginManualReview(nextCollectibleType);
-        return;
-      }
-      reviewEditor.resetExpandedReviewIds(coverage);
-      goToStep("manual", nextCollectibleType);
+      beginManualReview(nextCollectibleType);
       return;
     }
 
@@ -403,6 +433,20 @@ export default function GettingStartedPage() {
     seedManualReviewForTree(tree);
   }, [fullPinReview, chasmFriendsShortcut, step]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: drop hydrated review when auth uid changes
+  useEffect(() => {
+    const uid = user?.uid ?? null;
+    const seededUid = hydratedOwnerUidRef.current;
+
+    if (seededUid === uid) {
+      return;
+    }
+
+    if (seededUid !== null && seededUid !== uid) {
+      resetReviewStateForOwnerChange();
+    }
+  }, [user?.uid]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
     if (step !== "manual" || collectionStatus !== "ready" || chasmFriendsShortcut) {
@@ -435,18 +479,6 @@ export default function GettingStartedPage() {
     collectionSeedPendingRef.current = false;
     applyManualReviewSeed(reviewTree, entries ?? []);
   }, [step, collectionStatus, entries, reviewTree, user]);
-
-  useEffect(() => {
-    if (step === "manual") {
-      return;
-    }
-    collectionHydratedRef.current = false;
-    collectionSeedPendingRef.current = false;
-    hydratedEntriesKeyRef.current = "";
-    hydratedSeedQuantitiesRef.current = {};
-    explicitZeroGroupIdsRef.current = new Set();
-    sessionScopedGroupIdsRef.current = new Set();
-  }, [step]);
 
   const handleSave = async () => {
     if (user && !collectionReady) {

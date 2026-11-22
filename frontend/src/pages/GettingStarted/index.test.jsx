@@ -363,6 +363,25 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toBeChecked();
   });
 
+  it("re-seeds the review tree when collectible type changes before using the progress indicator", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user, {
+      collectiblePattern: /^story deck cards$/i,
+      reviewHeading: /review your cards/i,
+    });
+    expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /about you/i }));
+    await chooseCollectibleType(user, /^both$/i);
+
+    await user.click(screen.getByRole("button", { name: /card review/i }));
+
+    expect(screen.getByRole("heading", { name: /review your collection/i })).toBeInTheDocument();
+    expect(screen.getByText("ChasmFriends Pins")).toBeInTheDocument();
+  });
+
   it("lets collectors jump back to earlier steps from the progress indicator", async () => {
     const user = setupUser();
     renderPage();
@@ -378,6 +397,74 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
     await user.click(screen.getByRole("button", { name: /card review/i }));
     expect(screen.getByRole("heading", { name: /review your collection/i })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("group", { name: /elsecaller story foils coverage/i })).getByRole(
+        "button",
+        { name: "Some" },
+      ),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("resets manual review when the signed-in account changes", async () => {
+    const entriesByUser = {
+      "user-a": [{ id: "LT24-CHM-01-DUN", quantity: 1 }],
+      "user-b": [],
+    };
+
+    function AccountSwitchHarness() {
+      const [uid, setUid] = useState("user-a");
+      mockUseAuth.mockImplementation(() => ({ user: uid ? { uid } : null }));
+      mockUseUserCollection.mockImplementation(() => ({
+        entries: uid ? (entriesByUser[uid] ?? []) : [],
+        loading: false,
+        error: null,
+      }));
+      mockApplyBulkCollectionUpdate.mockResolvedValue({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        issues: [],
+      });
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button type="button" onClick={() => setUid("user-b")}>
+            Switch account
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<AccountSwitchHarness />);
+
+    await goToCardReview(user);
+
+    const elsecallerCoverage = screen.getByRole("group", {
+      name: /elsecaller story foils coverage/i,
+    });
+    await user.click(within(elsecallerCoverage).getByRole("button", { name: "All" }));
+    expect(within(elsecallerCoverage).getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Switch account" }));
+
+    await waitFor(() => {
+      expect(
+        within(screen.getByRole("group", { name: /elsecaller story foils coverage/i })).getByRole(
+          "button",
+          { name: "None" },
+        ),
+      ).toHaveAttribute("aria-pressed", "true");
+    });
+
+    await user.click(screen.getByRole("button", { name: "Save collection" }));
+    const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)?.[0];
+    expect(call?.ownerUid).toBe("user-b");
+    expect(call?.rows ?? []).toEqual([]);
   });
 
   it("sends spreadsheet collectors to the bulk import explanation", async () => {
@@ -1031,6 +1118,123 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(screen.getByRole("button", { name: /^collapse story foils$/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /pin collections/i })).not.toBeInTheDocument();
     expect(screen.queryByText("ChasmFriends Pins")).not.toBeInTheDocument();
+  });
+
+  it("keeps unsaved All coverage after footer Back and Continue", async () => {
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const elsecallerCoverage = screen.getByRole("group", {
+      name: /elsecaller story foils coverage/i,
+    });
+    await user.click(within(elsecallerCoverage).getByRole("button", { name: "All" }));
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: /what best describes you/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByRole("heading", { name: /review your collection/i })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("group", { name: /elsecaller story foils coverage/i })).getByRole(
+        "button",
+        { name: "All" },
+      ),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("preserves in-progress review edits when navigating back to About you and returning", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "existing", skuId: "LT24-CHM-01-DUN", quantity: 1 }],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const elsecallerCoverage = screen.getByRole("group", {
+      name: /elsecaller story foils coverage/i,
+    });
+    expect(within(elsecallerCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("heading", { name: /what best describes you/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /card review/i }));
+
+    expect(
+      within(screen.getByRole("group", { name: /elsecaller story foils coverage/i })).getByRole(
+        "button",
+        { name: "Some" },
+      ),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      within(
+        screen.getByRole("group", { name: /the chasmfriends get a pet! story dun coverage/i }),
+      ).getByRole("button", { name: "Some" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("keeps in-progress review edits when the Firestore snapshot updates", async () => {
+    function SnapshotHarness() {
+      const [collectionEntries, setCollectionEntries] = useState([
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+      ]);
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockReturnValue({
+        entries: collectionEntries,
+        loading: false,
+        error: null,
+      });
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button
+            type="button"
+            onClick={() =>
+              setCollectionEntries([
+                { id: "LT24-CHM-01-DUN", quantity: 1 },
+                { id: "PIN-CF-01", quantity: 2 },
+              ])
+            }
+          >
+            Push snapshot
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<SnapshotHarness />);
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const elsecallerCoverage = () =>
+      screen.getByRole("group", { name: /elsecaller story foils coverage/i });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Push snapshot" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/[1-9]/);
+    });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   it("prefills step 2 from legacy cardId + finish collection docs", async () => {
