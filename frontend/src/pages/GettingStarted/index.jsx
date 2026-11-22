@@ -29,6 +29,7 @@ import {
   gettingStartedTree,
   includesPins,
   isCollectionConfirmedLoadedForOwner,
+  isManualReviewSyncedWithEntries,
   mergeReviewStateFromEntries,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
@@ -200,6 +201,7 @@ export default function GettingStartedPage() {
   const sessionScopedGroupIdsRef = useRef(new Set());
   const fullPinReviewSeededRef = useRef(false);
   const manualReviewCollectibleTypeRef = useRef(null);
+  const reviewHydrationScopeRef = useRef(null);
   const hydratedOwnerUidRef = useRef(null);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
@@ -464,6 +466,20 @@ export default function GettingStartedPage() {
     seedManualReviewForTree(tree);
   }, [fullPinReview, chasmFriendsShortcut, step]);
 
+  useEffect(() => {
+    const scopeKey = chasmFriendsShortcut
+      ? "chasm"
+      : fullPinReview
+        ? "pins-all"
+        : (collectibleType ?? "none");
+    const previousScope = reviewHydrationScopeRef.current;
+    if (previousScope !== null && previousScope !== scopeKey) {
+      collectionHydratedRef.current = false;
+      hydratedEntriesKeyRef.current = "";
+    }
+    reviewHydrationScopeRef.current = scopeKey;
+  }, [chasmFriendsShortcut, fullPinReview, collectibleType]);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: drop hydrated review when auth uid changes
   useEffect(() => {
     const uid = user?.uid ?? null;
@@ -495,10 +511,15 @@ export default function GettingStartedPage() {
       sessionScopedGroupIdsRef.current.size > 0 || explicitZeroGroupIdsRef.current.size > 0;
     const entriesChangedSinceHydrate =
       hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
+    const reviewOutOfSync =
+      hasEntries &&
+      !userTouchedReview &&
+      !isManualReviewSyncedWithEntries(entries, reviewTree, coverage, quantities);
     const shouldHydrate =
       collectionSeedPendingRef.current ||
       (!collectionHydratedRef.current && hasEntries) ||
-      entriesChangedSinceHydrate;
+      entriesChangedSinceHydrate ||
+      reviewOutOfSync;
     if (!shouldHydrate) {
       return;
     }
