@@ -2,7 +2,12 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { decodeHavePrefill, emptyHavePrefill, HAVE_QTY_MAX } from "./havePrefill.js";
+import {
+  decodeHavePrefill,
+  emptyHavePrefill,
+  HAVE_QTY_MAX,
+  mergeHydrationQuantities,
+} from "./havePrefill.js";
 
 const catalogPath = join(dirname(fileURLToPath(import.meta.url)), "../storyData/pins-catalog.json");
 const catalogSkuIds = JSON.parse(readFileSync(catalogPath, "utf8")).pins.map((pin) => pin.id);
@@ -96,5 +101,19 @@ describe("decodeHavePrefill", () => {
       "PIN-CF-03": HAVE_QTY_MAX,
     });
     expect(seed.raiseMerge(once, once)).toEqual(once);
+  });
+
+  it("mergeHydrationQuantities raise-merges untouched SKUs and keeps touched local qty", () => {
+    const touched = new Set(["PIN-KROG-05"]);
+    const merged = mergeHydrationQuantities(
+      { "PIN-CF-01": 0, "PIN-KROG-05": 0, "PIN-CF-02": 2 },
+      { "PIN-CF-01": 1, "PIN-KROG-05": 3, "PIN-CF-02": 1 },
+      touched,
+    );
+    expect(merged).toEqual({
+      "PIN-CF-01": 1,
+      "PIN-KROG-05": 0,
+      "PIN-CF-02": 2,
+    });
   });
 });
