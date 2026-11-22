@@ -41,6 +41,20 @@ describe("isoUftPost ownership (#107)", () => {
     expect(text).toContain("None available yet.");
   });
 
+  it("counts presence-only legacy docs with no quantity field as owned", () => {
+    const { tree } = buildIsoUftPostTree([{ id: "LT24-CHM-01-DUN" }]);
+    const iso = tree.find((node) => node.id === "iso");
+    const chasmDun = iso.children[0].children.find((leaf) => leaf.label === CHASM_TITLE);
+    expect(numberedItems(chasmDun.line)).not.toContain(1);
+  });
+
+  it("counts legacy collection docs whose catalog SKU is only in the Firestore document id", () => {
+    const { tree } = buildIsoUftPostTree([{ id: "LT24-CHM-01-DUN", quantity: 1 }]);
+    const iso = tree.find((node) => node.id === "iso");
+    const chasmDun = iso.children[0].children.find((leaf) => leaf.label === CHASM_TITLE);
+    expect(numberedItems(chasmDun.line)).not.toContain(1);
+  });
+
   it("matches owned SKUs case-insensitively and still omits other finishes of that card", () => {
     const { tree, text } = (() => {
       const built = buildIsoUftPostTree([{ skuId: "lt24-chm-01-dun", quantity: "1" }]);
