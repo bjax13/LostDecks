@@ -494,16 +494,21 @@ export function buildGettingStartedNonDestructiveSaveRows(
   });
 }
 
+/** Firestore collection snapshot finished for a signed-in owner (independent of review UI hydration). */
+export function isCollectionConfirmedLoadedForOwner({ ownerUid, collectionLoading }) {
+  return Boolean(ownerUid && !collectionLoading);
+}
+
 /**
  * Manual review save: non-destructive adds, plus zero rows only for groups the user
- * explicitly set to None after collection hydration (resolved SKUs with owned qty > 0).
+ * explicitly set to None once collection is confirmed loaded (resolved SKUs with owned qty > 0).
  */
 export function buildGettingStartedManualReviewSaveRows(
   coverage,
   quantities,
   tree,
   existingEntries = [],
-  { explicitZeroGroupIds = new Set(), collectionLoaded = false } = {},
+  { explicitZeroGroupIds = new Set(), collectionConfirmedLoaded = false } = {},
 ) {
   const rows = buildGettingStartedNonDestructiveSaveRows(
     coverage,
@@ -512,7 +517,7 @@ export function buildGettingStartedManualReviewSaveRows(
     existingEntries,
   );
 
-  if (!collectionLoaded || explicitZeroGroupIds.size === 0) {
+  if (!collectionConfirmedLoaded || explicitZeroGroupIds.size === 0) {
     return rows;
   }
 

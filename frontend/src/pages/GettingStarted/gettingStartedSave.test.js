@@ -4,8 +4,10 @@ import {
   buildGettingStartedManualReviewSaveRows,
   buildGettingStartedNonDestructiveSaveRows,
   createCoverageState,
+  filterChasmFriendsTree,
   filterGettingStartedTree,
   gettingStartedTree,
+  isCollectionConfirmedLoadedForOwner,
 } from "./gettingStartedCatalog.js";
 
 const mockBatchDelete = vi.fn();
@@ -106,7 +108,7 @@ describe("Getting Started explicit None removals", () => {
 
     const rows = buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, PROD_EXISTING, {
       explicitZeroGroupIds,
-      collectionLoaded: true,
+      collectionConfirmedLoaded: true,
     });
 
     expect(rows).toEqual(
@@ -137,7 +139,7 @@ describe("Getting Started explicit None removals", () => {
     expect(
       buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, PROD_EXISTING, {
         explicitZeroGroupIds: new Set(),
-        collectionLoaded: true,
+        collectionConfirmedLoaded: true,
       }),
     ).toEqual([]);
 
@@ -146,7 +148,7 @@ describe("Getting Started explicit None removals", () => {
       {},
       reviewTree,
       PROD_EXISTING,
-      { explicitZeroGroupIds: new Set([chasmGroup.id]), collectionLoaded: false },
+      { explicitZeroGroupIds: new Set([chasmGroup.id]), collectionConfirmedLoaded: false },
     );
     expect(explicitNone).toEqual([]);
 
@@ -173,10 +175,38 @@ describe("Getting Started explicit None removals", () => {
 
     const rows = buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, existing, {
       explicitZeroGroupIds: new Set([chasmGroup.id]),
-      collectionLoaded: true,
+      collectionConfirmedLoaded: true,
     });
 
     expect(rows).toEqual([expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "0" })]);
     expect(rows.some((row) => row.skuId === "weird-doc")).toBe(false);
+  });
+
+  it("isCollectionConfirmedLoadedForOwner gates deletes without review UI hydration", () => {
+    expect(
+      isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionLoading: true }),
+    ).toBe(false);
+    expect(isCollectionConfirmedLoadedForOwner({ ownerUid: null, collectionLoading: false })).toBe(
+      false,
+    );
+    expect(
+      isCollectionConfirmedLoadedForOwner({ ownerUid: "user-1", collectionLoading: false }),
+    ).toBe(true);
+  });
+
+  it("allows explicit None deletes on the Chasm Friends tree when collection is confirmed loaded", () => {
+    const reviewTree = filterChasmFriendsTree();
+    const pinGroup = reviewTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "PIN-CF-01"));
+    const coverage = createCoverageState("all", reviewTree);
+    coverage[pinGroup.id] = "none";
+
+    const rows = buildGettingStartedManualReviewSaveRows(coverage, {}, reviewTree, PROD_EXISTING, {
+      explicitZeroGroupIds: new Set([pinGroup.id]),
+      collectionConfirmedLoaded: true,
+    });
+
+    expect(rows).toEqual([expect.objectContaining({ skuId: "PIN-CF-01", quantity: "0" })]);
   });
 });

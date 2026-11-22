@@ -28,6 +28,7 @@ import {
   filterGettingStartedTree,
   gettingStartedTree,
   includesPins,
+  isCollectionConfirmedLoadedForOwner,
 } from "./gettingStartedCatalog";
 import "./GettingStarted.css";
 import QuickPinPicker from "./QuickPinPicker.jsx";
@@ -460,7 +461,10 @@ export default function GettingStartedPage() {
             entries ?? [],
             {
               explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
-              collectionLoaded: collectionHydratedRef.current,
+              collectionConfirmedLoaded: isCollectionConfirmedLoadedForOwner({
+                ownerUid: user.uid,
+                collectionLoading,
+              }),
             },
           ),
           existingEntries: entries,
