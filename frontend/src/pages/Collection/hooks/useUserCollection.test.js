@@ -41,6 +41,21 @@ function createFakeDoc(id, data) {
   };
 }
 
+function createFakeSnapshot(docs, { fromCache = false } = {}) {
+  return {
+    docs,
+    metadata: { fromCache, hasPendingWrites: false },
+  };
+}
+
+function getOnNext(callIndex = 0) {
+  return mockOnSnapshot.mock.calls[callIndex][2];
+}
+
+function getOnError(callIndex = 0) {
+  return mockOnSnapshot.mock.calls[callIndex][3];
+}
+
 describe("useUserCollection", () => {
   describe("when ownerUid is falsy", () => {
     it("returns idle with empty entries", async () => {
@@ -97,6 +112,7 @@ describe("useUserCollection", () => {
       expect(mockOnSnapshot).toHaveBeenCalledTimes(1);
       expect(mockOnSnapshot).toHaveBeenCalledWith(
         "query-ref",
+        { includeMetadataChanges: true },
         expect.any(Function),
         expect.any(Function),
       );
@@ -105,15 +121,15 @@ describe("useUserCollection", () => {
     it("on success: maps prod-shaped id-only docs to entries and marks ready", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
-      const onNext = mockOnSnapshot.mock.calls[0][1];
-      const fakeSnap = {
-        docs: [
-          createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 2 }),
-          createFakeDoc("LT24-WOK-01-DUN", { ownerUid: "user-abc", quantity: 1 }),
-        ],
-      };
-
-      act(() => onNext(fakeSnap));
+      const onNext = getOnNext();
+      act(() =>
+        onNext(
+          createFakeSnapshot([
+            createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 2 }),
+            createFakeDoc("LT24-WOK-01-DUN", { ownerUid: "user-abc", quantity: 1 }),
+          ]),
+        ),
+      );
 
       expect(result.current.entries).toEqual([
         { id: "LT24-CHM-01-DUN", ownerUid: "user-abc", quantity: 2 },
@@ -126,8 +142,8 @@ describe("useUserCollection", () => {
     it("on success: empty snapshot still means ready (not idle)", () => {
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
-      const onNext = mockOnSnapshot.mock.calls[0][1];
-      act(() => onNext({ docs: [] }));
+      const onNext = getOnNext();
+      act(() => onNext(createFakeSnapshot([])));
 
       expect(result.current.entries).toEqual([]);
       expect(result.current.status).toBe("ready");
@@ -138,7 +154,7 @@ describe("useUserCollection", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
-      const onError = mockOnSnapshot.mock.calls[0][2];
+      const onError = getOnError();
       const fakeError = new Error("permission-denied");
 
       act(() => onError(fakeError));
@@ -155,14 +171,16 @@ describe("useUserCollection", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
-      const onNext = mockOnSnapshot.mock.calls[0][1];
+      const onNext = getOnNext();
       act(() =>
-        onNext({
-          docs: [createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 1 })],
-        }),
+        onNext(
+          createFakeSnapshot([
+            createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 1 }),
+          ]),
+        ),
       );
 
-      const onError = mockOnSnapshot.mock.calls[0][2];
+      const onError = getOnError();
       const fakeError = new Error("transient-read-failure");
       act(() => onError(fakeError));
 
@@ -215,16 +233,16 @@ describe("useUserCollection", () => {
         initialProps: { ownerUid: "user-A" },
       });
 
-      const onNext = mockOnSnapshot.mock.calls[0][1];
+      const onNext = getOnNext();
       act(() =>
-        onNext({
-          docs: [
+        onNext(
+          createFakeSnapshot([
             createFakeDoc("LT24-CHM-01-DUN", {
               ownerUid: "user-A",
               quantity: 1,
             }),
-          ],
-        }),
+          ]),
+        ),
       );
       expect(result.current.entries).toHaveLength(1);
 
@@ -248,11 +266,13 @@ describe("useUserCollection", () => {
         initialProps: { ownerUid: "user-A" },
       });
 
-      const onNextA = mockOnSnapshot.mock.calls[0][1];
+      const onNextA = getOnNext();
       act(() =>
-        onNextA({
-          docs: [createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-A", quantity: 1 })],
-        }),
+        onNextA(
+          createFakeSnapshot([
+            createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-A", quantity: 1 }),
+          ]),
+        ),
       );
       expect(result.current.status).toBe("ready");
 
@@ -266,16 +286,31 @@ describe("useUserCollection", () => {
         initialProps: { ownerUid: "user-A" },
       });
 
-      const onNext = mockOnSnapshot.mock.calls[0][1];
-      act(() =>
-        onNext({
-          docs: [createFakeDoc("LT24-CHM-01-DUN", { quantity: 1 })],
-        }),
-      );
+      const onNext = getOnNext();
+      act(() => onNext(createFakeSnapshot([createFakeDoc("LT24-CHM-01-DUN", { quantity: 1 })])));
       expect(result.current.status).toBe("ready");
 
       rerender({ ownerUid: "user-A" });
 
+      expect(result.current.status).toBe("ready");
+      expect(result.current.entries).toHaveLength(1);
+    });
+
+    it("stays loading on cache-only snapshots until a server snapshot arrives", () => {
+      const { result } = renderHook(() => useUserCollection("user-abc"));
+      const onNext = getOnNext();
+
+      act(() => onNext(createFakeSnapshot([], { fromCache: true })));
+      expect(result.current.status).toBe("loading");
+      expect(result.current.entries).toEqual([]);
+
+      act(() =>
+        onNext(
+          createFakeSnapshot([createFakeDoc("PIN-CF-01", { ownerUid: "user-abc", quantity: 1 })], {
+            fromCache: false,
+          }),
+        ),
+      );
       expect(result.current.status).toBe("ready");
       expect(result.current.entries).toHaveLength(1);
     });

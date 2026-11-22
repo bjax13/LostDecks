@@ -263,6 +263,21 @@ describe("bulkImport (unit)", () => {
       expect(mockBatchCommit).toHaveBeenCalled();
     });
 
+    it("creates pin rows with deterministic Firestore doc id (catalog sku)", async () => {
+      const result = await applyBulkCollectionUpdate({
+        ownerUid: "u1",
+        rows: [{ skuId: "PIN-CF-01", quantity: 1 }],
+        existingEntries: [],
+        allowPins: true,
+      });
+      expect(result.created).toBe(1);
+      expect(mockBatchSet).toHaveBeenCalledWith(
+        { id: "PIN-CF-01" },
+        expect.objectContaining({ skuId: "PIN-CF-01", quantity: 1 }),
+        { merge: true },
+      );
+    });
+
     it("sets absolute quantity on existing entry", async () => {
       const result = await applyBulkCollectionUpdate({
         ownerUid: "u1",

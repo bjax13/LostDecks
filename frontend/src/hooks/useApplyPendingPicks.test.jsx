@@ -111,6 +111,71 @@ describe("PendingPicksApplier", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
   });
 
+  it("writes once and still clears or navigates when entries change mid-apply", async () => {
+    savePendingPicks({ "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+    });
+
+    let resolveApply;
+    const applyDeferred = new Promise((resolve) => {
+      resolveApply = () => resolve({ created: 1, updated: 0, deleted: 0 });
+    });
+    mockApplyBulk.mockReturnValue(applyDeferred);
+
+    const { rerender } = render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockApplyBulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingEntries: [{ id: "PIN-CF-01", quantity: 1 }],
+        rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+      }),
+    );
+
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "PIN-CF-01", quantity: 1 },
+        { id: "auto-id-1", skuId: "PIN-CF-02", quantity: 1 },
+      ],
+      status: "ready",
+    });
+    rerender(<PendingPicksApplier />);
+
+    await act(async () => {
+      resolveApply();
+    });
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+      expect(mockNavigate).toHaveBeenCalledWith("/matches?welcome=1", { replace: true });
+    });
+    expect(window.localStorage.getItem("pendingPinPicks")).toBeNull();
+  });
+
+  it("does not bulk-write Shredhead when the server snapshot already shows it owned", async () => {
+    savePendingPicks({ "PIN-CF-01": 1, "PIN-CF-02": 1 });
+    mockUseUserCollection.mockReturnValue({
+      status: "ready",
+      entries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+    });
+
+    render(<PendingPicksApplier />);
+
+    await waitFor(() => {
+      expect(mockApplyBulk).toHaveBeenCalledTimes(1);
+    });
+    expect(mockApplyBulk).toHaveBeenCalledWith({
+      ownerUid: "u1",
+      rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
+      existingEntries: [{ id: "PIN-CF-01", ownerUid: "u1", quantity: 1 }],
+      allowPins: true,
+    });
+  });
+
   it("stops after max attempts, keeps pending picks, and surfaces an alert", async () => {
     vi.useFakeTimers();
     savePendingPicks({ "PIN-CF-01": 2 });

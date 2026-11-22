@@ -38,12 +38,18 @@ export function useUserCollection(ownerUid) {
 
     const unsubscribe = onSnapshot(
       collectionQuery,
+      { includeMetadataChanges: true },
       (snapshot) => {
         const nextEntries = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setState({ entries: nextEntries, status: "ready", error: null });
+        const serverConfirmed = snapshot.metadata?.fromCache === false;
+        setState({
+          entries: nextEntries,
+          status: serverConfirmed ? "ready" : "loading",
+          error: null,
+        });
       },
       (err) => {
         console.error("Failed to load collection entries", err);
