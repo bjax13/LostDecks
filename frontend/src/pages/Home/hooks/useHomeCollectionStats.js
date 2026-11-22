@@ -49,6 +49,8 @@ export function useHomeCollectionStats() {
       isSignedIn && catalogTotal > 0 ? Math.max(0, catalogTotal - summary.uniqueCardCount) : null;
     const extras = isSignedIn ? Math.max(0, summary.totalQuantity - summary.uniqueSkuCount) : null;
 
+    const hasTrackedItems = isSignedIn && summary.uniqueSkuCount > 0;
+
     return {
       catalogTotal,
       foilCatalogTotal,
@@ -59,6 +61,7 @@ export function useHomeCollectionStats() {
       missingItems,
       extras,
       isSignedIn,
+      hasTrackedItems,
     };
   }, [decoratedEntries, isSignedIn, summary]);
 

@@ -164,9 +164,20 @@ describe("Home page", () => {
       expect(within(snapshot).getByText("0 / 161")).toBeInTheDocument();
     });
 
-    it("shows Get Started as View Collection link", () => {
+    it("hides onboarding footer when the user already tracks items", () => {
       renderHome();
-      expect(screen.queryByRole("button", { name: "Get Started" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: "Start tracking your collection" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows onboarding footer with View Collection when signed in with no items", () => {
+      mockUseUserCollection.mockReturnValue({
+        entries: [],
+        loading: false,
+        error: null,
+      });
+      renderHome();
       const footer = screen
         .getByRole("heading", { name: "Start tracking your collection" })
         .closest("section");
@@ -225,5 +236,8 @@ describe("Home page", () => {
 
     renderHome();
     expect(screen.getByTestId("snapshot-loading")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Start tracking your collection" }),
+    ).not.toBeInTheDocument();
   });
 });

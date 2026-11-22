@@ -27,7 +27,7 @@ export default function Home() {
         <HomeSupportedCollections />
         <HomeFeatureTiles />
         <HomeCollectionSnapshot stats={stats} loading={loading} />
-        <HomeFooterCta />
+        {!stats.isSignedIn || (!loading && !stats.hasTrackedItems) ? <HomeFooterCta /> : null}
       </div>
     </main>
   );
