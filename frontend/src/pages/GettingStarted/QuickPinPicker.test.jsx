@@ -200,6 +200,56 @@ describe("QuickPinPicker", () => {
     expect(haveAll).toHaveClass("is-active");
   });
 
+  it("keeps an explicit local Need when collection hydrates after loading", async () => {
+    const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
+    const prefill = decodeHavePrefill("PIN-CF-01", {
+      catalogSkuIds: chasmSkuIds,
+      seriesList: [{ id: "pins:ChasmFriends", skuIds: chasmSkuIds }],
+    });
+    const entries = [
+      { skuId: "PIN-CF-01", quantity: 1 },
+      { skuId: "PIN-CF-02", quantity: 1 },
+    ];
+
+    const { rerender } = render(
+      <QuickPinPicker
+        isSignedIn
+        collectionLoading
+        prefill={prefill}
+        entries={entries}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    await user.type(screen.getByPlaceholderText(/Search pins or series/i), "Shredhead");
+    const pinRow = screen.getByText("Shredhead").closest("li");
+    const modes = within(pinRow).getByRole("group", { name: /Shredhead ownership/i });
+    await user.click(within(modes).getByRole("button", { name: "Need" }));
+    expect(within(modes).getByRole("button", { name: "Need" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    rerender(
+      <QuickPinPicker
+        isSignedIn
+        collectionLoading={false}
+        prefill={prefill}
+        entries={entries}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByPlaceholderText(/Search pins or series/i)).toHaveValue("Shredhead");
+    const pinRowAfter = screen.getByText("Shredhead").closest("li");
+    const modesAfter = within(pinRowAfter).getByRole("group", { name: /Shredhead ownership/i });
+    expect(within(modesAfter).getByRole("button", { name: "Need" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByText(/1 marked Have/i)).toBeInTheDocument();
+  });
+
   it("keeps a series expanded when hydrate leaves it only partially Have", () => {
     const chasmSkuIds = ["PIN-CF-01", "PIN-CF-02", "PIN-CF-03", "PIN-CF-04", "PIN-CF-05"];
     const prefill = decodeHavePrefill("PIN-CF-01:2", {
