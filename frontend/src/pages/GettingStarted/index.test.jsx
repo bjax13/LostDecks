@@ -114,7 +114,7 @@ async function applyBulkQuantity(user, bulkActions, quantity) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockUseAuth.mockReturnValue({ user: null });
-  mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });
   mockApplyBulkCollectionUpdate.mockResolvedValue({
     created: 0,
     updated: 0,
@@ -1040,7 +1040,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
         { id: "card", cardId: "LT24-CHM-01", finish: "DUN", count: 1 },
         { id: "pin", cardId: "PIN-CF-01", copies: 1 },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
     const user = setupUser();
@@ -1070,7 +1070,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
         { id: "card", skuId: "LT24-CHM-01-DUN", quantity: 1 },
         { id: "pin", skuId: "PIN-CF-01", quantity: 1 },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
     const user = setupUser();
@@ -1097,7 +1097,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
       entries: [{ id: "legacy", skuId: "NOT-IN-REVIEW-TREE", quantity: 3 }],
-      loading: false,
+      status: "ready",
       error: null,
     });
     const user = setupUser();
@@ -1116,7 +1116,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     const existingEntries = [{ id: "existing", skuId: "LT24-CHM-01-DUN", quantity: 1 }];
     mockUseUserCollection.mockReturnValue({
       entries: existingEntries,
-      loading: false,
+      status: "ready",
       error: null,
     });
     mockApplyBulkCollectionUpdate.mockResolvedValue({
@@ -1143,7 +1143,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
         { id: "LT24-CHM-01-DUN", quantity: 1 },
         { id: "PIN-CF-01", quantity: 1 },
       ],
-      loading: false,
+      status: "ready",
       error: null,
     });
     const user = setupUser();
@@ -1183,7 +1183,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
   it("saves cards-only collectors without allowing pin updates", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
-    mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+    mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });
     const user = setupUser();
     renderPage();
 
@@ -1330,28 +1330,28 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     });
 
     function FullPinReviewLoadHarness() {
-      const [collection, setCollection] = useState({ entries: [], loading: true });
+      const [collection, setCollection] = useState({ entries: [], status: "loading" });
       mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
       mockUseUserCollection.mockImplementation(() => ({
         entries: collection.entries,
-        loading: collection.loading,
+        status: collection.status,
         error: null,
       }));
 
       return (
         <TestMemoryRouter initialEntries={[chasmPath]}>
-          <button type="button" onClick={() => setCollection({ entries: [], loading: false })}>
+          <button type="button" onClick={() => setCollection({ entries: [], status: "ready" })}>
             Allow save
           </button>
-          <button type="button" onClick={() => setCollection({ entries: [], loading: true })}>
+          <button type="button" onClick={() => setCollection({ entries: [], status: "loading" })}>
             Loading again
           </button>
           <button
             type="button"
             onClick={() =>
               setCollection({
-                entries: [{ id: "pin", skuId: "PIN-CF-01", quantity: 1 }],
-                loading: false,
+                entries: [{ id: "PIN-CF-01", quantity: 1 }],
+                status: "ready",
               })
             }
           >
@@ -1377,15 +1377,15 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       await user.click(screen.getByRole("button", { name: "Loading again" }));
       await user.click(await screen.findByRole("link", { name: "add the rest of your pins" }));
 
-      const chasmCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
-      expect(within(chasmCoverage).getByRole("button", { name: "None" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      );
+      expect(screen.getByText(/loading your saved collection/i)).toBeInTheDocument();
+      expect(
+        screen.queryByRole("group", { name: /chasmfriends pins coverage/i }),
+      ).not.toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Load collection" }));
 
       await waitFor(() => {
+        const chasmCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
         expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
           "aria-pressed",
           "true",

@@ -1,28 +1,37 @@
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "../../../lib/firebase";
 
-const initialState = {
-  entries: [],
-  loading: true,
-  error: null,
-};
+/** @typedef {'idle' | 'loading' | 'ready' | 'error'} UserCollectionStatus */
+
+/**
+ * @param {string | null | undefined} ownerUid
+ * @returns {{ entries: object[]; status: UserCollectionStatus; error: Error | null }}
+ */
+function createInitialState(ownerUid) {
+  if (!ownerUid) {
+    return { entries: [], status: "idle", error: null };
+  }
+  return { entries: [], status: "loading", error: null };
+}
 
 export function useUserCollection(ownerUid) {
-  const [entries, setEntries] = useState(initialState.entries);
-  const [loading, setLoading] = useState(initialState.loading);
-  const [error, setError] = useState(initialState.error);
+  const subscribedOwnerUidRef = useRef(/** @type {string | null} */ (null));
+  const [{ entries, status, error }, setState] = useState(() => createInitialState(ownerUid));
 
   useEffect(() => {
     if (!ownerUid) {
-      setEntries([]);
-      setLoading(false);
-      setError(null);
+      subscribedOwnerUidRef.current = null;
+      setState({ entries: [], status: "idle", error: null });
       return undefined;
     }
 
-    setLoading(true);
-    setError(null);
+    const ownerChanged = subscribedOwnerUidRef.current !== ownerUid;
+    subscribedOwnerUidRef.current = ownerUid;
+
+    if (ownerChanged) {
+      setState({ entries: [], status: "loading", error: null });
+    }
 
     const collectionRef = collection(db, "collections");
     const collectionQuery = query(collectionRef, where("ownerUid", "==", ownerUid));
@@ -34,18 +43,16 @@ export function useUserCollection(ownerUid) {
           id: doc.id,
           ...doc.data(),
         }));
-        setEntries(nextEntries);
-        setLoading(false);
+        setState({ entries: nextEntries, status: "ready", error: null });
       },
       (err) => {
         console.error("Failed to load collection entries", err);
-        setError(err);
-        setLoading(false);
+        setState({ entries: [], status: "error", error: err });
       },
     );
 
     return () => unsubscribe();
   }, [ownerUid]);
 
-  return { entries, loading, error };
+  return { entries, status, error };
 }

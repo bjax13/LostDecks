@@ -67,7 +67,7 @@ beforeEach(() => {
     isAdmin: true,
     adminLoading: false,
   });
-  mockUseUserCollection.mockReturnValue({ entries: [], loading: false, error: null });
+  mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });
   mockHttpsCallable.mockReturnValue(async () => ({ data: { users: COLLECTORS } }));
 });
 
@@ -143,7 +143,7 @@ describe("AdminPage", () => {
     const user = userEvent.setup();
     mockUseUserCollection.mockImplementation((ownerUid) => {
       if (ownerUid !== "user-a") {
-        return { entries: [], loading: false, error: null };
+        return { entries: [], status: "ready", error: null };
       }
       return {
         entries: [
@@ -155,7 +155,7 @@ describe("AdminPage", () => {
             updatedAt: null,
           },
         ],
-        loading: false,
+        status: "ready",
         error: null,
       };
     });
@@ -183,7 +183,7 @@ describe("AdminPage", () => {
   it("reports a collection load failure for the selected user", async () => {
     mockUseUserCollection.mockReturnValue({
       entries: [],
-      loading: false,
+      status: "error",
       error: new Error("missing"),
     });
     renderAdmin("/admin/user-a");
