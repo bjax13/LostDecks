@@ -45,7 +45,7 @@ describe("VisualBulkCollectionEditorModal", () => {
   }
 
   it("saves only session-edited SKUs against live entries when collection changed while open", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const { rerender } = renderModal(openEntries);
 
     rerender(
