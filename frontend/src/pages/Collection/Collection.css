@@ -469,6 +469,28 @@
   background: rgba(12, 8, 28, 0.55);
 }
 
+.collection-bulk-post-modal__discord-warning {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 193, 7, 0.45);
+  background: rgba(255, 193, 7, 0.12);
+  color: #ffe8a3;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.collection-bulk-post-modal__chunk + .collection-bulk-post-modal__chunk {
+  margin-top: 0.75rem;
+}
+
+.collection-bulk-post-modal__chunk-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(218, 112, 214, 0.95);
+}
+
 .collection-bulk-post-modal__tree {
   margin: 0;
   padding: 0;

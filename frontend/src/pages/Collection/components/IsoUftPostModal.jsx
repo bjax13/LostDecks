@@ -3,7 +3,8 @@ import { DEFAULT_MATCH_KEEP_BY_LANE } from "../../../lib/userPreferences.js";
 import {
   buildIsoUftPostTree,
   buildShareUrl,
-  formatIsoUftPost,
+  DISCORD_MESSAGE_CHAR_LIMIT,
+  formatIsoUftPostWithDiscordChunks,
   getDefaultExcludedIds,
 } from "../utils/isoUftPost";
 
@@ -182,6 +183,9 @@ export default function IsoUftPostModal({
   const [collapsedIds, setCollapsedIds] = useState(() => new Set());
   const [format, setFormat] = useState(() => readStoredPrefs().format);
   const [includeLink, setIncludeLink] = useState(() => readStoredPrefs().includeLink);
+  const [resolvedShareId, setResolvedShareId] = useState(shareId);
+  const [copyWarning, setCopyWarning] = useState(null);
+  const shareRefreshAttemptedRef = useRef(false);
 
   const { tree, skippedEntries } = useMemo(
     () => buildIsoUftPostTree(entries ?? [], { matchKeep, format }),
@@ -197,9 +201,17 @@ export default function IsoUftPostModal({
       setIncludeLink(prefs.includeLink);
       setExcludedIds(getDefaultExcludedIds());
       setCollapsedIds(getDefaultCollapsedIds(tree));
+      shareRefreshAttemptedRef.current = false;
+      setCopyWarning(null);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, tree]);
+
+  useEffect(() => {
+    setResolvedShareId(shareId);
+    setCopyWarning(null);
+    shareRefreshAttemptedRef.current = false;
+  }, [shareId]);
 
   useEffect(() => {
     writeStoredPrefs({ format, includeLink });
@@ -220,18 +232,22 @@ export default function IsoUftPostModal({
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  const [resolvedShareId, setResolvedShareId] = useState(shareId);
-
-  useEffect(() => {
-    setResolvedShareId(shareId);
-  }, [shareId]);
-
   const footerUrl = includeLink ? buildShareUrl({ shareId: resolvedShareId }) : null;
 
-  const previewText = useMemo(
-    () => formatIsoUftPost(tree, excludedIds, { format, footerUrl }),
+  const {
+    text: previewText,
+    chunks,
+    exceedsLimit,
+  } = useMemo(
+    () =>
+      formatIsoUftPostWithDiscordChunks(tree, excludedIds, {
+        format,
+        footerUrl,
+      }),
     [tree, excludedIds, format, footerUrl],
   );
+
+  const discordChunks = exceedsLimit ? chunks : [previewText];
 
   const handleToggleCollapse = (nodeId) => {
     setCollapsedIds((prev) => {
@@ -264,18 +280,45 @@ export default function IsoUftPostModal({
     });
   };
 
-  const handleCopy = async () => {
-    if (!previewText) {
+  const refreshPublicShareIfNeeded = async () => {
+    if (!resolvedShareId || !onRefreshPublicShare || shareRefreshAttemptedRef.current) {
+      return null;
+    }
+    shareRefreshAttemptedRef.current = true;
+    try {
+      await onRefreshPublicShare();
+      return null;
+    } catch (err) {
+      console.error("Public share refresh failed; copying anyway", err);
+      const warning = "Copied, but the public link may be stale until you update it.";
+      setCopyWarning(warning);
+      return warning;
+    }
+  };
+
+  const handleCopyChunk = async (chunkText, partIndex) => {
+    if (!chunkText) {
       return;
     }
 
+    let refreshWarning = null;
+    if (partIndex === 1) {
+      refreshWarning = await refreshPublicShareIfNeeded();
+    }
+
     try {
-      if (resolvedShareId && onRefreshPublicShare) {
-        await onRefreshPublicShare();
+      await copyTextToClipboard(chunkText);
+      onCopied({
+        skippedEntries,
+        format,
+        includeLink,
+        discordPart: partIndex,
+        discordPartCount: discordChunks.length,
+      });
+      const isLastPart = !exceedsLimit || partIndex === discordChunks.length;
+      if (isLastPart && !refreshWarning && !copyWarning) {
+        onClose();
       }
-      await copyTextToClipboard(previewText);
-      onCopied({ skippedEntries, format, includeLink });
-      onClose();
     } catch (err) {
       console.error("Failed to copy ISO/UFT post", err);
       onCopyError();
@@ -329,7 +372,9 @@ export default function IsoUftPostModal({
         >
           <div className="collection-bulk-post-modal__header">
             <h2>ISO/UFT post preview</h2>
-            <p>Select sections to include, then copy the formatted post to your clipboard.</p>
+            <p>
+              Select sections to include, then copy the Discord-formatted post to your clipboard.
+            </p>
           </div>
 
           <div className="collection-bulk-post-modal__options">
@@ -353,6 +398,11 @@ export default function IsoUftPostModal({
             {shareError ? (
               <p className="collection-bulk-post-modal__share-error" role="alert">
                 Could not update the public link. Try again.
+              </p>
+            ) : null}
+            {copyWarning ? (
+              <p className="collection-bulk-post-modal__share-error" role="status">
+                {copyWarning}
               </p>
             ) : null}
             <fieldset className="collection-bulk-post-modal__format">
@@ -399,19 +449,57 @@ export default function IsoUftPostModal({
 
             <div className="collection-bulk-post-modal__preview-pane">
               <h3 className="collection-bulk-post-modal__pane-title">Preview</h3>
-              <pre className="collection-bulk-post-modal__preview">{previewText}</pre>
+              {exceedsLimit ? (
+                <p className="collection-bulk-post-modal__discord-warning" role="status">
+                  This post is longer than Discord&apos;s{" "}
+                  {DISCORD_MESSAGE_CHAR_LIMIT.toLocaleString()}
+                  -character limit. Copy each part below and paste them as separate messages (in
+                  order).
+                </p>
+              ) : null}
+              {discordChunks.map((chunkText, index) => (
+                <div
+                  key={
+                    exceedsLimit
+                      ? `discord-chunk-part-${index + 1}-of-${discordChunks.length}`
+                      : "discord-chunk-single"
+                  }
+                  className="collection-bulk-post-modal__chunk"
+                >
+                  {exceedsLimit ? (
+                    <h4 className="collection-bulk-post-modal__chunk-title">
+                      Part {index + 1} of {discordChunks.length}
+                    </h4>
+                  ) : null}
+                  <pre className="collection-bulk-post-modal__preview">{chunkText}</pre>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="collection-bulk-post-modal__actions">
-            <button
-              type="button"
-              className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
-              onClick={handleCopy}
-              disabled={!previewText}
-            >
-              Copy to clipboard
-            </button>
+            {exceedsLimit ? (
+              discordChunks.map((chunkText, index) => (
+                <button
+                  key={chunkText.split("\n")[0] ?? `discord-copy-${chunkText.length}`}
+                  type="button"
+                  className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
+                  onClick={() => handleCopyChunk(chunkText, index + 1)}
+                  disabled={!chunkText}
+                >
+                  Copy part {index + 1}
+                </button>
+              ))
+            ) : (
+              <button
+                type="button"
+                className="collection-bulk-post-modal__button collection-bulk-post-modal__button--primary"
+                onClick={() => handleCopyChunk(previewText, 1)}
+                disabled={!previewText}
+              >
+                Copy to clipboard
+              </button>
+            )}
             <button
               type="button"
               className="collection-bulk-post-modal__button collection-bulk-post-modal__button--secondary"

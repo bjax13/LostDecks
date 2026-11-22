@@ -421,7 +421,7 @@ describe("BulkCollectionTools", () => {
 
     const preview = getPostDialog().querySelector(".collection-bulk-post-modal__preview");
     expect(preview).toHaveTextContent(/Elsecaller Foils: E40/);
-    expect(preview).toHaveTextContent(/Trade with me on ShardStash:/);
+    expect(preview).toHaveTextContent(/\[ShardStash\]/);
     expect(preview).toHaveTextContent(/utm_source=share/);
   });
 
@@ -729,10 +729,9 @@ describe("BulkCollectionTools", () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     const copied = writeText.mock.calls[0][0];
-    expect(copied).toContain("ISO:");
-    expect(copied).toContain("Story Foils:");
-    expect(copied).toMatch(/9\b/);
-    expect(copied).toContain("UFT:");
+    expect(copied).toContain("**ISO** (looking for)");
+    expect(copied).toMatch(/- Alpha Foils: 9/);
+    expect(copied).toContain("**UFT** (up for trade)");
     expect(copied).toContain("10");
     expect(copied).toMatch(/7\s+Sparkle/);
     expect(copied).toMatch(/\b8\b/);
@@ -842,9 +841,9 @@ describe("BulkCollectionTools", () => {
     await user.click(screen.getByRole("button", { name: /copy to clipboard/i }));
 
     const copied = writeText.mock.calls[0][0];
-    expect(copied).not.toContain("ISO:");
-    expect(copied).toContain("UFT:");
-    expect(copied).toMatch(/Zeta Foils: 10/);
+    expect(copied).not.toContain("**ISO**");
+    expect(copied).toContain("**UFT** (up for trade)");
+    expect(copied).toMatch(/- Zeta Foils: 10/);
   });
 
   it("does not open ISO/UFT post modal while a CSV upload is still processing", async () => {
