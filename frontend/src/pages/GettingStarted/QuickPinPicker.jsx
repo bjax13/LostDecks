@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { emptyHavePrefill, mergeHydrationQuantities } from "../../lib/havePrefill.js";
+import {
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "../Collection/utils/collectionEntrySku.js";
 import { gettingStartedTree } from "./gettingStartedCatalog";
 import "./QuickPinPicker.css";
 
@@ -35,10 +39,9 @@ function buildSeriesFromTree(tree = gettingStartedTree) {
 function quantitiesFromEntries(entries, pinSkuIds) {
   const bySku = new Map();
   for (const entry of entries ?? []) {
-    const skuId = typeof entry?.skuId === "string" ? entry.skuId.trim().toUpperCase() : "";
+    const skuId = resolveCollectionEntrySkuId(entry);
     if (!skuId || !pinSkuIds.has(skuId)) continue;
-    const raw = entry.quantity ?? entry.count ?? entry.copies ?? entry.total;
-    const qty = typeof raw === "number" && Number.isFinite(raw) ? Math.max(0, Math.floor(raw)) : 0;
+    const qty = ownedQuantityFromEntry(entry);
     bySku.set(skuId, (bySku.get(skuId) ?? 0) + qty);
   }
   const quantities = {};
@@ -86,6 +89,7 @@ function partialHaveSeriesIds(seriesList, quantities) {
 export default function QuickPinPicker({
   entries = [],
   collectionLoading = false,
+  collectionReady = false,
   saving = false,
   error = null,
   isSignedIn = false,
@@ -110,28 +114,22 @@ export default function QuickPinPicker({
   const userTouchedSkuIdsRef = useRef(new Set());
 
   useEffect(() => {
-    if (collectionLoading || hydratedFromCollection || !isSignedIn) {
+    if (!collectionReady || hydratedFromCollection || !isSignedIn) {
       return;
     }
     // Prefill expansion was seed-only; recompute after merge so a series
     // that became fully Have (or fully Need) collapses. Explicit local picks win.
-    const merged = mergeHydrationQuantities(
-      quantities,
-      quantitiesFromEntries(entries, allPinSkuIds),
-      userTouchedSkuIdsRef.current,
-    );
-    setQuantities(merged);
-    setExpandedSeries(new Set(partialHaveSeriesIds(seriesList, merged)));
+    setQuantities((prev) => {
+      const merged = mergeHydrationQuantities(
+        prev,
+        quantitiesFromEntries(entries, allPinSkuIds),
+        userTouchedSkuIdsRef.current,
+      );
+      setExpandedSeries(new Set(partialHaveSeriesIds(seriesList, merged)));
+      return merged;
+    });
     setHydratedFromCollection(true);
-  }, [
-    allPinSkuIds,
-    collectionLoading,
-    entries,
-    hydratedFromCollection,
-    isSignedIn,
-    quantities,
-    seriesList,
-  ]);
+  }, [allPinSkuIds, collectionReady, entries, hydratedFromCollection, isSignedIn, seriesList]);
 
   const normalizedSearch = search.trim().toLowerCase();
 
