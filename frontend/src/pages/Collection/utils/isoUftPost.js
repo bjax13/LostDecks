@@ -431,6 +431,13 @@ export function buildIsoUftSkuLists(entries, { matchKeep = DEFAULT_MATCH_KEEP_BY
 /** Discord standard message character limit (4,000 with Nitro — we target the default). */
 export const DISCORD_MESSAGE_CHAR_LIMIT = 2000;
 
+const DISCORD_MARKDOWN_ESCAPE_PATTERN = /[*_~`|>#\\[\]]/g;
+
+/** Escape catalog copy for Discord markdown (Discord output only). */
+export function escapeDiscordMarkdownContent(text) {
+  return String(text).replace(DISCORD_MARKDOWN_ESCAPE_PATTERN, "\\$&");
+}
+
 const ISO_MODE_SUBTITLE = "(looking for)";
 const UFT_MODE_SUBTITLE = "(up for trade)";
 
@@ -532,7 +539,7 @@ function discordBulletsForMode(mode) {
   const bullets = [];
   for (const section of mode.sections) {
     for (const item of section.items) {
-      bullets.push({ modeId: mode.id, text: `- ${item}` });
+      bullets.push({ modeId: mode.id, text: `- ${escapeDiscordMarkdownContent(item)}` });
     }
   }
   return bullets;
@@ -635,41 +642,37 @@ function renderChunkFromUnits(
   return lines.join("\n");
 }
 
-/**
- * Splits a Discord-formatted post into numbered chunks under `limit` characters.
- * Splits only at item bullet boundaries.
- */
-export function splitDiscordIsoUftPost(
-  text,
-  { limit = DISCORD_MESSAGE_CHAR_LIMIT, heading = DEFAULT_DISCORD_HEADING } = {},
+function measureChunkSize(
+  units,
+  { partIndex, partCount, headingBase, footerLine, headerByMode, limit },
 ) {
-  if (text.length <= limit) {
-    return { chunks: [text], exceedsLimit: false };
-  }
+  const chunkText = renderChunkFromUnits(units, {
+    partIndex,
+    partCount,
+    headingBase,
+    footerLine,
+    headerByMode,
+  });
+  return { chunkText, fits: chunkText.length <= limit };
+}
 
-  const lines = text.split("\n");
-  const footerLine = lines.find((line) => line.startsWith("-# ")) ?? null;
-  const headingBase =
-    (lines[0] ?? `## ${heading}`).replace(/\s*\(\d+\/\d+\)\s*$/, "") || `## ${heading}`;
-
-  const modeHeaders = new Map();
-  const bullets = [];
-  let activeModeId = "iso";
-
-  for (const line of lines) {
-    if (line.startsWith("**ISO**") || line.startsWith("**UFT**")) {
-      activeModeId = line.startsWith("**ISO**") ? "iso" : "uft";
-      modeHeaders.set(activeModeId, { kind: "modeHeader", modeId: activeModeId, text: line });
-    } else if (line.startsWith("- ")) {
-      bullets.push({ kind: "bullet", modeId: activeModeId, text: line });
-    }
-  }
-
+function splitDiscordBulletUnits(bullets, { limit, headingBase, footerLine, headerByMode }) {
   if (bullets.length === 0) {
-    return { chunks: [text.slice(0, limit)], exceedsLimit: true };
+    const fallback = renderChunkFromUnits([], {
+      partIndex: 1,
+      partCount: 1,
+      headingBase,
+      footerLine,
+      headerByMode,
+    });
+    const chunk = fallback.length > 0 ? fallback : headingBase;
+    return {
+      chunks: [chunk],
+      exceedsLimit: true,
+      hasOversizedChunk: chunk.length > limit,
+    };
   }
 
-  const headerByMode = modeHeaders;
   const greedyChunks = [];
   let index = 0;
   while (index < bullets.length) {
@@ -704,6 +707,36 @@ export function splitDiscordIsoUftPost(
     greedyChunks.push(bullets.slice(index, lastFittingEnd));
     index = lastFittingEnd;
   }
+
+  const rebalanceFooterOverflow = () => {
+    if (!footerLine || greedyChunks.length === 0) {
+      return;
+    }
+    const partCount = greedyChunks.length;
+    const chunks = greedyChunks.map((units, idx) =>
+      renderChunkFromUnits(units, {
+        partIndex: idx + 1,
+        partCount,
+        headingBase,
+        footerLine: idx === partCount - 1 ? footerLine : null,
+        headerByMode,
+      }),
+    );
+    const last = chunks[chunks.length - 1];
+    if (last.length <= limit) {
+      return;
+    }
+    const lastUnits = greedyChunks[greedyChunks.length - 1];
+    if (lastUnits.length <= 1) {
+      return;
+    }
+    const splitPoint = Math.max(1, lastUnits.length - 1);
+    const headUnits = lastUnits.slice(0, splitPoint);
+    const tailUnits = lastUnits.slice(splitPoint);
+    greedyChunks.splice(greedyChunks.length - 1, 1, headUnits, tailUnits);
+  };
+
+  rebalanceFooterOverflow();
 
   let partCount = greedyChunks.length;
   let chunks = greedyChunks.map((units, idx) =>
@@ -739,21 +772,58 @@ export function splitDiscordIsoUftPost(
     );
   }
 
-  return { chunks, exceedsLimit: true };
+  const hasOversizedChunk = chunks.some((chunk) => chunk.length > limit);
+  return {
+    chunks: chunks.length > 0 ? chunks : [headingBase],
+    exceedsLimit: true,
+    hasOversizedChunk,
+  };
 }
 
-function measureChunkSize(
-  units,
-  { partIndex, partCount, headingBase, footerLine, headerByMode, limit },
+/**
+ * Splits a Discord-formatted post into numbered chunks under `limit` characters.
+ * Splits only at item bullet boundaries.
+ */
+export function splitDiscordIsoUftPost(
+  text,
+  { limit = DISCORD_MESSAGE_CHAR_LIMIT, heading = DEFAULT_DISCORD_HEADING } = {},
 ) {
-  const chunkText = renderChunkFromUnits(units, {
-    partIndex,
-    partCount,
+  if (text.length <= limit) {
+    return { chunks: [text], exceedsLimit: false, hasOversizedChunk: false };
+  }
+
+  const lines = text.split("\n");
+  const footerLine = lines.find((line) => line.startsWith("-# ")) ?? null;
+  const headingBase =
+    (lines[0] ?? `## ${heading}`).replace(/\s*\(\d+\/\d+\)\s*$/, "") || `## ${heading}`;
+
+  const modeHeaders = new Map();
+  const bullets = [];
+  let activeModeId = "iso";
+
+  for (const line of lines) {
+    if (line.startsWith("**ISO**") || line.startsWith("**UFT**")) {
+      activeModeId = line.startsWith("**ISO**") ? "iso" : "uft";
+      modeHeaders.set(activeModeId, { kind: "modeHeader", modeId: activeModeId, text: line });
+    } else if (line.startsWith("- ")) {
+      bullets.push({ kind: "bullet", modeId: activeModeId, text: line });
+    }
+  }
+
+  if (bullets.length === 0) {
+    return {
+      chunks: [text],
+      exceedsLimit: true,
+      hasOversizedChunk: text.length > limit,
+    };
+  }
+
+  return splitDiscordBulletUnits(bullets, {
+    limit,
     headingBase,
     footerLine,
-    headerByMode,
+    headerByMode: modeHeaders,
   });
-  return { chunkText, fits: chunkText.length <= limit };
 }
 
 export function splitDiscordPostSegments(
@@ -762,7 +832,7 @@ export function splitDiscordPostSegments(
 ) {
   const fullText = renderDiscordSegments(segments);
   if (fullText.length <= limit) {
-    return { chunks: [fullText], exceedsLimit: false };
+    return { chunks: [fullText], exceedsLimit: false, hasOversizedChunk: false };
   }
 
   const headingBase = `## ${heading}`;
@@ -773,102 +843,20 @@ export function splitDiscordPostSegments(
 
   const headerByMode = new Map(modeHeaders.map((segment) => [segment.modeId, segment]));
 
-  const greedyChunks = [];
-  let index = 0;
-  while (index < bullets.length) {
-    let end = index;
-    let lastFittingEnd = index;
-
-    while (end < bullets.length) {
-      const units = bullets.slice(index, end + 1);
-      const tentativeParts = greedyChunks.length + 1;
-      const { fits } = measureChunkSize(units, {
-        partIndex: tentativeParts,
-        partCount: tentativeParts,
-        headingBase,
-        footerLine: null,
-        headerByMode,
-        limit,
-      });
-      if (fits) {
-        lastFittingEnd = end + 1;
-        end += 1;
-        continue;
-      }
-      if (end === index) {
-        lastFittingEnd = index + 1;
-      }
-      break;
-    }
-
-    if (lastFittingEnd <= index) {
-      lastFittingEnd = index + 1;
-    }
-    greedyChunks.push(bullets.slice(index, lastFittingEnd));
-    index = lastFittingEnd;
+  if (bullets.length === 0) {
+    return {
+      chunks: [fullText],
+      exceedsLimit: true,
+      hasOversizedChunk: fullText.length > limit,
+    };
   }
 
-  let partCount = greedyChunks.length;
-  let chunks = greedyChunks.map((units, idx) =>
-    renderChunkFromUnits(units, {
-      partIndex: idx + 1,
-      partCount,
-      headingBase,
-      footerLine: idx === partCount - 1 ? footerLine : null,
-      headerByMode,
-    }),
-  );
-
-  if (footerLine && chunks.length > 0) {
-    const last = chunks[chunks.length - 1];
-    if (last.length > limit) {
-      const lastUnits = greedyChunks[greedyChunks.length - 1];
-      if (lastUnits.length > 1) {
-        const splitPoint = Math.max(1, lastUnits.length - 1);
-        const headUnits = lastUnits.slice(0, splitPoint);
-        const tailUnits = lastUnits.slice(splitPoint);
-        greedyChunks.splice(greedyChunks.length - 1, 1, headUnits, tailUnits);
-        partCount = greedyChunks.length;
-        chunks = greedyChunks.map((units, idx) =>
-          renderChunkFromUnits(units, {
-            partIndex: idx + 1,
-            partCount,
-            headingBase,
-            footerLine: idx === partCount - 1 ? footerLine : null,
-            headerByMode,
-          }),
-        );
-      }
-    }
-  }
-
-  for (let i = 0; i < 8; i += 1) {
-    const oversized = chunks.findIndex((chunk) => chunk.length > limit);
-    if (oversized === -1) {
-      break;
-    }
-    const units = greedyChunks[oversized];
-    if (units.length <= 1) {
-      chunks[oversized] = units[0]?.text?.slice(0, limit - 1) ?? chunks[oversized].slice(0, limit);
-      break;
-    }
-    const mid = Math.ceil(units.length / 2);
-    const left = units.slice(0, mid);
-    const right = units.slice(mid);
-    greedyChunks.splice(oversized, 1, left, right);
-    partCount = greedyChunks.length;
-    chunks = greedyChunks.map((unitList, idx) =>
-      renderChunkFromUnits(unitList, {
-        partIndex: idx + 1,
-        partCount,
-        headingBase,
-        footerLine: idx === partCount - 1 ? footerLine : null,
-        headerByMode,
-      }),
-    );
-  }
-
-  return { chunks, exceedsLimit: true };
+  return splitDiscordBulletUnits(bullets, {
+    limit,
+    headingBase,
+    footerLine,
+    headerByMode,
+  });
 }
 
 export function formatIsoUftPost(
@@ -899,8 +887,10 @@ export function formatIsoUftPostWithDiscordChunks(tree, excludedIds = new Set(),
     heading,
   });
   const text = renderDiscordSegments(segments);
-  const { chunks, exceedsLimit } = splitDiscordPostSegments(segments, { heading });
-  return { text, chunks, exceedsLimit };
+  const { chunks, exceedsLimit, hasOversizedChunk } = splitDiscordPostSegments(segments, {
+    heading,
+  });
+  return { text, chunks, exceedsLimit, hasOversizedChunk };
 }
 
 export function buildIsoUftPost(

@@ -7,6 +7,7 @@ import {
   DEFAULT_DISCORD_HEADING,
   DEFAULT_EXCLUDED_SECTION_IDS,
   DISCORD_MESSAGE_CHAR_LIMIT,
+  escapeDiscordMarkdownContent,
   formatIsoUftPost,
   formatIsoUftPostWithDiscordChunks,
   getDefaultExcludedIds,
@@ -488,6 +489,123 @@ describe("isoUftPost", () => {
     );
     expect(exceedsLimit).toBe(false);
     expect(chunks).toHaveLength(1);
+  });
+
+  it("escapes Discord markdown special characters in catalog lines only", () => {
+    expect(escapeDiscordMarkdownContent("pins *bold* _x_ ~y~ `z` | #>[\\]")).toBe(
+      "pins \\*bold\\* \\_x\\_ \\~y\\~ \\`z\\` \\| \\#\\>\\[\\\\\\]",
+    );
+
+    collectiblesState.skus = [{ skuId: "uft-ns", cardId: "c-uft-ns", finish: "FOIL" }];
+    collectiblesState.cardById = {
+      "c-uft-ns": {
+        category: "nonsense",
+        number: 1,
+        detail: "variant: *Star*",
+        storyTitle: "Zeta",
+      },
+    };
+
+    const owned = [{ skuId: "owned-sf", quantity: 1 }];
+    collectiblesState.skus.unshift({ skuId: "owned-sf", cardId: "c-owned", finish: "FOIL" });
+    collectiblesState.cardById["c-owned"] = {
+      category: "story",
+      number: 1,
+      storyTitle: "Alpha",
+    };
+
+    const { tree } = buildIsoUftPostTree([...owned, { skuId: "uft-ns", quantity: 2 }]);
+    const discordText = formatIsoUftPost(tree, new Set(), { outputFormat: "discord" });
+    const plainText = formatIsoUftPost(tree, new Set(), { outputFormat: "plain" });
+
+    expect(discordText).toContain("\\*Star\\*");
+    expect(plainText).toContain("*Star*");
+    expect(plainText).not.toContain("\\*Star\\*");
+  });
+
+  it("keeps an oversized single bullet intact with heading, labels, and footer", () => {
+    const payload = "x".repeat(2400);
+    const bulletText = `- Alpha Foils: ${payload}`;
+    const segments = [
+      { kind: "heading", text: `## ${DEFAULT_DISCORD_HEADING}` },
+      { kind: "modeHeader", modeId: "iso", text: "**ISO** (looking for)" },
+      { kind: "bullet", modeId: "iso", text: bulletText },
+      {
+        kind: "footer",
+        text: "-# [ShardStash](https://shardstash.web.app)",
+      },
+    ];
+
+    const { chunks, hasOversizedChunk } = splitDiscordPostSegments(segments, { limit: 2000 });
+    expect(chunks).toHaveLength(1);
+    expect(hasOversizedChunk).toBe(true);
+    expect(chunks[0]).toMatch(/^## /);
+    expect(chunks[0]).toContain("**ISO** (looking for)");
+    expect(chunks[0]).toContain(payload);
+    expect(chunks[0]).toContain("[ShardStash]");
+    expect(chunks[0].length).toBeGreaterThan(2000);
+  });
+
+  it("preserves one short bullet with wrappers when the combined chunk exceeds the limit", () => {
+    const segments = [
+      { kind: "heading", text: `## ${DEFAULT_DISCORD_HEADING}` },
+      { kind: "modeHeader", modeId: "iso", text: "**ISO** (looking for)" },
+      { kind: "bullet", modeId: "iso", text: "- Alpha Foils: 9" },
+      {
+        kind: "footer",
+        text: `-# Updated · [ShardStash](${"https://shardstash.web.app/".repeat(80)})`,
+      },
+    ];
+
+    const { chunks, hasOversizedChunk } = splitDiscordPostSegments(segments, { limit: 120 });
+    expect(chunks).toHaveLength(1);
+    expect(hasOversizedChunk).toBe(true);
+    expect(chunks[0]).toContain("- Alpha Foils: 9");
+    expect(chunks[0]).toContain("**ISO**");
+    expect(chunks[0]).toContain("[ShardStash]");
+  });
+
+  it("returns a single chunk for over-limit posts with no bullet lines", () => {
+    const body = `## ${DEFAULT_DISCORD_HEADING}\n\n**ISO** (looking for)\nNone needed yet.`;
+    const { chunks, hasOversizedChunk } = splitDiscordIsoUftPost(body, { limit: 20 });
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]).toBe(body);
+    expect(hasOversizedChunk).toBe(true);
+
+    const longHeading = `## ${"title ".repeat(400)}`;
+    const { chunks: segmentChunks } = splitDiscordPostSegments(
+      [
+        { kind: "heading", text: longHeading },
+        { kind: "modeHeader", modeId: "iso", text: "**ISO** (looking for)" },
+      ],
+      { limit: 50 },
+    );
+    expect(segmentChunks).toHaveLength(1);
+    expect(segmentChunks[0]).toContain(longHeading);
+  });
+
+  it("puts the footer only on the last split part", () => {
+    const bullets = Array.from({ length: 40 }, (_, i) => ({
+      kind: "bullet",
+      modeId: "iso",
+      text: `- Alpha Foils: ${i}, ${i + 1}, ${i + 2}`,
+    }));
+
+    const { chunks } = splitDiscordPostSegments(
+      [
+        { kind: "heading", text: `## ${DEFAULT_DISCORD_HEADING}` },
+        { kind: "modeHeader", modeId: "iso", text: "**ISO** (looking for)" },
+        ...bullets,
+        { kind: "footer", text: "-# [ShardStash](https://example.test)" },
+      ],
+      { limit: 400 },
+    );
+
+    expect(chunks.length).toBeGreaterThan(1);
+    for (let i = 0; i < chunks.length - 1; i += 1) {
+      expect(chunks[i]).not.toContain("[ShardStash]");
+    }
+    expect(chunks.at(-1)).toContain("[ShardStash]");
   });
 
   it("splitDiscordIsoUftPost honors item boundaries from rendered markdown", () => {
