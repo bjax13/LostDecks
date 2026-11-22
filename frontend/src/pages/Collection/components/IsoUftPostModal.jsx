@@ -222,6 +222,7 @@ export default function IsoUftPostModal({
     text: previewText,
     chunks,
     exceedsLimit,
+    hasOversizedChunk,
   } = useMemo(
     () =>
       formatIsoUftPostWithDiscordChunks(tree, excludedIds, {
@@ -378,6 +379,9 @@ export default function IsoUftPostModal({
                   {DISCORD_MESSAGE_CHAR_LIMIT.toLocaleString()}
                   -character limit. Copy each part below and paste them as separate messages (in
                   order).
+                  {hasOversizedChunk
+                    ? " At least one part is still over the limit on its own — trim that line or split it manually in Discord."
+                    : null}
                 </p>
               ) : null}
               {discordChunks.map((chunkText, index) => (

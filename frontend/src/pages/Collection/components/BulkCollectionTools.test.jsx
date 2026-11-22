@@ -866,6 +866,56 @@ describe("BulkCollectionTools", () => {
     });
   });
 
+  it("shows Discord over-limit warning, per-part copy buttons, and closes only after the last part", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Reflect.deleteProperty(globalThis.navigator, "clipboard");
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+      writable: true,
+    });
+
+    localStorage.setItem(
+      "isoUftPostPrefs",
+      JSON.stringify({ format: "classic", includeLink: true }),
+    );
+    collectiblesState.stories = Array.from({ length: 150 }, (_, i) => ({ title: `Story${i}` }));
+    collectiblesState.skus = Array.from({ length: 150 }, (_, i) => ({
+      skuId: `uft-foil-${i}`,
+      cardId: `c-uft-${i}`,
+      finish: "FOIL",
+    }));
+    collectiblesState.cardById = Object.fromEntries(
+      Array.from({ length: 150 }, (_, i) => [
+        `c-uft-${i}`,
+        { category: "story", number: i + 1, storyTitle: `Story${i}` },
+      ]),
+    );
+    const entries = collectiblesState.skus.map((sku) => ({
+      skuId: sku.skuId,
+      quantity: 3,
+    }));
+
+    render(<BulkCollectionTools ownerUid={ownerUid} entries={entries} />);
+    await openPostModal(user);
+
+    expect(screen.getByText(/longer than Discord/i)).toBeInTheDocument();
+    const partButtons = screen.getAllByRole("button", { name: /copy part \d+/i });
+    expect(partButtons.length).toBeGreaterThan(1);
+    expect(screen.queryByRole("button", { name: /copy to clipboard/i })).not.toBeInTheDocument();
+
+    await user.click(partButtons[0]);
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(getPostDialog()).toBeInTheDocument();
+
+    await user.click(partButtons[partButtons.length - 1]);
+    expect(writeText).toHaveBeenCalledTimes(2);
+    expect(
+      screen.queryByRole("dialog", { name: /iso\/uft post preview/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("does not open ISO/UFT post modal when disabled", () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Reflect.deleteProperty(globalThis.navigator, "clipboard");
