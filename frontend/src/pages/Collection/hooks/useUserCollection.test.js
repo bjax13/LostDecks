@@ -134,7 +134,7 @@ describe("useUserCollection", () => {
       expect(result.current.error).toBe(null);
     });
 
-    it("on error: sets error, marks error status, and logs", () => {
+    it("on error before ready: marks error with empty entries", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useUserCollection("user-abc"));
 
@@ -147,6 +147,30 @@ describe("useUserCollection", () => {
       expect(result.current.status).toBe("error");
       expect(result.current.entries).toEqual([]);
       expect(consoleSpy).toHaveBeenCalledWith("Failed to load collection entries", fakeError);
+
+      consoleSpy.mockRestore();
+    });
+
+    it("on error after ready: keeps the last loaded entries", () => {
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const { result } = renderHook(() => useUserCollection("user-abc"));
+
+      const onNext = mockOnSnapshot.mock.calls[0][1];
+      act(() =>
+        onNext({
+          docs: [createFakeDoc("LT24-CHM-01-DUN", { ownerUid: "user-abc", quantity: 1 })],
+        }),
+      );
+
+      const onError = mockOnSnapshot.mock.calls[0][2];
+      const fakeError = new Error("transient-read-failure");
+      act(() => onError(fakeError));
+
+      expect(result.current.status).toBe("error");
+      expect(result.current.error).toBe(fakeError);
+      expect(result.current.entries).toEqual([
+        { id: "LT24-CHM-01-DUN", ownerUid: "user-abc", quantity: 1 },
+      ]);
 
       consoleSpy.mockRestore();
     });

@@ -1181,6 +1181,24 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     expect(mockApplyBulkCollectionUpdate).not.toHaveBeenCalled();
   });
 
+  it("keeps save disabled when the collection hook is not ready", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "error",
+      error: new Error("offline"),
+    });
+    renderPage("/getting-started?pins=all");
+
+    expect(screen.getByRole("button", { name: "Save collection" })).toBeDisabled();
+
+    const chasmPinCoverage = screen.getByRole("group", { name: /chasmfriends pins coverage/i });
+    expect(within(chasmPinCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
   it("saves cards-only collectors without allowing pin updates", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({ entries: [], status: "ready", error: null });

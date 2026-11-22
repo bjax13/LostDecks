@@ -205,6 +205,7 @@ export default function GettingStartedPage() {
     error: collectionError,
   } = useUserCollection(user?.uid ?? null);
   const collectionLoading = collectionStatus === "loading";
+  const collectionReady = collectionStatus === "ready";
   const navigate = useNavigate();
 
   const haveRaw = searchParams.get("have");
@@ -262,13 +263,9 @@ export default function GettingStartedPage() {
       collectionSeedPendingRef.current = false;
       return null;
     }
-    if (collectionStatus === "loading") {
+    if (collectionStatus !== "ready") {
       collectionSeedPendingRef.current = true;
       return undefined;
-    }
-    if (collectionStatus === "error") {
-      collectionSeedPendingRef.current = false;
-      return entries ?? [];
     }
     collectionSeedPendingRef.current = false;
     return entries ?? [];
@@ -408,7 +405,7 @@ export default function GettingStartedPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: hydrate manual review when auth/collection resolve
   useEffect(() => {
-    if (step !== "manual" || collectionStatus === "loading" || chasmFriendsShortcut) {
+    if (step !== "manual" || collectionStatus !== "ready" || chasmFriendsShortcut) {
       return;
     }
 
@@ -452,6 +449,9 @@ export default function GettingStartedPage() {
   }, [step]);
 
   const handleSave = async () => {
+    if (user && !collectionReady) {
+      return;
+    }
     if (!user) {
       pendingSaveRef.current = true;
       captureEvent(SIGN_IN_PROMPTED, { reason: "getting-started-save" });
@@ -517,12 +517,12 @@ export default function GettingStartedPage() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: retry save once after auth modal success
   useEffect(() => {
-    if (!user || !pendingSaveRef.current || saving || collectionLoading) {
+    if (!user || !pendingSaveRef.current || saving || !collectionReady) {
       return;
     }
     pendingSaveRef.current = false;
     void handleSave();
-  }, [user, saving, collectionLoading]);
+  }, [user, saving, collectionReady]);
 
   const handleQuickPickerSubmit = async (pickQuantities) => {
     const source = {
@@ -792,7 +792,7 @@ export default function GettingStartedPage() {
                     <button
                       type="button"
                       className="getting-started__button is-primary"
-                      disabled={saving || collectionLoading}
+                      disabled={saving || (user && !collectionReady)}
                       onClick={handleSave}
                     >
                       {saving

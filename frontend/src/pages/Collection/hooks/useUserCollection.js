@@ -47,7 +47,11 @@ export function useUserCollection(ownerUid) {
       },
       (err) => {
         console.error("Failed to load collection entries", err);
-        setState({ entries: [], status: "error", error: err });
+        setState((previous) => ({
+          entries: previous.entries,
+          status: "error",
+          error: err,
+        }));
       },
     );
 
