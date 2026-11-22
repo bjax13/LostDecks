@@ -521,7 +521,7 @@ export function buildGettingStartedNonDestructiveSaveRows(
   });
 }
 
-/** Firestore collection snapshot finished for a signed-in owner (independent of review UI hydration). */
+/** Signed-in owner and Firestore snapshot settled (independent of review UI hydration). */
 export function isCollectionConfirmedLoadedForOwner({ ownerUid, collectionLoading }) {
   return Boolean(ownerUid && !collectionLoading);
 }
