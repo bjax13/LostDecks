@@ -416,7 +416,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       mockUseAuth.mockImplementation(() => ({ user: uid ? { uid } : null }));
       mockUseUserCollection.mockImplementation(() => ({
         entries: uid ? (entriesByUser[uid] ?? []) : [],
-        loading: false,
+        status: "ready",
         error: null,
       }));
       mockApplyBulkCollectionUpdate.mockResolvedValue({
@@ -1148,7 +1148,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
       entries: [{ id: "existing", skuId: "LT24-CHM-01-DUN", quantity: 1 }],
-      loading: false,
+      status: "ready",
       error: null,
     });
     const user = setupUser();
@@ -1191,7 +1191,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
       mockUseUserCollection.mockReturnValue({
         entries: collectionEntries,
-        loading: false,
+        status: "ready",
         error: null,
       });
 
