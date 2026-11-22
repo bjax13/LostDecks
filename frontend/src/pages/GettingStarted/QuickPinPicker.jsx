@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { emptyHavePrefill } from "../../lib/havePrefill.js";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { emptyHavePrefill, mergeHydrationQuantities } from "../../lib/havePrefill.js";
 import { gettingStartedTree } from "./gettingStartedCatalog";
 import "./QuickPinPicker.css";
 
@@ -107,14 +107,19 @@ export default function QuickPinPicker({
   const [search, setSearch] = useState("");
   const [expandedSeries, setExpandedSeries] = useState(() => new Set(prefill.expandedSeriesIds));
   const [hydratedFromCollection, setHydratedFromCollection] = useState(false);
+  const userTouchedSkuIdsRef = useRef(new Set());
 
   useEffect(() => {
     if (collectionLoading || hydratedFromCollection || !isSignedIn) {
       return;
     }
-    // Prefill expansion was seed-only; recompute after raiseMerge so a series
-    // that became fully Have (or fully Need) collapses.
-    const merged = prefill.raiseMerge(quantities, quantitiesFromEntries(entries, allPinSkuIds));
+    // Prefill expansion was seed-only; recompute after merge so a series
+    // that became fully Have (or fully Need) collapses. Explicit local picks win.
+    const merged = mergeHydrationQuantities(
+      quantities,
+      quantitiesFromEntries(entries, allPinSkuIds),
+      userTouchedSkuIdsRef.current,
+    );
     setQuantities(merged);
     setExpandedSeries(new Set(partialHaveSeriesIds(seriesList, merged)));
     setHydratedFromCollection(true);
@@ -124,7 +129,6 @@ export default function QuickPinPicker({
     entries,
     hydratedFromCollection,
     isSignedIn,
-    prefill,
     quantities,
     seriesList,
   ]);
@@ -161,11 +165,15 @@ export default function QuickPinPicker({
   }, [expandedSeries, normalizedSearch, visibleSeries]);
 
   const setPinQuantity = (skuId, nextQty) => {
+    userTouchedSkuIdsRef.current.add(skuId);
     const clamped = Math.max(0, Math.min(MAX_QTY, Math.floor(nextQty)));
     setQuantities((prev) => ({ ...prev, [skuId]: clamped }));
   };
 
   const setSeriesQuantities = (series, qty) => {
+    for (const pin of series.pins) {
+      userTouchedSkuIdsRef.current.add(pin.skuId);
+    }
     setQuantities((prev) => {
       const next = { ...prev };
       for (const pin of series.pins) {
