@@ -298,6 +298,37 @@ test("two owners can create the same SKU at owner-scoped doc ids", async () => {
   );
 });
 
+test("cannot squat another user's owner-scoped doc id on create", async () => {
+  const skuId = "PIN-CF-02";
+  const victimScopedId = `${OWNER}_${skuId}`;
+  const otherDb = testEnv.authenticatedContext(OTHER).firestore();
+
+  await assertFails(
+    setDoc(
+      doc(otherDb, "collections", victimScopedId),
+      validEntry({ ownerUid: OTHER, skuId }),
+    ),
+  );
+});
+
+test("owner-scoped and auto-id collection creates still work", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+
+  await assertSucceeds(
+    setDoc(
+      doc(ownerDb, "collections", `${OWNER}_PIN-CF-02`),
+      validEntry({ ownerUid: OWNER, skuId: "PIN-CF-02" }),
+    ),
+  );
+  await assertSucceeds(setDoc(doc(ownerDb, "collections/entry-1"), validEntry()));
+  await assertSucceeds(
+    setDoc(
+      doc(ownerDb, "collections", "PIN-CF-01"),
+      validEntry({ ownerUid: OWNER, skuId: "PIN-CF-01" }),
+    ),
+  );
+});
+
 test("admin claim cannot read another user's preferences", async () => {
   await testEnv.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), `userPreferences/${OWNER}`), {
