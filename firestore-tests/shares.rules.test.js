@@ -8,7 +8,6 @@ const {
 } = require("@firebase/rules-unit-testing");
 const {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -105,8 +104,31 @@ test("non-owner cannot create or update a share", async () => {
   );
 });
 
-test("owner can delete their share", async () => {
+test("owner can revoke a share in place", async () => {
   const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
   await setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare());
-  await assertSucceeds(deleteDoc(doc(ownerDb, `shares/${SHARE_ID}`)));
+  await assertSucceeds(
+    updateDoc(doc(ownerDb, `shares/${SHARE_ID}`), {
+      iso: [],
+      uft: [],
+      revokedAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    }),
+  );
+});
+
+test("another user cannot claim a revoked share id", async () => {
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  const otherDb = testEnv.authenticatedContext(OTHER).firestore();
+  await setDoc(doc(ownerDb, `shares/${SHARE_ID}`), validShare());
+  await assertSucceeds(
+    updateDoc(doc(ownerDb, `shares/${SHARE_ID}`), {
+      iso: [],
+      uft: [],
+      revokedAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    }),
+  );
+
+  await assertFails(setDoc(doc(otherDb, `shares/${SHARE_ID}`), validShare({ ownerUid: OTHER })));
 });

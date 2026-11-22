@@ -124,8 +124,23 @@ service cloud.firestore {
         || validShareId(data.publicShareId);
     }
 
+    function validUftItem(item) {
+      return item.keys().hasOnly(["skuId", "quantity"])
+        && validSkuId(item.skuId)
+        && validQuantity(item.quantity)
+        && item.quantity >= 1;
+    }
+
+    function validUftList(list) {
+      return list is list
+        && list.size() <= 500
+        && (list.size() == 0 || (list[0] is map && validUftItem(list[0])));
+    }
+
     function validIsoList(list) {
-      return list is list && list.size() <= 500;
+      return list is list
+        && list.size() <= 500
+        && (list.size() == 0 || (list[0] is string && validSkuId(list[0])));
     }
 
     function validShareSnapshot(data) {
@@ -138,6 +153,7 @@ service cloud.firestore {
           "version",
           "discordHandle",
           "region",
+          "revokedAt",
         ])
         && data.keys().hasAll(["ownerUid", "displayName", "iso", "uft", "updatedAt", "version"])
         && data.ownerUid is string
@@ -145,15 +161,15 @@ service cloud.firestore {
         && data.displayName.size() >= 1
         && data.displayName.size() <= 60
         && validIsoList(data.iso)
-        && data.uft is list
-        && data.uft.size() <= 500
+        && validUftList(data.uft)
         && data.updatedAt is timestamp
         && data.version is int
         && data.version == 1
         && (!("discordHandle" in data)
           || (data.discordHandle is string && data.discordHandle.size() <= 100))
         && (!("region" in data)
-          || (data.region is string && data.region.size() <= 60));
+          || (data.region is string && data.region.size() <= 60))
+        && (!("revokedAt" in data) || data.revokedAt is timestamp);
     }
 
     function validUserPreferences(data) {
@@ -194,10 +210,12 @@ service cloud.firestore {
       allow list: if false;
       allow create: if signedIn()
         && request.auth.uid == request.resource.data.ownerUid
-        && validShareSnapshot(request.resource.data);
+        && validShareSnapshot(request.resource.data)
+        && !exists(/databases/$(database)/documents/shares/$(shareId));
       allow update: if signedIn()
         && request.auth.uid == resource.data.ownerUid
         && request.resource.data.ownerUid == resource.data.ownerUid
+        && !("revokedAt" in resource.data)
         && validShareSnapshot(request.resource.data);
       allow delete: if signedIn() && request.auth.uid == resource.data.ownerUid;
     }
