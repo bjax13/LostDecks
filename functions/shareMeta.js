@@ -10,10 +10,11 @@ const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 const DEFAULT_TITLE = "ShardStash";
 const DEFAULT_DESCRIPTION =
   "Track your Lost Tales Story Deck cards and ChasmFriends pins, and find collectors to trade with.";
-const CACHE_CONTROL_OK = "public, max-age=900, s-maxage=300";
+const CACHE_CONTROL_OK = "public, max-age=60, s-maxage=300";
 const CACHE_CONTROL_MISS = "public, max-age=300, s-maxage=300";
 const SHARE_ID_PATTERN = /^[A-Za-z0-9_-]{8,32}$/;
 const HOSTED_SHELL_TTL_MS = 60_000;
+const HOSTED_SHELL_FETCH_MS = 2_000;
 
 const SPA_SHELL_CANDIDATES = [
   path.join(__dirname, "static", "spa-index.html"),
@@ -55,9 +56,17 @@ async function loadBaseHtmlAsync() {
   }
 
   try {
-    const response = await fetch(`${SITE_URL}/index.html`, {
-      headers: { Accept: "text/html", "Cache-Control": "no-cache" },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), HOSTED_SHELL_FETCH_MS);
+    let response;
+    try {
+      response = await fetch(`${SITE_URL}/index.html`, {
+        headers: { Accept: "text/html", "Cache-Control": "no-cache" },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
     if (response.ok) {
       const html = await response.text();
       if (html && !html.includes("/src/main.jsx")) {

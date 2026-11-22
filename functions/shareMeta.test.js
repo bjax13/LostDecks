@@ -128,6 +128,28 @@ test("renderShareMetaHtml injects share-specific meta", async () => {
   assert.match(html, /Alex&#39;s trade list on ShardStash/);
 });
 
+test("loadBaseHtmlAsync falls back when hosted fetch times out", async () => {
+  __test.resetBaseHtmlCache();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (_url, init) =>
+    new Promise((_, reject) => {
+      if (init?.signal) {
+        init.signal.addEventListener("abort", () => {
+          reject(new Error("fetch aborted"));
+        });
+      }
+    });
+
+  try {
+    const html = await __test.loadBaseHtmlAsync();
+    assert.ok(html);
+    assert.doesNotMatch(html, /index-FRESH\.js/);
+  } finally {
+    globalThis.fetch = originalFetch;
+    __test.setBaseHtmlForTests(SAMPLE_HTML);
+  }
+});
+
 test("loadBaseHtmlAsync prefers freshly fetched hosted index.html", async () => {
   __test.resetBaseHtmlCache();
   const originalFetch = globalThis.fetch;
