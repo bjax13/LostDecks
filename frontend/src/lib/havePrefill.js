@@ -26,6 +26,11 @@
 
 export const HAVE_QTY_MAX = 20;
 
+function clampHaveQty(raw) {
+  const qty = typeof raw === "number" && Number.isFinite(raw) ? Math.floor(raw) : 0;
+  return Math.max(0, Math.min(HAVE_QTY_MAX, qty));
+}
+
 function raiseMergeQuantities(base, overlay) {
   const next = { ...base };
   for (const [skuId, raw] of Object.entries(overlay ?? {})) {
@@ -35,11 +40,41 @@ function raiseMergeQuantities(base, overlay) {
     if (!Number.isFinite(overlayQty)) continue;
     const baseQty =
       typeof next[skuId] === "number" && Number.isFinite(next[skuId]) ? Math.floor(next[skuId]) : 0;
-    next[skuId] = Math.max(0, Math.min(HAVE_QTY_MAX, Math.max(baseQty, overlayQty)));
+    next[skuId] = clampHaveQty(Math.max(baseQty, overlayQty));
   }
   for (const [skuId, raw] of Object.entries(next)) {
-    const qty = typeof raw === "number" && Number.isFinite(raw) ? Math.floor(raw) : 0;
-    next[skuId] = Math.max(0, Math.min(HAVE_QTY_MAX, qty));
+    next[skuId] = clampHaveQty(raw);
+  }
+  return next;
+}
+
+/**
+ * Merge server/collection quantities into local state. SKUs the user touched
+ * locally keep their base qty; untouched SKUs use raise-merge (max).
+ *
+ * @param {Readonly<Record<SkuId, number>>} base
+ * @param {Readonly<Record<SkuId, number>>} overlay
+ * @param {ReadonlySet<SkuId> | null | undefined} touchedSkuIds
+ * @returns {Record<SkuId, number>}
+ */
+export function mergeHydrationQuantities(base, overlay, touchedSkuIds) {
+  const next = { ...base };
+  const touched = touchedSkuIds ?? new Set();
+  for (const [skuId, raw] of Object.entries(overlay ?? {})) {
+    if (typeof skuId !== "string" || !skuId || touched.has(skuId)) continue;
+    const overlayQty =
+      typeof raw === "number" && Number.isFinite(raw) ? Math.floor(raw) : Number.NaN;
+    if (!Number.isFinite(overlayQty)) continue;
+    const baseQty =
+      typeof next[skuId] === "number" && Number.isFinite(next[skuId]) ? Math.floor(next[skuId]) : 0;
+    next[skuId] = clampHaveQty(Math.max(baseQty, overlayQty));
+  }
+  for (const [skuId, raw] of Object.entries(next)) {
+    if (touched.has(skuId)) {
+      next[skuId] = clampHaveQty(next[skuId]);
+      continue;
+    }
+    next[skuId] = clampHaveQty(raw);
   }
   return next;
 }
