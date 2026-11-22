@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { datasetSkus } from "../../data/collectibles";
 import {
   buildCollectionRows,
+  buildGettingStartedNonDestructiveSaveRows,
   buildGettingStartedSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
@@ -486,6 +487,22 @@ describe("gettingStartedCatalog", () => {
     expect(coverage[emptyGroup.id]).toBe("none");
   });
 
+  it("resolves prod-shaped docs when skuId is only in the Firestore document id", () => {
+    const { coverage, quantities } = deriveReviewStateFromEntries(
+      [
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "PIN-CF-01", copies: 1 },
+      ],
+      gettingStartedTree,
+    );
+    expect(quantities["LT24-CHM-01-DUN"]).toBe("1");
+    expect(quantities["PIN-CF-01"]).toBe("1");
+    const chasmDunGroup = gettingStartedTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    expect(coverage[chasmDunGroup.id]).toBe("some");
+  });
+
   it("resolves legacy Firestore docs stored as cardId + finish with count", () => {
     const { coverage, quantities } = deriveReviewStateFromEntries(
       [
@@ -565,23 +582,36 @@ describe("gettingStartedCatalog", () => {
     expect(pinSkuIds.length).toBeGreaterThan(5);
   });
 
-  it("omits unseeded zero-quantity rows from Getting Started saves", () => {
+  it("never emits destructive rows for non-destructive Getting Started saves", () => {
     const coverage = createCoverageState("none", gettingStartedTree);
-    const scopedGroup = gettingStartedTree[0].children[0];
+    const existing = [
+      { id: "LT24-CHM-01-DUN", quantity: 1 },
+      { id: "PIN-CF-01", quantity: 1 },
+    ];
 
-    const unscopedRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree);
-    expect(unscopedRows).toEqual([]);
+    expect(
+      buildGettingStartedNonDestructiveSaveRows(coverage, {}, gettingStartedTree, existing),
+    ).toEqual([]);
 
+    const chasmGroup = gettingStartedTree
+      .flatMap((section) => section.children)
+      .find((group) => group.skus.some((sku) => sku.skuId === "LT24-CHM-01-DUN"));
+    coverage[chasmGroup.id] = "some";
+    const raised = buildGettingStartedNonDestructiveSaveRows(
+      coverage,
+      { "LT24-CHM-01-DUN": "2" },
+      gettingStartedTree,
+      existing,
+    );
+    expect(raised).toEqual([expect.objectContaining({ skuId: "LT24-CHM-01-DUN", quantity: "2" })]);
+  });
+
+  it("does not emit zero rows for previously seeded SKUs in legacy save rows helper", () => {
+    const coverage = createCoverageState("none", gettingStartedTree);
     const ownedSku = "LT24-CHM-01-DUN";
     const seededRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree, {
       seededQuantities: { [ownedSku]: "1" },
     });
-    expect(seededRows.some((row) => row.skuId === ownedSku && row.quantity === "0")).toBe(true);
-
-    const scopedRows = buildGettingStartedSaveRows(coverage, {}, gettingStartedTree, {
-      sessionScopedGroupIds: new Set([scopedGroup.id]),
-    });
-    expect(scopedRows.length).toBeGreaterThan(0);
-    expect(scopedRows.every((row) => row.quantity === "0")).toBe(true);
+    expect(seededRows.some((row) => row.skuId === ownedSku && row.quantity === "0")).toBe(false);
   });
 });

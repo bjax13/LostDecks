@@ -16,8 +16,9 @@ import { mergePickRows, savePendingPicks } from "../../lib/pendingPicks.js";
 import pinsCatalog from "../../storyData/pins-catalog.json";
 import { useUserCollection } from "../Collection/hooks/useUserCollection";
 import { applyBulkCollectionUpdate } from "../Collection/utils/bulkImport";
+import { collectionEntriesHydrationKey } from "../Collection/utils/collectionEntrySku.js";
 import {
-  buildGettingStartedSaveRows,
+  buildGettingStartedNonDestructiveSaveRows,
   COLLECTIBLE_TYPE_BOTH,
   COLLECTIBLE_TYPE_CARDS,
   COLLECTIBLE_TYPE_PINS,
@@ -191,6 +192,7 @@ export default function GettingStartedPage() {
   const chasmTrackedRef = useRef(false);
   const collectionSeedPendingRef = useRef(false);
   const collectionHydratedRef = useRef(false);
+  const hydratedEntriesKeyRef = useRef("");
   const hydratedSeedQuantitiesRef = useRef({});
   const explicitZeroGroupIdsRef = useRef(new Set());
   const sessionScopedGroupIdsRef = useRef(new Set());
@@ -276,6 +278,7 @@ export default function GettingStartedPage() {
     setQuantities(seeded.quantities);
     reviewEditor.resetExpandedReviewIds(seeded.coverage);
     hydratedSeedQuantitiesRef.current = { ...seeded.quantities };
+    hydratedEntriesKeyRef.current = collectionEntriesHydrationKey(sourceEntries);
     collectionHydratedRef.current = true;
     collectionSeedPendingRef.current = false;
     manualReviewCollectibleTypeRef.current = collectibleType ?? COLLECTIBLE_TYPE_BOTH;
@@ -408,8 +411,15 @@ export default function GettingStartedPage() {
     }
 
     const hasEntries = (entries?.length ?? 0) > 0;
+    const hydrationKey = collectionEntriesHydrationKey(entries ?? []);
+    const userTouchedReview =
+      sessionScopedGroupIdsRef.current.size > 0 || explicitZeroGroupIdsRef.current.size > 0;
+    const entriesChangedSinceHydrate =
+      hydrationKey.length > 0 && hydrationKey !== hydratedEntriesKeyRef.current;
     const shouldHydrate =
-      collectionSeedPendingRef.current || (!collectionHydratedRef.current && hasEntries);
+      collectionSeedPendingRef.current ||
+      (!collectionHydratedRef.current && hasEntries) ||
+      (!userTouchedReview && entriesChangedSinceHydrate);
     if (!shouldHydrate) {
       return;
     }
@@ -444,11 +454,12 @@ export default function GettingStartedPage() {
       const result = await Promise.race([
         applyBulkCollectionUpdate({
           ownerUid: user.uid,
-          rows: buildGettingStartedSaveRows(coverage, quantities, reviewTree, {
-            seededQuantities: hydratedSeedQuantitiesRef.current,
-            explicitZeroGroupIds: explicitZeroGroupIdsRef.current,
-            sessionScopedGroupIds: sessionScopedGroupIdsRef.current,
-          }),
+          rows: buildGettingStartedNonDestructiveSaveRows(
+            coverage,
+            quantities,
+            reviewTree,
+            entries ?? [],
+          ),
           existingEntries: entries,
           allowPins: includesPins(collectibleType),
         }),

@@ -26,9 +26,13 @@ vi.mock("../../contexts/AuthModalContext.jsx", () => ({
 vi.mock("../Collection/hooks/useUserCollection", () => ({
   useUserCollection: (ownerUid) => mockUseUserCollection(ownerUid),
 }));
-vi.mock("../Collection/utils/bulkImport", () => ({
-  applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
-}));
+vi.mock("../Collection/utils/bulkImport", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    applyBulkCollectionUpdate: (...args) => mockApplyBulkCollectionUpdate(...args),
+  };
+});
 vi.mock("../../analytics/posthog.js", () => ({
   captureEvent: (...args) => mockCaptureEvent(...args),
 }));
@@ -1068,6 +1072,60 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).toHaveAttribute("aria-pressed", "true");
   });
 
+  it("keeps in-progress review edits when the Firestore snapshot updates", async () => {
+    function SnapshotHarness() {
+      const [collectionEntries, setCollectionEntries] = useState([
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+      ]);
+      mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+      mockUseUserCollection.mockReturnValue({
+        entries: collectionEntries,
+        loading: false,
+        error: null,
+      });
+
+      return (
+        <TestMemoryRouter initialEntries={["/getting-started"]}>
+          <button
+            type="button"
+            onClick={() =>
+              setCollectionEntries([
+                { id: "LT24-CHM-01-DUN", quantity: 1 },
+                { id: "PIN-CF-01", quantity: 2 },
+              ])
+            }
+          >
+            Push snapshot
+          </button>
+          <GettingStartedPage />
+        </TestMemoryRouter>
+      );
+    }
+
+    const user = setupUser();
+    render(<SnapshotHarness />);
+
+    await goToCardReview(user);
+    await setElsecallerStoryFoilsToSome(user);
+
+    const elsecallerCoverage = () =>
+      screen.getByRole("group", { name: /elsecaller story foils coverage/i });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Push snapshot" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/[1-9]/);
+    });
+    expect(within(elsecallerCoverage()).getByRole("button", { name: "Some" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
   it("prefills step 2 from legacy cardId + finish collection docs", async () => {
     mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
     mockUseUserCollection.mockReturnValue({
@@ -1168,11 +1226,34 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
     const call = mockApplyBulkCollectionUpdate.mock.calls[0][0];
     expect(call.existingEntries).toEqual(existingEntries);
-    const ownedRow = call.rows.find((row) => row.skuId === "LT24-CHM-01-DUN");
-    expect(ownedRow?.quantity).toBe("1");
-    expect(
-      call.rows.filter((row) => row.skuId === "LT24-CHM-01-DUN" && row.quantity === "0"),
-    ).toHaveLength(0);
+    expect(call.rows).toEqual([]);
+  });
+
+  it("hydrates manual review when Firestore docs only store sku ids in document ids", async () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [
+        { id: "LT24-CHM-01-DUN", quantity: 1 },
+        { id: "PIN-CF-01", quantity: 1 },
+      ],
+      loading: false,
+      error: null,
+    });
+    const user = setupUser();
+    renderPage();
+
+    await goToCardReview(user);
+
+    const chasmCoverage = screen.getByRole("group", {
+      name: /the chasmfriends get a pet! story dun coverage/i,
+    });
+    await waitFor(() => {
+      expect(within(chasmCoverage).getByRole("button", { name: "Some" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+    expect(screen.getByLabelText("Collection summary")).toHaveTextContent(/[1-9]/);
   });
 
   it("captures sign_in_prompted when a signed-out collector tries to save", async () => {
@@ -1322,17 +1403,8 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
       ).toBeInTheDocument();
 
       const rows = mockApplyBulkCollectionUpdate.mock.calls[0][0].rows;
-      expect(rows.map((row) => row.skuId)).toEqual([
-        "PIN-CF-01",
-        "PIN-CF-02",
-        "PIN-CF-03",
-        "PIN-CF-04",
-        "PIN-CF-05",
-      ]);
-      expect(rows.find((row) => row.skuId === "PIN-CF-01").quantity).toBe("1");
-      expect(
-        rows.filter((row) => row.skuId !== "PIN-CF-01").every((row) => row.quantity === "0"),
-      ).toBe(true);
+      expect(rows).toEqual([expect.objectContaining({ skuId: "PIN-CF-01", quantity: "1" })]);
+      expect(rows.every((row) => Number(row.quantity) > 0)).toBe(true);
       expectNoCardWord();
     });
 
@@ -1415,10 +1487,7 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
 
       await user.click(screen.getByRole("button", { name: "Save collection" }));
       const call = mockApplyBulkCollectionUpdate.mock.calls.at(-1)[0];
-      expect(call.rows.find((row) => row.skuId === "PIN-CF-01")?.quantity).toBe("1");
-      expect(
-        call.rows.filter((row) => row.skuId === "PIN-CF-01" && row.quantity === "0"),
-      ).toHaveLength(0);
+      expect(call.rows).toEqual([]);
     });
 
     it("opens the unfiltered pin review from the after-save link", async () => {
