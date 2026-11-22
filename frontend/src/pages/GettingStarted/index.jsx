@@ -686,6 +686,7 @@ export default function GettingStartedPage() {
           <QuickPinPicker
             entries={entries}
             collectionLoading={collectionLoading}
+            collectionReady={collectionReady}
             saving={saving}
             error={error}
             isSignedIn={Boolean(user)}

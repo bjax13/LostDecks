@@ -89,6 +89,7 @@ describe("QuickPinPicker", () => {
     render(
       <QuickPinPicker
         isSignedIn
+        collectionReady
         entries={[
           { skuId: "PIN-CF-01", quantity: 1 },
           { skuId: "PIN-CF-02", quantity: 4 },
@@ -98,6 +99,32 @@ describe("QuickPinPicker", () => {
     );
 
     expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
+  });
+
+  it("prefills when the catalog sku lives only on the Firestore document id", () => {
+    render(
+      <QuickPinPicker
+        isSignedIn
+        collectionReady
+        entries={[{ id: "PIN-CF-01", quantity: 1 }]}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/1 marked Have/i)).toBeInTheDocument();
+  });
+
+  it("waits for collection ready before hydrating signed-in picks", () => {
+    const entries = [{ id: "PIN-CF-01", quantity: 1 }];
+    const { rerender } = render(
+      <QuickPinPicker isSignedIn collectionReady={false} entries={entries} onSubmit={vi.fn()} />,
+    );
+
+    expect(screen.getByText(/0 marked Have/i)).toBeInTheDocument();
+
+    rerender(<QuickPinPicker isSignedIn collectionReady entries={entries} onSubmit={vi.fn()} />);
+
+    expect(screen.getByText(/1 marked Have/i)).toBeInTheDocument();
   });
 
   it("seeds quantities and expands only partially filled series from have= prefill", async () => {
@@ -153,6 +180,7 @@ describe("QuickPinPicker", () => {
     render(
       <QuickPinPicker
         isSignedIn
+        collectionReady
         prefill={prefill}
         entries={[
           { skuId: "PIN-CF-01", quantity: 1 },
@@ -177,6 +205,7 @@ describe("QuickPinPicker", () => {
     render(
       <QuickPinPicker
         isSignedIn
+        collectionReady
         prefill={prefill}
         entries={[
           { skuId: "PIN-CF-01", quantity: 1 },
@@ -234,6 +263,7 @@ describe("QuickPinPicker", () => {
       <QuickPinPicker
         isSignedIn
         collectionLoading={false}
+        collectionReady
         prefill={prefill}
         entries={entries}
         onSubmit={vi.fn()}
@@ -260,6 +290,7 @@ describe("QuickPinPicker", () => {
     render(
       <QuickPinPicker
         isSignedIn
+        collectionReady
         prefill={prefill}
         entries={[
           { skuId: "PIN-CF-01", quantity: 1 },
