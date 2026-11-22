@@ -23,6 +23,7 @@ import {
   COLLECTIBLE_TYPE_PINS,
   createCoverageState,
   DEFAULT_MANUAL_QUANTITY,
+  deriveReviewStateFromEntries,
   filterChasmFriendsTree,
   filterGettingStartedTree,
   gettingStartedTree,
@@ -189,6 +190,7 @@ export default function GettingStartedPage() {
   const urlBootstrappedRef = useRef(false);
   const pendingSaveRef = useRef(false);
   const chasmTrackedRef = useRef(false);
+  const collectionSeedPendingRef = useRef(false);
   const { user } = useAuth();
   const { openAuthModal } = useAuthModal();
   const { entries, loading: collectionLoading } = useUserCollection(user?.uid ?? null);
@@ -238,15 +240,36 @@ export default function GettingStartedPage() {
     setProfile(nextProfile);
   };
 
+  const applyManualReviewSeed = (tree, sourceEntries) => {
+    if (sourceEntries?.length) {
+      const seeded = deriveReviewStateFromEntries(sourceEntries, tree);
+      setCoverage(seeded.coverage);
+      setQuantities(seeded.quantities);
+      reviewEditor.resetExpandedReviewIds(seeded.coverage);
+      return;
+    }
+    const newCoverage = createCoverageState("none", tree);
+    setCoverage(newCoverage);
+    setQuantities({});
+    reviewEditor.resetExpandedReviewIds(newCoverage);
+  };
+
   const beginManualReview = (nextCollectibleType = collectibleType) => {
     const tree = filterGettingStartedTree(
       gettingStartedTree,
       nextCollectibleType ?? COLLECTIBLE_TYPE_BOTH,
     );
-    const newCoverage = createCoverageState("none", tree);
-    setCoverage(newCoverage);
-    setQuantities({});
-    reviewEditor.resetExpandedReviewIds(newCoverage);
+    let seededEntries = [];
+    if (user?.uid) {
+      if (collectionLoading) {
+        collectionSeedPendingRef.current = true;
+        seededEntries = null;
+      } else {
+        collectionSeedPendingRef.current = false;
+        seededEntries = entries ?? [];
+      }
+    }
+    applyManualReviewSeed(tree, seededEntries);
     goToStep("manual", nextCollectibleType);
   };
 
@@ -327,6 +350,21 @@ export default function GettingStartedPage() {
       collectibleType: COLLECTIBLE_TYPE_PINS,
     });
   }, [chasmFriendsShortcut]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: seed step 2 once when collection finishes loading
+  useEffect(() => {
+    if (step !== "manual" || collectionLoading || !collectionSeedPendingRef.current) {
+      return;
+    }
+    collectionSeedPendingRef.current = false;
+    if (!user?.uid || !entries?.length) {
+      return;
+    }
+    const seeded = deriveReviewStateFromEntries(entries, reviewTree);
+    setCoverage(seeded.coverage);
+    setQuantities(seeded.quantities);
+    reviewEditor.resetExpandedReviewIds(seeded.coverage);
+  }, [step, collectionLoading, entries, reviewTree, user]);
 
   const handleSave = async () => {
     if (!user) {
@@ -434,13 +472,10 @@ export default function GettingStartedPage() {
 
   const openFullPinReview = () => {
     const tree = filterGettingStartedTree(gettingStartedTree, COLLECTIBLE_TYPE_PINS);
-    const nextCoverage = createCoverageState("none", tree);
     setCollectibleType(COLLECTIBLE_TYPE_PINS);
     setProfile("manual");
-    setCoverage(nextCoverage);
-    setQuantities({});
     setChasmSaved(false);
-    reviewEditor.resetExpandedReviewIds(nextCoverage);
+    applyManualReviewSeed(tree, user?.uid && !collectionLoading ? (entries ?? []) : []);
     goToStep("manual", COLLECTIBLE_TYPE_PINS);
   };
 
