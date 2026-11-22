@@ -5,9 +5,17 @@ import {
   MAX_COLLECTION_QUANTITY,
 } from "../../../lib/collectionLimits";
 import { db } from "../../../lib/firebase";
-import { ownedQuantityFromEntry, resolveCollectionEntrySkuId } from "./collectionEntrySku.js";
+import {
+  collectionEntryDocId,
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "./collectionEntrySku.js";
 
-export { ownedQuantityFromEntry, resolveCollectionEntrySkuId } from "./collectionEntrySku.js";
+export {
+  collectionEntryDocId,
+  ownedQuantityFromEntry,
+  resolveCollectionEntrySkuId,
+} from "./collectionEntrySku.js";
 
 const csvHeaders = ["skuId", "quantity", "notes"];
 
@@ -375,7 +383,17 @@ export async function applyBulkCollectionUpdate({
     }
 
     const keeper = existingDocs[0];
-    const docRef = keeper?.id ? doc(collectionRef, keeper.id) : doc(collectionRef, skuId);
+    let docRef;
+    if (keeper?.id) {
+      docRef = doc(collectionRef, keeper.id);
+    } else {
+      const newDocId = collectionEntryDocId(ownerUid, skuId);
+      if (!newDocId) {
+        issues.push({ line, message: "Could not resolve document id for SKU." });
+        return;
+      }
+      docRef = doc(collectionRef, newDocId);
+    }
     const payload = {
       ownerUid,
       skuId,

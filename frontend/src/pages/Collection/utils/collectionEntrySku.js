@@ -17,6 +17,16 @@ export function ownedQuantityFromEntry(entry) {
   return normalizeQuantityValue(entry?.quantity ?? entry?.count ?? entry?.copies ?? entry?.total);
 }
 
+/** Deterministic Firestore doc id for a new bulk row (owner-scoped; not a global SKU path). */
+export function collectionEntryDocId(ownerUid, skuId) {
+  const owner = typeof ownerUid === "string" ? ownerUid.trim() : "";
+  const sku = typeof skuId === "string" ? skuId.trim().toUpperCase() : "";
+  if (!owner || !sku) {
+    return null;
+  }
+  return `${owner}_${sku}`;
+}
+
 /**
  * Match Firestore collection docs: skuId field, cardId + finish (cards), pin cardId,
  * or a catalog SKU stored only in the document id (legacy rows).
@@ -42,6 +52,23 @@ export function resolveCollectionEntrySkuId(entry) {
     const normalized = docId.toUpperCase();
     if (getSkuRecord(normalized)) {
       return normalized;
+    }
+    const owner = typeof entry?.ownerUid === "string" ? entry.ownerUid.trim() : "";
+    if (owner.length > 0) {
+      const prefix = `${owner}_`;
+      if (docId.startsWith(prefix)) {
+        const suffix = docId.slice(prefix.length).toUpperCase();
+        if (getSkuRecord(suffix)) {
+          return suffix;
+        }
+      }
+    }
+    const underscoreIndex = docId.indexOf("_");
+    if (underscoreIndex > 0) {
+      const suffix = docId.slice(underscoreIndex + 1).toUpperCase();
+      if (getSkuRecord(suffix)) {
+        return suffix;
+      }
     }
   }
 

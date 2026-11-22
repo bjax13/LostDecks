@@ -279,6 +279,25 @@ test("admin claim can still create their own collection entry", async () => {
   );
 });
 
+test("two owners can create the same SKU at owner-scoped doc ids", async () => {
+  const skuId = "PIN-CF-02";
+  const ownerDocId = `${OWNER}_${skuId}`;
+  const otherDocId = `${OTHER}_${skuId}`;
+
+  const ownerDb = testEnv.authenticatedContext(OWNER).firestore();
+  const otherDb = testEnv.authenticatedContext(OTHER).firestore();
+
+  await assertSucceeds(
+    setDoc(doc(ownerDb, "collections", ownerDocId), validEntry({ ownerUid: OWNER, skuId })),
+  );
+  await assertSucceeds(
+    setDoc(doc(otherDb, "collections", otherDocId), validEntry({ ownerUid: OTHER, skuId })),
+  );
+  await assertFails(
+    setDoc(doc(otherDb, "collections", ownerDocId), validEntry({ ownerUid: OTHER, skuId })),
+  );
+});
+
 test("admin claim cannot read another user's preferences", async () => {
   await testEnv.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), `userPreferences/${OWNER}`), {

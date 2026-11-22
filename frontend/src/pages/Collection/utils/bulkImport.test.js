@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   applyBulkCollectionUpdate,
+  collectionEntryDocId,
   createCollectionTemplateCsv,
   createStoryDeckCollectionCsv,
   groupCollectionEntriesBySku,
@@ -267,20 +268,21 @@ describe("bulkImport (unit)", () => {
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
       expect(mockBatchSet).toHaveBeenCalledWith(
-        { id: "LT24-ELS-01-DUN" },
-        expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: 2 }),
+        { id: "u1_LT24-ELS-01-DUN" },
+        expect.objectContaining({ skuId: "LT24-ELS-01-DUN", quantity: 2, ownerUid: "u1" }),
         { merge: true },
       );
       expect(mockBatchCommit).toHaveBeenCalled();
     });
 
-    it("applies the same create twice to one sku-keyed doc (idempotent path)", async () => {
+    it("applies the same create twice to one owner-scoped doc (idempotent path)", async () => {
       const payload = {
         ownerUid: "u1",
         rows: [{ skuId: "PIN-CF-02", quantity: 1 }],
         existingEntries: [],
         allowPins: true,
       };
+      const expectedId = collectionEntryDocId("u1", "PIN-CF-02");
 
       await applyBulkCollectionUpdate(payload);
       await applyBulkCollectionUpdate(payload);
@@ -288,8 +290,30 @@ describe("bulkImport (unit)", () => {
       expect(mockBatchSet).toHaveBeenCalledTimes(2);
       const firstRef = mockBatchSet.mock.calls[0][0];
       const secondRef = mockBatchSet.mock.calls[1][0];
-      expect(firstRef).toEqual({ id: "PIN-CF-02" });
-      expect(secondRef).toEqual({ id: "PIN-CF-02" });
+      expect(firstRef).toEqual({ id: expectedId });
+      expect(secondRef).toEqual({ id: expectedId });
+    });
+
+    it("uses distinct doc ids when two owners create the same SKU", async () => {
+      const row = [{ skuId: "PIN-CF-02", quantity: 1 }];
+      await applyBulkCollectionUpdate({
+        ownerUid: "owner-a",
+        rows: row,
+        existingEntries: [],
+        allowPins: true,
+      });
+      const idA = mockBatchSet.mock.calls.at(-1)[0].id;
+      mockBatchSet.mockClear();
+      await applyBulkCollectionUpdate({
+        ownerUid: "owner-b",
+        rows: row,
+        existingEntries: [],
+        allowPins: true,
+      });
+      const idB = mockBatchSet.mock.calls.at(-1)[0].id;
+      expect(idA).toBe(collectionEntryDocId("owner-a", "PIN-CF-02"));
+      expect(idB).toBe(collectionEntryDocId("owner-b", "PIN-CF-02"));
+      expect(idA).not.toBe(idB);
     });
 
     it("sets absolute quantity on existing entry", async () => {
@@ -404,7 +428,7 @@ describe("bulkImport (unit)", () => {
       expect(result.created).toBe(1);
       expect(result.issues).toHaveLength(0);
       expect(mockBatchSet).toHaveBeenCalledWith(
-        { id: "LT24-ELS-01-DUN" },
+        { id: "u1_LT24-ELS-01-DUN" },
         expect.objectContaining({ notes: "n".repeat(500) }),
         { merge: true },
       );
