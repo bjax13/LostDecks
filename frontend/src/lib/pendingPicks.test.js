@@ -87,4 +87,12 @@ describe("mergePickRows", () => {
     expect(mergePickRows({ "PIN-CF-01": 0 }, [{ skuId: "PIN-CF-01", quantity: 5 }])).toEqual([]);
     expect(mergePickRows({ "PIN-CF-01": 1 }, [{ skuId: "PIN-CF-01", quantity: 4 }])).toEqual([]);
   });
+
+  it("respects legacy prod docs where the SKU is only in the document id", () => {
+    expect(
+      mergePickRows({ "PIN-CF-01": 1 }, [
+        { id: "PIN-CF-01", ownerUid: "collector", quantity: "3" },
+      ]),
+    ).toEqual([]);
+  });
 });

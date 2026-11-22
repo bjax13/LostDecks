@@ -134,6 +134,18 @@ describe("GettingStartedPage", { timeout: 20_000 }, () => {
     ).not.toBeInTheDocument();
   });
 
+  it("prefills owned pins on collect=pins when the sku is only on the Firestore doc id", () => {
+    mockUseAuth.mockReturnValue({ user: { uid: "user-1" } });
+    mockUseUserCollection.mockReturnValue({
+      entries: [{ id: "PIN-CF-01", quantity: 1 }],
+      status: "ready",
+      error: null,
+    });
+    renderPage("/getting-started?collect=pins");
+
+    expect(screen.getByText(/1 marked Have/i)).toBeInTheDocument();
+  });
+
   it("seeds the quick pin picker from have= SKU CSV", () => {
     renderPage("/getting-started?collect=pins&have=PIN-CF-01:2,PIN-KROG-05");
     expect(screen.getByText(/2 marked Have/i)).toBeInTheDocument();
