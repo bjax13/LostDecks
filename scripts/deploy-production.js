@@ -2,6 +2,10 @@ const { spawnSync } = require("node:child_process");
 const path = require("node:path");
 const { prepareHostingDeploy } = require("./prepare-hosting-deploy");
 const { hostFromPublicUrl, resolveProductionAuthDomain } = require("./productionAuthDomain");
+const {
+  assertProductionPostHogConfig,
+  resolveProductionPostHogConfig,
+} = require("./production-posthog-env");
 
 const repoRoot = path.resolve(__dirname, "..");
 const isWindows = process.platform === "win32";
@@ -125,6 +129,12 @@ function getDeployMode() {
 }
 
 async function main() {
+  const posthog = assertProductionPostHogConfig(
+    resolveProductionPostHogConfig({
+      env: process.env,
+      frontendDir: path.join(repoRoot, "frontend"),
+    }),
+  );
   const deployScript = getDeployMode();
   const appId = getWebAppId();
   const sdk = getSdkConfig(appId);
@@ -161,6 +171,9 @@ async function main() {
   const deployEnv = {
     ...process.env,
     VITE_USE_EMULATORS: "false",
+    VITE_POSTHOG_KEY: posthog.key,
+    VITE_POSTHOG_HOST: posthog.host,
+    VITE_POSTHOG_SURVEY_ID: posthog.surveyId,
     ...required,
   };
 
