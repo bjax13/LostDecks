@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   collectiblesIndex,
   datasetMeta,
@@ -71,25 +71,23 @@ export function useCollectiblesExplorer({
     return datasetStories;
   }, [categoryFilter]);
 
-  const setCategoryFilter = useCallback((nextCategory) => {
-    setCategoryFilterState((prev) => {
-      if (prev === nextCategory) return prev;
-      return nextCategory;
-    });
-  }, []);
+  // Track Category for synchronous companion resets (avoid a one-frame mismatched Sub Category).
+  const categoryRef = useRef(categoryFilter);
+  categoryRef.current = categoryFilter;
 
-  // Cascade Sub Category / rarity / sort cleanup only when Category actually changes.
-  // Kept out of setCategoryFilter so URL re-sync with the same value is a no-op (no flicker).
-  const previousCategoryRef = useRef(categoryFilter);
-  useEffect(() => {
-    if (previousCategoryRef.current === categoryFilter) return;
-    previousCategoryRef.current = categoryFilter;
+  const setCategoryFilter = useCallback((nextCategory) => {
+    // Idempotent: URL re-sync with the same value must not wipe Sub Category (flicker fix).
+    if (categoryRef.current === nextCategory) return;
+    categoryRef.current = nextCategory;
+    setCategoryFilterState(nextCategory);
+    // Clear dependent filters in the same transition (batched) so the new Category never
+    // renders with a stale Sub Category / rarity selection.
     setStoryFilter("all");
-    if (categoryFilter === "pin") {
+    if (nextCategory === "pin") {
       setRarityFilter("all");
       setSortField((current) => (current === "rarity" ? defaultSort.field : current));
     }
-  }, [categoryFilter]);
+  }, []);
 
   const filteredCollectibles = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -142,6 +140,7 @@ export function useCollectiblesExplorer({
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
+    categoryRef.current = "all";
     setCategoryFilterState("all");
     setStoryFilter("all");
     setRarityFilter("all");

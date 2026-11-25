@@ -114,6 +114,29 @@ describe("useCollectiblesExplorer (unit)", () => {
     expect(result.current.isPinSubCategory).toBe(false);
   });
 
+  it("clears Sub Category in the same transition as Category (no mismatched intermediate)", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setStoryFilter(result.current.stories[0].code));
+    expect(result.current.storyFilter).not.toBe("all");
+
+    act(() => {
+      result.current.setCategoryFilter("pin");
+    });
+
+    expect(result.current.categoryFilter).toBe("pin");
+    expect(result.current.storyFilter).toBe("all");
+    expect(result.current.collectibles.every((c) => c.category === "pin")).toBe(true);
+  });
+
+  it("does not clear Sub Category when Category is set to the same value", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setStoryFilter(result.current.stories[0].code));
+    const selected = result.current.storyFilter;
+    expect(selected).not.toBe("all");
+    act(() => result.current.setCategoryFilter("all"));
+    expect(result.current.storyFilter).toBe(selected);
+  });
+
   it("disables Sub Category and clears filter when Category is Heralds", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     act(() => result.current.setStoryFilter(result.current.stories[0].code));
