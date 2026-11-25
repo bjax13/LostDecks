@@ -152,16 +152,28 @@ describe("CollectiblesToolbar", () => {
   });
 
   describe("sub category filter", () => {
-    it("renders dynamic story options plus static ones for story-deck categories", () => {
+    it("renders dynamic story options plus Heralds only when Category is All", () => {
       renderToolbar();
       const select = screen.getByLabelText("Sub Category");
       const options = within(select).getAllByRole("option");
 
       expect(options).toHaveLength(stories.length + 2);
-      expect(options[0]).toHaveTextContent("All stories");
+      expect(options[0]).toHaveTextContent("All sub categories");
       expect(options[1]).toHaveTextContent("Red Riding Hood");
       expect(options[2]).toHaveTextContent("Snow White");
       expect(options[options.length - 1]).toHaveTextContent("Heralds only");
+    });
+
+    it("omits Heralds only when Category is Story cards", () => {
+      renderToolbar({ categoryFilter: "story" });
+      const select = screen.getByLabelText("Sub Category");
+      const options = within(select).getAllByRole("option");
+
+      expect(options.map((o) => o.textContent)).toEqual([
+        "All sub categories",
+        "Red Riding Hood",
+        "Snow White",
+      ]);
     });
 
     it("renders pin series options without Heralds when Category is Pins", () => {
@@ -267,9 +279,10 @@ describe("CollectiblesToolbar", () => {
     });
 
     it("hides the rarity filter when pins are the category in view", () => {
-      renderToolbar({ categoryFilter: "pin", rarityFilter: "Rare" });
+      const { container } = renderToolbar({ categoryFilter: "pin", rarityFilter: "Rare" });
       expect(screen.queryByLabelText("Rarity")).not.toBeInTheDocument();
       expect(screen.queryByRole("option", { name: "All rarities" })).not.toBeInTheDocument();
+      expect(container.querySelector(".filter-control--placeholder")).toBeInTheDocument();
     });
   });
 
@@ -393,6 +406,7 @@ describe("CollectiblesToolbar", () => {
       renderToolbar({ stories: [], rarityOptions: [] });
 
       const storyOptions = within(screen.getByLabelText("Sub Category")).getAllByRole("option");
+      // All sub categories + Heralds only when Category is All
       expect(storyOptions).toHaveLength(2);
 
       const rarityOpts = within(screen.getByLabelText("Rarity")).getAllByRole("option");

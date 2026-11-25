@@ -70,19 +70,24 @@ export default function CollectiblesToolbar({
               <option value="na">NA</option>
             ) : (
               <>
-                <option value="all">{isPinSubCategory ? "All series" : "All stories"}</option>
+                <option value="all">
+                  {isPinSubCategory ? "All series" : "All sub categories"}
+                </option>
                 {stories.map((story) => (
                   <option key={story.code} value={story.code}>
                     {story.title}
                   </option>
                 ))}
-                {!isPinSubCategory ? <option value="heralds">Heralds only</option> : null}
+                {categoryFilter === "all" ? <option value="heralds">Heralds only</option> : null}
               </>
             )}
           </select>
         </div>
 
-        {isPinSubCategory ? null : (
+        {isPinSubCategory ? (
+          // Keep a grid slot so Category changes do not reflow the toolbar.
+          <div className="filter-control filter-control--placeholder" aria-hidden="true" />
+        ) : (
           <div className="filter-control">
             <label htmlFor="rarity-filter">Rarity</label>
             <select

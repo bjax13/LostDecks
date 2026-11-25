@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   collectiblesIndex,
   datasetMeta,
@@ -49,14 +49,39 @@ export function useCollectiblesExplorer({
   /** Heralds: Sub Category stays visible but disabled (NA); ignore any stale filter. */
   const subCategoryDisabled = categoryFilter === "herald";
 
-  const stories = useMemo(
-    () => (isPinSubCategory ? pinSeriesOptions : datasetStories),
-    [isPinSubCategory],
-  );
+  /** Sub Category options for the active Category (all subcategories when Category is All). */
+  const stories = useMemo(() => {
+    if (categoryFilter === "pin") return pinSeriesOptions;
+    if (categoryFilter === "herald") return [];
+    if (categoryFilter === "all") {
+      const seen = new Set();
+      const combined = [];
+      for (const story of datasetStories) {
+        seen.add(story.code);
+        combined.push(story);
+      }
+      for (const series of pinSeriesOptions) {
+        if (seen.has(series.code)) continue;
+        seen.add(series.code);
+        combined.push(series);
+      }
+      return combined;
+    }
+    // Story cards / Nonsense variants: story titles only.
+    return datasetStories;
+  }, [categoryFilter]);
+
+  // Track Category for synchronous companion resets (avoid a one-frame mismatched Sub Category).
+  const categoryRef = useRef(categoryFilter);
+  categoryRef.current = categoryFilter;
 
   const setCategoryFilter = useCallback((nextCategory) => {
+    // Idempotent: URL re-sync with the same value must not wipe Sub Category (flicker fix).
+    if (categoryRef.current === nextCategory) return;
+    categoryRef.current = nextCategory;
     setCategoryFilterState(nextCategory);
-    // Clear stale Sub Category whenever Category changes (esp. → Heralds / Pins).
+    // Clear dependent filters in the same transition (batched) so the new Category never
+    // renders with a stale Sub Category / rarity selection.
     setStoryFilter("all");
     if (nextCategory === "pin") {
       setRarityFilter("all");
@@ -70,10 +95,10 @@ export function useCollectiblesExplorer({
     let items = allCollectibles.filter((c) => {
       if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
       if (!subCategoryDisabled && storyFilter !== "all") {
-        if (isPinSubCategory) {
-          if (!pinSeriesMatches(c, storyFilter)) return false;
-        } else if (storyFilter === "heralds") {
+        if (storyFilter === "heralds") {
           if (c.category !== "herald") return false;
+        } else if (c.category === "pin") {
+          if (!pinSeriesMatches(c, storyFilter)) return false;
         } else if (c.story !== storyFilter) {
           return false;
         }
@@ -115,6 +140,7 @@ export function useCollectiblesExplorer({
 
   const resetFilters = useCallback(() => {
     setSearchTerm("");
+    categoryRef.current = "all";
     setCategoryFilterState("all");
     setStoryFilter("all");
     setRarityFilter("all");

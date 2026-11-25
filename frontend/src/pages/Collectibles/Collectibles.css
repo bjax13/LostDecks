@@ -151,6 +151,13 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
+/* Reserves the Rarity column when Category is Pins so the toolbar does not reflow. */
+.filter-control--placeholder {
+  min-height: 4.25rem;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .sort-wrapper {
   display: flex;
   align-items: center;
