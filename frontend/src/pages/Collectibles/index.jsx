@@ -82,11 +82,12 @@ export default function CollectiblesPage() {
     tradeFlagBySkuId,
   });
 
+  // Sync Category from the URL only when the query changes (back/forward, deep links).
+  // Do not depend on categoryFilter — pairing local setCategoryFilter with setSearchParams
+  // used to fight the still-stale query (A→B→A→B) and flicker the page.
   useEffect(() => {
-    if (categoryFilter !== categoryFromQuery) {
-      setCategoryFilter(categoryFromQuery);
-    }
-  }, [categoryFilter, categoryFromQuery, setCategoryFilter]);
+    setCategoryFilter(categoryFromQuery);
+  }, [categoryFromQuery, setCategoryFilter]);
 
   useEffect(() => {
     if (!user) setTradeStatusFilter("all");

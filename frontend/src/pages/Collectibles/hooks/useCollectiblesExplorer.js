@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   collectiblesIndex,
   datasetMeta,
@@ -49,20 +49,47 @@ export function useCollectiblesExplorer({
   /** Heralds: Sub Category stays visible but disabled (NA); ignore any stale filter. */
   const subCategoryDisabled = categoryFilter === "herald";
 
-  const stories = useMemo(
-    () => (isPinSubCategory ? pinSeriesOptions : datasetStories),
-    [isPinSubCategory],
-  );
+  /** Sub Category options for the active Category (all subcategories when Category is All). */
+  const stories = useMemo(() => {
+    if (categoryFilter === "pin") return pinSeriesOptions;
+    if (categoryFilter === "herald") return [];
+    if (categoryFilter === "all") {
+      const seen = new Set();
+      const combined = [];
+      for (const story of datasetStories) {
+        seen.add(story.code);
+        combined.push(story);
+      }
+      for (const series of pinSeriesOptions) {
+        if (seen.has(series.code)) continue;
+        seen.add(series.code);
+        combined.push(series);
+      }
+      return combined;
+    }
+    // Story cards / Nonsense variants: story titles only.
+    return datasetStories;
+  }, [categoryFilter]);
 
   const setCategoryFilter = useCallback((nextCategory) => {
-    setCategoryFilterState(nextCategory);
-    // Clear stale Sub Category whenever Category changes (esp. → Heralds / Pins).
+    setCategoryFilterState((prev) => {
+      if (prev === nextCategory) return prev;
+      return nextCategory;
+    });
+  }, []);
+
+  // Cascade Sub Category / rarity / sort cleanup only when Category actually changes.
+  // Kept out of setCategoryFilter so URL re-sync with the same value is a no-op (no flicker).
+  const previousCategoryRef = useRef(categoryFilter);
+  useEffect(() => {
+    if (previousCategoryRef.current === categoryFilter) return;
+    previousCategoryRef.current = categoryFilter;
     setStoryFilter("all");
-    if (nextCategory === "pin") {
+    if (categoryFilter === "pin") {
       setRarityFilter("all");
       setSortField((current) => (current === "rarity" ? defaultSort.field : current));
     }
-  }, []);
+  }, [categoryFilter]);
 
   const filteredCollectibles = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -70,10 +97,10 @@ export function useCollectiblesExplorer({
     let items = allCollectibles.filter((c) => {
       if (categoryFilter !== "all" && c.category !== categoryFilter) return false;
       if (!subCategoryDisabled && storyFilter !== "all") {
-        if (isPinSubCategory) {
-          if (!pinSeriesMatches(c, storyFilter)) return false;
-        } else if (storyFilter === "heralds") {
+        if (storyFilter === "heralds") {
           if (c.category !== "herald") return false;
+        } else if (c.category === "pin") {
+          if (!pinSeriesMatches(c, storyFilter)) return false;
         } else if (c.story !== storyFilter) {
           return false;
         }

@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { act } from "react";
 import { describe, expect, it } from "vitest";
-import { collectiblesIndex } from "../../../data/collectibles.js";
+import { collectiblesIndex, datasetStories, pinSeriesOptions } from "../../../data/collectibles.js";
 import { compareCollectibles } from "../utils/compareCollectibles.js";
 import { useCollectiblesExplorer } from "./useCollectiblesExplorer.js";
 
@@ -77,10 +77,31 @@ describe("useCollectiblesExplorer (unit)", () => {
     ).toBe(true);
   });
 
-  it("keeps story list sub category options for All categories", () => {
+  it("exposes stories and pin series as sub category options for All categories", () => {
     const { result } = renderHook(() => useCollectiblesExplorer());
     expect(result.current.isPinSubCategory).toBe(false);
-    expect(result.current.stories.some((s) => s.code && s.title && s.code !== s.title)).toBe(true);
+    expect(result.current.stories.length).toBe(datasetStories.length + pinSeriesOptions.length);
+    expect(result.current.stories.slice(0, datasetStories.length)).toEqual(datasetStories);
+    expect(result.current.stories.slice(datasetStories.length)).toEqual(pinSeriesOptions);
+  });
+
+  it("exposes only story titles as sub category options for Story cards", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    act(() => result.current.setCategoryFilter("story"));
+    expect(result.current.stories).toEqual(datasetStories);
+  });
+
+  it("filters All-categories view by a pin series sub category", () => {
+    const { result } = renderHook(() => useCollectiblesExplorer());
+    const pinSeries = pinSeriesOptions[0]?.code;
+    expect(pinSeries).toBeTruthy();
+    act(() => result.current.setStoryFilter(pinSeries));
+    expect(result.current.collectibles.length).toBeGreaterThan(0);
+    expect(
+      result.current.collectibles.every(
+        (c) => c.category === "pin" && (c.series ?? c.storyTitle) === pinSeries,
+      ),
+    ).toBe(true);
   });
 
   it("resets Sub Category when Category changes", () => {

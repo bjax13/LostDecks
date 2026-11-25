@@ -435,4 +435,27 @@ describe("CollectiblesPage (integration)", () => {
     expect(screen.getByTestId("search")).toHaveTextContent("");
     expect(screen.getByRole("heading", { name: "Herald One" })).toBeInTheDocument();
   });
+
+  it("keeps Category stable after change (no URL sync revert flicker)", async () => {
+    const user = setupUser();
+    renderWithRouter(<CollectiblesPage />);
+
+    await user.selectOptions(screen.getByLabelText("Category"), "story");
+    expect(screen.getByLabelText("Category")).toHaveValue("story");
+    expect(screen.getByTestId("search")).toHaveTextContent("?category=story");
+    expect(screen.getByRole("heading", { name: "Test Story #01" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Herald One" })).not.toBeInTheDocument();
+
+    // Flush any deferred URL→state sync; Category must not bounce back to all.
+    await waitFor(() => {
+      expect(screen.getByLabelText("Category")).toHaveValue("story");
+    });
+    expect(screen.queryByRole("heading", { name: "Herald One" })).not.toBeInTheDocument();
+  });
+
+  it("labels Sub Category default as All sub categories", () => {
+    renderWithRouter(<CollectiblesPage />);
+    const select = screen.getByLabelText("Sub Category");
+    expect(select).toHaveDisplayValue("All sub categories");
+  });
 });
