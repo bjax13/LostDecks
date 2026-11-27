@@ -127,11 +127,7 @@ describe("AiPhotoImportPanel", () => {
       created: 0,
       updated: 0,
       deleted: 0,
-      issues: [{ line: 1, message: 'SKU "BAD-SKU" not found in catalog.' }],
-    });
-    analyzeMock.mockResolvedValue({
-      extractions: [{ name: "Unknown", printedId: "BAD-SKU", kind: "card", confidence: 0.5 }],
-      meta: { estimatedCostUsd: 0.002, imageCount: 1, itemCount: 1 },
+      issues: [{ line: 1, message: "Quantity 1000 exceeds the maximum of 999." }],
     });
 
     const user = userEvent.setup();
@@ -140,11 +136,14 @@ describe("AiPhotoImportPanel", () => {
     expect(uploadInput).toBeTruthy();
     await user.upload(uploadInput, new File(["pixels"], "card.jpg", { type: "image/jpeg" }));
     await waitFor(() => expect(screen.getByRole("heading", { name: /review matches/i })));
+    const quantityInput = screen.getByLabelText(/quantity for elsecaller/i);
+    await user.clear(quantityInput);
+    await user.type(quantityInput, "1000");
     await user.click(screen.getByRole("button", { name: /confirm import/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/some rows could not be imported/i)).toBeInTheDocument();
-      expect(screen.getByText(/not found in catalog/i)).toBeInTheDocument();
+      expect(screen.getByText(/exceeds the maximum/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /confirm import/i })).toBeInTheDocument();
     });
     expect(screen.getByRole("heading", { name: /review matches/i })).toBeInTheDocument();
