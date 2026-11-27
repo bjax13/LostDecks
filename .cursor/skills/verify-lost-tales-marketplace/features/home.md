@@ -1,12 +1,12 @@
 # Home
 
-Home is the signed-out landing page: a hero that sends collectors into getting started or the catalog, tiles for supported sets, and a snapshot that stays empty until sign-in.
+Home is the signed-out landing page: a hero that sends collectors into getting started, the ChasmFriends pin shortcut, or the catalog, tiles for supported sets, and a snapshot that shows catalog totals as placeholders with Sign in hints until sign-in.
 
 ## Sub-features
 
-- `home-load` shows the ShardStash heading and primary navigation.
+- `home-load` shows the hero heading and the ShardStash brand in primary navigation.
 - `home-nav` reaches Collectibles, Collection, Matches, Account, and Sign in from the primary nav.
-- `home-hero-cta` opens Getting Started and the collectibles catalog from the hero.
+- `home-hero-cta` opens Getting Started, the ChasmFriends pin shortcut, and the collectibles catalog from the hero.
 - `home-supported` opens the catalog from the Story Deck Cards and Pins tiles.
 - `home-snapshot-signed-out` shows Collection Snapshot values as placeholders with Sign in hints.
 
@@ -28,6 +28,7 @@ Preconditions:
 - **Primary nav.** Confirm nav targets. Run `$VERIFY drive expect --role navigation --name Primary` then `$VERIFY drive click --role link --name Collectibles --scope nav`. The heading `Collectibles` is visible. Return with `$VERIFY drive click --role link --name Home --scope nav`.
 - **Hero getting started.** From home, choose the first Getting Started control. Run `$VERIFY drive click --role link --name "Getting Started" --nth 0`. The heading `Build your collection without entering every card.` is visible.
 - **Hero catalog.** Return home, then choose View Collectibles. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "View Collectibles"`. The heading `Collectibles` is visible.
+- **Chasm friends shortcut.** Return home and choose `log my chasm friend pins`. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "log my chasm friend pins"`. The heading `which chasm friends do you have?` is visible, with button `i have all 5`. Capture `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/home/chasm-friends.png --full-page` and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/home/chasm-friends.aria.txt`.
 - **Supported collections.** Return home and choose Browse catalog. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse catalog"`. The heading `Collectibles` is visible and the page still shows all categories.
 - **Pin tile.** Return home and choose Browse pins. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "Browse pins"`. The Category filter is `Pins` (the catalog heading remains `Collectibles`). The Rarity filter is not shown.
 - **Signed-out snapshot.** Return home. Run `$VERIFY drive goto --path /` and `$VERIFY drive expect --role heading --name "Collection Snapshot"`. Snapshot stats include the hint `Sign in` rather than owned counts.

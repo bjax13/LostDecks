@@ -9,6 +9,7 @@ Collection is the signed-in inventory: quantities already saved for the collecto
 - `collection-getting-started-manual` picks a collectible type, reviews that set, and saves quantities.
 - `collection-getting-started-spreadsheet` points a spreadsheet collector at bulk import.
 - `collection-quick-pins` opens the QR pin picker from `?collect=pins`.
+- `collection-chasm-shortcut` opens the five ChasmFriends pins from Home `log my chasm friend pins` (`?pins=chasmfriends`).
 - `collection-bulk` exposes the three CSV downloads, Upload filled template, Copy ISO/UFT post, Open visual editor, and Download my collection.
 
 ## How to get to it (user POV)
@@ -19,6 +20,7 @@ Collection is the signed-in inventory: quantities already saved for the collecto
 - Open `/collections` or `/getting-started` directly.
 - From the spreadsheet branch of Getting Started, choose `Go to bulk import` (signed in) which lands on `/collections#bulk-import`.
 - Open `/getting-started?collect=pins` (the QR quick pin picker).
+- Choose `log my chasm friend pins` on Home, which opens `/getting-started?pins=chasmfriends`.
 
 ## Driving it with verify-lost-tales
 
@@ -36,6 +38,7 @@ Preconditions:
 - **Spreadsheet branch.** Go back, keep Story Deck cards, and choose spreadsheet. Run `$VERIFY drive click --role button --name Back --exact`, `$VERIFY drive click --role radio --name "My collection is in a spreadsheet"`, `$VERIFY drive click --role button --name Continue`. Heading `Prepare your collection for bulk import.` is visible. Signed in, `Go to bulk import` is a link to the collection bulk section.
 - **Save requires session.** On the manual branch while signed out, the primary action is `Sign in and save` (opens the auth modal) rather than `Save collection`. Reach that step with the same Story Deck Cards and non-spreadsheet radios before checking the button.
 - **Quick pins.** Open the QR picker. Run `$VERIFY drive goto --path "/getting-started?collect=pins"`. Heading `Mark what you have, then find trades.` is visible, with `Which pins do you have?`.
+- **Chasm friends shortcut.** Open the hero shortcut. Run `$VERIFY drive goto --path /` and `$VERIFY drive click --role link --name "log my chasm friend pins"`. Heading `which chasm friends do you have?` is visible, with button `i have all 5` and a tree named `Pins to review`.
 - **Proof.** Capture Collector One's collection. Run `$VERIFY drive login --email collector.one@example.com --password replace-me-local-only`, `$VERIFY drive click --role link --name Collection --scope nav`, `$VERIFY drive screenshot --path /tmp/lost-tales-verify/artifacts/collection/collector-one.png --full-page`, and `$VERIFY drive snapshot --path /tmp/lost-tales-verify/artifacts/collection/collector-one.aria.txt`. Artifacts show `Your Collection`, seeded Elsecaller rows, and `Hi, Collector One`.
 
 ## Gotchas
@@ -49,3 +52,5 @@ Preconditions:
 - Bulk upload mutates Firestore. After uploading a CSV, re-check the collection table, then `$VERIFY seed` before Matches recipes that depend on the original quantities.
 - The CSV downloads are `lost-tales-collection-empty.csv`, `lost-tales-collection-full-set.csv`, and `lost-tales-collection-current.csv`. There is no `Download template` button and no `lost-tales-collection-template.csv`.
 - `?collect=pins` skips the profile step and shows the quick pin picker. Its heading is `Mark what you have, then find trades.`, not the default getting-started heading.
+- `?pins=chasmfriends` also skips the profile step. Its heading is `which chasm friends do you have?`, not the default getting-started heading and not the quick-pin heading.
+- `Copy ISO/UFT post` opens a dialog named `ISO/UFT post preview`. Checking `Share a public trade list link` publishes `/t/<shareId>`. Drive that page from [trade-list.md](./trade-list.md). Checking the box again when it is already on revokes the link.

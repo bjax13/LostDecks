@@ -90,7 +90,9 @@ Stable handles from this repo:
 
 - Primary nav (`aria-label="Primary"`): brand link `ShardStash`; links `Home`, `Collectibles`, `Collection`, `Matches`, `Account`; signed-out `Sign in` (link to `/auth/login`); signed-in `Sign out` and `Hi, <name>`
 - Home h1: `Track your collectibles in one place.`
-- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Sub Category`, `Rarity` (`Rarity` is absent when Category is `Pins`); buttons `Grid view`, `Table view`, `Reset filters`
+- Collectibles h1: `Collectibles`; search label `Search`; filters `Category`, `Sub Category`, `Rarity` (`Rarity` is absent when Category is `Pins`); buttons `Grid view`, `Table view`, `Reset filters`. Pin detail Category reads `Pin`. The catalog filter option is `Pins`.
+- Public trade list (`/t/<shareId>`): heading `<name>'s trade list`, or `This list isn't shared anymore` when the id is unknown. Publish from Collection → `Copy ISO/UFT post` → checkbox `Share a public trade list link`. The preview host is `shardstash.web.app`; open the `/t/<shareId>` path on the local app.
+- Home hero link `log my chasm friend pins` opens Getting Started with heading `which chasm friends do you have?`.
 - A catalog tile heading expands the tile. Inside the expanded body, the id link's accessible name is the collectible id (`LT24-ELS-01`). A separate always-visible `details ›` link is named `View details for <title>` (`View details for Elsecaller #01`). Pass `--exact` when one title is a prefix of another (`M-Bot` also matches `M-Bot Drone`). Table view is a region named `Collectibles table`.
 - Getting Started profile choices and Account match toggles are radios or checkboxes inside a label. `click` activates that label.
 - Login h1: `Sign in to ShardStash`; Register h1: `Create your ShardStash account`
