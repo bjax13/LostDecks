@@ -8,6 +8,7 @@ import {
 } from "../../../analytics/events.js";
 import { captureEvent, isAiPhotoImportEnabled } from "../../../analytics/posthog.js";
 import { getSkuRecord } from "../../../data/collectibles.js";
+import { mapImportIssuesToRowIds, mergeDraftRowsForImport } from "../utils/aiPhotoImportDraft.js";
 import { preparePhotoForAiImport } from "../utils/aiPhotoImportImage.js";
 import { matchExtractionsToCatalog } from "../utils/aiPhotoImportMatcher.js";
 import { analyzeCollectionPhotos } from "../utils/analyzeCollectionPhotos.js";
@@ -51,6 +52,7 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
   const [error, setError] = useState(null);
   const [draftRows, setDraftRows] = useState([]);
   const [importReport, setImportReport] = useState(null);
+  const [importIssues, setImportIssues] = useState([]);
   const [estimatedCost, setEstimatedCost] = useState(null);
 
   const activeRows = useMemo(() => draftRows.filter((row) => !row.removed), [draftRows]);
@@ -68,6 +70,7 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
     setStatus("analyzing");
     setError(null);
     setImportReport(null);
+    setImportIssues([]);
     setDraftRows([]);
 
     try {
@@ -122,19 +125,34 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
     }
     setStatus("confirming");
     setError(null);
+    setImportIssues([]);
     try {
-      const rows = activeRows.map((row, index) => ({
-        __lineNumber: index + 1,
-        skuId: row.skuId,
-        quantity: String(row.quantity),
-        notes: row.notes,
-      }));
+      const mergedRows = mergeDraftRowsForImport(activeRows);
       const result = await applyBulkCollectionUpdate({
         ownerUid,
-        rows,
+        rows: mergedRows,
         existingEntries,
         allowPins: true,
       });
+
+      const issues = result.issues ?? [];
+      if (issues.length > 0) {
+        const issueByRowId = mapImportIssuesToRowIds(issues, mergedRows);
+        setDraftRows((current) =>
+          current.map((row) => ({
+            ...row,
+            issueMessage: issueByRowId.get(row.id) ?? row.issueMessage ?? null,
+          })),
+        );
+        setImportIssues(issues);
+        if (result.created || result.updated || result.deleted) {
+          setImportReport(result);
+        }
+        setStatus("review");
+        setError("Some rows could not be imported. Fix the items below and confirm again.");
+        return;
+      }
+
       setImportReport(result);
 
       const correctedCount = activeRows.filter(
@@ -147,7 +165,7 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
         removedCount,
       });
       captureEvent(AI_PHOTO_IMPORT_ITEMS_CONFIRMED, {
-        confirmedCount: activeRows.length,
+        confirmedCount: mergedRows.length,
         created: result.created,
         updated: result.updated,
         deleted: result.deleted,
@@ -155,6 +173,7 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
       });
       setStatus("done");
       setDraftRows([]);
+      setImportIssues([]);
     } catch (err) {
       console.error("AI photo import confirm failed", err);
       setError(err?.message ?? "Could not import items.");
@@ -221,7 +240,10 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
             <tbody>
               {draftRows.map((row) =>
                 row.removed ? null : (
-                  <tr key={row.id}>
+                  <tr
+                    key={row.id}
+                    className={row.issueMessage ? "collection-ai-review__row--issue" : ""}
+                  >
                     <td>{row.extractionLabel}</td>
                     <td>
                       <select
@@ -292,7 +314,20 @@ export default function AiPhotoImportPanel({ ownerUid, existingEntries, disabled
         </div>
       ) : null}
 
-      {importReport ? (
+      {importIssues.length > 0 ? (
+        <div className="collection-bulk__issues">
+          <strong>Some rows were skipped:</strong>
+          <ul>
+            {importIssues.map((issue) => (
+              <li key={`${issue.line}-${issue.message}`}>
+                {issue.line === "?" ? "Row" : `Line ${issue.line}`}: {issue.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {importReport && importIssues.length === 0 ? (
         <div className="collection-bulk__report" role="status">
           <strong>AI import complete.</strong> {importReport.created} new, {importReport.updated}{" "}
           updated, {importReport.deleted} removed.

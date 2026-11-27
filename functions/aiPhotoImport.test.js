@@ -49,6 +49,38 @@ test("evaluateAiPhotoImportCaps blocks global cap and marks disabled", () => {
   assert.equal(result.nextGlobalState.featureDisabled, true);
 });
 
+test("evaluateAiPhotoImportCaps re-enables on the next UTC day after global latch", () => {
+  const dayN = Date.UTC(2026, 10, 27, 23, 0, 0);
+  const dayNPlus1 = Date.UTC(2026, 10, 28, 1, 0, 0);
+  const latchedGlobal = {
+    dailyDate: utcDayKey(dayN),
+    dailyCount: caps.globalDailyCap,
+    featureDisabled: true,
+  };
+
+  const blocked = evaluateAiPhotoImportCaps({
+    caps,
+    userState: null,
+    globalState: latchedGlobal,
+    now: dayN,
+    imageCount: 1,
+  });
+  assert.equal(blocked.allowed, false);
+  assert.equal(blocked.reason, "global-daily-cap");
+
+  const nextDay = evaluateAiPhotoImportCaps({
+    caps,
+    userState: null,
+    globalState: latchedGlobal,
+    now: dayNPlus1,
+    imageCount: 1,
+  });
+  assert.equal(nextDay.allowed, true);
+  assert.equal(nextDay.nextGlobalState.dailyDate, utcDayKey(dayNPlus1));
+  assert.equal(nextDay.nextGlobalState.dailyCount, 1);
+  assert.equal(nextDay.nextGlobalState.featureDisabled, false);
+});
+
 test("evaluateAiPhotoImportCaps blocks user daily cap", () => {
   const now = Date.UTC(2026, 10, 27, 12, 0, 0);
   const result = evaluateAiPhotoImportCaps({

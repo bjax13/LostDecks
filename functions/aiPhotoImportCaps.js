@@ -30,16 +30,6 @@ function evaluateAiPhotoImportCaps(input) {
   const dayKey = utcDayKey(now);
   const monthKey = utcMonthKey(now);
 
-  if (globalState?.featureDisabled === true) {
-    return {
-      allowed: false,
-      reason: "global-disabled",
-      message: "AI photo import is temporarily unavailable. Please try again tomorrow.",
-      nextUserState: userState ?? {},
-      nextGlobalState: globalState ?? {},
-    };
-  }
-
   let globalDailyDate = typeof globalState?.dailyDate === "string" ? globalState.dailyDate : dayKey;
   let globalDailyCount = typeof globalState?.dailyCount === "number" ? globalState.dailyCount : 0;
   if (globalDailyDate !== dayKey) {
