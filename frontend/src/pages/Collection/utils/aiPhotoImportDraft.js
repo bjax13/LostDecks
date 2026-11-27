@@ -1,3 +1,5 @@
+import { MAX_COLLECTION_QUANTITY } from "../../../lib/collectionLimits.js";
+
 /**
  * Merge review rows that target the same SKU before bulk import.
  * @param {Array<{ id: string, skuId: string, quantity: number, notes?: string }>} rows
@@ -11,7 +13,10 @@ export function mergeDraftRowsForImport(rows) {
     if (!skuId) {
       continue;
     }
-    const quantity = Math.max(0, Math.round(Number(row.quantity) || 0));
+    const quantity = Math.min(
+      MAX_COLLECTION_QUANTITY,
+      Math.max(0, Math.round(Number(row.quantity) || 0)),
+    );
     const notes = typeof row.notes === "string" ? row.notes.trim() : "";
     const existing = bySku.get(skuId);
     if (!existing) {
@@ -23,7 +28,7 @@ export function mergeDraftRowsForImport(rows) {
       });
       continue;
     }
-    existing.quantity += quantity;
+    existing.quantity = Math.min(MAX_COLLECTION_QUANTITY, existing.quantity + quantity);
     existing.sourceRowIds.push(row.id);
     if (notes) {
       existing.notes = [existing.notes, notes].filter(Boolean).join(" | ");

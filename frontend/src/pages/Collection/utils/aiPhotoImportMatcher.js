@@ -38,7 +38,10 @@ function catalogSearchRows() {
     return {
       skuId: sku.skuId,
       cardId: sku.cardId,
-      finish: sku.finish ?? null,
+      finish:
+        typeof sku.finish === "string" && sku.finish.trim()
+          ? sku.finish.trim().toUpperCase()
+          : null,
       isPin: isPinSkuId(sku.skuId),
       label,
     };

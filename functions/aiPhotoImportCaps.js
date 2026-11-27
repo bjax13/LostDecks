@@ -38,17 +38,15 @@ function evaluateAiPhotoImportCaps(input) {
   }
 
   if (globalDailyCount + imageCount > caps.globalDailyCap) {
-    const nextGlobal = {
-      dailyDate: globalDailyDate,
-      dailyCount: globalDailyCount,
-      featureDisabled: true,
-    };
     return {
       allowed: false,
       reason: "global-daily-cap",
       message: "AI photo import is temporarily unavailable. Please try again tomorrow.",
       nextUserState: userState ?? {},
-      nextGlobalState: nextGlobal,
+      nextGlobalState: {
+        dailyDate: globalDailyDate,
+        dailyCount: globalDailyCount,
+      },
     };
   }
 
@@ -81,7 +79,6 @@ function evaluateAiPhotoImportCaps(input) {
       nextGlobalState: {
         dailyDate: globalDailyDate,
         dailyCount: globalDailyCount,
-        featureDisabled: false,
       },
     };
   }
@@ -100,7 +97,6 @@ function evaluateAiPhotoImportCaps(input) {
       nextGlobalState: {
         dailyDate: globalDailyDate,
         dailyCount: globalDailyCount,
-        featureDisabled: false,
       },
     };
   }
@@ -119,7 +115,6 @@ function evaluateAiPhotoImportCaps(input) {
     nextGlobalState: {
       dailyDate: globalDailyDate,
       dailyCount: globalDailyCount + imageCount,
-      featureDisabled: false,
     },
   };
 }
@@ -153,8 +148,6 @@ async function enforceAiPhotoImportCaps(db, uid, imageCount, now = Date.now(), o
           {
             dailyDate: result.nextGlobalState.dailyDate,
             dailyCount: result.nextGlobalState.dailyCount,
-            featureDisabled: true,
-            disabledAt: Timestamp.fromMillis(now),
           },
           { merge: true },
         );
@@ -178,7 +171,6 @@ async function enforceAiPhotoImportCaps(db, uid, imageCount, now = Date.now(), o
       {
         dailyDate: result.nextGlobalState.dailyDate,
         dailyCount: result.nextGlobalState.dailyCount,
-        featureDisabled: false,
       },
       { merge: true },
     );

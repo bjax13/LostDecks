@@ -35,7 +35,31 @@ describe("aiPhotoImportMatcher", () => {
       confidence: 0.6,
     });
     expect(candidates.length).toBeGreaterThan(0);
-    expect(candidates[0].skuId).toMatch(/LT24-ELS-01/);
+    expect(candidates[0].skuId).toBe("LT24-ELS-01-DUN");
+  });
+
+  it("prefers FOIL over DUN when extraction finish is FOIL", () => {
+    const candidates = rankCatalogMatchesForExtraction({
+      name: "Elsecaller #01",
+      finish: "FOIL",
+      kind: "card",
+      confidence: 0.6,
+    });
+    const els01 = candidates.filter((row) => row.skuId.startsWith("LT24-ELS-01-"));
+    expect(els01[0]?.skuId).toBe("LT24-ELS-01-FOIL");
+    expect(els01[0]?.score).toBeGreaterThan(els01[1]?.score ?? 0);
+  });
+
+  it("prefers DUN over FOIL when extraction finish is DUN", () => {
+    const candidates = rankCatalogMatchesForExtraction({
+      name: "Elsecaller #01",
+      finish: "DUN",
+      kind: "card",
+      confidence: 0.6,
+    });
+    const els01 = candidates.filter((row) => row.skuId.startsWith("LT24-ELS-01-"));
+    expect(els01[0]?.skuId).toBe("LT24-ELS-01-DUN");
+    expect(els01[0]?.score).toBeGreaterThan(els01[1]?.score ?? 0);
   });
 
   it("maps multiple extractions", () => {

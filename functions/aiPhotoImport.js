@@ -20,6 +20,27 @@ function uidOrEmpty(value) {
   return typeof value === "string" ? value : "";
 }
 
+/** @param {unknown} err */
+function sanitizeErrorForLog(err) {
+  if (err instanceof HttpsError) {
+    return { code: err.code, message: err.message };
+  }
+  const code =
+    typeof err === "object" && err !== null && typeof err.code === "string"
+      ? err.code
+      : typeof err === "object" && err !== null && typeof err.status === "number"
+        ? String(err.status)
+        : "unknown";
+  let message = "vision request failed";
+  if (typeof err === "object" && err !== null && typeof err.message === "string") {
+    message = err.message
+      .replace(/https?:\/\/\S+/gi, "[url]")
+      .replace(/AIza\S+/gi, "[key]")
+      .slice(0, 200);
+  }
+  return { code, message };
+}
+
 /**
  * @param {import("firebase-functions/v2/https").CallableRequest} request
  */
@@ -55,7 +76,8 @@ async function analyzeCollectionPhotosHandler(request, admin) {
     try {
       extraction = await extractCollectiblesFromImages({ apiKey }, images);
     } catch (err) {
-      console.error("analyzeCollectionPhotos: vision failed", { uid: callerUid, err });
+      const { code, message } = sanitizeErrorForLog(err);
+      console.error("analyzeCollectionPhotos: vision failed", { uid: callerUid, code, message });
       throw new HttpsError("internal", "Could not analyze photos. Please try again.");
     }
   }
@@ -89,7 +111,8 @@ const analyzeCollectionPhotos = onCall(
       if (err instanceof HttpsError) {
         throw err;
       }
-      console.error("analyzeCollectionPhotos failed", { err });
+      const { code, message } = sanitizeErrorForLog(err);
+      console.error("analyzeCollectionPhotos failed", { code, message });
       throw new HttpsError("internal", "Could not analyze photos. Please try again.");
     }
   },

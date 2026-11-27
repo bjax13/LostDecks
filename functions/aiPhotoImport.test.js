@@ -4,7 +4,10 @@ const { describe, test } = require("node:test");
 const assert = require("node:assert/strict");
 const { HttpsError } = require("firebase-functions/v2/https");
 const { evaluateAiPhotoImportCaps, utcDayKey } = require("./aiPhotoImportCaps");
-const { validateAnalyzeImagesInput } = require("./aiPhotoImportValidation");
+const {
+  validateAnalyzeImagesInput,
+  MAX_TOTAL_DECODED_BYTES,
+} = require("./aiPhotoImportValidation");
 const { normalizeExtractionItems } = require("./geminiCollectionVision");
 const { resolveCapsFromConfig } = require("./aiPhotoImportConfig");
 const { analyzeCollectionPhotosHandler, __test: aiPhotoImportTest } = require("./aiPhotoImport");
@@ -31,7 +34,20 @@ test("validateAnalyzeImagesInput rejects more than six images", () => {
   assert.throws(() => validateAnalyzeImagesInput(many));
 });
 
-test("evaluateAiPhotoImportCaps blocks global cap and marks disabled", () => {
+test("validateAnalyzeImagesInput rejects total decoded size over cap", () => {
+  const perImageBytes = Math.ceil(MAX_TOTAL_DECODED_BYTES / 3) + 1;
+  const big = Buffer.alloc(perImageBytes).toString("base64");
+  const images = Array.from({ length: 3 }, () => ({
+    mimeType: "image/png",
+    dataBase64: big,
+  }));
+  assert.throws(
+    () => validateAnalyzeImagesInput(images),
+    (err) => err instanceof HttpsError && /Total photo size exceeds/.test(err.message),
+  );
+});
+
+test("evaluateAiPhotoImportCaps blocks global cap", () => {
   const now = Date.UTC(2026, 10, 27, 12, 0, 0);
   const result = evaluateAiPhotoImportCaps({
     caps,
@@ -39,23 +55,20 @@ test("evaluateAiPhotoImportCaps blocks global cap and marks disabled", () => {
     globalState: {
       dailyDate: utcDayKey(now),
       dailyCount: caps.globalDailyCap,
-      featureDisabled: false,
     },
     now,
     imageCount: 1,
   });
   assert.equal(result.allowed, false);
   assert.equal(result.reason, "global-daily-cap");
-  assert.equal(result.nextGlobalState.featureDisabled, true);
 });
 
-test("evaluateAiPhotoImportCaps re-enables on the next UTC day after global latch", () => {
+test("evaluateAiPhotoImportCaps allows requests on the next UTC day after global cap", () => {
   const dayN = Date.UTC(2026, 10, 27, 23, 0, 0);
   const dayNPlus1 = Date.UTC(2026, 10, 28, 1, 0, 0);
   const latchedGlobal = {
     dailyDate: utcDayKey(dayN),
     dailyCount: caps.globalDailyCap,
-    featureDisabled: true,
   };
 
   const blocked = evaluateAiPhotoImportCaps({
@@ -78,7 +91,6 @@ test("evaluateAiPhotoImportCaps re-enables on the next UTC day after global latc
   assert.equal(nextDay.allowed, true);
   assert.equal(nextDay.nextGlobalState.dailyDate, utcDayKey(dayNPlus1));
   assert.equal(nextDay.nextGlobalState.dailyCount, 1);
-  assert.equal(nextDay.nextGlobalState.featureDisabled, false);
 });
 
 test("evaluateAiPhotoImportCaps blocks user daily cap", () => {
@@ -91,7 +103,7 @@ test("evaluateAiPhotoImportCaps blocks user daily cap", () => {
       monthlyMonth: "2026-11",
       monthlyCount: 1,
     },
-    globalState: { dailyDate: utcDayKey(now), dailyCount: 0, featureDisabled: false },
+    globalState: { dailyDate: utcDayKey(now), dailyCount: 0 },
     now,
     imageCount: 1,
   });

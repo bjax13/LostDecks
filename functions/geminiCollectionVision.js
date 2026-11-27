@@ -1,5 +1,23 @@
 "use strict";
 
+const MAX_EXTRACTION_ITEMS = 50;
+const MAX_STRING_LENGTH = {
+  name: 200,
+  printedId: 64,
+  set: 16,
+  number: 32,
+  finish: 16,
+  variant: 200,
+};
+
+function clampString(value, maxLength) {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const trimmed = value.trim();
+  return trimmed.length > maxLength ? trimmed.slice(0, maxLength) : trimmed;
+}
+
 const EXTRACTION_PROMPT = `You identify individual Stormlight Lost Tales Story Deck trading cards and ChasmFriends enamel pins visible in collector photos.
 
 Return JSON only. For each distinct card or pin you can see, output one object in "items" with:
@@ -19,15 +37,16 @@ const RESPONSE_SCHEMA = {
   properties: {
     items: {
       type: "array",
+      maxItems: MAX_EXTRACTION_ITEMS,
       items: {
         type: "object",
         properties: {
-          name: { type: "string" },
-          printedId: { type: "string", nullable: true },
-          set: { type: "string", nullable: true },
-          number: { type: "string", nullable: true },
-          finish: { type: "string", nullable: true },
-          variant: { type: "string", nullable: true },
+          name: { type: "string", maxLength: MAX_STRING_LENGTH.name },
+          printedId: { type: "string", nullable: true, maxLength: MAX_STRING_LENGTH.printedId },
+          set: { type: "string", nullable: true, maxLength: MAX_STRING_LENGTH.set },
+          number: { type: "string", nullable: true, maxLength: MAX_STRING_LENGTH.number },
+          finish: { type: "string", nullable: true, maxLength: MAX_STRING_LENGTH.finish },
+          variant: { type: "string", nullable: true, maxLength: MAX_STRING_LENGTH.variant },
           kind: { type: "string", enum: ["card", "pin"] },
           confidence: { type: "number" },
         },
@@ -46,30 +65,29 @@ function normalizeExtractionItems(raw) {
     return [];
   }
   return raw.items
+    .slice(0, MAX_EXTRACTION_ITEMS)
     .map((item) => {
       if (!item || typeof item !== "object") {
         return null;
       }
-      const name = typeof item.name === "string" ? item.name.trim() : "";
+      const name = clampString(item.name, MAX_STRING_LENGTH.name);
       const kind = item.kind === "pin" ? "pin" : item.kind === "card" ? "card" : null;
       const confidence = Number(item.confidence);
       if (!name || !kind || !Number.isFinite(confidence)) {
         return null;
       }
+      const printedIdRaw = clampString(item.printedId, MAX_STRING_LENGTH.printedId);
+      const setRaw = clampString(item.set, MAX_STRING_LENGTH.set);
+      const numberRaw = clampString(item.number, MAX_STRING_LENGTH.number);
+      const finishRaw = clampString(item.finish, MAX_STRING_LENGTH.finish);
+      const variantRaw = clampString(item.variant, MAX_STRING_LENGTH.variant);
       return {
         name,
-        printedId:
-          typeof item.printedId === "string" && item.printedId.trim()
-            ? item.printedId.trim().toUpperCase()
-            : null,
-        set: typeof item.set === "string" && item.set.trim() ? item.set.trim().toUpperCase() : null,
-        number: typeof item.number === "string" && item.number.trim() ? item.number.trim() : null,
-        finish:
-          typeof item.finish === "string" && item.finish.trim()
-            ? item.finish.trim().toUpperCase()
-            : null,
-        variant:
-          typeof item.variant === "string" && item.variant.trim() ? item.variant.trim() : null,
+        printedId: printedIdRaw ? printedIdRaw.toUpperCase() : null,
+        set: setRaw ? setRaw.toUpperCase() : null,
+        number: numberRaw || null,
+        finish: finishRaw ? finishRaw.toUpperCase() : null,
+        variant: variantRaw || null,
         kind,
         confidence: Math.max(0, Math.min(1, confidence)),
       };
@@ -140,6 +158,8 @@ async function extractCollectiblesFromImages(deps, images) {
 module.exports = {
   EXTRACTION_PROMPT,
   RESPONSE_SCHEMA,
+  MAX_EXTRACTION_ITEMS,
+  MAX_STRING_LENGTH,
   normalizeExtractionItems,
   extractCollectiblesFromImages,
 };

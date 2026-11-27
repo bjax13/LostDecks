@@ -6,7 +6,7 @@ const {
   assertSucceeds,
   initializeTestEnvironment,
 } = require("@firebase/rules-unit-testing");
-const { doc, setDoc } = require("firebase/firestore");
+const { doc, getDoc, setDoc } = require("firebase/firestore");
 
 const RULES_PATH = path.join(__dirname, "..", "firestore.rules");
 
@@ -37,9 +37,12 @@ test.beforeEach(async () => {
 test("clients cannot read or write aiPhotoImportUsage", async () => {
   const db = testEnv.authenticatedContext(OWNER).firestore();
   await assertFails(setDoc(doc(db, "aiPhotoImportUsage/owner-uid"), { dailyCount: 1 }));
+  await assertFails(getDoc(doc(db, "aiPhotoImportUsage/owner-uid")));
   const deniedDb = testEnv.unauthenticatedContext().firestore();
-  await assertFails(setDoc(doc(db, "aiPhotoImportUsage/owner-uid"), { dailyCount: 99 }));
+  await assertFails(setDoc(doc(deniedDb, "aiPhotoImportUsage/owner-uid"), { dailyCount: 99 }));
+  await assertFails(getDoc(doc(deniedDb, "aiPhotoImportUsage/owner-uid")));
   await assertFails(setDoc(doc(deniedDb, "aiPhotoImportGlobal/counters"), { dailyCount: 1 }));
+  await assertFails(getDoc(doc(deniedDb, "aiPhotoImportGlobal/counters")));
 });
 
 test("clients cannot write config/aiPhotoImport", async () => {

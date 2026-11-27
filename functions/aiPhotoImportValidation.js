@@ -4,6 +4,8 @@ const { HttpsError } = require("firebase-functions/v2/https");
 
 const MAX_IMAGES_PER_REQUEST = 6;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+/** Total decoded payload across all images (stays under callable body limits). */
+const MAX_TOTAL_DECODED_BYTES = 7 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 /**
@@ -26,6 +28,7 @@ function validateAnalyzeImagesInput(images) {
 
   /** @type {{ mimeType: string, dataBase64: string }[]} */
   const normalized = [];
+  let totalDecodedBytes = 0;
 
   for (let index = 0; index < images.length; index += 1) {
     const image = images[index];
@@ -55,6 +58,13 @@ function validateAnalyzeImagesInput(images) {
         `Image ${index + 1} exceeds the ${Math.round(MAX_IMAGE_BYTES / (1024 * 1024))}MB size limit.`,
       );
     }
+    totalDecodedBytes += bytes.length;
+    if (totalDecodedBytes > MAX_TOTAL_DECODED_BYTES) {
+      throw new HttpsError(
+        "invalid-argument",
+        `Total photo size exceeds the ${Math.round(MAX_TOTAL_DECODED_BYTES / (1024 * 1024))}MB limit for one request. Send fewer or smaller photos.`,
+      );
+    }
     normalized.push({ mimeType, dataBase64 });
   }
 
@@ -64,6 +74,7 @@ function validateAnalyzeImagesInput(images) {
 module.exports = {
   MAX_IMAGES_PER_REQUEST,
   MAX_IMAGE_BYTES,
+  MAX_TOTAL_DECODED_BYTES,
   ALLOWED_MIME_TYPES,
   validateAnalyzeImagesInput,
 };

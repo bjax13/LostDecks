@@ -15,6 +15,14 @@ describe("mergeDraftRowsForImport", () => {
       sourceRowIds: ["a", "b"],
     });
   });
+
+  it("clamps merged quantity to the collection maximum", () => {
+    const merged = mergeDraftRowsForImport([
+      { id: "a", skuId: "LT24-ELS-01-DUN", quantity: 600, notes: "" },
+      { id: "b", skuId: "LT24-ELS-01-DUN", quantity: 500, notes: "" },
+    ]);
+    expect(merged[0].quantity).toBe("999");
+  });
 });
 
 describe("mapImportIssuesToRowIds", () => {
