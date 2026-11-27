@@ -46,5 +46,6 @@ Keep implementation details out of the map. Name only user paths, stable handles
 - [Collectibles](./collectibles.md) covers catalog search, filters, grid/table, and collectible detail.
 - [Sign in](./auth.md) covers login, register, the in-page auth modal, and auth-gated redirects.
 - [Collection](./collection.md) covers the signed-in collection, getting-started save, and bulk tools.
+- [Public trade list](./trade-list.md) covers the public `/t/<shareId>` page and publishing it from the ISO/UFT post dialog.
 - [Matches](./matches.md) covers reciprocal trade matches and the Account matching opt-out.
 - [Admin](./admin.md) covers the admin collector directory and the non-admin denial.
