@@ -13,6 +13,7 @@
     "admin:claims": "node set-admin-claims.js"
   },
   "dependencies": {
+    "@google/generative-ai": "0.24.1",
     "firebase-admin": "13.10.0",
     "firebase-functions": "7.3.2"
   }

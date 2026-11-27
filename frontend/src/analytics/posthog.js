@@ -5,6 +5,7 @@ const host = import.meta.env.VITE_POSTHOG_HOST?.trim() || "https://us.i.posthog.
 const feedbackSurveyId = import.meta.env.VITE_POSTHOG_SURVEY_ID?.trim() ?? "";
 
 const POSTHOG_UID_KEY = "shardstash.posthogUid";
+export const AI_PHOTO_IMPORT_FLAG = "ai-photo-import";
 
 let initialized = false;
 
@@ -151,6 +152,24 @@ export function capturePostHogPageView() {
   posthog.capture("$pageview", {
     $current_url: window.location.href,
   });
+}
+
+/**
+ * PostHog feature flag `ai-photo-import` is on by default; only an explicit false disables it.
+ */
+export function isAiPhotoImportEnabled() {
+  if (!isPostHogConfigured()) {
+    return true;
+  }
+  try {
+    const enabled = posthog.isFeatureEnabled(AI_PHOTO_IMPORT_FLAG);
+    if (enabled === false) {
+      return false;
+    }
+    return true;
+  } catch {
+    return true;
+  }
 }
 
 export function captureEvent(name, properties = {}) {

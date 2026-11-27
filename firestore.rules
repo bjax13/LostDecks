@@ -217,6 +217,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // AI photo import usage counters — callable Cloud Functions only (Admin SDK).
+    match /aiPhotoImportUsage/{userId} {
+      allow read, write: if false;
+    }
+
+    match /aiPhotoImportGlobal/{docId} {
+      allow read, write: if false;
+    }
+
+    match /config/aiPhotoImport {
+      allow read, write: if false;
+    }
+
     // Opt-in public ISO/UFT snapshots for /t/:shareId (ownerUid is world-readable).
     match /shares/{shareId} {
       allow get: if !("revokedAt" in resource.data)

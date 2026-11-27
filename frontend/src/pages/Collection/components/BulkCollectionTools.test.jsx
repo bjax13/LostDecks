@@ -19,6 +19,11 @@ vi.mock("../utils/bulkImport", () => ({
 
 vi.mock("../../../analytics/posthog.js", () => ({
   captureEvent: (...args) => mockCaptureEvent(...args),
+  isAiPhotoImportEnabled: () => true,
+}));
+
+vi.mock("./AiPhotoImportPanel.jsx", () => ({
+  default: () => null,
 }));
 
 vi.mock("../../../contexts/AuthContext.jsx", () => ({
