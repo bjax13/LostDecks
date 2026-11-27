@@ -19,6 +19,7 @@ const {
   resolvePublicDisplayName,
 } = require("./matches");
 const { enforceCallCooldown } = require("./rateLimit");
+const { analyzeCollectionPhotos } = require("./aiPhotoImport");
 const { renderShareMeta } = require("./shareMeta");
 
 if (!admin.apps.length) {
@@ -190,6 +191,7 @@ exports.listAdminCollectors = onCall(
 );
 
 exports.deleteMyAccount = deleteMyAccount;
+exports.analyzeCollectionPhotos = analyzeCollectionPhotos;
 exports.renderShareMeta = renderShareMeta;
 
 exports.__test = {

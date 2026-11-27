@@ -208,6 +208,12 @@ describe("posthog analytics", () => {
     expect(captureMock).toHaveBeenCalledWith("signup_completed", { method: "password" });
   });
 
+  it("isAiPhotoImportEnabled defaults to true when PostHog is not configured", async () => {
+    vi.stubEnv("VITE_POSTHOG_KEY", "");
+    const { isAiPhotoImportEnabled } = await import("./posthog.js");
+    expect(isAiPhotoImportEnabled()).toBe(true);
+  });
+
   it("resetPostHogUser calls reset after init and no-ops before", async () => {
     vi.stubEnv("VITE_POSTHOG_KEY", "");
     const { initPostHog, resetPostHogUser } = await import("./posthog.js");

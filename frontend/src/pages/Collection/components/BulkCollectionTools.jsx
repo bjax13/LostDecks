@@ -12,6 +12,7 @@ import {
   createStoryDeckCollectionCsv,
   parseBulkCollectionCsv,
 } from "../utils/bulkImport";
+import AiPhotoImportPanel from "./AiPhotoImportPanel.jsx";
 import IsoUftPostModal from "./IsoUftPostModal.jsx";
 import VisualBulkCollectionEditorModal from "./VisualBulkCollectionEditorModal.jsx";
 
@@ -302,6 +303,12 @@ export default function BulkCollectionTools({ ownerUid, entries, disabled }) {
           </label>
         </div>
       </div>
+
+      <AiPhotoImportPanel
+        ownerUid={ownerUid}
+        existingEntries={existingEntries}
+        disabled={disabled || processing}
+      />
 
       <div className="collection-bulk__panel collection-bulk__panel--visual">
         <h3 className="collection-bulk__panel-title">Visual editor</h3>
